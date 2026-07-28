@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kanji Flashcard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#0B0D10;
+    --bg-2:#15181c;
+    --ink:#ECE7DC;
+    --ink-soft:#9BA1A6;
+    --ink-faint:#6b7075;
+    --panel-1:#1D2126;
+    --panel-2:#24282e;
+    --back-1:#152731;
+    --back-2:#0d1b22;
+    --accent:#D9694F;
+    --accent-soft:#e5876f;
+    --gold:#C9A66B;
+    --moss:#7C9A6B;
+    --moss-soft:#93b17f;
+    --card-w: min(84vw, 360px);
+    --card-h: min(120vw, 460px);
+
+    --glass-bg: rgba(255,255,255,0.07);
+    --glass-bg-strong: rgba(255,255,255,0.12);
+    --glass-border: rgba(255,255,255,0.32);
+    --glass-border-soft: rgba(255,255,255,0.14);
+    --glass-highlight: rgba(255,255,255,0.55);
+    --glass-shadow: rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg-1);
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+    position:relative;
+    isolation:isolate;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ---------- LIVING BACKDROP (soft blurred color, so the glass has something nice to catch) ---------- */
+  .bg-scene{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    overflow:hidden;
+    background:var(--bg-1);
+  }
+  .bg-scene .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(70px);
+    opacity:0.55;
+    will-change:transform;
+  }
+  .bg-scene .blob.b1{
+    width:60vw; height:60vw; max-width:480px; max-height:480px;
+    top:-14%; left:-18%;
+    background:radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    animation:drift1 22s ease-in-out infinite;
+  }
+  .bg-scene .blob.b2{
+    width:55vw; height:55vw; max-width:440px; max-height:440px;
+    bottom:-16%; right:-14%;
+    background:radial-gradient(circle, var(--moss) 0%, transparent 70%);
+    animation:drift2 26s ease-in-out infinite;
+  }
+  .bg-scene .blob.b3{
+    width:44vw; height:44vw; max-width:360px; max-height:360px;
+    top:38%; right:4%;
+    background:radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    opacity:0.35;
+    animation:drift3 20s ease-in-out infinite;
+  }
+  .bg-scene .blob.b4{
+    width:38vw; height:38vw; max-width:320px; max-height:320px;
+    bottom:20%; left:6%;
+    background:radial-gradient(circle, var(--back-1) 0%, transparent 70%);
+    opacity:0.5;
+    animation:drift1 30s ease-in-out infinite reverse;
+  }
+  .bg-scene::after{
+    content:"";
+    position:absolute; inset:0;
+    background:rgba(11,13,16,0.35);
+  }
+  @keyframes drift1{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(6%, 8%) scale(1.08); }
+  }
+  @keyframes drift2{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(-7%, -6%) scale(1.1); }
+  }
+  @keyframes drift3{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(-5%, 10%) scale(0.92); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .bg-scene .blob{animation:none !important;}
+  }
+
+  header{
+    width:100%;
+    max-width:480px;
+    padding:26px 20px 8px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.32em;
+    color:var(--accent);
+    font-weight:700;
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Shippori Mincho', serif;
+    font-size:24px;
+    margin:6px 0 0;
+    font-weight:600;
+    letter-spacing:0.01em;
+    color:var(--ink);
+  }
+
+  .known-banner{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    margin:16px auto 0;
+    max-width:480px;
+    width:calc(100% - 40px);
+    border:1px solid rgba(124,154,107,0.45);
+    background:linear-gradient(165deg, rgba(124,154,107,0.28), rgba(124,154,107,0.14));
+    backdrop-filter:blur(14px) saturate(150%);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);
+    color:var(--moss-soft);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:0.02em;
+    padding:11px 14px;
+    border-radius:16px;
+    cursor:pointer;
+    transition:all .25s ease;
+  }
+  .known-banner:active{transform:scale(0.98);}
+  .known-banner.active{
+    background:linear-gradient(165deg, rgba(124,154,107,0.5), rgba(124,154,107,0.28));
+    border-color:var(--moss);
+    color:#eafce0;
+  }
+  .known-banner-icon{font-size:16px;}
+  .known-banner-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+    font-size:11.5px;
+    background:var(--moss);
+    color:#0B0D10;
+    padding:2px 7px;
+    border-radius:999px;
+    font-weight:900;
+  }
+
+  nav.tabs{
+    display:flex;
+    gap:8px;
+    margin:18px auto 0;
+    max-width:480px;
+    width:calc(100% - 40px);
+  }
+  .tab-btn{
+    flex:1;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:blur(14px) saturate(150%);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);
+    color:var(--ink-soft);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    padding:9px 6px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:all .25s ease;
+  }
+  .tab-btn.active{
+    background:rgba(236,231,220,0.92);
+    color:var(--bg-1);
+    border-color:rgba(236,231,220,0.92);
+  }
+  .tab-btn .badge{
+    display:inline-block;
+    margin-left:5px;
+    font-size:10.5px;
+    background:var(--accent);
+    color:#fff;
+    padding:1px 6px;
+    border-radius:999px;
+    font-weight:700;
+  }
+  .tab-btn.active .badge{background:var(--gold); color:var(--bg-1);}
+
+  main{
+    width:100%;
+    max-width:480px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 16px 40px;
+  }
+
+  /* ---------- STAGE / SWIPE CARD ---------- */
+  .stage{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    height:var(--card-h);
+    touch-action:pan-y;
+  }
+  .card{
+    position:relative;
+    width:var(--card-w);
+    height:var(--card-h);
+    cursor:grab;
+    user-select:none;
+    will-change:transform;
+  }
+  .card:active{cursor:grabbing;}
+  .card-inner{
+    width:100%; height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:transform .55s cubic-bezier(.2,.8,.2,1);
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg);}
+
+  .card.flipped .face.back{
+    animation:cardGlow 2.2s ease-in-out infinite;
+  }
+  @keyframes cardGlow{
+    0%,100%{
+      border-color:var(--glass-border-soft);
+      box-shadow:
+        0 24px 50px -16px var(--glass-shadow),
+        0 2px 10px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.18),
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 0 0 0 rgba(201,166,107,0);
+    }
+    50%{
+      border-color:var(--gold);
+      box-shadow:
+        0 24px 50px -16px var(--glass-shadow),
+        0 2px 10px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.18),
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 0 26px 6px rgba(201,166,107,0.55);
+    }
+  }
+
+  .face{
+    position:absolute; inset:0;
+    border-radius:22px;
+    backface-visibility:hidden;
+    display:flex;
+    flex-direction:column;
+    padding:26px 22px;
+    box-shadow:
+      0 24px 50px -16px var(--glass-shadow),
+      0 2px 10px rgba(0,0,0,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.18),
+      inset 0 0 0 1px rgba(255,255,255,0.04);
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    overflow:hidden;
+  }
+  .face::before{
+    /* glass sheen streak */
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:55%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 60%, transparent 100%);
+    pointer-events:none;
+  }
+  .face::after{
+    /* subtle border glow to sell the glass edge */
+    content:"";
+    position:absolute; inset:0;
+    border-radius:22px;
+    border:1px solid transparent;
+    background:linear-gradient(160deg, var(--glass-highlight), transparent 30%, transparent 70%, rgba(255,255,255,0.15)) border-box;
+    -webkit-mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    opacity:0.35;
+    pointer-events:none;
+  }
+  .face.front{
+    justify-content:space-between;
+  }
+  .face.front > *{ position:relative; z-index:1; }
+  .face.back{
+    transform:rotateY(180deg);
+    color:var(--ink);
+    justify-content:space-between;
+    background:linear-gradient(165deg, rgba(21,39,49,0.35), rgba(13,27,34,0.28)), var(--glass-bg);
+  }
+  .face.back > *{ position:relative; z-index:1; }
+
+  .face-top-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .type-badge{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    padding:4px 10px;
+    border-radius:999px;
+    border:1px solid currentColor;
+    text-transform:uppercase;
+  }
+  .front .type-badge{color:var(--accent-soft); border-color:var(--accent-soft);}
+  .back .type-badge{color:var(--gold); border-color:var(--gold);}
+
+  .hanko{
+    width:32px; height:32px;
+    border-radius:8px;
+    background:rgba(217,105,79,0.16);
+    color:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Shippori Mincho',serif;
+    font-size:16px;
+    font-weight:700;
+  }
+  .back .hanko{background:rgba(201,166,107,0.14); color:var(--gold);}
+
+  .kanji-display{
+    font-family:'Shippori Mincho', serif;
+    font-size:clamp(48px, 15vw, 70px);
+    text-align:center;
+    line-height:1.15;
+    font-weight:600;
+    color:var(--ink);
+    letter-spacing:0.02em;
+  }
+  .romaji-front{
+    text-align:center;
+    font-size:15px;
+    color:var(--ink-soft);
+    font-weight:500;
+    letter-spacing:0.04em;
+  }
+  .back-center{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0;
+  }
+  .translation{
+    font-size:clamp(24px,7.5vw,29px);
+    font-weight:600;
+    text-align:center;
+    padding:0 6px;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+  }
+  .back-bottom{
+    text-align:center;
+  }
+  .divider{
+    width:34px; height:2px; background:var(--gold);
+    margin:0 auto 10px; border-radius:2px; opacity:0.7;
+  }
+  .reading-label{
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:0.8;
+    margin-bottom:6px;
+    font-weight:700;
+  }
+  .back-reading{
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    text-align:center;
+    line-height:1.6;
+    padding:0 4px;
+  }
+  .back-reading .rk{
+    display:inline-block;
+    background:rgba(255,255,255,0.08);
+    border:1px solid var(--glass-border-soft);
+    padding:2px 8px;
+    border-radius:8px;
+    margin:2px 3px;
+  }
+
+  .swipe-tag{
+    position:absolute;
+    top:22px;
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:0.06em;
+    padding:6px 14px;
+    border-radius:8px;
+    border:2px solid;
+    opacity:0;
+    z-index:5;
+    transform:rotate(-8deg);
+    pointer-events:none;
+  }
+  .swipe-tag.left{ left:18px; color:var(--moss-soft); border-color:var(--moss-soft); background:rgba(20,22,25,0.8); transform:rotate(-10deg);}
+  .swipe-tag.right{ right:18px; color:var(--accent-soft); border-color:var(--accent-soft); background:rgba(20,22,25,0.8); transform:rotate(10deg);}
+
+  .stage-controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin-top:20px;
+  }
+  .ctrl-btn{
+    border:none;
+    width:48px; height:48px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;
+    cursor:pointer;
+    box-shadow:0 8px 20px -6px rgba(0,0,0,0.5);
+    transition:transform .15s ease;
+  }
+  .ctrl-btn:active{transform:scale(0.9);}
+  .ctrl-btn.later{
+    background:var(--glass-bg);
+    color:var(--ink);
+    border:1.5px solid var(--glass-border-soft);
+    backdrop-filter:blur(14px) saturate(150%);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);
+  }
+  .ctrl-btn.known{background:var(--moss); color:#0B0D10;}
+
+  .swipe-hints{
+    display:flex;
+    justify-content:space-between;
+    width:100%;
+    max-width:340px;
+    margin-top:16px;
+    gap:12px;
+  }
+  .swipe-hints .hint{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:11.5px;
+    color:var(--ink-faint);
+    line-height:1.35;
+  }
+  .swipe-hints .hint.right{justify-content:flex-end; text-align:right;}
+  .swipe-hints .hint b{color:var(--ink-soft); font-weight:700;}
+  .swipe-hints .arrow{font-size:15px; flex-shrink:0;}
+  .swipe-hints .hint.left .arrow{color:var(--moss-soft);}
+  .swipe-hints .hint.right .arrow{color:var(--accent-soft);}
+
+  .progress-note{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-faint);
+    margin-top:16px;
+  }
+  .progress-note b{color:var(--accent-soft);}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+  }
+  .empty-state .big-em{font-size:40px; opacity:0.8;}
+  .empty-state h2{font-family:'Shippori Mincho',serif; font-size:19px; margin:14px 0 6px; color:var(--ink);}
+  .empty-state p{font-size:13.5px; color:var(--ink-soft); max-width:280px; margin:0 auto;}
+
+  /* ---------- KNOWN SUMMARY ---------- */
+  .known-summary{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .known-total{
+    text-align:center;
+    background:linear-gradient(165deg, rgba(124,154,107,0.22), rgba(124,154,107,0.08)), var(--glass-bg);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border:1px solid rgba(124,154,107,0.35);
+    border-radius:18px;
+    padding:26px 18px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .known-total-num{
+    font-family:'Shippori Mincho', serif;
+    font-size:44px;
+    font-weight:600;
+    color:var(--moss-soft);
+    line-height:1;
+  }
+  .known-total-label{
+    margin-top:6px;
+    font-size:12.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+  .known-breakdown{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .kb-row{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(14px) saturate(150%);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border:1px solid var(--glass-border-soft);
+    border-radius:14px;
+    padding:14px 16px;
+  }
+  .kb-row .kb-info{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+  .kb-row .kb-day{
+    font-family:'Shippori Mincho', serif;
+    font-size:14px;
+    color:var(--ink);
+    font-weight:600;
+  }
+  .kb-row .kb-count{
+    font-size:11.5px;
+    color:var(--gold);
+    font-weight:700;
+  }
+  .kb-actions{
+    display:flex;
+    gap:8px;
+  }
+  .kb-quiz-btn, .kb-review-btn{
+    flex:1;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 10px;
+    border-radius:10px;
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    box-shadow:0 8px 18px -8px rgba(217,105,79,0.5);
+    transition:all .2s ease;
+    white-space:nowrap;
+    text-align:center;
+  }
+  .kb-review-btn{
+    background:var(--glass-bg-strong);
+    color:var(--ink);
+    border:1.5px solid var(--glass-border-soft);
+    box-shadow:none;
+  }
+  .kb-quiz-btn:active, .kb-review-btn:active{transform:scale(0.96);}
+
+  .quiz-launch{
+    margin-top:18px;
+    width:100%;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:15px 20px;
+    border-radius:14px;
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-weight:900;
+    font-size:15px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    box-shadow:0 10px 24px -8px rgba(217,105,79,0.4);
+  }
+  .quiz-launch:disabled{
+    background:var(--panel-2); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
+  }
+  .quiz-launch:active:not(:disabled){transform:scale(0.98);}
+
+  /* ---------- QUIZ ---------- */
+  .quiz-wrap{width:100%;}
+  .quiz-progress{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12.5px; color:var(--ink-soft); margin-bottom:14px;
+  }
+  .quiz-progress .score{color:var(--moss-soft); font-weight:700;}
+  .quiz-bar{
+    width:100%; height:6px; background:var(--glass-bg); border-radius:6px; overflow:hidden; margin-bottom:22px;
+    border:1px solid var(--glass-border-soft);
+  }
+  .quiz-bar-fill{height:100%; background:var(--accent); border-radius:6px; transition:width .3s ease;}
+  .quiz-card{
+    background:var(--glass-bg);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-radius:18px;
+    padding:32px 22px;
+    text-align:center;
+    box-shadow:0 14px 32px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+    margin-bottom:20px;
+    border:1px solid var(--glass-border-soft);
+  }
+  .quiz-kanji{
+    font-family:'Shippori Mincho',serif;
+    font-size:52px;
+    color:var(--ink);
+  }
+  .quiz-romaji{color:var(--ink-soft); font-size:14px; margin-top:6px;}
+  .quiz-options{display:flex; flex-direction:column; gap:10px;}
+  .quiz-opt{
+    background:var(--glass-bg);
+    backdrop-filter:blur(14px) saturate(150%);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border:2px solid var(--glass-border-soft);
+    color:var(--ink);
+    border-radius:12px;
+    padding:14px 16px;
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    text-align:left;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .quiz-opt:active{transform:scale(0.98);}
+  .quiz-opt.correct{background:var(--moss); border-color:var(--moss); color:#0B0D10;}
+  .quiz-opt.wrong{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .quiz-opt.disabled{pointer-events:none; opacity:0.55;}
+
+  .quiz-result{text-align:center; padding:30px 10px;}
+  .quiz-result .big-em{font-size:46px;}
+  .quiz-result h2{font-family:'Shippori Mincho',serif; font-size:23px; margin:10px 0 4px; color:var(--ink);}
+  .quiz-result p{color:var(--ink-soft); font-size:14px;}
+  .quiz-result button{
+    margin-top:18px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(14px) saturate(150%);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);
+    color:var(--ink);
+    border:1.5px solid var(--glass-border-soft);
+    padding:13px 24px;
+    border-radius:12px;
+    font-weight:700;
+    font-family:'Zen Maru Gothic',sans-serif;
+    cursor:pointer;
+  }
+
+  .hidden{display:none !important;}
+
+  @media (prefers-reduced-motion: reduce){
+    .card-inner, .ctrl-btn, .quiz-bar-fill{transition:none !important;}
+    .card.flipped .face.back{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-scene" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
+
+<header>
+  <div class="eyebrow">So'z birikmalari</div>
+  <h1>Kanji Flashcard</h1>
+</header>
+
+<button class="known-banner" id="knownBanner" type="button">
+  <span class="known-banner-icon">🌿</span>
+  <span class="known-banner-label">Bilganlarim</span>
+  <span class="known-banner-badge" id="knownBannerBadge">0</span>
+</button>
+
+<nav class="tabs" id="tabsNav"></nav>
+
+<main>
+
+  <!-- LEARN VIEW -->
+  <section id="view-learn">
+    <div class="stage" id="stage">
+      <!-- cards injected here -->
+    </div>
+    <div class="swipe-hints">
+      <div class="hint left"><span class="arrow">←</span> Chapga siljitish: <b>&nbsp;Bilganlarim ro'yxatiga olish</b></div>
+    </div>
+    <div class="swipe-hints">
+      <div class="hint right">O'ngga siljitish: <b>&nbsp;Navbatda saqlash</b> <span class="arrow">→</span></div>
+    </div>
+    <div class="progress-note" id="progressNote"></div>
+  </section>
+
+  <!-- KNOWN VIEW -->
+  <section id="view-known" class="hidden">
+    <div class="known-summary" id="knownSummary"></div>
+    <div id="knownEmpty" class="empty-state hidden">
+      <div class="big-em">🍃</div>
+      <h2>Hali bo'sh</h2>
+      <p>Kartochkalarni chapga surganingizda, bilgan so'zlaringiz shu yerda to'planadi.</p>
+    </div>
+    <button class="quiz-launch" id="btnQuiz" disabled>Viktorina boshlash</button>
+  </section>
+
+  <!-- QUIZ VIEW -->
+  <section id="view-quiz" class="hidden">
+    <div class="quiz-wrap" id="quizWrap"></div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+
+  // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun"};
+  const DAY_ORDER = [1,2];
+
+  const WORDS = [
+    // ---- 1-kun ----
+    {id:"yama", day:1, group:"山", kanji:"山", romaji:"yama", type:"kun'yomi", reading:"山(yama) — yakka kanji", uz:"tog'"},
+    {id:"yamamichi", day:1, group:"山", kanji:"山道", romaji:"yamamichi", type:"kun + kun", reading:"山(yama) + 道(michi)", uz:"tog' yo'li"},
+    {id:"fujisan", day:1, group:"山", kanji:"富士山", romaji:"fujisan", type:"— + on", reading:"富士(Fuji) + 山(san)", uz:"Fuji tog'i"},
+    {id:"tozan", day:1, group:"山", kanji:"登山", romaji:"tozan", type:"on + on", reading:"登(to) + 山(zan)", uz:"tog'ga chiqish"},
+    {id:"kazan", day:1, group:"山", kanji:"火山", romaji:"kazan", type:"on + on", reading:"火(ka) + 山(zan)", uz:"vulqon"},
+
+    {id:"kawa", day:1, group:"川", kanji:"川", romaji:"kawa", type:"kun'yomi", reading:"川(kawa) — yakka kanji", uz:"daryo"},
+    {id:"amanogawa", day:1, group:"川", kanji:"天の川", romaji:"amanogawa", type:"kun + kun", reading:"天(ama) + の + 川(gawa)", uz:"Somon yo'li"},
+    {id:"nairugawa", day:1, group:"川", kanji:"ナイル川", romaji:"nairugawa", type:"— + kun", reading:"ナイル(Nairu) + 川(gawa)", uz:"Nil daryosi"},
+    {id:"kawaasobi", day:1, group:"川", kanji:"川遊び", romaji:"kawaasobi", type:"kun + kun", reading:"川(kawa) + 遊び(asobi)", uz:"daryo bo'yiga chiqish"},
+    {id:"kasen", day:1, group:"川", kanji:"河川", romaji:"kasen", type:"on + on", reading:"河(ka) + 川(sen)", uz:"daryolar (rasmiy)"},
+
+    {id:"ta", day:1, group:"田", kanji:"田", romaji:"ta", type:"kun'yomi", reading:"田(ta) — yakka kanji", uz:"dala"},
+    {id:"tanbo", day:1, group:"田", kanji:"田んぼ", romaji:"tanbo", type:"kun'yomi", reading:"田(ta) + んぼ", uz:"guruch maydoni"},
+    {id:"taue", day:1, group:"田", kanji:"田植え", romaji:"taue", type:"kun + kun", reading:"田(ta) + 植え(ue)", uz:"sholi ekish"},
+    {id:"suiden", day:1, group:"田", kanji:"水田", romaji:"suiden", type:"on + on", reading:"水(sui) + 田(den)", uz:"guruch dalasi"},
+    {id:"inaka", day:1, group:"田", kanji:"田舎", romaji:"inaka", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"qishloq"},
+    {id:"denen", day:1, group:"田", kanji:"田園", romaji:"den'en", type:"on + on", reading:"田(den) + 園(en)", uz:"qishloq yerlari"},
+
+    // ---- 2-kun ----
+    {id:"nichiyoubi", day:2, group:"日", kanji:"日曜日", romaji:"nichiyoubi", type:"on + kun", reading:"日(nichi) + 曜(you) + 日(bi)", uz:"yakshanba"},
+    {id:"nihon", day:2, group:"日", kanji:"日本", romaji:"nihon", type:"on + on", reading:"日(ni) + 本(hon)", uz:"Yaponiya"},
+    {id:"tanjoubi", day:2, group:"日", kanji:"誕生日", romaji:"tanjoubi", type:"on + on + kun", reading:"誕(tan) + 生(jou) + 日(bi)", uz:"tug'ilgan kun"},
+    {id:"mainichi", day:2, group:"日", kanji:"毎日", romaji:"mainichi", type:"on + on", reading:"毎(mai) + 日(nichi)", uz:"har kuni"},
+    {id:"nikka", day:2, group:"日", kanji:"日課", romaji:"nikka", type:"on + on", reading:"日(ni) + 課(ka)", uz:"kundalik"},
+
+    {id:"tsuki", day:2, group:"月", kanji:"月", romaji:"tsuki", type:"kun'yomi", reading:"月(tsuki) — yakka kanji", uz:"oy"},
+    {id:"ichigatsu", day:2, group:"月", kanji:"一月", romaji:"ichigatsu", type:"on + on", reading:"一(ichi) + 月(gatsu)", uz:"Yanvar"},
+    {id:"maitsuki", day:2, group:"月", kanji:"毎月", romaji:"maitsuki", type:"on + kun", reading:"毎(mai) + 月(tsuki)", uz:"har oy"},
+    {id:"raigetsu", day:2, group:"月", kanji:"来月", romaji:"raigetsu", type:"on + on", reading:"来(rai) + 月(getsu)", uz:"keyingi oy"},
+    {id:"oshougatsu", day:2, group:"月", kanji:"お正月", romaji:"oshougatsu", type:"— + on + on", reading:"お + 正(shou) + 月(gatsu)", uz:"Yangi yil bayrami"},
+
+    {id:"hi", day:2, group:"火", kanji:"火", romaji:"hi", type:"kun'yomi", reading:"火(hi) — yakka kanji", uz:"olov"},
+    {id:"kaji", day:2, group:"火", kanji:"火事", romaji:"kaji", type:"kun + on", reading:"火(ka) + 事(ji)", uz:"Yong'in"},
+    {id:"hanabi", day:2, group:"火", kanji:"花火", romaji:"hanabi", type:"kun + kun", reading:"花(hana) + 火(bi)", uz:"mushakbozlik"},
+    {id:"kazan_hi", day:2, group:"火", kanji:"火山", romaji:"kazan", type:"kun + on", reading:"火(ka) + 山(zan)", uz:"vulqon"},
+    {id:"kayoubi", day:2, group:"火", kanji:"火曜日", romaji:"kayoubi", type:"kun + on + kun", reading:"火(ka) + 曜(you) + 日(bi)", uz:"seshanba"},
+  ];
+  const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
+
+  // ---------- STATE ----------
+  // Har bir kun uchun alohida navbat (queue)
+  let queues = {};
+  DAY_ORDER.forEach(d=>{ queues[d] = WORDS.filter(w=>w.day===d).map(w=>w.id); });
+  let known = [];
+  let currentDay = DAY_ORDER[0];
+  let flipped = false;
+  let currentTab = "learn";
+
+  function hanko(id){
+    return byId[id] ? byId[id].group : "";
+  }
+
+  // ---------- PERSISTENCE ----------
+  async function loadState(){
+    try{
+      const res = await window.storage.get('kanji-flashcard-state');
+      if(res && res.value){
+        const data = JSON.parse(res.value);
+        const validIds = new Set(WORDS.map(w=>w.id));
+        if(data.queues && typeof data.queues === 'object'){
+          DAY_ORDER.forEach(d=>{
+            const saved = Array.isArray(data.queues[d]) ? data.queues[d].filter(id=>validIds.has(id)) : [];
+            queues[d] = saved;
+          });
+        } else if(Array.isArray(data.queue)){
+          // eski format bilan moslik (bitta umumiy navbat)
+          queues[DAY_ORDER[0]] = data.queue.filter(id=>validIds.has(id));
+        }
+        known = Array.isArray(data.known) ? data.known.filter(id=>validIds.has(id)) : [];
+        // har bir so'z aynan bitta joyda (navbat yoki bilganlar) bo'lishini ta'minlash
+        const seen = new Set([...Object.values(queues).flat(), ...known]);
+        WORDS.forEach(w=>{ if(!seen.has(w.id)) queues[w.day].push(w.id); });
+      }
+    }catch(e){ /* no saved state yet — use defaults */ }
+  }
+
+  async function saveState(){
+    try{
+      await window.storage.set('kanji-flashcard-state', JSON.stringify({queues, known}));
+    }catch(e){ console.error('Saqlashda xatolik:', e); }
+  }
+
+  // ---------- TABS (faqat kunlar) ----------
+  const tabsNav = document.getElementById('tabsNav');
+  function renderTabs(){
+    tabsNav.innerHTML = "";
+    DAY_ORDER.forEach(d=>{
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (currentTab==='learn' && currentDay===d ? ' active' : '');
+      btn.innerHTML = `${DAY_LABELS[d]} <span class="badge" id="dayCount-${d}">${queues[d].length}</span>`;
+      btn.addEventListener('click', ()=>{ currentDay = d; showTab('learn'); });
+      tabsNav.appendChild(btn);
+    });
+    renderKnownBanner();
+  }
+
+  // ---------- Bilganlarim (alohida yashil banner) ----------
+  const knownBanner = document.getElementById('knownBanner');
+  const knownBannerBadge = document.getElementById('knownBannerBadge');
+  knownBanner.addEventListener('click', ()=>showTab('known'));
+  function renderKnownBanner(){
+    knownBannerBadge.textContent = known.length;
+    knownBanner.classList.toggle('active', currentTab==='known' || currentTab==='quiz');
+  }
+
+  // ---------- RENDER: LEARN STAGE ----------
+  const stage = document.getElementById('stage');
+  const progressNote = document.getElementById('progressNote');
+
+  function renderStage(){
+    stage.innerHTML = "";
+    updateCounts();
+    const queue = queues[currentDay];
+    if(queue.length === 0){
+      stage.innerHTML = `<div class="empty-state">
+        <div class="big-em">⛩️</div>
+        <h2>Barchasi ko'rib chiqildi!</h2>
+        <p>${DAY_LABELS[currentDay]} bo'limidagi so'zlar "Bilganlarim" bo'limiga o'tdi. Endi Viktorina bilan mustahkamlang.</p>
+      </div>`;
+      progressNote.textContent = "";
+      return;
+    }
+
+    const word = byId[queue[0]];
+    flipped = false;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'activeCard';
+    card.innerHTML = `
+      <div class="swipe-tag left">BILAMAN ✓</div>
+      <div class="swipe-tag right">NAVBATDA ↺</div>
+      <div class="card-inner">
+        <div class="face front">
+          <div class="face-top-row">
+            <span class="type-badge">${word.type}</span>
+            <div class="hanko">${hanko(word.id)}</div>
+          </div>
+          <div class="kanji-display">${word.kanji}</div>
+          <div class="romaji-front">${word.romaji}</div>
+        </div>
+        <div class="face back">
+          <div class="face-top-row">
+            <span class="type-badge">o'zbekcha</span>
+            <div class="hanko">${hanko(word.id)}</div>
+          </div>
+          <div class="back-center">
+            <div class="translation">${word.uz}</div>
+          </div>
+          <div class="back-bottom">
+            <div class="divider"></div>
+            <div class="reading-label">Kun'yomi / On'yomi</div>
+            <div class="back-reading"><span class="rk">${word.reading}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+    stage.appendChild(card);
+    attachCardEvents(card);
+    progressNote.innerHTML = `Navbatda: <b>${queue.length}</b> ta so'z &nbsp;·&nbsp; Bilganlar: <b>${known.length}</b> ta`;
+  }
+
+  function updateCounts(){
+    DAY_ORDER.forEach(d=>{
+      const el = document.getElementById(`dayCount-${d}`);
+      if(el) el.textContent = queues[d].length;
+    });
+    renderKnownBanner();
+  }
+
+  // ---------- SWIPE / DRAG ----------
+  function attachCardEvents(card){
+    let startX=0, startY=0, curX=0, dragging=false, moved=false;
+    const inner = card.querySelector('.card-inner');
+    const tagLeft = card.querySelector('.swipe-tag.left');
+    const tagRight = card.querySelector('.swipe-tag.right');
+
+    function pointerDown(e){
+      dragging = true; moved = false;
+      const p = e.touches ? e.touches[0] : e;
+      startX = p.clientX; startY = p.clientY; curX = 0;
+      inner.style.transition = 'none';
+    }
+    function pointerMove(e){
+      if(!dragging) return;
+      const p = e.touches ? e.touches[0] : e;
+      const dx = p.clientX - startX;
+      const dy = p.clientY - startY;
+      if(Math.abs(dx) > 8) moved = true;
+      if(!moved) return;
+      curX = dx;
+      const rot = dx / 18;
+      card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
+      const op = Math.min(Math.abs(dx)/80, 1);
+      if(dx < 0){ tagLeft.style.opacity = op; tagRight.style.opacity = 0; }
+      else { tagRight.style.opacity = op; tagLeft.style.opacity = 0; }
+      e.preventDefault && e.cancelable && e.preventDefault();
+    }
+    function pointerUp(){
+      if(!dragging) return;
+      dragging = false;
+      inner.style.transition = '';
+      const threshold = 90;
+      if(curX <= -threshold){
+        flyOut(-1, markKnown);
+      } else if(curX >= threshold){
+        flyOut(1, markLater);
+      } else {
+        card.style.transition = 'transform .35s cubic-bezier(.2,.8,.2,1)';
+        card.style.transform = '';
+        tagLeft.style.opacity = 0; tagRight.style.opacity = 0;
+        setTimeout(()=>{ card.style.transition=''; }, 350);
+      }
+    }
+    function flyOut(dir, cb){
+      card.style.transition = 'transform .4s ease, opacity .4s ease';
+      card.style.transform = `translateX(${dir*600}px) rotate(${dir*35}deg)`;
+      card.style.opacity = '0';
+      setTimeout(cb, 220);
+    }
+    function click(){
+      if(moved) return; // was a drag, not a tap
+      card.classList.toggle('flipped');
+    }
+
+    card.addEventListener('mousedown', pointerDown);
+    window.addEventListener('mousemove', pointerMove);
+    window.addEventListener('mouseup', pointerUp);
+    card.addEventListener('touchstart', pointerDown, {passive:true});
+    card.addEventListener('touchmove', pointerMove, {passive:false});
+    card.addEventListener('touchend', pointerUp);
+    card.addEventListener('click', click);
+  }
+
+  function markKnown(){
+    const id = queues[currentDay].shift();
+    known.push(id);
+    saveState();
+    renderStage();
+  }
+  function markLater(){
+    const id = queues[currentDay].shift();
+    queues[currentDay].push(id);
+    saveState();
+    renderStage();
+  }
+
+  // ---------- KNOWN VIEW (faqat umumiy statistika) ----------
+  function renderKnown(){
+    const summary = document.getElementById('knownSummary');
+    const emptyEl = document.getElementById('knownEmpty');
+    const quizBtn = document.getElementById('btnQuiz');
+    summary.innerHTML = "";
+    if(known.length === 0){
+      emptyEl.classList.remove('hidden');
+      quizBtn.disabled = true;
+    } else {
+      emptyEl.classList.add('hidden');
+      quizBtn.disabled = false;
+      const breakdown = DAY_ORDER
+        .map(d=>({d, count: known.filter(id=>byId[id].day===d).length}))
+        .filter(x=>x.count > 0);
+      summary.innerHTML = `
+        <div class="known-total">
+          <div class="known-total-num">${known.length}</div>
+          <div class="known-total-label">bilgan so'z</div>
+        </div>
+        <div class="known-breakdown">
+          ${breakdown.map(x=>`
+            <div class="kb-row">
+              <div class="kb-info">
+                <span class="kb-day">${DAY_LABELS[x.d]}</span>
+                <span class="kb-count">${x.count} ta bilgan so'z</span>
+              </div>
+              <div class="kb-actions">
+                <button class="kb-review-btn" data-day="${x.d}" type="button">Qayta ko'rib chiqish</button>
+                <button class="kb-quiz-btn" data-day="${x.d}" type="button">Viktorina boshlash</button>
+              </div>
+            </div>`).join('')}
+        </div>
+      `;
+      summary.querySelectorAll('.kb-quiz-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const d = Number(btn.getAttribute('data-day'));
+          startQuiz(known.filter(id=>byId[id].day===d), 'known');
+        });
+      });
+      summary.querySelectorAll('.kb-review-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const d = Number(btn.getAttribute('data-day'));
+          requeueDay(d);
+        });
+      });
+    }
+    updateCounts();
+  }
+
+  // shu kunning bilganlar ro'yxatidagi so'zlarini yana navbatga (kartochka bo'limiga) qaytarish
+  function requeueDay(d){
+    const ids = known.filter(id=>byId[id].day===d);
+    if(ids.length === 0) return;
+    known = known.filter(id=>byId[id].day!==d);
+    queues[d] = [...ids, ...queues[d]];
+    saveState();
+    currentDay = d;
+    showTab('learn');
+  }
+
+  // ---------- TABS ----------
+  const views = {
+    learn: document.getElementById('view-learn'),
+    known: document.getElementById('view-known'),
+    quiz: document.getElementById('view-quiz'),
+  };
+  function showTab(tab){
+    currentTab = tab;
+    Object.keys(views).forEach(k=>views[k].classList.toggle('hidden', k!==tab));
+    renderTabs();
+    if(tab==='learn') renderStage();
+    if(tab==='known') renderKnown();
+  }
+
+  // ---------- QUIZ ----------
+  let quizItems = [], quizIdx = 0, quizScore = 0, quizReturnTab = 'known', quizPool = [];
+
+  function startQuiz(ids, returnTab){
+    if(ids.length === 0) return;
+    quizPool = ids.slice();
+    quizItems = shuffle([...ids]);
+    quizIdx = 0; quizScore = 0;
+    quizReturnTab = returnTab;
+    showTab('quiz');
+    renderQuizQuestion();
+  }
+
+  document.getElementById('btnQuiz').addEventListener('click', ()=>{
+    startQuiz(known, 'known');
+  });
+
+  function shuffle(arr){
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function renderQuizQuestion(){
+    const wrap = document.getElementById('quizWrap');
+    if(quizIdx >= quizItems.length){
+      renderQuizResult();
+      return;
+    }
+    const word = byId[quizItems[quizIdx]];
+    // build 4 options: correct + 3 distractors (shu viktorina o'z manbasidan, kifoya bo'lmasa hammasidan)
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    let distractors = shuffle(pool.filter(id=>id!==word.id)).slice(0,3);
+    const options = shuffle([word.id, ...distractors]);
+
+    wrap.innerHTML = `
+      <div class="quiz-progress">
+        <span>Savol ${quizIdx+1} / ${quizItems.length}</span>
+        <span class="score">Ball: ${quizScore}</span>
+      </div>
+      <div class="quiz-bar"><div class="quiz-bar-fill" style="width:${(quizIdx/quizItems.length)*100}%"></div></div>
+      <div class="quiz-card">
+        <div class="quiz-kanji">${word.kanji}</div>
+        <div class="quiz-romaji">${word.romaji}</div>
+      </div>
+      <div class="quiz-options">
+        ${options.map(id=>`<button class="quiz-opt" data-id="${id}">${byId[id].uz}</button>`).join('')}
+      </div>
+    `;
+    wrap.querySelectorAll('.quiz-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>handleQuizAnswer(btn, word.id, options));
+    });
+  }
+
+  function handleQuizAnswer(btn, correctId, options){
+    const chosenId = btn.getAttribute('data-id');
+    const allBtns = document.querySelectorAll('.quiz-opt');
+    allBtns.forEach(b=>b.classList.add('disabled'));
+    if(chosenId === correctId){
+      btn.classList.add('correct');
+      quizScore++;
+    } else {
+      btn.classList.add('wrong');
+      allBtns.forEach(b=>{ if(b.getAttribute('data-id')===correctId) b.classList.add('correct'); });
+    }
+    setTimeout(()=>{
+      quizIdx++;
+      renderQuizQuestion();
+    }, 850);
+  }
+
+  function renderQuizResult(){
+    const wrap = document.getElementById('quizWrap');
+    const pct = Math.round((quizScore/quizItems.length)*100);
+    let emoji = "🌱", msg = "Davom eting, mashq — mahorat kaliti!";
+    if(pct === 100){ emoji="🏯"; msg="Mukammal! Barcha so'zlarni bilasiz!"; }
+    else if(pct >= 70){ emoji="🎋"; msg="Ajoyib natija!"; }
+    wrap.innerHTML = `
+      <div class="quiz-result">
+        <div class="big-em">${emoji}</div>
+        <h2>${quizScore} / ${quizItems.length} to'g'ri</h2>
+        <p>${msg}</p>
+        <button id="btnBackKnown">${quizReturnTab==='learn' ? 'Kartochkalarga qaytish' : 'Bilganlarimga qaytish'}</button>
+      </div>
+    `;
+    document.getElementById('btnBackKnown').addEventListener('click', ()=>showTab(quizReturnTab));
+  }
+
+  // ---------- INIT ----------
+  (async function init(){
+    await loadState();
+    renderTabs();
+    renderStage();
+    updateCounts();
+  })();
+
+})();
+</script>
+</body>
+</html>
