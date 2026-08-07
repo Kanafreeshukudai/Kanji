@@ -1688,8 +1688,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11];
 
   const WORDS = [
     // ---- 1-kun ----
@@ -1880,6 +1880,32 @@
     {id:"katana", day:10, group:"刀", kanji:"刀", romaji:"katana", type:"kun'yomi", reading:"刀(katana) — yakka kanji", otherReadings:"kun: かたな(katana) · on: トウ(tou)", uz:"qilich"},
     {id:"nihontou", day:10, group:"刀", kanji:"日本刀", romaji:"nihontou", type:"on + on + on", reading:"日(ni) + 本(hon) + 刀(tou)", uz:"Yapon qilichi"},
     {id:"tachiuchi", day:10, group:"刀", kanji:"太刀打ち", romaji:"tachiuchi", type:"kun + kun", reading:"太刀(tachi) + 打ち(uchi)", uz:"qilichlarni kesib o'tish"},
+
+    // ---- 11-kun ----
+    {id:"chichi", day:11, group:"父", kanji:"父", romaji:"chichi", type:"kun'yomi", reading:"父(chichi) — yakka kanji", otherReadings:"kun: ちち(chichi), とう(tou) · on: フ(fu)", uz:"otam"},
+    {id:"otousan", day:11, group:"父", kanji:"お父さん", romaji:"otousan", type:"— + kun", reading:"お + 父さん(tousan)", uz:"otangiz"},
+    {id:"sofu", day:11, group:"父", kanji:"祖父", romaji:"sofu", type:"on + on", reading:"祖(so) + 父(fu)", uz:"bobo"},
+    {id:"oji", day:11, group:"父", kanji:"叔父", romaji:"oji", type:"kun'yomi", reading:"叔父(oji) — jukujikun", uz:"amaki"},
+    {id:"chichinohi", day:11, group:"父", kanji:"父の日", romaji:"chichi no hi", type:"kun + kun", reading:"父(chichi) + の + 日(hi)", uz:"Otalar kuni"},
+
+    {id:"haha", day:11, group:"母", kanji:"母", romaji:"haha", type:"kun'yomi", reading:"母(haha) — yakka kanji", otherReadings:"kun: はは(haha), かあ(kaa) · on: ボ(bo)", uz:"onam"},
+    {id:"okaasan", day:11, group:"母", kanji:"お母さん", romaji:"okaasan", type:"— + kun", reading:"お + 母さん(kaasan)", uz:"onangiz"},
+    {id:"fubo", day:11, group:"母", kanji:"父母", romaji:"fubo", type:"kun + kun", reading:"父(chichi) + 母(haha)", uz:"ota-onalar"},
+    {id:"hahanohi", day:11, group:"母", kanji:"母の日", romaji:"haha no hi", type:"kun + kun", reading:"母(haha) + の + 日(hi)", uz:"Onalar kuni"},
+    {id:"bokokugo", day:11, group:"母", kanji:"母国語", romaji:"bokokugo", type:"on + on + on", reading:"母(bo) + 国(koku) + 語(go)", uz:"ona tili"},
+
+    {id:"sen", day:11, group:"先", kanji:"先", romaji:"saki", type:"kun'yomi", reading:"先(saki) — yakka kanji", otherReadings:"kun: さき(saki) · on: セン(sen)", uz:"oldin, ilgari"},
+    {id:"sensei", day:11, group:"先", kanji:"先生", romaji:"sensei", type:"on + on", reading:"先(sen) + 生(sei)", uz:"o'qituvchi"},
+    {id:"sengetsu", day:11, group:"先", kanji:"先月", romaji:"sengetsu", type:"on + on", reading:"先(sen) + 月(getsu)", uz:"o'tgan oy"},
+    {id:"senshuu", day:11, group:"先", kanji:"先週", romaji:"senshuu", type:"on + on", reading:"先(sen) + 週(shuu)", uz:"o'tgan hafta"},
+    {id:"sakini", day:11, group:"先", kanji:"先に", romaji:"sakini", type:"kun'yomi", reading:"先(saki) + に", uz:"oldin, avval"},
+
+    {id:"sei", day:11, group:"生", kanji:"生", romaji:"sei", type:"on'yomi", reading:"生(sei) — yakka kanji", otherReadings:"kun: い-きる(ikiru), う-まれる(umareru), なま(nama) · on: セイ(sei), ショウ(shou)", uz:"hayot"},
+    {id:"gakusei", day:11, group:"生", kanji:"学生", romaji:"gakusei", type:"on + on", reading:"学(gaku) + 生(sei)", uz:"talaba"},
+    {id:"tanjoubi_sei", day:11, group:"生", kanji:"誕生日", romaji:"tanjoubi", type:"on + on + kun", reading:"誕(tan) + 生(jou) + 日(bi)", uz:"tug'ilgan kun"},
+    {id:"umareru", day:11, group:"生", kanji:"生まれる", romaji:"umareru", type:"kun'yomi", reading:"生(u) + まれる", uz:"tug'ilish"},
+    {id:"ikebana", day:11, group:"生", kanji:"生け花", romaji:"ikebana", type:"kun + kun", reading:"生け(ike) + 花(bana)", uz:"gul aranjirovkasi"},
+    {id:"namatamago", day:11, group:"生", kanji:"生卵", romaji:"namatamago", type:"kun + kun", reading:"生(nama) + 卵(tamago)", uz:"xom tuxum"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
