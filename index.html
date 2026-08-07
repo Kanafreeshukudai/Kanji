@@ -190,6 +190,7 @@
     max-width:480px;
     padding:26px 20px 8px;
     text-align:center;
+    position:relative;
   }
   .eyebrow{
     font-size:11px;
@@ -206,6 +207,151 @@
     letter-spacing:0.01em;
     color:var(--ink);
   }
+
+  /* ---------- QIDIRUV (search) ---------- */
+  .search-toggle-btn{
+    position:absolute;
+    top:22px;
+    right:16px;
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .search-toggle-btn:active{transform:scale(0.92);}
+  .search-toggle-btn.active{
+    background:linear-gradient(165deg, rgba(217,105,79,0.5), rgba(217,105,79,0.28));
+    border-color:var(--accent);
+    color:var(--accent-soft);
+  }
+  .search-toggle-btn svg{width:17px; height:17px; display:block;}
+
+  .search-panel{
+    width:100%;
+    max-width:480px;
+    padding:0 20px;
+    display:grid;
+    grid-template-rows:0fr;
+    opacity:0;
+    transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+  }
+  .search-panel.open{
+    grid-template-rows:1fr;
+    opacity:1;
+    padding:6px 20px 4px;
+  }
+  .search-panel-inner{overflow:hidden; min-height:0;}
+  .search-input-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1px solid var(--glass-border);
+    background:var(--glass-bg-strong);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    border-radius:14px;
+    padding:9px 12px;
+  }
+  .search-input-row svg{width:15px; height:15px; flex-shrink:0; color:var(--ink-faint);}
+  #searchInput{
+    flex:1;
+    min-width:0;
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:14.5px;
+  }
+  #searchInput::placeholder{color:var(--ink-faint);}
+  .search-clear-x{
+    flex-shrink:0;
+    width:20px; height:20px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,0.1);
+    color:var(--ink-soft);
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+  }
+  .search-clear-x.show{display:flex;}
+
+  .search-results{
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:min(56vh, 460px);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .search-hint, .search-empty{
+    text-align:center;
+    color:var(--ink-faint);
+    font-size:12.5px;
+    padding:14px 4px 6px;
+  }
+  .search-result-item{
+    border:1px solid var(--glass-border-soft);
+    background:rgba(255,255,255,0.05);
+    border-radius:14px;
+    padding:10px 12px;
+    cursor:pointer;
+    transition:border-color .15s ease, background-color .15s ease;
+  }
+  .search-result-item:active{transform:scale(0.99);}
+  .search-result-item.expanded{
+    border-color:rgba(217,105,79,0.45);
+    background:linear-gradient(165deg, rgba(217,105,79,0.16), rgba(217,105,79,0.06));
+  }
+  .sri-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .sri-kanji{
+    font-family:'Shippori Mincho', serif;
+    font-size:19px;
+    color:var(--ink);
+  }
+  .sri-day{
+    flex-shrink:0;
+    font-size:10px;
+    font-weight:700;
+    color:var(--ink-faint);
+    letter-spacing:0.02em;
+  }
+  .sri-sub{
+    margin-top:2px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .sri-sub .sri-romaji{color:var(--accent-soft); font-weight:600;}
+  .sri-detail{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px solid var(--glass-border-soft);
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    display:none;
+  }
+  .search-result-item.expanded .sri-detail{display:block;}
+  .sri-detail b{color:var(--ink);}
 
   .known-banner{
     display:flex;
@@ -1607,7 +1753,21 @@
 <header>
   <div class="eyebrow">So'z birikmalari</div>
   <h1>Kanji Flashcard</h1>
+  <button class="search-toggle-btn" id="searchToggleBtn" type="button" aria-label="Qidiruv">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+  </button>
 </header>
+
+<div class="search-panel" id="searchPanel">
+  <div class="search-panel-inner">
+    <div class="search-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+      <input type="text" id="searchInput" placeholder="Kanji, romaji yoki tarjima..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="search-clear-x" id="searchClearX" type="button" aria-label="Tozalash">✕</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
 
 <div class="banner-row">
   <button class="known-banner" id="knownBanner" type="button">
@@ -1909,6 +2069,108 @@
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
+
+  // ---------- QIDIRUV (search) ----------
+  // Kanji, romaji va o'zbekcha tarjima bo'yicha bir vaqtda qidiradi.
+  // O'quv navbati (queues/known)ga tegmaydi — faqat lug'at sifatida ishlaydi.
+  (function(){
+    const toggleBtn = document.getElementById('searchToggleBtn');
+    const panel = document.getElementById('searchPanel');
+    const input = document.getElementById('searchInput');
+    const clearX = document.getElementById('searchClearX');
+    const resultsWrap = document.getElementById('searchResults');
+    let open = false;
+    let expandedId = null;
+
+    // apostrof variantlarini bittasiga tenglashtirish + kichik harfga o'tkazish,
+    // shunda "tog'", "tog'", "togʻ" kabi turli klaviatura belgilari ham topiladi
+    function norm(s){
+      return (s || '')
+        .toLowerCase()
+        .replace(/[’ʻʼ`´‘]/g, "'")
+        .trim();
+    }
+
+    function searchWords(qRaw){
+      const q = norm(qRaw);
+      if(!q) return [];
+      const scored = [];
+      for(const w of WORDS){
+        const kanji = w.kanji, romaji = norm(w.romaji), uz = norm(w.uz);
+        const kanjiHit = w.kanji.includes(qRaw.trim());
+        const romajiHit = romaji.includes(q);
+        const uzHit = uz.includes(q);
+        if(!kanjiHit && !romajiHit && !uzHit) continue;
+        // tartib: aniq moslik > boshidan moslik > ichida moslik
+        let score = 3;
+        if(kanji === qRaw.trim() || romaji === q || uz === q) score = 0;
+        else if(romaji.startsWith(q) || uz.startsWith(q)) score = 1;
+        else if(kanjiHit) score = 2;
+        scored.push({w, score});
+      }
+      scored.sort((a,b)=> a.score - b.score || a.w.day - b.w.day);
+      return scored.map(s=>s.w).slice(0, 40);
+    }
+
+    function renderResults(qRaw){
+      const q = qRaw.trim();
+      if(!q){
+        resultsWrap.innerHTML = `<div class="search-hint">Kanji, romaji (masalan "yama") yoki tarjima (masalan "tog'") — qanday yozsangiz ham topiladi.</div>`;
+        return;
+      }
+      const found = searchWords(q);
+      if(found.length === 0){
+        resultsWrap.innerHTML = `<div class="search-empty">Hech narsa topilmadi 🍂</div>`;
+        return;
+      }
+      resultsWrap.innerHTML = found.map(w=>`
+        <div class="search-result-item${expandedId===w.id ? ' expanded' : ''}" data-id="${w.id}">
+          <div class="sri-top">
+            <span class="sri-kanji">${w.kanji}</span>
+            <span class="sri-day">${DAY_LABELS[w.day] || ''}</span>
+          </div>
+          <div class="sri-sub"><span class="sri-romaji">${w.romaji}</span> — ${w.uz}</div>
+          <div class="sri-detail">
+            <div><b>O'qilishi:</b> ${w.reading || '—'}</div>
+            ${w.otherReadings ? `<div><b>Boshqa o'qilishlar:</b> ${w.otherReadings}</div>` : ''}
+            <div><b>Turi:</b> ${w.type || '—'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    resultsWrap.addEventListener('click', (e)=>{
+      const item = e.target.closest('.search-result-item');
+      if(!item) return;
+      const id = item.getAttribute('data-id');
+      expandedId = (expandedId === id) ? null : id;
+      renderResults(input.value);
+    });
+
+    input.addEventListener('input', ()=>{
+      clearX.classList.toggle('show', input.value.length > 0);
+      expandedId = null;
+      renderResults(input.value);
+    });
+
+    clearX.addEventListener('click', ()=>{
+      input.value = '';
+      clearX.classList.remove('show');
+      expandedId = null;
+      renderResults('');
+      input.focus();
+    });
+
+    toggleBtn.addEventListener('click', ()=>{
+      open = !open;
+      toggleBtn.classList.toggle('active', open);
+      panel.classList.toggle('open', open);
+      if(open){
+        renderResults(input.value);
+        setTimeout(()=>input.focus(), 250);
+      }
+    });
+  })();
 
   // ---------- STATE ----------
   // Har bir kun uchun alohida navbat (queue)
