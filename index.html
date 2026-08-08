@@ -824,8 +824,11 @@
     pointer-events:none;
   }
 
-  /* haqiqiy suv to'lqini effekti — chiziq yoki nuqta emas, ortidagi kartichka/fon shunchaki
-     yorug'lik sindirilgandek bukiladi va xiralashadi, xuddi suv yuzasidagi to'lqin kabi */
+  /* haqiqiy suv to'lqini effekti — AMOLED ekranlarda chinakam qora rangga
+     tegmasligi uchun backdrop-filter ISHLATILMAYDI (u orqa fondagi piksellarni
+     "namlab", kulrangsimon tuman hosil qilardi). Buning o'rniga faqat o'zining
+     yorug'ligini chiqaradigan, tashqariga kengayib boruvchi nozik yorug' halqa
+     ishlatiladi — atrofdagi qora piksellarga umuman tegmaydi. */
   .ripple-overlay{
     position:fixed;
     inset:0;
@@ -840,10 +843,11 @@
     margin:-20px 0 0 -20px;
     border-radius:50%;
     background:transparent;
-    backdrop-filter:blur(3px);
-    -webkit-backdrop-filter:blur(3px);
-    -webkit-mask-image:radial-gradient(circle, transparent 52%, rgba(0,0,0,0.85) 66%, rgba(0,0,0,0.85) 80%, transparent 94%);
-    mask-image:radial-gradient(circle, transparent 52%, rgba(0,0,0,0.85) 66%, rgba(0,0,0,0.85) 80%, transparent 94%);
+    border:1.4px solid rgba(255,255,255,0.4);
+    box-shadow:
+      0 0 10px 1px rgba(236,231,220,0.18),
+      inset 0 0 10px 1px rgba(236,231,220,0.1);
+    filter:blur(0.6px);
     opacity:0;
     transform:scale(.12);
     animation:rippleExpand 1.4s cubic-bezier(.16,.7,.3,1) forwards;
@@ -851,7 +855,7 @@
   @keyframes rippleExpand{
     0%{ transform:scale(.12); opacity:0; }
     12%{ opacity:.5; }
-    70%{ opacity:.2; }
+    70%{ opacity:.16; }
     100%{ transform:scale(var(--ripple-scale, 22)); opacity:0; }
   }
 
