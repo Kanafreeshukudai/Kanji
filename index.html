@@ -185,6 +185,44 @@
     contain:strict;
   }
 
+  /* ---------- SVAYP QILGANDA EKRAN CHETLARINING YONISHI ----------
+     kartochka chapga/o'ngga tortilganda, ekranning tegishli cheti sekin
+     yorishadi va markazga qarab xiralashib boradi (chap — yashil/moss,
+     o'ng — qizil). Fon (bg-scene/dots) ustida, lekin kartochka ostida
+     turadi (z-index:-1, background qatlamidan keyin joylashgani uchun
+     ular ustidan, kartochka esa buning ustidan chiqadi). */
+  .swipe-edge-glow{
+    position:fixed;
+    top:0; bottom:0;
+    width:46vw;
+    max-width:300px;
+    z-index:-1;
+    pointer-events:none;
+    opacity:0;
+    filter:blur(14px);
+    transition:opacity .16s ease;
+    will-change:opacity;
+  }
+  .swipe-edge-glow.left{
+    left:-6vw;
+    background:linear-gradient(to right,
+      rgba(124,154,107,0.85) 0%,
+      rgba(124,154,107,0.4) 30%,
+      rgba(124,154,107,0.12) 62%,
+      transparent 100%);
+  }
+  .swipe-edge-glow.right{
+    right:-6vw;
+    background:linear-gradient(to left,
+      rgba(217,60,52,0.82) 0%,
+      rgba(217,60,52,0.38) 30%,
+      rgba(217,60,52,0.11) 62%,
+      transparent 100%);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .swipe-edge-glow{ transition:none; }
+  }
+
   header{
     width:100%;
     max-width:480px;
@@ -250,6 +288,22 @@
     padding:6px 20px 4px;
   }
   .search-panel-inner{overflow:hidden; min-height:0;}
+  .search-input-row,
+  .search-results{
+    opacity:0;
+    transform:translateY(-6px);
+    transition:opacity .22s ease, transform .22s ease;
+  }
+  .search-panel.open .search-input-row{
+    opacity:1;
+    transform:translateY(0);
+    transition-delay:.08s;
+  }
+  .search-panel.open .search-results{
+    opacity:1;
+    transform:translateY(0);
+    transition-delay:.13s;
+  }
   .search-input-row{
     display:flex;
     align-items:center;
@@ -675,6 +729,13 @@
     transform:scale(0.9);
     pointer-events:none;
   }
+  .tab-btn.tab-btn-custom.collapsing{
+    overflow:hidden;
+    padding-top:0; padding-bottom:0;
+    margin-top:0; margin-bottom:0;
+    border-width:0;
+    transition:max-height .32s cubic-bezier(.4,0,.2,1), padding .32s ease, margin .32s ease, border-width .32s ease;
+  }
 
   .tabs-older-collapse{
     display:grid;
@@ -779,8 +840,8 @@
     margin:-20px 0 0 -20px;
     border-radius:50%;
     background:transparent;
-    backdrop-filter:blur(2.2px) brightness(1.12) contrast(1.04) saturate(1.05);
-    -webkit-backdrop-filter:blur(2.2px) brightness(1.12) contrast(1.04) saturate(1.05);
+    backdrop-filter:blur(2.6px) contrast(1.015) saturate(1.02);
+    -webkit-backdrop-filter:blur(2.6px) contrast(1.015) saturate(1.02);
     -webkit-mask-image:radial-gradient(circle, transparent 52%, rgba(0,0,0,0.85) 66%, rgba(0,0,0,0.85) 80%, transparent 94%);
     mask-image:radial-gradient(circle, transparent 52%, rgba(0,0,0,0.85) 66%, rgba(0,0,0,0.85) 80%, transparent 94%);
     opacity:0;
@@ -1857,6 +1918,9 @@
 
 <canvas class="dots-canvas" id="dotsCanvas" aria-hidden="true"></canvas>
 
+<div class="swipe-edge-glow left" id="edgeGlowLeft" aria-hidden="true"></div>
+<div class="swipe-edge-glow right" id="edgeGlowRight" aria-hidden="true"></div>
+
 <div class="app-shell" id="appShell">
 
 <header>
@@ -2560,13 +2624,13 @@
   btnAllQuizTimed.addEventListener('click', ()=>{
     startQuiz([...selectedKanji], 'all', 'timed');
   });
-  // tanlangan kanjilarni "Maxsus Flashcard" navbatiga qo'shib, kartochka oynasiga o'tkazish
+  // tanlangan kanjilarni "Maxsus Flashcard" navbatiga o'rnatib (eskisini
+  // almashtirib), kartochka oynasiga o'tkazadi — har safar bosilganda to'plam
+  // yangi tanlov bilan yangilanadi, eskisi ustiga qo'shilib bormaydi
   btnAllToFlashcard.addEventListener('click', ()=>{
     const ids = [...selectedKanji];
     if(ids.length === 0) return;
-    ids.forEach(id=>{
-      if(!queues[CUSTOM_DAY_ID].includes(id)) queues[CUSTOM_DAY_ID].push(id);
-    });
+    queues[CUSTOM_DAY_ID] = ids;
     customDeckExists = true;
     customFadingOut = false;
     selectedKanji.clear();
@@ -2643,8 +2707,11 @@
   }
 
   // ---------- SWIPE / DRAG ----------
+  const edgeGlowLeft = document.getElementById('edgeGlowLeft');
+  const edgeGlowRight = document.getElementById('edgeGlowRight');
   // ---------- MAXSUS KARTOCHKA HOSIL BO'LISH ANIMATSIYASI (ovoz + aylanish + mozayik nuqtalar) ----------
   let creationAudioCtx = null;
+  let creationReverbNode = null;
   function getCreationAudioCtx(){
     try{
       if(!creationAudioCtx){
@@ -2657,49 +2724,128 @@
     }catch(e){ return null; }
   }
 
-  // qisqa "shuf" shovqin portlashi — filtrlangan oq shovqin, chastotasi pasayadi
-  function creationNoiseBurst(ctx, time, dur, freqStart, freqEnd, peakGain){
+  // kichik, tabiiy "xona" aksi — tashqi audio fayl kerak emas, oq shovqindan
+  // eksponensial so'nuvchi impulse response yasab, ConvolverNode uchun ishlatamiz.
+  // Bu qattiq "tap" tovushini yumshoq, quloqqa yoqimli tarzda cho'zib beradi.
+  function getCreationReverb(ctx){
+    if(!creationReverbNode){
+      try{
+        const dur = 0.5, decay = 3.4;
+        const length = Math.max(1, Math.floor(ctx.sampleRate * dur));
+        const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+        for(let ch=0; ch<2; ch++){
+          const data = impulse.getChannelData(ch);
+          for(let i=0;i<length;i++){
+            data[i] = (Math.random()*2-1) * Math.pow(1 - i/length, decay);
+          }
+        }
+        const conv = ctx.createConvolver();
+        conv.buffer = impulse;
+        creationReverbNode = conv;
+      }catch(e){ creationReverbNode = null; }
+    }
+    return creationReverbNode;
+  }
+
+  // uzluksiz "vviz" (whoosh) — havoda aylanib borayotgan kartochkaning yagona,
+  // silliq tovushi. Uch bo'lakka bo'lingan "shuf-shuf-shuf" o'rniga endi bitta
+  // tovush: chastotasi asta pasayadi (uzoqlashib, sekinlashayotgandek) va
+  // ustiga past chastotali LFO bilan yumshoq "tebranish" (flutter) qo'shiladi —
+  // bu tebranish tezligi ham asta sekinlashadi, xuddi kartochka aylanishi
+  // sekinlashib, joyiga cho'kayotgandek tuyuladi.
+  function creationSpinWhoosh(ctx, time, dur){
     const n = Math.max(1, Math.floor(ctx.sampleRate * dur));
     const buffer = ctx.createBuffer(1, n, ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for(let i=0;i<n;i++){ data[i] = Math.random()*2-1; }
     const src = ctx.createBufferSource();
     src.buffer = buffer;
+
     const bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.Q.value = 0.9;
-    bp.frequency.setValueAtTime(freqStart, time);
-    bp.frequency.exponentialRampToValueAtTime(Math.max(60, freqEnd), time + dur);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, time);
-    g.gain.exponentialRampToValueAtTime(peakGain, time + dur*0.35);
-    g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-    src.connect(bp); bp.connect(g); g.connect(ctx.destination);
-    src.start(time); src.stop(time + dur + 0.03);
+    bp.Q.value = 1.0;
+    bp.frequency.setValueAtTime(2100, time);
+    bp.frequency.exponentialRampToValueAtTime(460, time + dur*0.92);
+
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 200;
+
+    // umumiy hajm — yumshoq kirish, saqlanish, "buff"dan oldin yumshoq chiqish
+    const envGain = ctx.createGain();
+    envGain.gain.setValueAtTime(0.0001, time);
+    envGain.gain.linearRampToValueAtTime(0.15, time + 0.1);
+    envGain.gain.setValueAtTime(0.15, time + dur*0.55);
+    envGain.gain.linearRampToValueAtTime(0.0001, time + dur);
+
+    // tebranish (flutter) — tezligi asta pasayadi, aylanish sekinlashayotganini
+    // his qildiradi
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(9, time);
+    lfo.frequency.exponentialRampToValueAtTime(2.2, time + dur);
+    const lfoDepth = ctx.createGain();
+    lfoDepth.gain.value = 0.45;
+    const tremGain = ctx.createGain();
+    tremGain.gain.value = 0.6;
+    lfo.connect(lfoDepth); lfoDepth.connect(tremGain.gain);
+
+    src.connect(bp); bp.connect(hp); hp.connect(tremGain); tremGain.connect(envGain); envGain.connect(ctx.destination);
+    src.start(time); src.stop(time + dur + 0.05);
+    lfo.start(time); lfo.stop(time + dur + 0.05);
   }
 
-  // "buff" — kartochka joyiga tushganda eshitiladigan yumshoq gumbir
+  // "buff" — kartochka joyiga tushganda eshitiladigan yumshoq, iliq gumbir:
+  // og'irlik beruvchi past ton + kontakt uchun juda qisqa "tik" + tabiiy,
+  // sekin so'nuvchi past ovozli akс (reverb), bu tovushni sun'iy emas, yumshoq
+  // va quloqqa yoqimli qiladi.
   function creationThud(ctx, time){
-    const dur = 0.24;
+    const dur = 0.34;
+
     const osc = ctx.createOscillator();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(170, time);
-    osc.frequency.exponentialRampToValueAtTime(46, time + dur);
+    osc.frequency.setValueAtTime(148, time);
+    osc.frequency.exponentialRampToValueAtTime(50, time + dur);
     const og = ctx.createGain();
     og.gain.setValueAtTime(0.0001, time);
-    og.gain.exponentialRampToValueAtTime(0.4, time + 0.015);
-    og.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+    og.gain.linearRampToValueAtTime(0.34, time + 0.014);
+    og.gain.setTargetAtTime(0.0001, time + 0.014, 0.1);
+
+    const clickBuf = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate*0.03)), ctx.sampleRate);
+    const cd = clickBuf.getChannelData(0);
+    for(let i=0;i<cd.length;i++){ cd[i] = Math.random()*2-1; }
+    const clickSrc = ctx.createBufferSource();
+    clickSrc.buffer = clickBuf;
+    const clickFilter = ctx.createBiquadFilter();
+    clickFilter.type = 'bandpass';
+    clickFilter.frequency.value = 850;
+    clickFilter.Q.value = 1.1;
+    const clickGain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.16, time);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.035);
+
     osc.connect(og); og.connect(ctx.destination);
+    clickSrc.connect(clickFilter); clickFilter.connect(clickGain); clickGain.connect(ctx.destination);
+
+    const reverb = getCreationReverb(ctx);
+    if(reverb){
+      const tailGain = ctx.createGain();
+      tailGain.gain.value = 0.14;
+      og.connect(tailGain); clickGain.connect(tailGain);
+      tailGain.connect(reverb); reverb.connect(ctx.destination);
+    }
+
     osc.start(time); osc.stop(time + dur + 0.02);
-    creationNoiseBurst(ctx, time, 0.09, 700, 150, 0.22);
+    clickSrc.start(time); clickSrc.stop(time + 0.04);
   }
 
+  // animatsiya (cardFormSpin) aynan 1.2s davom etadi va 1080deg aylanadi —
+  // shuning uchun uchta "shuf" ovozi shu vaqt oralig'iga teng taqsimlangan,
+  // "buff" esa aylanish deyarli tugab, kartochka joyiga tushadigan zumda eshitiladi.
   function scheduleCreationSound(ctx){
     const t0 = ctx.currentTime + 0.03;
-    creationNoiseBurst(ctx, t0,        0.17, 1500, 480, 0.12); // shuf
-    creationNoiseBurst(ctx, t0 + 0.26, 0.17, 1850, 580, 0.14); // shuf
-    creationNoiseBurst(ctx, t0 + 0.55, 0.19, 2150, 680, 0.16); // shufff
-    creationThud(ctx, t0 + 0.92);                              // buff — kartochka joyiga tushganda
+    creationSpinWhoosh(ctx, t0, 1.05); // 1080deg aylanish davomida yagona, silliq "vviz"
+    creationThud(ctx, t0 + 1.10);      // buff — joyiga tushganda
   }
 
   // kartochka joyiga tushgach, mozayik nuqtalar markazdan suv tomchisidek tarqaladi
@@ -2784,8 +2930,13 @@
       const rot = dx / 18;
       card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
       const op = Math.min(Math.abs(dx)/80, 1);
-      if(dx < 0){ tagLeft.style.opacity = op; tagRight.style.opacity = 0; }
-      else { tagRight.style.opacity = op; tagLeft.style.opacity = 0; }
+      if(dx < 0){
+        tagLeft.style.opacity = op; tagRight.style.opacity = 0;
+        edgeGlowLeft.style.opacity = op; edgeGlowRight.style.opacity = 0;
+      } else {
+        tagRight.style.opacity = op; tagLeft.style.opacity = 0;
+        edgeGlowRight.style.opacity = op; edgeGlowLeft.style.opacity = 0;
+      }
     }
     function pointerMove(e){
       if(!dragging || decided === 'v') return;
@@ -2827,6 +2978,7 @@
         card.style.transition = 'transform .35s cubic-bezier(.2,.8,.2,1)';
         card.style.transform = '';
         tagLeft.style.opacity = 0; tagRight.style.opacity = 0;
+        edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
         setTimeout(()=>{ card.style.transition=''; }, 350);
       }
     }
@@ -2834,6 +2986,7 @@
       card.style.transition = 'transform .4s ease, opacity .4s ease';
       card.style.transform = `translateX(${dir*600}px) rotate(${dir*35}deg)`;
       card.style.opacity = '0';
+      edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
       setTimeout(cb, 220);
     }
     function click(){
@@ -2874,12 +3027,22 @@
     if(btn){
       void btn.offsetWidth; // reflow — o'tish animatsiyasi joriy holatdan boshlansin
       btn.classList.add('fading-out');
+      // fade tugagach, tugma egallab turgan joy (balandlik/bo'shliq) ham asta
+      // yig'iladi — shu sababli pastidagi yozuvlar birdan tepaga sirg'anib
+      // qolmaydi, balki tekis, sekin ko'tariladi
+      setTimeout(()=>{
+        if(!btn.isConnected) return;
+        btn.style.maxHeight = btn.offsetHeight + 'px';
+        void btn.offsetWidth;
+        btn.classList.add('collapsing');
+        btn.style.maxHeight = '0px';
+      }, 480);
     }
     setTimeout(()=>{
       customDeckExists = false;
       customFadingOut = false;
       renderTabs();
-    }, 650);
+    }, 480 + 340);
   }
   function markLater(){
     const id = queues[currentDay].shift();
