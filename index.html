@@ -1515,13 +1515,13 @@
   .quiz-opt.disabled{pointer-events:none; opacity:0.55;}
 
   /* ---------- VAQT SINOVI (timed recall quiz) ---------- */
-  .quiz-card-timed{cursor:pointer;}
+  .quiz-card-timed{}
   .quiz-timer-bar{
     width:100%; height:6px; background:var(--glass-bg); border-radius:6px; overflow:hidden;
     margin:16px 0 2px; border:1px solid var(--glass-border-soft);
   }
   .quiz-timer-fill{
-    height:100%; width:100%; background:var(--gold); border-radius:6px;
+    height:100%; width:100%; background:var(--moss); border-radius:6px;
     transition:width linear;
   }
   .quiz-timer-fill.urgent{
@@ -1529,8 +1529,8 @@
     animation:timerUrgentBlink .5s ease-in-out infinite;
   }
   @keyframes timerUrgentBlink{
-    0%,100%{opacity:1;}
-    50%{opacity:0.3;}
+    0%,100%{opacity:1; box-shadow:0 0 8px 1px rgba(217,105,79,0.75);}
+    50%{opacity:0.3; box-shadow:0 0 2px 0 rgba(217,105,79,0);}
   }
   @media (prefers-reduced-motion: reduce){
     .quiz-timer-fill.urgent{animation:none !important; opacity:1 !important;}
@@ -1596,6 +1596,26 @@
   }
   .quiz-timed-next:disabled{opacity:0.35; cursor:not-allowed; box-shadow:none;}
   .quiz-timed-next:active:not(:disabled){transform:scale(0.98);}
+  .quiz-timed-next{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+  }
+  .qtn-count-ring{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:23px;
+    height:23px;
+    flex:none;
+    border:2px solid rgba(255,255,255,0.85);
+    border-radius:50%;
+    font-size:12px;
+    font-weight:800;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
 
   .quiz-result{text-align:center; padding:30px 10px;}
   .quiz-result .big-em{font-size:46px;}
@@ -3189,6 +3209,7 @@
     if(tab!=='learn') kunlarOpen = false;
     if(tab!=='quiz' && timedRevealTimeout){ clearTimeout(timedRevealTimeout); timedRevealTimeout = null; }
     if(tab!=='quiz' && timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
+    if(tab!=='quiz' && timedNextInterval){ clearInterval(timedNextInterval); timedNextInterval = null; }
     renderTabs();
     if(tab==='learn') renderStage();
     if(tab==='known') renderKnown();
@@ -3197,14 +3218,17 @@
 
   // ---------- QUIZ ----------
   let quizItems = [], quizIdx = 0, quizScore = 0, quizReturnTab = 'known', quizPool = [], quizType = 'translate';
+  let quizBarPct = 0; // savollar shkalasining joriy foizi — savollar orasida sekin siljishi uchun saqlanadi
   let timedRevealTimeout = null;
   let timedUrgentTimeout = null;
+  let timedNextInterval = null;
 
   function startQuiz(ids, returnTab, mode){
     if(ids.length === 0) return;
     quizPool = ids.slice();
     quizItems = shuffle([...ids]);
     quizIdx = 0; quizScore = 0;
+    quizBarPct = 0;
     quizReturnTab = returnTab;
     quizType = mode === 'romaji' ? 'romaji' : mode === 'timed' ? 'timed' : 'translate';
     showTab('quiz');
@@ -3230,9 +3254,26 @@
     return a;
   }
 
+  // savollar shkalasi (Savol X/Y ostidagi chiziq) — savoldan-savolga sakramay,
+  // avvalgi qiymatidan yangi qiymatga qarab sekin siljib boradi
+  function animateQuizBar(fillEl){
+    const targetPct = (quizIdx/quizItems.length)*100;
+    fillEl.style.transition = 'none';
+    fillEl.style.width = quizBarPct + '%';
+    void fillEl.offsetWidth; // majburiy reflow — boshlang'ich holat chizib bo'lingandan keyingina animatsiya boshlansin
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        fillEl.style.transition = 'width .6s ease';
+        fillEl.style.width = targetPct + '%';
+      });
+    });
+    quizBarPct = targetPct;
+  }
+
   function renderQuizQuestion(){
     if(timedRevealTimeout){ clearTimeout(timedRevealTimeout); timedRevealTimeout = null; }
     if(timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
+    if(timedNextInterval){ clearInterval(timedNextInterval); timedNextInterval = null; }
     const wrap = document.getElementById('quizWrap');
     if(quizIdx >= quizItems.length){
       renderQuizResult();
@@ -3254,7 +3295,7 @@
         <span>Savol ${quizIdx+1} / ${quizItems.length}</span>
         <span class="score">Ball: ${quizScore}</span>
       </div>
-      <div class="quiz-bar"><div class="quiz-bar-fill" style="width:${(quizIdx/quizItems.length)*100}%"></div></div>
+      <div class="quiz-bar"><div class="quiz-bar-fill" id="quizBarFill" style="width:${quizBarPct}%"></div></div>
       <div class="quiz-mode-label">${modeLabel}</div>
       <div class="quiz-feedback" id="quizFeedback"></div>
       <div class="quiz-card">
@@ -3264,6 +3305,7 @@
         ${options.map(id=>`<button class="quiz-opt" data-id="${id}">${quizType === 'romaji' ? byId[id].romaji : byId[id].uz}</button>`).join('')}
       </div>
     `;
+    animateQuizBar(document.getElementById('quizBarFill'));
     wrap.querySelectorAll('.quiz-opt').forEach(btn=>{
       btn.addEventListener('click', ()=>handleQuizAnswer(btn, word.id, options));
     });
@@ -3275,6 +3317,7 @@
   // tagida kichikroq tarjima ochiladi, so'ng keyingi so'zga o'tiladi.
   const TIMED_QUIZ_SECONDS = 10;
   const TIMED_QUIZ_URGENT_AT = 3; // oxirgi necha soniyada chiziq qizarib milt-milt qiladi
+  const NEXT_STEP_SECONDS = 5; // javob ko'ringandan keyin "Keyingisi" tugmasidagi hisoblagich
   function renderTimedQuizQuestion(){
     const wrap = document.getElementById('quizWrap');
     const word = byId[quizItems[quizIdx]];
@@ -3282,7 +3325,7 @@
       <div class="quiz-progress">
         <span>Savol ${quizIdx+1} / ${quizItems.length}</span>
       </div>
-      <div class="quiz-bar"><div class="quiz-bar-fill" style="width:${(quizIdx/quizItems.length)*100}%"></div></div>
+      <div class="quiz-bar"><div class="quiz-bar-fill" id="quizBarFill" style="width:${quizBarPct}%"></div></div>
       <div class="quiz-mode-label">10 soniyada eslashga harakat qiling</div>
       <div class="quiz-mode-sublabel">Bilsangiz, ovoz chiqarib o'qing!</div>
       <div class="quiz-card quiz-card-timed" id="timedCard">
@@ -3290,18 +3333,41 @@
       </div>
       <div class="quiz-timer-bar"><div class="quiz-timer-fill" id="timedFill"></div></div>
       <div class="quiz-timed-status">
-        <div class="quiz-timed-hint" id="timedHint">Javobni oldinroq ko'rish uchun kartaga bosing</div>
+        <div class="quiz-timed-hint" id="timedHint">Bilsangiz, pastdagi tugma orqali javobni ko'ring</div>
         <div class="quiz-reveal" id="timedReveal">
           <div class="qr-romaji">${word.romaji}</div>
           <div class="qr-uz">${word.uz}</div>
         </div>
       </div>
-      <button class="quiz-timed-next" id="timedNext" disabled>Keyingisi →</button>
+      <button class="quiz-timed-next" id="timedNext">Javobni ko'rish</button>
     `;
     const fill = document.getElementById('timedFill');
-    const card = document.getElementById('timedCard');
     const nextBtn = document.getElementById('timedNext');
     let revealed = false;
+
+    animateQuizBar(document.getElementById('quizBarFill'));
+
+    // "Keyingisi" tugmasi ustida 5 soniyalik kamayish tartibidagi hisoblagich —
+    // javob ko'rilgan zahoti boshlanadi, tugagach avtomatik keyingi kanjiga o'tadi
+    function startNextCountdown(){
+      let remaining = NEXT_STEP_SECONDS;
+      nextBtn.innerHTML = `Keyingisi → <span class="qtn-count-ring">${remaining}</span>`;
+      nextBtn.onclick = goNext;
+      timedNextInterval = setInterval(()=>{
+        remaining--;
+        if(remaining <= 0){
+          goNext();
+        } else {
+          nextBtn.innerHTML = `Keyingisi → <span class="qtn-count-ring">${remaining}</span>`;
+        }
+      }, 1000);
+    }
+
+    function goNext(){
+      if(timedNextInterval){ clearInterval(timedNextInterval); timedNextInterval = null; }
+      quizIdx++;
+      renderQuizQuestion();
+    }
 
     function reveal(){
       if(revealed) return;
@@ -3313,23 +3379,29 @@
       fill.classList.remove('urgent');
       document.getElementById('timedHint').classList.add('hide');
       document.getElementById('timedReveal').classList.add('show');
-      nextBtn.disabled = false;
+      startNextCountdown();
     }
 
-    // chiziqni o'ng tarafdan chap tarafga qarab kamaytirish
+    // chiziqni o'ng tarafdan chap tarafga qarab kamaytirish — teskari sakrab
+    // qolmasligi (ayniqsa avtomatik "keyingisi" orqali darhol qayta chizilganda)
+    // uchun boshlang'ich holat majburan reflow qilinadi, so'ng ikki rAF orqali
+    // animatsiya boshlanadi
+    fill.style.transition = 'none';
+    fill.style.width = '100%';
+    void fill.offsetWidth; // majburiy reflow
     requestAnimationFrame(()=>{
-      fill.style.transition = `width ${TIMED_QUIZ_SECONDS}s linear`;
-      fill.style.width = '0%';
+      requestAnimationFrame(()=>{
+        fill.style.transition = `width ${TIMED_QUIZ_SECONDS}s linear`;
+        fill.style.width = '0%';
+      });
     });
     timedRevealTimeout = setTimeout(reveal, TIMED_QUIZ_SECONDS * 1000);
     // oxirgi 3 soniyada chiziq qizarib, milt-milt qiladi
     timedUrgentTimeout = setTimeout(()=>{ fill.classList.add('urgent'); }, (TIMED_QUIZ_SECONDS - TIMED_QUIZ_URGENT_AT) * 1000);
 
-    card.addEventListener('click', reveal);
-    nextBtn.addEventListener('click', ()=>{
-      quizIdx++;
-      renderQuizQuestion();
-    });
+    // "Javobni ko'rish" — kanjini bilgan taqdirda, vaqtdan oldin javobni
+    // ochish uchun (kartaning o'zi emas, aynan shu tugma orqali)
+    nextBtn.onclick = reveal;
   }
 
   // ---------- JAVOB HIS-TUYG'USI (quvonch/afsus emoji + o'zbekcha yozuv) ----------
