@@ -1488,11 +1488,11 @@
     mix-blend-mode:normal;
   }
   .page-flash.flash-correct{
-    background:radial-gradient(circle at 50% 38%, rgba(124,154,107,0.55) 0%, rgba(124,154,107,0.18) 45%, transparent 75%);
+    background:radial-gradient(circle at 50% 38%, rgba(124,154,107,0.6) 0%, rgba(124,154,107,0.24) 60%, transparent 92%);
     animation:pageFlashPulse .8s ease-out;
   }
   .page-flash.flash-wrong{
-    background:radial-gradient(circle at 50% 38%, rgba(217,105,79,0.5) 0%, rgba(217,105,79,0.16) 45%, transparent 75%);
+    background:radial-gradient(circle at 50% 38%, rgba(217,105,79,0.55) 0%, rgba(217,105,79,0.22) 60%, transparent 92%);
     animation:pageFlashShake .8s ease-out;
   }
   @keyframes pageFlashPulse{
@@ -2848,7 +2848,9 @@
   // "buff" esa aylanish deyarli tugab, kartochka joyiga tushadigan zumda eshitiladi.
   function scheduleCreationSound(ctx){
     const t0 = ctx.currentTime + 0.03;
-    creationSpinWhoosh(ctx, t0, 1.05); // 1080deg aylanish davomida yagona, silliq "vviz"
+    // "vviz" (whoosh) ovozi olib tashlandi — endi faqat kartochka joyiga
+    // tushgandagi "buff" tovushi eshitiladi, aylanish vaqti bilan bir xil
+    // vaqtlash saqlab qolindi.
     creationThud(ctx, t0 + 1.10);      // buff — joyiga tushganda
   }
 
@@ -3450,18 +3452,18 @@
     try{
       // quvnoq, yorqin ko'tarilib boruvchi mayor arpeggio — o'yin g'alabasiga
       // o'xshash ijobiy tuyg'u beradi, lekin qisqa va yumshoq eshitiladi
-      playTone(523.25,  0,    0.16, 'sine', 0.13); // C5
-      playTone(659.25,  0.07, 0.18, 'sine', 0.13); // E5
-      playTone(783.99,  0.14, 0.20, 'sine', 0.12); // G5
-      playTone(1046.50, 0.21, 0.34, 'sine', 0.115);// C6 — yorqin, davomli yakun
+      playTone(523.25,  0,    0.16, 'sine', 0.18); // C5
+      playTone(659.25,  0.07, 0.18, 'sine', 0.18); // E5
+      playTone(783.99,  0.14, 0.20, 'sine', 0.17); // G5
+      playTone(1046.50, 0.21, 0.34, 'sine', 0.16);// C6 — yorqin, davomli yakun
     }catch(e){}
   }
   function playWrongSound(){
     try{
       // yumshoq, past ohangda pastga tushuvchi ikki ton — xafa qilmaydigan,
       // "hechqisi yo'q" degandek iliq va bosiq tovush (keskin emas)
-      playTone(311.13, 0,    0.24, 'triangle', 0.085); // Eb4
-      playTone(246.94, 0.10, 0.34, 'triangle', 0.075); // B3 — pastga, yumshoq so'nish
+      playTone(311.13, 0,    0.24, 'triangle', 0.115); // Eb4
+      playTone(246.94, 0.10, 0.34, 'triangle', 0.10); // B3 — pastga, yumshoq so'nish
     }catch(e){}
   }
 
