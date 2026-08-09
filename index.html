@@ -3477,12 +3477,20 @@
       allBtns.forEach(b=>{ if(b.getAttribute('data-id')===correctId) b.classList.add('correct'); });
       flashPage('flash-wrong');
       playWrongSound();
+      vibrateWrong();
       showQuizFeedback(false);
     }
     setTimeout(()=>{
       quizIdx++;
       renderQuizQuestion();
     }, 1300);
+  }
+
+  // ---------- VIBRATSIYA (xato javobda telefonni titratish) ----------
+  function vibrateWrong(){
+    if('vibrate' in navigator){
+      try{ navigator.vibrate([60, 40, 60, 40, 120]); }catch(e){}
+    }
   }
 
   // ---------- SAHIFA FLESHI (to'g'ri/noto'g'ri javob his-tuyg'usi) ----------
