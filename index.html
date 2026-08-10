@@ -2046,8 +2046,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2265,6 +2265,31 @@
     {id:"umareru", day:11, group:"生", kanji:"生まれる", romaji:"umareru", type:"kun'yomi", reading:"生(u) + まれる", uz:"tug'ilish"},
     {id:"ikebana", day:11, group:"生", kanji:"生け花", romaji:"ikebana", type:"kun + kun", reading:"生け(ike) + 花(bana)", uz:"gul aranjirovkasi"},
     {id:"namatamago", day:11, group:"生", kanji:"生卵", romaji:"namatamago", type:"kun + kun", reading:"生(nama) + 卵(tamago)", uz:"xom tuxum"},
+
+    // ---- 12-kun ----
+    {id:"ichi", day:12, group:"一", kanji:"一", romaji:"ichi", type:"on'yomi", reading:"一(ichi) — yakka kanji", otherReadings:"on: イチ(ichi) · kun: ひと(hito)", uz:"bir"},
+    {id:"hitoride", day:12, group:"一", kanji:"一人で", romaji:"hitoride", type:"kun'yomi", reading:"一人(hitori) + で", uz:"o'zi, bir o'zi"},
+    {id:"isshoni", day:12, group:"一", kanji:"一緒に", romaji:"issho ni", type:"on'yomi", reading:"一緒(issho) + に", uz:"birga"},
+    {id:"ichido", day:12, group:"一", kanji:"一度", romaji:"ichido", type:"on'yomi", reading:"一(ichi) + 度(do)", uz:"bir marta"},
+    {id:"tsuitachi", day:12, group:"一", kanji:"一日", romaji:"tsuitachi", type:"jukujikun", reading:"一日(tsuitachi) — maxsus o'qilish", uz:"oyning birinchi kuni"},
+
+    {id:"ni", day:12, group:"二", kanji:"二", romaji:"ni", type:"on'yomi", reading:"二(ni) — yakka kanji", otherReadings:"on: ニ(ni) · kun: ふた(futa)", uz:"ikki"},
+    {id:"futatsu", day:12, group:"二", kanji:"二つ", romaji:"futatsu", type:"kun'yomi", reading:"二つ(futatsu)", uz:"ikkita"},
+    {id:"nigatsu", day:12, group:"二", kanji:"二月", romaji:"nigatsu", type:"on'yomi", reading:"二(ni) + 月(gatsu)", uz:"Fevral"},
+    {id:"futari", day:12, group:"二", kanji:"二人", romaji:"futari", type:"jukujikun", reading:"二人(futari) — maxsus o'qilish", uz:"ikki kishi"},
+    {id:"hatsuka", day:12, group:"二", kanji:"二十日", romaji:"hatsuka", type:"jukujikun", reading:"二十日(hatsuka) — maxsus o'qilish", uz:"yigirmanchi kun / 20-kun"},
+
+    {id:"san", day:12, group:"三", kanji:"三", romaji:"san", type:"on'yomi", reading:"三(san) — yakka kanji", otherReadings:"on: サン(san) · kun: み(mi)", uz:"uch"},
+    {id:"mittsu", day:12, group:"三", kanji:"三つ", romaji:"mittsu", type:"kun'yomi", reading:"三つ(mittsu)", uz:"uchta"},
+    {id:"sanji", day:12, group:"三", kanji:"三時", romaji:"sanji", type:"on'yomi", reading:"三(san) + 時(ji)", uz:"soat uch"},
+    {id:"sannin", day:12, group:"三", kanji:"三人", romaji:"sannin", type:"on'yomi", reading:"三(san) + 人(nin)", uz:"uch kishi"},
+    {id:"mikazuki", day:12, group:"三", kanji:"三日月", romaji:"mikazuki", type:"jukujikun", reading:"三日月(mikazuki) — maxsus o'qilish", uz:"yarim oy (hilol oy)"},
+
+    {id:"yon", day:12, group:"四", kanji:"四", romaji:"yon", type:"kun'yomi", reading:"四(yon) — yakka kanji", otherReadings:"on: シ(shi) · kun: よ(yo), よん(yon)", uz:"to'rt"},
+    {id:"yottsu", day:12, group:"四", kanji:"四つ", romaji:"yottsu", type:"kun'yomi", reading:"四つ(yottsu)", uz:"to'rtta"},
+    {id:"yoji", day:12, group:"四", kanji:"四時", romaji:"yoji", type:"kun'yomi", reading:"四(yo) + 時(ji)", uz:"soat to'rt"},
+    {id:"shigatsu", day:12, group:"四", kanji:"四月", romaji:"shigatsu", type:"on'yomi", reading:"四(shi) + 月(gatsu)", uz:"aprel"},
+    {id:"yokka", day:12, group:"四", kanji:"四日", romaji:"yokka", type:"jukujikun", reading:"四日(yokka) — maxsus o'qilish", uz:"to'rtinchi kun / 4-kun"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
