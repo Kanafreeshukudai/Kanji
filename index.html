@@ -44,6 +44,8 @@
     --gold:#C9A66B;
     --moss:#7C9A6B;
     --moss-soft:#93b17f;
+    --slate:#5C82A6;
+    --plum:#9B6FA0;
     --card-w: min(84vw, 360px);
     --card-h: min(120vw, 460px);
 
@@ -435,6 +437,16 @@
     border-color:var(--moss);
     color:#eafce0;
   }
+  /* "Bilganlarim"ga kartochka qo'shilganda (chapga surilganda) bir zumlik
+     yashil miltillash — foydalanuvchiga kartochka qayerga ketganini ko'rsatadi */
+  @keyframes knownBannerPulse{
+    0%{ box-shadow:0 0 0 0 rgba(124,154,107,0); background:linear-gradient(165deg, rgba(124,154,107,0.16), rgba(124,154,107,0.08)); border-color:rgba(124,154,107,0.4); }
+    45%{ box-shadow:0 0 0 10px rgba(124,154,107,0.28); background:linear-gradient(165deg, rgba(124,154,107,0.62), rgba(124,154,107,0.34)); border-color:var(--moss); color:#eafce0; }
+    100%{ box-shadow:0 0 0 0 rgba(124,154,107,0); }
+  }
+  .known-banner.pulse{
+    animation:knownBannerPulse 1.3s cubic-bezier(.22,.61,.36,1);
+  }
   .known-banner-icon{font-size:16px;}
   .known-banner-badge{
     display:inline-flex;
@@ -710,20 +722,78 @@
 
   .tab-btn.tab-btn-custom{
     flex:1 1 100%;
-    background:linear-gradient(165deg, rgba(124,154,107,0.34), rgba(124,154,107,0.16));
-    border-color:rgba(124,154,107,0.6);
-    color:#9fc78a;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding-left:34px;
+    padding-right:34px;
+    background:linear-gradient(165deg, rgba(92,130,166,0.34), rgba(92,130,166,0.16));
+    border-color:rgba(0,0,0,0.55);
+    color:#c7d8e8;
     opacity:1;
     transform:scale(1);
     transition:opacity .6s ease, transform .6s ease, background .25s ease, border-color .25s ease, color .25s ease;
   }
-  .tab-btn.tab-btn-custom.active{
-    background:linear-gradient(165deg, var(--moss), #4f6b41);
-    border-color:var(--moss);
-    color:#eef5ea;
+  .tab-btn.tab-btn-custom .tab-btn-custom-label{
+    text-align:center;
   }
-  .tab-btn.tab-btn-custom .badge{background:var(--moss);}
+  .tab-btn.tab-btn-custom.active{
+    background:linear-gradient(165deg, var(--slate), #3d5a75);
+    border-color:rgba(0,0,0,0.55);
+    color:#eaf2f9;
+  }
+  .tab-btn.tab-btn-custom .badge{background:var(--slate);}
   .tab-btn.tab-btn-custom.active .badge{background:var(--gold); color:var(--bg-1);}
+  .tab-btn.tab-btn-custom-shuffled{
+    background:linear-gradient(165deg, rgba(217,105,79,0.34), rgba(217,105,79,0.16));
+    color:#f6d2c4;
+  }
+  .tab-btn.tab-btn-custom-shuffled.active{
+    background:linear-gradient(165deg, var(--accent), #a84a35);
+    color:#fdece6;
+  }
+  .tab-btn.tab-btn-custom-shuffled .badge{background:var(--accent);}
+  .tab-btn.tab-btn-custom-shuffled.active .badge{background:var(--gold); color:var(--bg-1);}
+  .tab-btn.tab-btn-custom .shuffle-indicator{
+    display:inline-block;
+    margin-left:8px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:var(--gold);
+    color:var(--bg-1);
+    font-size:10.5px;
+    font-weight:900;
+    letter-spacing:0.02em;
+    vertical-align:middle;
+  }
+  .tab-btn.tab-btn-custom .tab-btn-custom-close{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    border:none;
+    border-radius:50%;
+    background:rgba(0,0,0,0.18);
+    color:inherit;
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .tab-btn.tab-btn-custom .tab-btn-custom-close:hover{
+    background:rgba(0,0,0,0.32);
+  }
+  .tab-btn.tab-btn-custom .tab-btn-custom-close:active{
+    transform:translateY(-50%) scale(0.9);
+  }
   .tab-btn.tab-btn-custom.fading-out{
     opacity:0;
     transform:scale(0.9);
@@ -1322,26 +1392,53 @@
   }
   .quiz-launch:active:not(:disabled){transform:scale(0.98);}
   .flashcard-convert-btn{
-    display:block;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
     width:100%;
     margin-top:14px;
-    background:var(--moss);
+    background:var(--slate);
     color:#fff;
     border:none;
-    padding:14px 14px;
-    border-radius:14px;
+    padding:8px 8px 8px 16px;
+    border-radius:16px;
     font-family:'Zen Maru Gothic',sans-serif;
     font-weight:900;
     font-size:14px;
     letter-spacing:0.02em;
     cursor:pointer;
-    box-shadow:0 10px 24px -8px rgba(124,154,107,0.4);
+    box-shadow:0 10px 24px -8px rgba(92,130,166,0.45);
     transition:opacity .2s ease, transform .2s ease;
   }
-  .flashcard-convert-btn:disabled{
+  .flashcard-convert-btn.disabled{
     background:var(--panel-2); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
   }
-  .flashcard-convert-btn:active:not(:disabled){transform:scale(0.98);}
+  .flashcard-convert-btn:active:not(.disabled){transform:scale(0.98);}
+  .flashcard-convert-label{
+    flex:1 1 auto;
+    text-align:center;
+  }
+  .flashcard-shuffle-btn{
+    flex:1 1 auto;
+    max-width:62%;
+    background:var(--accent);
+    color:#fff;
+    border:1px solid rgba(0,0,0,0.55);
+    padding:11px 13px;
+    border-radius:12px;
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-weight:900;
+    font-size:13.5px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    box-shadow:0 8px 18px -8px rgba(217,105,79,0.55);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .flashcard-shuffle-btn:disabled{
+    background:rgba(255,255,255,0.12); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
+  }
+  .flashcard-shuffle-btn:active:not(:disabled){transform:scale(0.96);}
   .quiz-mode-label{
     text-align:center;
     font-size:12.5px;
@@ -2027,7 +2124,10 @@
       <button class="quiz-launch quiz-launch-romaji" id="btnAllQuizRomaji" disabled>Romaji quiz</button>
       <button class="quiz-launch quiz-launch-timed" id="btnAllQuizTimed" disabled>Vaqt sinovi</button>
     </div>
-    <button class="flashcard-convert-btn" id="btnAllToFlashcard" disabled type="button">Flashcardga aylantirish</button>
+    <div class="flashcard-convert-btn disabled" id="btnAllToFlashcard" role="button" tabindex="0" aria-disabled="true">
+      <span class="flashcard-convert-label">Flashcardga aylantirish</span>
+      <button class="flashcard-shuffle-btn" id="btnAllToFlashcardShuffle" disabled type="button">Aralashtirish</button>
+    </div>
     <div class="all-selected-note" id="allSelectedNote"></div>
     <button class="all-clear-btn slot-empty" id="btnAllClear" type="button">Tanlovni tozalash</button>
     <div id="allList"></div>
@@ -2046,8 +2146,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2290,6 +2390,31 @@
     {id:"yoji", day:12, group:"四", kanji:"四時", romaji:"yoji", type:"kun'yomi", reading:"四(yo) + 時(ji)", uz:"soat to'rt"},
     {id:"shigatsu", day:12, group:"四", kanji:"四月", romaji:"shigatsu", type:"on'yomi", reading:"四(shi) + 月(gatsu)", uz:"aprel"},
     {id:"yokka", day:12, group:"四", kanji:"四日", romaji:"yokka", type:"jukujikun", reading:"四日(yokka) — maxsus o'qilish", uz:"to'rtinchi kun / 4-kun"},
+
+    // ---- 13-kun ----
+    {id:"go", day:13, group:"五", kanji:"五", romaji:"go", type:"on'yomi", reading:"五(go) — yakka kanji", otherReadings:"kun: いつ(itsu) · on: ゴ(go)", uz:"besh"},
+    {id:"itsutsu", day:13, group:"五", kanji:"五つ", romaji:"itsutsu", type:"kun'yomi", reading:"五つ(itsutsu)", uz:"beshta"},
+    {id:"goji", day:13, group:"五", kanji:"五時", romaji:"goji", type:"on + on", reading:"五(go) + 時(ji)", uz:"soat besh"},
+    {id:"gogatsu", day:13, group:"五", kanji:"五月", romaji:"gogatsu", type:"on + on", reading:"五(go) + 月(gatsu)", uz:"May"},
+    {id:"itsuka", day:13, group:"五", kanji:"五日", romaji:"itsuka", type:"jukujikun", reading:"五日(itsuka) — maxsus o'qilish", uz:"beshinchi kun / 5-kun"},
+
+    {id:"roku", day:13, group:"六", kanji:"六", romaji:"roku", type:"on'yomi", reading:"六(roku) — yakka kanji", otherReadings:"kun: む(mu), むい(mui) · on: ロク(roku)", uz:"olti"},
+    {id:"muttsu", day:13, group:"六", kanji:"六つ", romaji:"muttsu", type:"kun'yomi", reading:"六つ(muttsu)", uz:"oltita"},
+    {id:"roppyaku", day:13, group:"六", kanji:"六百", romaji:"roppyaku", type:"on + on", reading:"六(rop) + 百(pyaku)", uz:"olti yuz"},
+    {id:"muika", day:13, group:"六", kanji:"六日", romaji:"muika", type:"jukujikun", reading:"六日(muika) — maxsus o'qilish", uz:"oltinchi kun / 6-kun"},
+    {id:"roppun", day:13, group:"六", kanji:"六分", romaji:"roppun", type:"on + on", reading:"六(rop) + 分(pun)", uz:"olti daqiqa"},
+
+    {id:"nana", day:13, group:"七", kanji:"七", romaji:"nana", type:"kun'yomi", reading:"七(nana) — yakka kanji", otherReadings:"kun: なな(nana) · on: シチ(shichi)", uz:"yetti"},
+    {id:"nanatsu", day:13, group:"七", kanji:"七つ", romaji:"nanatsu", type:"kun'yomi", reading:"七つ(nanatsu)", uz:"yettita"},
+    {id:"nanoka", day:13, group:"七", kanji:"七日", romaji:"nanoka", type:"jukujikun", reading:"七日(nanoka) — maxsus o'qilish", uz:"yettinchi kun / 7-kun"},
+    {id:"tanabata_nana", day:13, group:"七", kanji:"七夕", romaji:"tanabata", type:"jukujikun", reading:"七夕(tanabata) — maxsus o'qilish", uz:"yulduzlar festivali"},
+    {id:"shichinin", day:13, group:"七", kanji:"七人", romaji:"shichinin", type:"on + on", reading:"七(shichi) + 人(nin)", uz:"yetti kishi"},
+
+    {id:"hachi", day:13, group:"八", kanji:"八", romaji:"hachi", type:"on'yomi", reading:"八(hachi) — yakka kanji", otherReadings:"kun: や(ya), よう(you) · on: ハチ(hachi)", uz:"sakkiz"},
+    {id:"yattsu", day:13, group:"八", kanji:"八つ", romaji:"yattsu", type:"kun'yomi", reading:"八つ(yattsu)", uz:"sakkizta"},
+    {id:"happyaku", day:13, group:"八", kanji:"八百", romaji:"happyaku", type:"on + on", reading:"八(hap) + 百(pyaku)", uz:"sakkiz yuz"},
+    {id:"youka", day:13, group:"八", kanji:"八日", romaji:"youka", type:"jukujikun", reading:"八日(youka) — maxsus o'qilish", uz:"sakkizinchi kun / 8-kun"},
+    {id:"yaoya", day:13, group:"八", kanji:"八百屋", romaji:"yaoya", type:"jukujikun", reading:"八百屋(yaoya) — maxsus o'qilish", uz:"sabzavot do'koni"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -2402,6 +2527,7 @@
   DAY_ORDER.forEach(d=>{ queues[d] = WORDS.filter(w=>w.day===d).map(w=>w.id); });
   queues[CUSTOM_DAY_ID] = []; // maxsus kartochka navbati — "Hammasi" bo'limidan tanlab qo'shiladi
   let customDeckExists = false; // maxsus kartochka tabi hech bo'lmasa bir marta yasalganmi
+  let customDeckShuffled = false; // joriy Maxsus Flashcard to'plami "Aralashtirish" orqali yasalganmi
   let customFadingOut = false; // hammasi ko'rib chiqilgach, tab sekin yo'qolish animatsiyasida
   let customKnownSet = new Set(); // Maxsus Flashcard orqali "bilaman"ga o'tkazilgan so'zlar — Bilganlarimda alohida guruhlanadi
   let known = [];
@@ -2493,16 +2619,45 @@
   }
 
   // maxsus kartochka uchun alohida tab tugmasi — kunlar ro'yxatining pastida,
-  // faqat "Hammasi" bo'limidan kamida bir marta kartochka yasalgandan keyin ko'rinadi
+  // faqat "Hammasi" bo'limidan kamida bir marta kartochka yasalgandan keyin ko'rinadi.
+  // Chetida X tugmasi bor — bosilsa, to'plam darhol yopiladi (o'chiriladi).
   function customDayTabBtn(){
-    const btn = document.createElement('button');
-    btn.type = 'button';
+    const btn = document.createElement('div');
+    btn.setAttribute('role', 'button');
+    btn.tabIndex = 0;
     btn.className = 'tab-btn tab-btn-custom'
       + (currentTab==='learn' && currentDay===CUSTOM_DAY_ID ? ' active' : '')
-      + (customFadingOut ? ' fading-out' : '');
-    btn.innerHTML = `${DAY_LABELS[CUSTOM_DAY_ID]} <span class="badge" id="dayCount-${CUSTOM_DAY_ID}">${queues[CUSTOM_DAY_ID].length}</span>`;
-    btn.addEventListener('click', ()=>{ currentDay = CUSTOM_DAY_ID; kunlarOpen = false; saveState(); showTab('learn'); });
+      + (customFadingOut ? ' fading-out' : '')
+      + (customDeckShuffled ? ' tab-btn-custom-shuffled' : '');
+    btn.innerHTML = `<span class="tab-btn-custom-label">${DAY_LABELS[CUSTOM_DAY_ID]} <span class="badge" id="dayCount-${CUSTOM_DAY_ID}">${queues[CUSTOM_DAY_ID].length}</span>`
+      + (customDeckShuffled ? `<span class="shuffle-indicator">Aralashtirilgan</span>` : '')
+      + `</span><button type="button" class="tab-btn-custom-close" id="btnCloseCustomDeck" aria-label="Maxsus Flashcardni yopish">&#10005;</button>`;
+    const selectDeck = ()=>{ currentDay = CUSTOM_DAY_ID; kunlarOpen = false; saveState(); showTab('learn'); };
+    btn.addEventListener('click', selectDeck);
+    btn.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectDeck(); }
+    });
+    btn.querySelector('.tab-btn-custom-close').addEventListener('click', (e)=>{
+      e.stopPropagation(); // tab tanlanib qolmasligi uchun
+      closeCustomDeck();
+    });
     return btn;
+  }
+
+  // Maxsus Flashcardni foydalanuvchi X tugmasi orqali qo'lda yopadi — navbatdagi
+  // ko'rilmagan kartochkalar bekor qilinadi, "Bilganlarim"ga o'tganlari saqlanib qoladi
+  function closeCustomDeck(){
+    if(customFadingOut) return; // animatsiya davom etayotganda qayta ishga tushmasin
+    queues[CUSTOM_DAY_ID] = [];
+    if(currentDay === CUSTOM_DAY_ID){
+      currentDay = DAY_ORDER[0];
+      if(currentTab === 'learn'){
+        renderStage();
+        updateCounts();
+      }
+    }
+    saveState();
+    triggerCustomFadeOut();
   }
 
   function renderTabs(){
@@ -2568,6 +2723,7 @@
   const btnAllQuizRomaji = document.getElementById('btnAllQuizRomaji');
   const btnAllQuizTimed = document.getElementById('btnAllQuizTimed');
   const btnAllToFlashcard = document.getElementById('btnAllToFlashcard');
+  const btnAllToFlashcardShuffle = document.getElementById('btnAllToFlashcardShuffle');
 
   let allListBuilt = false;
   function renderAll(){
@@ -2653,7 +2809,9 @@
     btnAllQuizTranslate.disabled = n === 0;
     btnAllQuizRomaji.disabled = n === 0;
     btnAllQuizTimed.disabled = n === 0;
-    btnAllToFlashcard.disabled = n === 0;
+    btnAllToFlashcard.classList.toggle('disabled', n === 0);
+    btnAllToFlashcard.setAttribute('aria-disabled', n === 0 ? 'true' : 'false');
+    btnAllToFlashcardShuffle.disabled = n === 0;
     btnAllClear.classList.toggle('slot-empty', n === 0);
     allSelectedNote.textContent = n === 0
       ? "Viktorina yoki kartochka uchun kanjilarni tanlang"
@@ -2673,14 +2831,25 @@
   btnAllQuizTimed.addEventListener('click', ()=>{
     startQuiz([...selectedKanji], 'all', 'timed');
   });
+  // Fisher-Yates aralashtirish — massivni joyida tasodifiy tartibga soladi
+  function shuffleArray(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   // tanlangan kanjilarni "Maxsus Flashcard" navbatiga o'rnatib (eskisini
   // almashtirib), kartochka oynasiga o'tkazadi — har safar bosilganda to'plam
-  // yangi tanlov bilan yangilanadi, eskisi ustiga qo'shilib bormaydi
-  btnAllToFlashcard.addEventListener('click', ()=>{
+  // yangi tanlov bilan yangilanadi, eskisi ustiga qo'shilib bormaydi.
+  // shuffled=true bo'lsa, tanlangan kanjilar tasodifiy aralashtirilgan holda joylanadi
+  function createCustomDeck(shuffled){
     const ids = [...selectedKanji];
     if(ids.length === 0) return;
-    queues[CUSTOM_DAY_ID] = ids;
+    queues[CUSTOM_DAY_ID] = shuffled ? shuffleArray(ids) : ids;
     customDeckExists = true;
+    customDeckShuffled = shuffled;
     customFadingOut = false;
     selectedKanji.clear();
     refreshAllSelectionUI();
@@ -2689,6 +2858,23 @@
     renderTabs();
     showTab('learn');
     playCardCreationAnimation();
+  }
+
+  btnAllToFlashcard.addEventListener('click', ()=>{
+    if(btnAllToFlashcard.classList.contains('disabled')) return;
+    createCustomDeck(false);
+  });
+  btnAllToFlashcard.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      if(btnAllToFlashcard.classList.contains('disabled')) return;
+      createCustomDeck(false);
+    }
+  });
+  btnAllToFlashcardShuffle.addEventListener('click', (e)=>{
+    e.stopPropagation(); // tashqi (ketma-ket) tugmaga bosilganday ta'sir qilmasin
+    if(btnAllToFlashcardShuffle.disabled) return;
+    createCustomDeck(true);
   });
 
   // ---------- RENDER: LEARN STAGE ----------
@@ -2696,6 +2882,13 @@
   const progressNote = document.getElementById('progressNote');
 
   function renderStage(){
+    // eski faol kartochkaga bog'langan window-darajasidagi (mousemove/mouseup)
+    // event listenerlar - agar tozalanmasa, har yangi kartochka chiqqanda
+    // yig'ilib boraveradi (memory leak) va uzoq foydalanishda sekinlashuvga
+    // olib keladi, shu sababli innerHTML tozalanishidan oldin bekor qilinadi
+    const prevCard = document.getElementById('activeCard');
+    if(prevCard && prevCard._cleanupEvents) prevCard._cleanupEvents();
+
     stage.innerHTML = "";
     updateCounts();
     const queue = queues[currentDay];
@@ -2965,6 +3158,10 @@
     const inner = card.querySelector('.card-inner');
     const tagLeft = card.querySelector('.swipe-tag.left');
     const tagRight = card.querySelector('.swipe-tag.right');
+    // bitta AbortController orqali shu kartochkaga tegishli barcha listenerlar
+    // (jumladan window'ga ulanganlari) bitta chaqiruv bilan bekor qilinadi
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     // real finger taps always wobble a few pixels — this must be big enough that a tap
     // never gets mistaken for the start of a drag, but small enough that an intentional
@@ -3045,13 +3242,18 @@
       card.classList.toggle('flipped');
     }
 
-    card.addEventListener('mousedown', pointerDown);
-    window.addEventListener('mousemove', pointerMove);
-    window.addEventListener('mouseup', pointerUp);
-    card.addEventListener('touchstart', pointerDown, {passive:true});
-    card.addEventListener('touchmove', pointerMove, {passive:false});
-    card.addEventListener('touchend', pointerUp);
-    card.addEventListener('click', click);
+    card.addEventListener('mousedown', pointerDown, {signal});
+    window.addEventListener('mousemove', pointerMove, {signal});
+    window.addEventListener('mouseup', pointerUp, {signal});
+    card.addEventListener('touchstart', pointerDown, {passive:true, signal});
+    card.addEventListener('touchmove', pointerMove, {passive:false, signal});
+    card.addEventListener('touchend', pointerUp, {signal});
+    card.addEventListener('click', click, {signal});
+
+    // renderStage() har safar yangi kartochka chiqarganda shu funksiyani chaqirib,
+    // window'ga ulangan listenerlarni (mousemove/mouseup) bekor qiladi — aks holda
+    // ular umuman olib tashlanmay yig'ilib boraverar edi
+    card._cleanupEvents = () => controller.abort();
   }
 
   function markKnown(){
@@ -3062,6 +3264,7 @@
     if(wasCustom && !wasAlreadyKnown){
       customKnownSet.add(id); // Maxsus Flashcarddan bilinganlar alohida guruhlanadi
     }
+    pulseKnownBanner();
     saveState();
     renderStage();
     updateCounts(); // joriy kun tugmasidagi son (badge) darhol yangilansin — aks holda "muzlab" qolib, tab almashtirilgunicha eski son ko'rinaverar edi
@@ -3069,6 +3272,15 @@
     if(wasCustom && queues[CUSTOM_DAY_ID].length === 0 && customDeckExists && !customFadingOut){
       triggerCustomFadeOut();
     }
+  }
+  // kartochka chapga surilib "Bilganlarim"ga qo'shilganda, tugmani bir zumga
+  // yashil rangda miltillatadi — foydalanuvchiga aniq qayerga ketganini ko'rsatadi
+  function pulseKnownBanner(){
+    if(!knownBanner) return;
+    knownBanner.classList.remove('pulse');
+    void knownBanner.offsetWidth; // reflow — animatsiya qayta-qayta bosilganda ham qaytadan boshlansin
+    knownBanner.classList.add('pulse');
+    setTimeout(()=>knownBanner.classList.remove('pulse'), 1300);
   }
   // Maxsus Flashcard navbati to'liq ko'rib chiqilganda, tab kunlar ro'yxatidan
   // sekin (fade) yo'qoladi — animatsiya tugagach butunlay ro'yxatdan olib tashlanadi
@@ -3092,6 +3304,7 @@
     setTimeout(()=>{
       customDeckExists = false;
       customFadingOut = false;
+      customDeckShuffled = false;
       renderTabs();
     }, 480 + 340);
   }
