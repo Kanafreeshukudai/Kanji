@@ -1362,6 +1362,9 @@
     margin-top:18px;
   }
   .quiz-launch{
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
     margin-top:0;
     width:100%;
     flex:1;
@@ -1376,6 +1379,7 @@
     letter-spacing:0.02em;
     cursor:pointer;
     box-shadow:0 10px 24px -8px rgba(217,105,79,0.4);
+    transition:transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, filter .16s ease;
   }
   .quiz-launch-romaji{
     background:var(--moss);
@@ -1390,8 +1394,15 @@
   .quiz-launch:disabled{
     background:var(--panel-2); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
   }
-  .quiz-launch:active:not(:disabled){transform:scale(0.98);}
+  .quiz-launch:active:not(:disabled){
+    transform:scale(0.96);
+    filter:brightness(1.14) saturate(1.12);
+    box-shadow:0 4px 12px -6px rgba(0,0,0,0.5);
+  }
   .flashcard-convert-btn{
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -1409,17 +1420,24 @@
     letter-spacing:0.02em;
     cursor:pointer;
     box-shadow:0 10px 24px -8px rgba(92,130,166,0.45);
-    transition:opacity .2s ease, transform .2s ease;
+    transition:opacity .2s ease, transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, filter .16s ease;
   }
   .flashcard-convert-btn.disabled{
     background:var(--panel-2); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
   }
-  .flashcard-convert-btn:active:not(.disabled){transform:scale(0.98);}
+  .flashcard-convert-btn:active:not(.disabled){
+    transform:scale(0.98);
+    filter:brightness(1.14) saturate(1.12);
+    box-shadow:0 4px 12px -6px rgba(0,0,0,0.5);
+  }
   .flashcard-convert-label{
     flex:1 1 auto;
     text-align:center;
   }
   .flashcard-shuffle-btn{
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
     flex:1 1 auto;
     max-width:62%;
     background:var(--accent);
@@ -1433,12 +1451,72 @@
     letter-spacing:0.02em;
     cursor:pointer;
     box-shadow:0 8px 18px -8px rgba(217,105,79,0.55);
-    transition:opacity .2s ease, transform .2s ease;
+    transition:opacity .2s ease, transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, filter .16s ease;
   }
   .flashcard-shuffle-btn:disabled{
     background:rgba(255,255,255,0.12); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
   }
-  .flashcard-shuffle-btn:active:not(:disabled){transform:scale(0.96);}
+  .flashcard-shuffle-btn:active:not(:disabled){
+    transform:scale(0.94);
+    filter:brightness(1.14) saturate(1.12);
+    box-shadow:0 3px 10px -6px rgba(0,0,0,0.5);
+  }
+
+  /* ---------- HAMMASI (view-all) bo'limi: quiz va flashcard tugmalari
+     saytning standart (fon rangi bo'yicha) tugma uslubida qoladi — faqat
+     chetki ramkasi o'z rangida bir maromda, pulsatsiyasiz yonib turadi ---------- */
+  #view-all .quiz-launch{
+    --glow-rgb:217,105,79;
+    border:1px solid rgba(var(--glow-rgb),0.9);
+    box-shadow:0 10px 24px -8px rgba(217,105,79,0.4), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+  }
+  #view-all .quiz-launch-romaji{
+    --glow-rgb:124,154,107;
+    border-color:rgba(var(--glow-rgb),0.9);
+    box-shadow:0 10px 24px -8px rgba(124,154,107,0.4), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+  }
+  #view-all .quiz-launch-timed{
+    --glow-rgb:201,166,107;
+    border-color:rgba(var(--glow-rgb),0.9);
+    box-shadow:0 10px 24px -8px rgba(201,166,107,0.45), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+  }
+  #view-all .quiz-launch:disabled{
+    background:var(--panel-2); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
+  }
+  #view-all .flashcard-convert-btn{
+    --glow-rgb:92,130,166;
+    border:1px solid rgba(var(--glow-rgb),0.9);
+    box-shadow:0 10px 24px -8px rgba(92,130,166,0.45), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+  }
+  #view-all .flashcard-convert-btn.disabled{
+    background:var(--panel-2); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
+  }
+  #view-all .flashcard-shuffle-btn{
+    --glow-rgb:217,105,79;
+    border:1px solid rgba(var(--glow-rgb),0.95);
+    box-shadow:0 8px 18px -8px rgba(217,105,79,0.55), 0 0 0 1px rgba(var(--glow-rgb),0.65), 0 0 10px 1px rgba(var(--glow-rgb),0.55);
+  }
+  #view-all .flashcard-shuffle-btn:disabled{
+    background:rgba(255,255,255,0.12); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
+  }
+
+  /* barmoq tekkan nuqtadan yoyiluvchi to'lqin (material ripple) — bosilganda
+     JS orqali .btn-ripple <span> qo'shiladi, animatsiya tugagach o'chiriladi */
+  .btn-ripple{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.55);
+    transform:scale(0);
+    opacity:1;
+    pointer-events:none;
+    z-index:2;
+    animation:btnRippleExpand .55s cubic-bezier(.22,.7,.32,1) forwards;
+  }
+  @keyframes btnRippleExpand{
+    0%{ transform:scale(0); opacity:.75; }
+    70%{ opacity:.35; }
+    100%{ transform:scale(1); opacity:0; }
+  }
   .quiz-mode-label{
     text-align:center;
     font-size:12.5px;
@@ -2540,6 +2618,14 @@
     return byId[id] ? byId[id].group : "";
   }
 
+  // Kun tabi bosilganda o'sha kunning navbatini asl tartibda, boshidan qaytadan tuzadi
+  // (oldingi safar qayerda to'xtagan bo'lsa ham, "bilganlarim"ga o'tmagan so'zlar
+  // yana boshidan, WORDS ro'yxatidagi tartibda chiqadi).
+  function resetDayQueue(d){
+    const knownSet = new Set(known);
+    queues[d] = WORDS.filter(w=>w.day===d && !knownSet.has(w.id)).map(w=>w.id);
+  }
+
   // ---------- PERSISTENCE ----------
   const STORAGE_KEY = 'kanji-flashcard-state';
   // Ilova (artifact) muhitida window.storage bo'ladi — bo'lmasa, brauzerning
@@ -2681,11 +2767,11 @@
     }
 
     recentDays.forEach(d=>{
-      tabsNav.appendChild(dayTabBtn(d, ()=>{ currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
+      tabsNav.appendChild(dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
     });
 
     olderDays.forEach(d=>{
-      tabsOlderGrid.appendChild(dayTabBtn(d, ()=>{ currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
+      tabsOlderGrid.appendChild(dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
     });
     tabsOlderCollapse.classList.toggle('open', kunlarOpen && olderDays.length>0);
 
@@ -2724,6 +2810,33 @@
   const btnAllQuizTimed = document.getElementById('btnAllQuizTimed');
   const btnAllToFlashcard = document.getElementById('btnAllToFlashcard');
   const btnAllToFlashcardShuffle = document.getElementById('btnAllToFlashcardShuffle');
+
+  // quiz/flashcard tugmalari bosilganda barmoq tekkan nuqtadan to'lqin yoyiladi —
+  // "Hammasi" va "Bilganlarim" ekranlaridagi barcha shu turdagi tugmalarga tegishli
+  function attachBtnRipple(el){
+    if(!el) return;
+    el.addEventListener('pointerdown', (e)=>{
+      if(el.disabled || el.classList.contains('disabled')) return;
+      const rect = el.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 1.9;
+      const x = (e.clientX ?? rect.left + rect.width/2) - rect.left - size/2;
+      const y = (e.clientY ?? rect.top + rect.height/2) - rect.top - size/2;
+      const ripple = document.createElement('span');
+      ripple.className = 'btn-ripple';
+      ripple.style.width = size + 'px';
+      ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      el.appendChild(ripple);
+      ripple.addEventListener('animationend', ()=> ripple.remove(), {once:true});
+      setTimeout(()=> ripple.remove(), 700); // ehtiyot chorasi
+    });
+  }
+  [
+    btnAllQuizTranslate, btnAllQuizRomaji, btnAllQuizTimed, btnAllToFlashcard, btnAllToFlashcardShuffle,
+    document.getElementById('btnQuizTranslate'), document.getElementById('btnQuizRomaji'), document.getElementById('btnQuizTimed')
+  ].forEach(attachBtnRipple);
+
 
   let allListBuilt = false;
   function renderAll(){
