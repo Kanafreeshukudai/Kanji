@@ -251,7 +251,8 @@
   /* ---------- QIDIRUV (search) ---------- */
   .search-toggle-btn{
     position:absolute;
-    top:22px;
+    top:50%;
+    transform:translateY(-50%);
     right:16px;
     width:36px;
     height:36px;
@@ -267,7 +268,7 @@
     cursor:pointer;
     transition:all .2s ease;
   }
-  .search-toggle-btn:active{transform:scale(0.92);}
+  .search-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
   .search-toggle-btn.active{
     background:linear-gradient(165deg, rgba(217,105,79,0.5), rgba(217,105,79,0.28));
     border-color:var(--accent);
@@ -2224,8 +2225,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2493,6 +2494,25 @@
     {id:"happyaku", day:13, group:"八", kanji:"八百", romaji:"happyaku", type:"on + on", reading:"八(hap) + 百(pyaku)", uz:"sakkiz yuz"},
     {id:"youka", day:13, group:"八", kanji:"八日", romaji:"youka", type:"jukujikun", reading:"八日(youka) — maxsus o'qilish", uz:"sakkizinchi kun / 8-kun"},
     {id:"yaoya", day:13, group:"八", kanji:"八百屋", romaji:"yaoya", type:"jukujikun", reading:"八百屋(yaoya) — maxsus o'qilish", uz:"sabzavot do'koni"},
+
+    // ---- 14-kun ----
+    {id:"kyuu", day:14, group:"九", kanji:"九", romaji:"kyuu", type:"on'yomi", reading:"九(kyuu) — yakka kanji", otherReadings:"kun: ここの(kokono), ここの-つ(kokonotsu) · on: キュウ(kyuu), ク(ku)", uz:"to'qqiz"},
+    {id:"kokonotsu", day:14, group:"九", kanji:"九つ", romaji:"kokonotsu", type:"kun'yomi", reading:"九つ(kokonotsu)", uz:"to'qqizta"},
+    {id:"kuji", day:14, group:"九", kanji:"九時", romaji:"kuji", type:"kun'yomi", reading:"九(ku) + 時(ji)", uz:"soat to'qqiz"},
+    {id:"kokonoka", day:14, group:"九", kanji:"九日", romaji:"kokonoka", type:"jukujikun", reading:"九日(kokonoka) — maxsus o'qilish", uz:"to'qqizinchi kun / 9-kun"},
+
+    {id:"juu", day:14, group:"十", kanji:"十", romaji:"juu", type:"on'yomi", reading:"十(juu) — yakka kanji", otherReadings:"kun: とお(too), と(to) · on: ジュウ(juu), ジュッ(jup), ジッ(ji)", uz:"o'n"},
+    {id:"tooka", day:14, group:"十", kanji:"十日", romaji:"tooka", type:"jukujikun", reading:"十日(tooka) — maxsus o'qilish", uz:"o'ninchi kun / 10-kun"},
+    {id:"juppun", day:14, group:"十", kanji:"十分", romaji:"juppun", type:"on + on", reading:"十(jup) + 分(pun)", uz:"o'n daqiqa / yetarli"},
+    {id:"jussai", day:14, group:"十", kanji:"十歳", romaji:"jussai", type:"on + on", reading:"十(jus) + 歳(sai)", uz:"o'n yoshda"},
+
+    {id:"hyaku", day:14, group:"百", kanji:"百", romaji:"hyaku", type:"on'yomi", reading:"百(hyaku) — yakka kanji", otherReadings:"on: ヒャク(hyaku), ビャク(byaku), ピャク(pyaku) · kun: もも(momo)", uz:"yuz"},
+    {id:"sanbyaku", day:14, group:"百", kanji:"三百", romaji:"sanbyaku", type:"on + on", reading:"三(san) + 百(byaku)", uz:"uch yuz"},
+    {id:"hyakkaten", day:14, group:"百", kanji:"百貨店", romaji:"hyakkaten", type:"on + on + on", reading:"百(hyak) + 貨(ka) + 店(ten)", uz:"universal do'kon"},
+
+    {id:"sen_1000", day:14, group:"千", kanji:"千", romaji:"sen", type:"on'yomi", reading:"千(sen) — yakka kanji", otherReadings:"on: セン(sen) · kun: ち(chi)", uz:"ming"},
+    {id:"senen", day:14, group:"千", kanji:"千円", romaji:"sen'en", type:"on + on", reading:"千(sen) + 円(en)", uz:"ming yen"},
+    {id:"sanzen", day:14, group:"千", kanji:"三千", romaji:"sanzen", type:"on + on", reading:"三(san) + 千(zen)", uz:"uch ming"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
