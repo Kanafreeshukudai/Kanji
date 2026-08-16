@@ -276,6 +276,29 @@
   }
   .search-toggle-btn svg{width:17px; height:17px; display:block;}
 
+  /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda */
+  .chat-toggle-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    left:16px;
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .chat-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
+  .chat-toggle-btn svg{width:17px; height:17px; display:block;}
+
   .search-panel{
     width:100%;
     max-width:480px;
@@ -1965,6 +1988,269 @@
   @media (prefers-reduced-motion: reduce){
     .splash-start-btn.show{animation:none !important;}
   }
+
+  /* ---------- NICKNAME MODAL ---------- */
+  .nickname-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(6,7,9,0.62);
+    backdrop-filter:blur(10px) saturate(140%);
+    -webkit-backdrop-filter:blur(10px) saturate(140%);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+  }
+  .nickname-overlay.show{opacity:1; pointer-events:auto;}
+  .nickname-card{
+    width:100%;
+    max-width:320px;
+    border-radius:22px;
+    padding:26px 22px 22px;
+    text-align:center;
+    background:linear-gradient(165deg, var(--panel-2), var(--panel-1));
+    border:1px solid var(--glass-border-soft);
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);
+    transform:translateY(14px) scale(0.96);
+    transition:transform .32s cubic-bezier(.2,.8,.2,1);
+  }
+  .nickname-overlay.show .nickname-card{transform:translateY(0) scale(1);}
+  .nickname-emoji{font-size:34px; margin-bottom:6px;}
+  .nickname-card h2{
+    font-family:'Shippori Mincho',serif;
+    font-size:19px;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  .nickname-card p{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+    line-height:1.5;
+  }
+  .nickname-input{
+    width:100%;
+    box-sizing:border-box;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border);
+    border-radius:13px;
+    padding:12px 14px;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:15px;
+    text-align:center;
+    outline:none;
+  }
+  .nickname-input::placeholder{color:var(--ink-faint);}
+  .nickname-confirm-btn{
+    width:100%;
+    margin-top:14px;
+    padding:13px 20px;
+    border-radius:13px;
+    border:none;
+    background:linear-gradient(135deg, var(--accent), var(--gold));
+    color:#fff8ef;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:800;
+    font-size:14.5px;
+    cursor:pointer;
+    box-shadow:0 10px 24px -8px rgba(217,105,79,0.45);
+  }
+  .nickname-confirm-btn:active{transform:scale(0.97);}
+  .nickname-confirm-btn:disabled{
+    opacity:0.4;
+    cursor:default;
+    box-shadow:none;
+  }
+  .nickname-confirm-btn:disabled:active{transform:none;}
+
+  /* ---------- GLOBAL CHAT (shu qurilmada saqlanadi) ---------- */
+  .chat-overlay{
+    position:fixed;
+    inset:0;
+    z-index:600;
+    background:rgba(6,7,9,0.5);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .28s ease;
+  }
+  .chat-overlay.open{opacity:1; pointer-events:auto;}
+
+  .chat-panel{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    z-index:601;
+    width:100%;
+    max-width:480px;
+    height:min(72vh, 580px);
+    transform:translate(-50%, 100%);
+    transition:transform .34s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(180deg, var(--panel-2), var(--panel-1) 70%);
+    border:1px solid var(--glass-border-soft);
+    border-bottom:none;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -20px 50px -18px rgba(0,0,0,0.6);
+    padding-bottom:env(safe-area-inset-bottom);
+    overflow:hidden;
+  }
+  .chat-panel.open{transform:translate(-50%, 0);}
+
+  .chat-panel-header{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px 12px;
+    border-bottom:1px solid var(--glass-border-soft);
+  }
+  .chat-panel-title{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .chat-panel-title h3{
+    margin:0;
+    font-family:'Shippori Mincho',serif;
+    font-size:16.5px;
+    color:var(--ink);
+  }
+  .chat-panel-title span{
+    font-size:11.5px;
+    color:var(--ink-faint);
+  }
+  .chat-close-btn{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .chat-close-btn:active{transform:scale(0.9);}
+
+  /* TODO: haqiqiy (server asosidagi) global chat ulanganda shu blokni CSS'dan ham olib tashlang */
+  .chat-test-notice{
+    flex:none;
+    margin:12px 16px 0;
+    padding:9px 12px;
+    border-radius:12px;
+    background:rgba(201,166,107,0.14);
+    border:1px solid rgba(201,166,107,0.4);
+    color:var(--gold);
+    font-size:11.5px;
+    line-height:1.5;
+    text-align:center;
+  }
+
+  .chat-messages{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .chat-empty{
+    margin:auto;
+    text-align:center;
+    color:var(--ink-faint);
+    font-size:13px;
+    padding:20px;
+    line-height:1.6;
+  }
+  .chat-empty .big-em{font-size:30px; display:block; margin-bottom:8px;}
+  .chat-msg{
+    max-width:78%;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .chat-msg.mine{align-self:flex-end; align-items:flex-end;}
+  .chat-msg.theirs{align-self:flex-start; align-items:flex-start;}
+  .chat-msg-nick{
+    font-size:11px;
+    font-weight:700;
+    color:var(--ink-faint);
+    padding:0 4px;
+  }
+  .chat-msg.mine .chat-msg-nick{color:var(--accent-soft);}
+  .chat-bubble{
+    padding:9px 13px;
+    border-radius:16px;
+    font-size:13.5px;
+    line-height:1.4;
+    word-break:break-word;
+    white-space:pre-wrap;
+  }
+  .chat-msg.theirs .chat-bubble{
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border-soft);
+    color:var(--ink);
+    border-bottom-left-radius:4px;
+  }
+  .chat-msg.mine .chat-bubble{
+    background:linear-gradient(150deg, var(--accent), var(--accent-soft));
+    color:#fff8ef;
+    border-bottom-right-radius:4px;
+  }
+  .chat-msg-time{
+    font-size:10px;
+    color:var(--ink-faint);
+    padding:0 4px;
+  }
+
+  .chat-input-bar{
+    flex:none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    border-top:1px solid var(--glass-border-soft);
+    background:rgba(0,0,0,0.12);
+  }
+  .chat-input-bar input{
+    flex:1;
+    min-width:0;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border);
+    border-radius:20px;
+    padding:11px 15px;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:14px;
+    outline:none;
+  }
+  .chat-input-bar input::placeholder{color:var(--ink-faint);}
+  .chat-send-btn{
+    flex:none;
+    width:40px; height:40px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(135deg, var(--accent), var(--gold));
+    color:#fff8ef;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .chat-send-btn svg{width:17px; height:17px;}
+  .chat-send-btn:active{transform:scale(0.9);}
+  .chat-send-btn:disabled{opacity:0.45; cursor:default;}
+
   .splash-credit{
     position:absolute;
     left:0;
@@ -2124,6 +2410,9 @@
 <div class="app-shell" id="appShell">
 
 <header>
+  <button class="chat-toggle-btn" id="chatToggleBtn" type="button" aria-label="Chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+  </button>
   <div class="eyebrow">So'z birikmalari</div>
   <h1>Kanji Flashcard</h1>
   <button class="search-toggle-btn" id="searchToggleBtn" type="button" aria-label="Qidiruv">
@@ -2221,12 +2510,44 @@
 
 </div>
 
+<!-- ---------- NICKNAME MODAL ---------- -->
+<div class="nickname-overlay" id="nicknameOverlay" aria-hidden="true">
+  <div class="nickname-card">
+    <div class="nickname-emoji">👋</div>
+    <h2>Sizni qanday chaqiraylik?</h2>
+    <p>Davom etish uchun nickname kiriting. Bu ism chatda boshqalarga shu nom bilan ko'rinadi.</p>
+    <input class="nickname-input" id="nicknameInput" type="text" maxlength="18" placeholder="Nickname" autocomplete="off" autocorrect="off" spellcheck="false" required>
+    <button class="nickname-confirm-btn" id="nicknameConfirmBtn" type="button" disabled>Davom etish</button>
+  </div>
+</div>
+
+<!-- ---------- GLOBAL CHAT ---------- -->
+<div class="chat-overlay" id="chatOverlay" aria-hidden="true"></div>
+<div class="chat-panel" id="chatPanel" aria-hidden="true">
+  <div class="chat-panel-header">
+    <div class="chat-panel-title">
+      <h3>Chat</h3>
+      <span id="chatNickLabel">Mehmon sifatida</span>
+    </div>
+    <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Yopish">✕</button>
+  </div>
+  <!-- TODO: haqiqiy (server asosidagi) global chat ulanganda shu bildirishnomani olib tashlang -->
+  <div class="chat-test-notice">⚠️ Hozircha chat test rejimida — jo'natilgan xabaringiz boshqa foydalanuvchilarga ko'rinmaydi.</div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-bar">
+    <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
+    <button class="chat-send-btn" id="chatSendBtn" type="button" aria-label="Yuborish">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>
+
 <script>
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2513,6 +2834,33 @@
     {id:"sen_1000", day:14, group:"千", kanji:"千", romaji:"sen", type:"on'yomi", reading:"千(sen) — yakka kanji", otherReadings:"on: セン(sen) · kun: ち(chi)", uz:"ming"},
     {id:"senen", day:14, group:"千", kanji:"千円", romaji:"sen'en", type:"on + on", reading:"千(sen) + 円(en)", uz:"ming yen"},
     {id:"sanzen", day:14, group:"千", kanji:"三千", romaji:"sanzen", type:"on + on", reading:"三(san) + 千(zen)", uz:"uch ming"},
+
+    // ---- 15-kun ----
+    {id:"man", day:15, group:"万", kanji:"万", romaji:"man", type:"on'yomi", reading:"万(man) — yakka kanji", otherReadings:"on: マン(man), バン(ban) · kun: よろず(yorozu)", uz:"o'n ming"},
+    {id:"ichiman", day:15, group:"万", kanji:"一万", romaji:"ichiman", type:"on + on", reading:"一(ichi) + 万(man)", uz:"o'n ming"},
+    {id:"juuman", day:15, group:"万", kanji:"十万", romaji:"juuman", type:"on + on", reading:"十(juu) + 万(man)", uz:"yuz ming"},
+    {id:"hyakuman", day:15, group:"万", kanji:"百万", romaji:"hyakuman", type:"on + on", reading:"百(hyaku) + 万(man)", uz:"bir million"},
+    {id:"bannou", day:15, group:"万", kanji:"万能", romaji:"bannou", type:"on + on", reading:"万(ban) + 能(nou)", uz:"har tomonlama"},
+    {id:"manbiki", day:15, group:"万", kanji:"万引きする", romaji:"manbikisuru", type:"on + kun", reading:"万(man) + 引き(biki) + する", uz:"do'konda o'g'irlik qilish"},
+
+    {id:"toshi", day:15, group:"年", kanji:"年", romaji:"toshi", type:"kun'yomi", reading:"年(toshi) — yakka kanji", otherReadings:"kun: とし(toshi) · on: ネン(nen)", uz:"yil, yosh"},
+    {id:"ichinensei", day:15, group:"年", kanji:"一年生", romaji:"ichinensei", type:"on + on + on", reading:"一(ichi) + 年(nen) + 生(sei)", uz:"birinchi kurs talabasi"},
+    {id:"ichinen", day:15, group:"年", kanji:"一年", romaji:"ichinen", type:"on + on", reading:"一(ichi) + 年(nen)", uz:"bir yil"},
+    {id:"kotoshi", day:15, group:"年", kanji:"今年", romaji:"kotoshi", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"bu yil"},
+    {id:"kyonen", day:15, group:"年", kanji:"去年", romaji:"kyonen", type:"on + on", reading:"去(kyo) + 年(nen)", uz:"o'tgan yil"},
+    {id:"maitoshi", day:15, group:"年", kanji:"毎年", romaji:"maitoshi", type:"on + kun", reading:"毎(mai) + 年(toshi)", uz:"har yili"},
+
+    {id:"en", day:15, group:"円", kanji:"円", romaji:"en", type:"on'yomi", reading:"円(en) — yakka kanji", otherReadings:"on: エン(en) · kun: まる(maru), まる-い(marui)", uz:"yen, doira"},
+    {id:"hyakuen", day:15, group:"円", kanji:"百円", romaji:"hyakuen", type:"on + on", reading:"百(hyaku) + 円(en)", uz:"yuz yen"},
+    {id:"marui", day:15, group:"円", kanji:"円い", romaji:"marui", type:"kun'yomi", reading:"円い(marui)", uz:"dumaloq"},
+    {id:"enyasu", day:15, group:"円", kanji:"円安", romaji:"en'yasu", type:"on + kun", reading:"円(en) + 安(yasu)", uz:"yena qadrsizlanishi"},
+    {id:"endaka", day:15, group:"円", kanji:"円高", romaji:"endaka", type:"on + kun", reading:"円(en) + 高(daka)", uz:"yena qadri oshishi"},
+
+    {id:"ue", day:15, group:"上", kanji:"上", romaji:"ue", type:"kun'yomi", reading:"上(ue) — yakka kanji", otherReadings:"kun: うえ(ue), のぼる(noboru), あげる(ageru) · on: ジョウ(jou), ショウ(shou)", uz:"yuqori"},
+    {id:"ijou", day:15, group:"上", kanji:"以上", romaji:"ijou", type:"on + on", reading:"以(i) + 上(jou)", uz:"bundan ortiq"},
+    {id:"jouzuna_ue", day:15, group:"上", kanji:"上手な", romaji:"jouzu na", type:"on + kun", reading:"上(jou) + 手(zu) + な", uz:"zo'r, qobiliyatli"},
+    {id:"uwagi", day:15, group:"上", kanji:"上着", romaji:"uwagi", type:"kun + kun", reading:"上(uwa) + 着(gi)", uz:"ustki kiyim"},
+    {id:"noboru", day:15, group:"上", kanji:"上る", romaji:"noboru", type:"kun'yomi", reading:"上る(noboru)", uz:"yuqoriga chiqish"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -4205,6 +4553,155 @@
     }
     setTimeout(()=>{ splash.style.display = 'none'; }, 750);
   }
+  // ---------- NICKNAME ----------
+  // "Boshlash" bosilganda — agar ilgari nickname kiritilmagan bo'lsa —
+  // ilova ochilishidan oldin foydalanuvchidan nickname so'raladi. Bu nom
+  // pastdagi global chatda ko'rinadi. Faqat shu qurilmada saqlanadi.
+  const NICK_KEY = 'kanji-flashcard-nickname';
+  function getNickname(){
+    try{ return (localStorage.getItem(NICK_KEY) || '').trim(); }catch(e){ return ''; }
+  }
+  function setNickname(v){
+    try{ localStorage.setItem(NICK_KEY, v); }catch(e){}
+  }
+  // Splash "Boshlash" tugmasi bosilganda avval shu funksiya chaqiriladi.
+  // Agar nickname allaqachon bo'lsa — to'g'ridan-to'g'ri hideSplash(e) ga o'tadi,
+  // bo'lmasa — avval nickname oynasi chiqadi, keyin ilova ochiladi.
+  function handleStartClick(evt){
+    const existing = getNickname();
+    if(existing){
+      hideSplash(evt);
+      return;
+    }
+    const overlay = document.getElementById('nicknameOverlay');
+    const input = document.getElementById('nicknameInput');
+    const confirmBtn = document.getElementById('nicknameConfirmBtn');
+    if(!overlay){ hideSplash(evt); return; } // ehtiyot chorasi — modal topilmasa ham ilova ochiladi
+
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden','false');
+    setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 300);
+
+    // nickname majburiy — tugma faqat matn kiritilganda yoqiladi
+    const syncBtnState = ()=>{ confirmBtn.disabled = input.value.trim().length === 0; };
+    syncBtnState();
+    input.addEventListener('input', syncBtnState);
+
+    const proceed = (nickEvt)=>{
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+      updateChatNickLabel();
+      hideSplash(nickEvt);
+    };
+    confirmBtn.addEventListener('click', (e)=>{
+      const val = input.value.trim().slice(0,18);
+      if(!val) return; // majburiy — bo'sh holda o'tkazilmaydi
+      setNickname(val);
+      proceed(e);
+    }, {once:true});
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && !confirmBtn.disabled) confirmBtn.click();
+    });
+  }
+
+  // ---------- GLOBAL CHAT ----------
+  // Eslatma: bu chat faqat shu qurilma/brauzerda saqlanadi (localStorage),
+  // haqiqiy ko'p qurilmali "global" chat emas — lekin xabarlar tarixi
+  // shu yerda doim turadi va darhol ishlaydi, hech qanday server kerak emas.
+  const CHAT_KEY = 'kanji-flashcard-chat-messages';
+  function loadChatMessages(){
+    try{
+      const raw = localStorage.getItem(CHAT_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function saveChatMessages(arr){
+    try{ localStorage.setItem(CHAT_KEY, JSON.stringify(arr.slice(-200))); }catch(e){}
+  }
+  function updateChatNickLabel(){
+    const label = document.getElementById('chatNickLabel');
+    if(!label) return;
+    const nick = getNickname();
+    label.textContent = nick ? (nick + ' sifatida') : 'Mehmon sifatida';
+  }
+  function formatChatTime(ts){
+    try{
+      return new Date(ts).toLocaleTimeString('uz-UZ', {hour:'2-digit', minute:'2-digit'});
+    }catch(e){ return ''; }
+  }
+  function renderChatMessages(){
+    const wrap = document.getElementById('chatMessages');
+    if(!wrap) return;
+    const msgs = loadChatMessages();
+    const myNick = getNickname();
+    if(!msgs.length){
+      wrap.innerHTML = '<div class="chat-empty"><span class="big-em">💬</span>Hali xabar yo\'q.<br>Birinchi bo\'lib yozing!</div>';
+      return;
+    }
+    wrap.innerHTML = msgs.map(m=>{
+      const mine = m.nick === myNick;
+      const safeNick = String(m.nick||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+      const safeText = String(m.text||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+      return `<div class="chat-msg ${mine?'mine':'theirs'}">
+        <div class="chat-msg-nick">${safeNick}</div>
+        <div class="chat-bubble">${safeText}</div>
+        <div class="chat-msg-time">${formatChatTime(m.time)}</div>
+      </div>`;
+    }).join('');
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+  function sendChatMessage(){
+    const input = document.getElementById('chatInput');
+    if(!input) return;
+    const text = input.value.trim();
+    if(!text) return;
+    const nick = getNickname() || 'Mehmon';
+    const msgs = loadChatMessages();
+    msgs.push({nick, text, time: Date.now()});
+    saveChatMessages(msgs);
+    input.value = '';
+    renderChatMessages();
+  }
+  function openChatPanel(){
+    const panel = document.getElementById('chatPanel');
+    const overlay = document.getElementById('chatOverlay');
+    updateChatNickLabel();
+    renderChatMessages();
+    if(panel){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
+    if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+    setTimeout(()=>{ try{ document.getElementById('chatInput').focus(); }catch(e){} }, 260);
+  }
+  function closeChatPanel(){
+    const panel = document.getElementById('chatPanel');
+    const overlay = document.getElementById('chatOverlay');
+    if(panel){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
+    if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+  }
+  (function initChatWidget(){
+    const fab = document.getElementById('chatToggleBtn');
+    const closeBtn = document.getElementById('chatCloseBtn');
+    const overlay = document.getElementById('chatOverlay');
+    const sendBtn = document.getElementById('chatSendBtn');
+    const input = document.getElementById('chatInput');
+    const nickLabel = document.getElementById('chatNickLabel');
+    if(fab) fab.addEventListener('click', openChatPanel);
+    if(closeBtn) closeBtn.addEventListener('click', closeChatPanel);
+    if(overlay) overlay.addEventListener('click', closeChatPanel);
+    if(sendBtn) sendBtn.addEventListener('click', sendChatMessage);
+    if(input) input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendChatMessage(); });
+    // chat sarlavhasidagi nickname bosilsa — nickname'ni o'zgartirish imkoni
+    if(nickLabel) nickLabel.addEventListener('click', ()=>{
+      const cur = getNickname();
+      const next = prompt("Nickname'ingizni o'zgartiring:", cur);
+      if(next !== null){
+        const val = next.trim().slice(0,18);
+        if(val){ setNickname(val); updateChatNickLabel(); renderChatMessages(); }
+      }
+    });
+    if(nickLabel) nickLabel.style.cursor = 'pointer';
+  })();
+
   // yuklanish tugagach shu funksiya chaqiriladi — endi ekran avtomatik yopilmaydi,
   // "Boshlash" tugmasi ko'rinadigan bo'ladi va foydalanuvchi bosishini kutadi
   function showStartButton(){
@@ -4213,7 +4710,7 @@
     if(track) track.classList.add('splash-bar-fade');
     if(btn){
       btn.classList.add('show');
-      btn.addEventListener('click', (e)=>hideSplash(e), {once:true});
+      btn.addEventListener('click', (e)=>handleStartClick(e), {once:true});
     }
   }
   // xavfsizlik: nimadir noto'g'ri ketib, tugma hech qachon bosilmasa ham,
@@ -4234,6 +4731,21 @@
   (async function init(){
     const splashStart = Date.now();
     await loadState();
+    // Kartochka ko'rsatilishidan oldin shriftlarning to'liq yuklanishini
+    // kutamiz — aks holda birinchi kanji standart (fallback) shrift bilan
+    // bir lahza chiqib, keyin "sakrab" almashib qolishi mumkin (FOUT).
+    if(document.fonts && document.fonts.load){
+      try{
+        const fontsPromise = Promise.all([
+          document.fonts.load('400 48px "Shippori Mincho"'),
+          document.fonts.load('600 48px "Shippori Mincho"'),
+          document.fonts.load('700 16px "Zen Maru Gothic"'),
+          document.fonts.ready
+        ]);
+        const timeout = new Promise(res=>setTimeout(res, 3000));
+        await Promise.race([fontsPromise, timeout]);
+      }catch(e){ /* shrift yuklanmasa ham sokin davom etamiz */ }
+    }
     showTab('learn');
     updateCounts();
     const MIN_SPLASH_MS = 2400;
