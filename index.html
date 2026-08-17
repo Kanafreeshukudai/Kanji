@@ -2546,8 +2546,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2861,6 +2861,33 @@
     {id:"jouzuna_ue", day:15, group:"上", kanji:"上手な", romaji:"jouzu na", type:"on + kun", reading:"上(jou) + 手(zu) + な", uz:"zo'r, qobiliyatli"},
     {id:"uwagi", day:15, group:"上", kanji:"上着", romaji:"uwagi", type:"kun + kun", reading:"上(uwa) + 着(gi)", uz:"ustki kiyim"},
     {id:"noboru", day:15, group:"上", kanji:"上る", romaji:"noboru", type:"kun'yomi", reading:"上る(noboru)", uz:"yuqoriga chiqish"},
+
+    // ---- 16-kun ----
+    {id:"shita", day:16, group:"下", kanji:"下", romaji:"shita", type:"kun'yomi", reading:"下(shita) — yakka kanji", otherReadings:"kun: した(shita), さがる(sagaru), くだる(kudaru), おろす(orosu) · on: カ(ka), ゲ(ge)", uz:"Quyida / pastga"},
+    {id:"ika", day:16, group:"下", kanji:"以下", romaji:"ika", type:"on + on", reading:"以(i) + 下(ka)", uz:"quyida"},
+    {id:"chikatetsu", day:16, group:"下", kanji:"地下鉄", romaji:"chikatetsu", type:"on + on + on", reading:"地(chi) + 下(ka) + 鉄(tetsu)", uz:"metro"},
+    {id:"hetana", day:16, group:"下", kanji:"下手な", romaji:"heta na", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"Kambag'al"},
+    {id:"kudasai", day:16, group:"下", kanji:"下さい", romaji:"kudasai", type:"kun'yomi", reading:"下さい(kudasai)", uz:"menga bering"},
+
+    {id:"han", day:16, group:"半", kanji:"半", romaji:"han", type:"on'yomi", reading:"半(han) — yakka kanji", otherReadings:"on: ハン(han) · kun: なか-ば(nakaba)", uz:"yarmi"},
+    {id:"sanjihan", day:16, group:"半", kanji:"三時半", romaji:"sanjihan", type:"on + on", reading:"三(san) + 時(ji) + 半(han)", uz:"uch yarim"},
+    {id:"hanbun", day:16, group:"半", kanji:"半分", romaji:"hanbun", type:"on + on", reading:"半(han) + 分(bun)", uz:"yarmi"},
+    {id:"hantoshi", day:16, group:"半", kanji:"半年", romaji:"hantoshi", type:"on + kun", reading:"半(han) + 年(toshi)", uz:"yarim yil"},
+    {id:"hangaku", day:16, group:"半", kanji:"半額", romaji:"hangaku", type:"on + on", reading:"半(han) + 額(gaku)", uz:"yarim narx"},
+    {id:"ichigatsunakaba", day:16, group:"半", kanji:"一月半ば", romaji:"ichigatsu nakaba", type:"on + kun", reading:"一月(ichigatsu) + 半ば(nakaba)", uz:"yanvar o'rtalarida"},
+
+    {id:"naka", day:16, group:"中", kanji:"中", romaji:"naka", type:"kun'yomi", reading:"中(naka) — yakka kanji", otherReadings:"kun: なか(naka) · on: チュウ(chuu), ジュウ(juu)", uz:"o'rta / ichki"},
+    {id:"chuugoku", day:16, group:"中", kanji:"中国", romaji:"chuugoku", type:"on + on", reading:"中(chuu) + 国(goku)", uz:"Xitoy"},
+    {id:"ichinenjuu", day:16, group:"中", kanji:"一年中", romaji:"ichinenjuu", type:"on + on + on", reading:"一(ichi) + 年(nen) + 中(juu)", uz:"butun yil davomida"},
+    {id:"chuugakkou", day:16, group:"中", kanji:"中学校", romaji:"chuugakkou", type:"on + on + on", reading:"中(chuu) + 学(gaku) + 校(kou)", uz:"o'rta maktab"},
+    {id:"tochuu", day:16, group:"中", kanji:"途中", romaji:"tochuu", type:"on + on", reading:"途(to) + 中(chuu)", uz:"yo'lda / yarmida"},
+
+    {id:"wakeru", day:16, group:"分", kanji:"分", romaji:"wakeru", type:"kun'yomi", reading:"分(wakeru) — yakka kanji", otherReadings:"kun: わ-ける(wakeru) · on: フン(fun), ブン(bun), ブ(bu), プン(pun)", uz:"Daqiqa, qismi, ajratish"},
+    {id:"gofun", day:16, group:"分", kanji:"五分", romaji:"gofun", type:"on + on", reading:"五(go) + 分(fun)", uz:"besh daqiqa"},
+    {id:"juppun", day:16, group:"分", kanji:"十分", romaji:"juppun", type:"on + on", reading:"十(ju) + 分(ppun)", uz:"o'n daqiqa"},
+    {id:"hanbun_bun", day:16, group:"分", kanji:"半分", romaji:"hanbun", type:"on + on", reading:"半(han) + 分(bun)", uz:"yarmi"},
+    {id:"wakaru", day:16, group:"分", kanji:"分かる", romaji:"wakaru", type:"kun'yomi", reading:"分かる(wakaru)", uz:"tushunish"},
+    {id:"jibun", day:16, group:"分", kanji:"自分", romaji:"jibun", type:"on + on", reading:"自(ji) + 分(bun)", uz:"o'zi"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
