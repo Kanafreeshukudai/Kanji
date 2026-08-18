@@ -718,6 +718,39 @@
   }
   .tab-btn.active .badge{background:var(--gold); color:var(--bg-1);}
 
+  /* ---------- YANGI KUN TUGMASINING TOVLANISHI ----------
+     yangi qo'shilgan kun (masalan 17-kun) e'tiborni tortishi uchun
+     asta-sekin porlab-so'nadigan halqa animatsiyasi bilan ajratiladi.
+     .active bo'lganda ham davom etadi, shunda tanlangandan keyin ham
+     yo'qolib qolmaydi. */
+  .tab-btn.new-day{
+    animation:newDayPulse 1.8s ease-in-out infinite;
+  }
+  .tab-btn.new-day.active{
+    animation:newDayPulseActive 1.8s ease-in-out infinite;
+  }
+  @keyframes newDayPulse{
+    0%,100%{
+      box-shadow:0 0 0 0 rgba(217,105,79,0.55), 0 0 0 1px rgba(217,105,79,0.35);
+      border-color:rgba(217,105,79,0.45);
+    }
+    50%{
+      box-shadow:0 0 0 7px rgba(217,105,79,0), 0 0 14px 2px rgba(217,105,79,0.65);
+      border-color:rgba(217,105,79,0.9);
+    }
+  }
+  @keyframes newDayPulseActive{
+    0%,100%{
+      box-shadow:0 0 0 0 rgba(217,105,79,0.55), 0 0 0 1px rgba(217,105,79,0.5);
+    }
+    50%{
+      box-shadow:0 0 0 7px rgba(217,105,79,0), 0 0 16px 3px rgba(217,105,79,0.75);
+    }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tab-btn.new-day, .tab-btn.new-day.active{ animation:none !important; }
+  }
+
   .tab-btn.kunlar-btn{
     flex:0.9;
     background:linear-gradient(165deg, rgba(163,35,35,0.34), rgba(163,35,35,0.16));
@@ -2546,8 +2579,9 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+  const NEW_DAY_ID = 18; // eng oxirgi qo'shilgan kun — uning tugmasi tovlanib turadi
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2888,6 +2922,53 @@
     {id:"hanbun_bun", day:16, group:"分", kanji:"半分", romaji:"hanbun", type:"on + on", reading:"半(han) + 分(bun)", uz:"yarmi"},
     {id:"wakaru", day:16, group:"分", kanji:"分かる", romaji:"wakaru", type:"kun'yomi", reading:"分かる(wakaru)", uz:"tushunish"},
     {id:"jibun", day:16, group:"分", kanji:"自分", romaji:"jibun", type:"on + on", reading:"自(ji) + 分(bun)", uz:"o'zi"},
+
+    {id:"otoko", day:17, group:"男", kanji:"男", romaji:"otoko", type:"kun'yomi", reading:"男(otoko) — yakka kanji", otherReadings:"kun: おとこ(otoko) · on: ダン(dan), ナン(nan)", uz:"erkak, yigit"},
+    {id:"otokonoko", day:17, group:"男", kanji:"男の子", romaji:"otoko no ko", type:"kun + kun", reading:"男(otoko) + の + 子(ko)", uz:"yigit"},
+    {id:"dansei", day:17, group:"男", kanji:"男性", romaji:"dansei", type:"on'yomi", reading:"男(dan) + 性(sei)", uz:"erkak"},
+    {id:"otokonohito", day:17, group:"男", kanji:"男の人", romaji:"otoko no hito", type:"kun + kun", reading:"男(otoko) + の + 人(hito)", uz:"odam"},
+    {id:"chounan", day:17, group:"男", kanji:"長男", romaji:"chounan", type:"on + on", reading:"長(chou) + 男(nan)", uz:"katta o'g'li"},
+    {id:"danshigakusei", day:17, group:"男", kanji:"男子学生", romaji:"danshi gakusei", type:"on + on + on + on", reading:"男(dan) + 子(shi) + 学(gaku) + 生(sei)", uz:"erkak talaba"},
+
+    {id:"hayashi", day:17, group:"林", kanji:"林", romaji:"hayashi", type:"kun'yomi", reading:"林(hayashi) — yakka kanji", otherReadings:"kun: はやし(hayashi) · on: リン(rin)", uz:"yog'och"},
+    {id:"kobayashi", day:17, group:"林", kanji:"小林", romaji:"kobayashi", type:"kun + kun", reading:"小(ko) + 林(bayashi)", uz:"Yapon nomi, Kobayashi"},
+    {id:"ringyou", day:17, group:"林", kanji:"林業", romaji:"ringyou", type:"on'yomi", reading:"林(rin) + 業(gyou)", uz:"o'rmon xo'jaligi"},
+
+    {id:"mori", day:17, group:"森", kanji:"森", romaji:"mori", type:"kun'yomi", reading:"森(mori) — yakka kanji", otherReadings:"kun: もり(mori) · on: シン(shin)", uz:"o'rmon"},
+    {id:"morita", day:17, group:"森", kanji:"森田", romaji:"morita", type:"kun + kun", reading:"森(mori) + 田(ta)", uz:"Yapon nomi, Morita"},
+    {id:"shinrin", day:17, group:"森", kanji:"森林", romaji:"shinrin", type:"on + on", reading:"森(shin) + 林(rin)", uz:"o'rmonlar"},
+
+    {id:"kyuu", day:17, group:"休", kanji:"休", romaji:"kyuu", type:"kun'yomi", reading:"休(yasu) — yakka kanji", otherReadings:"kun: やす-む(yasumu) · on: キュウ(kyuu)", uz:"dam olish"},
+    {id:"yasumu", day:17, group:"休", kanji:"休む", romaji:"yasumu", type:"kun'yomi", reading:"休む(yasumu)", uz:"dam olish"},
+    {id:"yasumi", day:17, group:"休", kanji:"休み", romaji:"yasumi", type:"kun'yomi", reading:"休み(yasumi)", uz:"bayram/dam olish"},
+    {id:"hiruyasumi", day:17, group:"休", kanji:"昼休み", romaji:"hiruyasumi", type:"kun + kun", reading:"昼(hiru) + 休み(yasumi)", uz:"tushlik tanaffusi"},
+    {id:"kyuujitsu", day:17, group:"休", kanji:"休日", romaji:"kyuujitsu", type:"on'yomi", reading:"休(kyuu) + 日(jitsu)", uz:"bayram"},
+    {id:"teikyuubi", day:17, group:"休", kanji:"定休日", romaji:"teikyuubi", type:"on + on + on", reading:"定(tei) + 休(kyuu) + 日(bi)", uz:"do'kon ishlamaydigan kun"},
+
+    // ---- 18-kun ----
+    {id:"karada", day:18, group:"体", kanji:"体", romaji:"karada", type:"kun'yomi", reading:"体(karada) — yakka kanji", otherReadings:"kun: からだ(karada) · on: タイ(tai)", uz:"tana"},
+    {id:"tairyoku", day:18, group:"体", kanji:"体力", romaji:"tairyoku", type:"on'yomi", reading:"体(tai) + 力(ryoku)", uz:"jismoniy kuch"},
+    {id:"taisou", day:18, group:"体", kanji:"体操", romaji:"taisou", type:"on'yomi", reading:"体(tai) + 操(sou)", uz:"jismoniy mashqlar, gimnastika"},
+    {id:"daitai", day:18, group:"体", kanji:"大体", romaji:"daitai", type:"on'yomi", reading:"大(dai) + 体(tai)", uz:"taxminan"},
+
+    {id:"su", day:18, group:"住", kanji:"住", romaji:"su", type:"kun'yomi", reading:"住(su) — yakka kanji", otherReadings:"kun: す-む(sumu) · on: ジュウ(juu)", uz:"yashash"},
+    {id:"sumu", day:18, group:"住", kanji:"住む", romaji:"sumu", type:"kun'yomi", reading:"住む(sumu)", uz:"yashamoq"},
+    {id:"juusho", day:18, group:"住", kanji:"住所", romaji:"juusho", type:"on'yomi", reading:"住(juu) + 所(sho)", uz:"manzil"},
+    {id:"juumin", day:18, group:"住", kanji:"住民", romaji:"juumin", type:"on'yomi", reading:"住(juu) + 民(min)", uz:"aholi"},
+    {id:"juutaku", day:18, group:"住", kanji:"住宅", romaji:"juutaku", type:"on'yomi", reading:"住(juu) + 宅(taku)", uz:"uy-joy"},
+    {id:"sumai", day:18, group:"住", kanji:"住まい", romaji:"sumai", type:"kun'yomi", reading:"住まい(sumai)", uz:"uy, turar joy"},
+
+    {id:"akarui", day:18, group:"明", kanji:"明るい", romaji:"akarui", type:"kun'yomi", reading:"明るい(akarui)", uz:"yorqin, yorug'"},
+    {id:"ashita", day:18, group:"明", kanji:"明日", romaji:"ashita", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"ertaga"},
+    {id:"setsumei", day:18, group:"明", kanji:"説明", romaji:"setsumei", type:"on'yomi", reading:"説(setsu) + 明(mei)", uz:"tushuntirish"},
+    {id:"akiraka", day:18, group:"明", kanji:"明らか", romaji:"akiraka", type:"kun'yomi", reading:"明らか(akiraka)", uz:"aniq"},
+    {id:"asatte", day:18, group:"明", kanji:"明後日", romaji:"asatte", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"ertangi kun"},
+
+    {id:"ji", day:18, group:"字", kanji:"字", romaji:"ji", type:"on'yomi", reading:"字(ji) — yakka kanji", otherReadings:"on: ジ(ji)", uz:"harf, belgi"},
+    {id:"kanjigo", day:18, group:"字", kanji:"漢字", romaji:"kanji", type:"on + on", reading:"漢(kan) + 字(ji)", uz:"kanji, iyeroglif"},
+    {id:"suuji", day:18, group:"字", kanji:"数字", romaji:"suuji", type:"on'yomi", reading:"数(suu) + 字(ji)", uz:"raqam, raqamlar"},
+    {id:"myouji", day:18, group:"字", kanji:"名字", romaji:"myouji", type:"on'yomi", reading:"名(myou) + 字(ji)", uz:"familiyasi"},
+    {id:"roomaji", day:18, group:"字", kanji:"ローマ字", romaji:"roumaji", type:"— + on", reading:"ローマ(rooma) + 字(ji)", uz:"Rim alifbosi"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -3093,7 +3174,7 @@
   function dayTabBtn(d, onSelect){
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'tab-btn' + (currentTab==='learn' && currentDay===d ? ' active' : '');
+    btn.className = 'tab-btn' + (currentTab==='learn' && currentDay===d ? ' active' : '') + (d===NEW_DAY_ID ? ' new-day' : '');
     btn.innerHTML = `${DAY_LABELS[d]} <span class="badge" id="dayCount-${d}">${queues[d].length}</span>`;
     btn.addEventListener('click', onSelect);
     return btn;
