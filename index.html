@@ -2579,9 +2579,9 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
-  const NEW_DAY_ID = 18; // eng oxirgi qo'shilgan kun — uning tugmasi tovlanib turadi
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19];
+  const NEW_DAY_ID = 18; // tovlanib turadigan tugma — atayin oxirgi (19) emas, undan bitta oldingi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2969,6 +2969,30 @@
     {id:"suuji", day:18, group:"字", kanji:"数字", romaji:"suuji", type:"on'yomi", reading:"数(suu) + 字(ji)", uz:"raqam, raqamlar"},
     {id:"myouji", day:18, group:"字", kanji:"名字", romaji:"myouji", type:"on'yomi", reading:"名(myou) + 字(ji)", uz:"familiyasi"},
     {id:"roomaji", day:18, group:"字", kanji:"ローマ字", romaji:"roumaji", type:"— + on", reading:"ローマ(rooma) + 字(ji)", uz:"Rim alifbosi"},
+
+    {id:"gaku", day:19, group:"学", kanji:"学", romaji:"gaku", type:"on'yomi", reading:"学(gaku) — yakka kanji", otherReadings:"kun: まな-ぶ(manabu) · on: ガク(gaku)", uz:"o'rganish"},
+    {id:"gakusei2", day:19, group:"学", kanji:"学生", romaji:"gakusei", type:"on + on", reading:"学(gaku) + 生(sei)", uz:"talaba"},
+    {id:"gakkou", day:19, group:"学", kanji:"学校", romaji:"gakkou", type:"on + on", reading:"学(gaku) + 校(kou)", uz:"maktab"},
+    {id:"gakushuu", day:19, group:"学", kanji:"学習", romaji:"gakushuu", type:"on + on", reading:"学(gaku) + 習(shuu)", uz:"o'rganish"},
+    {id:"manabu", day:19, group:"学", kanji:"学ぶ", romaji:"manabu", type:"kun'yomi", reading:"学ぶ(manabu)", uz:"o'rganmoq"},
+    {id:"rigakuryouhoushi", day:19, group:"学", kanji:"理学療法士", romaji:"rigakuryouhoushi", type:"on + on + on + on + on", reading:"理(ri) + 学(gaku) + 療(ryou) + 法(hou) + 士(shi)", uz:"Fizioterapevt"},
+
+    {id:"an", day:19, group:"安", kanji:"安", romaji:"an", type:"on'yomi", reading:"安(an) — yakka kanji", otherReadings:"kun: やす-い(yasui) · on: アン(an)", uz:"jiringlamoq, arzon"},
+    {id:"yasui2", day:19, group:"安", kanji:"安い", romaji:"yasui", type:"kun'yomi", reading:"安い(yasui)", uz:"arzon"},
+    {id:"anshinsuru", day:19, group:"安", kanji:"安心する", romaji:"anshin suru", type:"on + on + —", reading:"安(an) + 心(shin) + する", uz:"yengil tortmoq"},
+    {id:"anzen", day:19, group:"安", kanji:"安全", romaji:"anzen", type:"on + on", reading:"安(an) + 全(zen)", uz:"xavfsizlik"},
+    {id:"fuanna", day:19, group:"安", kanji:"不安な", romaji:"fuan na", type:"on + on + —", reading:"不(fu) + 安(an) + な", uz:"xavotirli"},
+
+    {id:"kou2", day:19, group:"好", kanji:"好", romaji:"kou", type:"on'yomi", reading:"好(kou) — yakka kanji", otherReadings:"kun: この-む(konomu) · on: コウ(kou)", uz:"kabi, yaxshi ko'radi"},
+    {id:"sukina", day:19, group:"好", kanji:"好きな", romaji:"sukina", type:"kun'yomi", reading:"好きな(sukina)", uz:"sevimli"},
+    {id:"konomi", day:19, group:"好", kanji:"好み", romaji:"konomi", type:"kun'yomi", reading:"好み(konomi)", uz:"ta'mni yoqtirish"},
+    {id:"okonomiyaki", day:19, group:"好", kanji:"お好み焼き", romaji:"okonomiyaki", type:"— + kun + kun", reading:"お + 好み(konomi) + 焼き(yaki)", uz:"Yapon torti"},
+
+    {id:"mai", day:19, group:"毎", kanji:"毎", romaji:"mai", type:"on'yomi", reading:"毎(mai) — yakka kanji", otherReadings:"on: マイ(mai) · kun: ごと(goto)", uz:"har"},
+    {id:"mainichi19", day:19, group:"毎", kanji:"毎日", romaji:"mainichi", type:"on + on", reading:"毎(mai) + 日(nichi)", uz:"har kuni"},
+    {id:"maiban", day:19, group:"毎", kanji:"毎晩", romaji:"maiban", type:"on + kun", reading:"毎(mai) + 晩(ban)", uz:"har kecha"},
+    {id:"maitoshi2", day:19, group:"毎", kanji:"毎年", romaji:"maitoshi", type:"on + kun", reading:"毎(mai) + 年(toshi)", uz:"har yili"},
+    {id:"mikkagoto", day:19, group:"毎", kanji:"三日毎", romaji:"mikkagoto", type:"kun + kun + kun", reading:"三(mi) + 日(kka) + 毎(goto)", uz:"har 3 kunda"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
