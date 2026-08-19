@@ -30,7 +30,7 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
-    --bg-1:#0B0D10;
+    --bg-1:#000000;
     --bg-2:#15181c;
     --ink:#ECE7DC;
     --ink-soft:#9BA1A6;
@@ -87,7 +87,7 @@
   html.lite .card.flipped .face.back{ animation:none !important; }
   *{box-sizing:border-box;}
   html,body{height:100%;}
-  html{scrollbar-gutter:stable both-edges; overscroll-behavior-y:none;}
+  html{scrollbar-gutter:stable; overscroll-behavior-y:none;}
   body{
     margin:0;
     min-height:100vh;
@@ -118,61 +118,14 @@
     overflow:hidden;
     background:var(--bg-1);
     contain:strict;
-  }
-  .bg-scene .blob{
-    position:absolute;
-    border-radius:50%;
-    filter:blur(var(--blob-blur));
-    opacity:0.55;
+    /* forces its own GPU compositing layer so it stays perfectly put
+       (no jitter/redraw) while the page scrolls */
+    transform:translateZ(0);
     will-change:transform;
-    contain:layout style paint;
+    backface-visibility:hidden;
   }
-  .bg-scene .blob.b1{
-    width:60vw; height:60vw; max-width:480px; max-height:480px;
-    top:-14%; left:-18%;
-    background:radial-gradient(circle, var(--accent) 0%, transparent 70%);
-    animation:drift1 22s ease-in-out infinite;
-  }
-  .bg-scene .blob.b2{
-    width:55vw; height:55vw; max-width:440px; max-height:440px;
-    bottom:-16%; right:-14%;
-    background:radial-gradient(circle, var(--moss) 0%, transparent 70%);
-    animation:drift2 26s ease-in-out infinite;
-  }
-  .bg-scene .blob.b3{
-    width:44vw; height:44vw; max-width:360px; max-height:360px;
-    top:38%; right:4%;
-    background:radial-gradient(circle, var(--gold) 0%, transparent 70%);
-    opacity:0.35;
-    animation:drift3 20s ease-in-out infinite;
-  }
-  .bg-scene .blob.b4{
-    width:38vw; height:38vw; max-width:320px; max-height:320px;
-    bottom:20%; left:6%;
-    background:radial-gradient(circle, var(--back-1) 0%, transparent 70%);
-    opacity:0.5;
-    animation:drift1 30s ease-in-out infinite reverse;
-  }
-  .bg-scene::after{
-    content:"";
-    position:absolute; inset:0;
-    background:rgba(11,13,16,0.35);
-  }
-  @keyframes drift1{
-    0%,100%{ transform:translate(0,0) scale(1); }
-    50%{ transform:translate(6%, 8%) scale(1.08); }
-  }
-  @keyframes drift2{
-    0%,100%{ transform:translate(0,0) scale(1); }
-    50%{ transform:translate(-7%, -6%) scale(1.1); }
-  }
-  @keyframes drift3{
-    0%,100%{ transform:translate(0,0) scale(1); }
-    50%{ transform:translate(-5%, 10%) scale(0.92); }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .bg-scene .blob{animation:none !important;}
-  }
+  /* corner color blobs removed — pure AMOLED black backdrop */
+  .bg-scene .blob{ display:none; }
 
   /* ---------- KO'TARILUVCHI NUQTALAR (kartochka/tugmalar ortidagi ambient qatlam) ----------
      bg-scene blob'lari kabi fixed va butun sahifa balandligida — shu sababli
@@ -185,6 +138,11 @@
     display:block;
     pointer-events:none;
     contain:strict;
+    /* own compositing layer — keeps the rising stars perfectly still
+       relative to the screen while the page content scrolls */
+    transform:translateZ(0);
+    will-change:transform;
+    backface-visibility:hidden;
   }
 
   /* ---------- SVAYP QILGANDA EKRAN CHETLARINING YONISHI ----------
@@ -1905,11 +1863,28 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    background:radial-gradient(circle at 50% 42%, rgba(201,166,107,0.16) 0%, rgba(11,13,16,0.97) 55%, var(--bg-1) 100%);
+    background:var(--bg-1);
     transition:opacity .75s cubic-bezier(.4,0,.2,1), filter .75s cubic-bezier(.4,0,.2,1), transform .75s cubic-bezier(.4,0,.2,1);
     transform-origin:var(--origin-x,50%) var(--origin-y,50%);
     touch-action:none;
     overscroll-behavior:none;
+    overflow:hidden;
+  }
+  /* ---------- SUZUVCHI CHIZIQ (splash effekti) ----------
+     Rangsiz (faqat --ink kulrang-oq tusda), o'zi chizilib, orqasi
+     asta o'chib boruvchi bitta chiziq — ekran markazi atrofida tasodifiy
+     yo'nalishda "suzadi", tezligi vaqti-vaqti bilan sekinlashib-tezlashib
+     turadi. Barcha matn/tugmalar ORTIDA (z-index pastroq) joylashadi. */
+  .splash-line-canvas{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    display:block;
+  }
+  .splash-kanji-stage, .splash-title, .splash-sub, .splash-bar-track, .splash-start-btn, .splash-credit{
+    position:relative;
+    z-index:1;
   }
   .splash-screen.splash-hide{
     opacity:0;
@@ -2409,6 +2384,7 @@
 <body>
 
 <div class="splash-screen" id="splashScreen" aria-hidden="true">
+  <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
   <div class="splash-kanji-stage">
     <span class="splash-kanji">山</span>
     <span class="splash-kanji">学</span>
@@ -3258,7 +3234,12 @@
       const kunlarBtn = document.createElement('button');
       kunlarBtn.type = 'button';
       kunlarBtn.className = 'tab-btn kunlar-btn' + (isOlderActive ? ' active' : '') + (kunlarOpen ? ' open' : '');
-      kunlarBtn.innerHTML = `Kunlar <span class="kunlar-arrow">▾</span>`;
+      // tanlangan kun "eski kunlar" ro'yxatidan bo'lsa, tugma ustida
+      // "Kunlar" o'rniga o'sha kunning nomi ko'rsatiladi (masalan "12-kun"),
+      // lekin tugma baribir bosiladigan bo'lib qoladi — qayta ochib,
+      // boshqa kunni tanlash mumkin
+      const kunlarLabel = isOlderActive ? DAY_LABELS[currentDay] : 'Kunlar';
+      kunlarBtn.innerHTML = `${kunlarLabel} <span class="kunlar-arrow">▾</span>`;
       kunlarBtn.addEventListener('click', ()=>{
         kunlarOpen = !kunlarOpen;
         renderTabs();
@@ -4615,6 +4596,157 @@
     return { start };
   })();
 
+  // ---------- SPLASH: SUZUVCHI CHIZIQLAR ----------
+  // Rangsiz (faqat --ink kulrang-oq) ikkita mustaqil chiziq. Har biri
+  // ekran markazi atrofida tasodifiy burchak bo'ylab "suzadi"; tezligi
+  // bir necha to'lqin (sinus) qo'shilishidan hosil bo'lgani uchun goh
+  // sekinlashadi, goh tezlashadi. Iz — sun'iy "xiralashtirish" orqali
+  // emas, balki har bir chiziq o'zining so'nggi ma'lum MASOFASINI
+  // (piksel bo'yicha) alohida nuqtalar ro'yxati sifatida saqlab, shu
+  // masofadan uzoqroq qolgan qismini butunlay o'chirib tashlash orqali
+  // chiziladi — canvas har kadrda TO'LIQ tozalanadi, shu sabab qop-qora
+  // fonda hech qanday qoldiq/dog' qolmaydi, iz aynan belgilangan
+  // masofada mutlaqo yo'qolib boradi.
+  const SplashLineFX = (function(){
+    let canvas, ctx, W=0, H=0, dpr=1;
+    let rafId=null, lastT=null, running=false, resizeHandler=null;
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // har bir chiziq o'ziga xos parametrlar bilan — shu sabab ikkinchisi
+    // birinchisiga o'xshab yurmaydi (boshqa tezlik oralig'i, boshqa
+    // to'lqin chastotalari, boshqa burilish xarakteri, boshqa radius,
+    // boshqa iz masofasi)
+    const lines = [
+      { // 1-chiziq — asosiy, o'rtacha tezlik, keng radius, uzunroq iz
+        x:0, y:0, angle:0, spA:0, spB:0, tp:0,
+        spAFreq:0.55, spBFreq:1.35, tpFreq:0.7, turnJitter:0.5, turnAmp:0.9,
+        baseSpeed:14, speedRange:46, radiusFactor:0.34, steerBack:0.05,
+        alpha:0.5, width:1.4, trailDist:230, trail:[]
+      },
+      { // 2-chiziq — sekinroq boshlanadi, keskinroq burilib turadi,
+        // to'lqinlari butunlay boshqa chastotada, izi ham qisqaroq —
+        // mustaqil xarakter
+        x:0, y:0, angle:0, spA:0, spB:0, tp:0,
+        spAFreq:0.31, spBFreq:0.92, tpFreq:1.6, turnJitter:1.1, turnAmp:0.5,
+        baseSpeed:6, speedRange:34, radiusFactor:0.24, steerBack:0.08,
+        alpha:0.36, width:1.1, trailDist:150, trail:[]
+      }
+    ];
+
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = Math.max(1, Math.round(W*dpr));
+      canvas.height = Math.max(1, Math.round(H*dpr));
+      canvas.style.width = W+'px';
+      canvas.style.height = H+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+
+    // eskirgan, belgilangan masofadan (trailDist) uzoqroq qolgan
+    // nuqtalarni ro'yxatdan butunlay olib tashlaydi — shu bilan iz
+    // aynan shu masofada tugaydi, undan keyin hech narsa qolmaydi
+    function trimTrail(L){
+      let total = 0;
+      for(let i=L.trail.length-1;i>0;i--){
+        const a = L.trail[i], b = L.trail[i-1];
+        const dx = a.x-b.x, dy = a.y-b.y;
+        total += Math.sqrt(dx*dx+dy*dy);
+        if(total > L.trailDist){
+          L.trail.splice(0, i);
+          return;
+        }
+      }
+    }
+
+    function stepLine(L, dt){
+      L.spA += dt*L.spAFreq;
+      L.spB += dt*L.spBFreq;
+      L.tp  += dt*L.tpFreq;
+      const wave = (Math.sin(L.spA)*0.5+0.5)*0.75 + (Math.sin(L.spB)*0.5+0.5)*0.45;
+      const speed = L.baseSpeed + wave*L.speedRange;
+
+      L.angle += (Math.sin(L.tp)*L.turnAmp + (Math.random()-0.5)*L.turnJitter) * dt;
+
+      const nx = L.x + Math.cos(L.angle)*speed*dt;
+      const ny = L.y + Math.sin(L.angle)*speed*dt;
+
+      const cx = W/2, cy = H/2;
+      const maxR = Math.min(W,H)*L.radiusFactor;
+      const dx = nx-cx, dy = ny-cy;
+      if(Math.sqrt(dx*dx+dy*dy) > maxR){
+        const toCenter = Math.atan2(cy-ny, cx-nx);
+        let diff = toCenter - L.angle;
+        while(diff > Math.PI) diff -= Math.PI*2;
+        while(diff < -Math.PI) diff += Math.PI*2;
+        L.angle += diff * L.steerBack;
+      }
+
+      L.x = nx; L.y = ny;
+      L.trail.push({x:nx, y:ny});
+      trimTrail(L);
+
+      // iz bo'ylab — eng eskisi (dumi) butunlay ko'rinmas (alpha 0)
+      // dan boshlab, eng yangi uchigacha asta yorqinlashib boradi
+      const n = L.trail.length;
+      for(let i=1;i<n;i++){
+        const t = i/(n-1); // 0 = dum (eng eski), 1 = bosh (eng yangi)
+        const a = L.alpha * t*t;
+        if(a <= 0.003) continue;
+        ctx.strokeStyle = `rgba(236,231,220,${a})`; // --ink — rangsiz, kulrang-oq
+        ctx.lineWidth = L.width;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(L.trail[i-1].x, L.trail[i-1].y);
+        ctx.lineTo(L.trail[i].x, L.trail[i].y);
+        ctx.stroke();
+      }
+    }
+
+    function step(ts){
+      if(!running) return;
+      if(lastT === null) lastT = ts;
+      let dt = (ts - lastT)/1000;
+      lastT = ts;
+      if(dt > 0.1) dt = 0.1;
+
+      // har kadrda TO'LIQ tozalash — hech qanday qoldiq/xira dog'
+      // yig'ilib qolmaydi, faqat hozir "tirik" (trailDist ichidagi)
+      // qism qayta chiziladi
+      ctx.clearRect(0,0,W,H);
+
+      lines.forEach(L=>stepLine(L, dt));
+
+      rafId = requestAnimationFrame(step);
+    }
+
+    function start(){
+      canvas = document.getElementById('splashLineCanvas');
+      if(!canvas || !canvas.getContext || reduceMotion) return;
+      ctx = canvas.getContext('2d', { alpha: true });
+      resize();
+      lines.forEach((L)=>{
+        L.x = W/2; L.y = H/2;
+        L.angle = Math.random()*Math.PI*2;
+        L.trail = [{x:L.x, y:L.y}];
+      });
+      resizeHandler = ()=>{ if(running) resize(); };
+      window.addEventListener('resize', resizeHandler, {passive:true});
+      running = true;
+      lastT = null;
+      rafId = requestAnimationFrame(step);
+    }
+
+    function stop(){
+      running = false;
+      if(rafId) cancelAnimationFrame(rafId);
+      if(resizeHandler) window.removeEventListener('resize', resizeHandler);
+    }
+
+    return { start, stop };
+  })();
+  SplashLineFX.start(); // splash ekrani ko'rinishi bilanoq boshlanadi
+
   // ---------- SPLASH / INTRO ----------
   // yumshoq "ting" jiringlagan qo'ng'iroq ohangi — mavjud playTone infratuzilmasidan
   // foydalanadi (zen qo'ng'irog'iga o'xshash yumshoq, jaranglagan tovush)
@@ -4668,6 +4800,7 @@
     document.documentElement.style.setProperty('--origin-y', oy + 'px');
 
     splash.classList.add('splash-hide');
+    SplashLineFX.stop(); // suzuvchi chiziq — splash yopilishi bilan to'xtaydi
     DotsFX.start(); // "Boshlash" bosilgan zahoti — ko'tariluvchi nuqtalar shu yerda boshlanadi
     const shell = document.getElementById('appShell');
     const flare = document.getElementById('introFlare');
@@ -4697,43 +4830,11 @@
     try{ localStorage.setItem(NICK_KEY, v); }catch(e){}
   }
   // Splash "Boshlash" tugmasi bosilganda avval shu funksiya chaqiriladi.
-  // Agar nickname allaqachon bo'lsa — to'g'ridan-to'g'ri hideSplash(e) ga o'tadi,
-  // bo'lmasa — avval nickname oynasi chiqadi, keyin ilova ochiladi.
+  // ESLATMA: nickname so'rash oynasi hozircha o'chirilgan — "Boshlash"
+  // bosilishi bilan to'g'ridan-to'g'ri ilova ochiladi. Pastdagi chat esa
+  // baribir ishlayveradi — nickname bo'lmasa "Mehmon" nomi bilan ko'rinadi.
   function handleStartClick(evt){
-    const existing = getNickname();
-    if(existing){
-      hideSplash(evt);
-      return;
-    }
-    const overlay = document.getElementById('nicknameOverlay');
-    const input = document.getElementById('nicknameInput');
-    const confirmBtn = document.getElementById('nicknameConfirmBtn');
-    if(!overlay){ hideSplash(evt); return; } // ehtiyot chorasi — modal topilmasa ham ilova ochiladi
-
-    overlay.classList.add('show');
-    overlay.setAttribute('aria-hidden','false');
-    setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 300);
-
-    // nickname majburiy — tugma faqat matn kiritilganda yoqiladi
-    const syncBtnState = ()=>{ confirmBtn.disabled = input.value.trim().length === 0; };
-    syncBtnState();
-    input.addEventListener('input', syncBtnState);
-
-    const proceed = (nickEvt)=>{
-      overlay.classList.remove('show');
-      overlay.setAttribute('aria-hidden','true');
-      updateChatNickLabel();
-      hideSplash(nickEvt);
-    };
-    confirmBtn.addEventListener('click', (e)=>{
-      const val = input.value.trim().slice(0,18);
-      if(!val) return; // majburiy — bo'sh holda o'tkazilmaydi
-      setNickname(val);
-      proceed(e);
-    }, {once:true});
-    input.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' && !confirmBtn.disabled) confirmBtn.click();
-    });
+    hideSplash(evt);
   }
 
   // ---------- GLOBAL CHAT ----------
@@ -4845,9 +4946,9 @@
       btn.addEventListener('click', (e)=>handleStartClick(e), {once:true});
     }
   }
-  // xavfsizlik: nimadir noto'g'ri ketib, tugma hech qachon bosilmasa ham,
-  // ilova abadiy osilib qolmasligi uchun (tovushsiz, sokin o'tadi)
-  setTimeout(hideSplash, 20000);
+  // ESLATMA: avvalgi xavfsizlik taymeri (20s dan keyin avtomatik ochilish)
+  // olib tashlandi — endi splash ekrani faqat foydalanuvchi "Boshlash"
+  // tugmasini bossagina yopiladi, o'z-o'zidan hech qachon o'tmaydi.
 
   // ---------- PWA: SERVICE WORKER RO'YXATDAN O'TKAZISH ----------
   // Sahifa to'liq yuklanganidan keyin, fonda, hech narsani sekinlashtirmasdan.
