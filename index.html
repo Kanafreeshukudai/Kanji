@@ -2133,6 +2133,28 @@
     animation:splashStartPulse 1.9s ease-in-out .5s infinite;
   }
   .splash-start-btn:active{transform:scale(0.93) !important; animation:none !important;}
+  /* Google hisobiga kirilmagunga qadar "Boshlash" tugmasi bosilmaydigan
+     va vizual jihatdan "o'chiq" ko'rinishda bo'ladi. */
+  .splash-start-btn.show:disabled{
+    opacity:0.4 !important;
+    cursor:not-allowed;
+    filter:grayscale(0.55);
+    animation:none !important;
+    box-shadow:none !important;
+    pointer-events:none;
+  }
+  .splash-start-hint{
+    margin-top:12px;
+    max-width:260px;
+    text-align:center;
+    font-size:12.5px;
+    line-height:1.4;
+    color:var(--ink-soft);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .5s ease;
+  }
+  .splash-start-hint.show{opacity:1;}
   @keyframes splashStartPulse{
     0%,100%{box-shadow:0 10px 26px rgba(217,105,79,0.4);}
     50%{box-shadow:0 10px 34px rgba(217,105,79,0.65);}
@@ -2623,7 +2645,8 @@
   <div class="splash-title">Kanji Flashcard</div>
   <div class="splash-sub">So'z birikmalari</div>
   <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
-  <button class="splash-start-btn" id="splashStartBtn" type="button">Boshlash</button>
+  <button class="splash-start-btn" id="splashStartBtn" type="button" disabled>Boshlash</button>
+  <div class="splash-start-hint" id="splashStartHint">Davom etish uchun avval Google hisobingizga kiring</div>
   <div class="splash-credit">
     <span class="splash-credit-name">Created by Doniyorbek</span>
     <span class="splash-credit-year">2026</span>
@@ -5095,6 +5118,11 @@
   // bosilishi bilan to'g'ridan-to'g'ri ilova ochiladi. Pastdagi chat esa
   // baribir ishlayveradi — nickname bo'lmasa "Mehmon" nomi bilan ko'rinadi.
   function handleStartClick(evt){
+    const btn = document.getElementById('splashStartBtn');
+    // Qat'iy tekshiruv: hisobga kirilmagan bo'lsa, tugma "disabled" bo'lgani
+    // uchun brauzer click hodisasini umuman yubormaydi — lekin ehtiyot
+    // chorasi sifatida bu yerda ham qayta tekshiriladi.
+    if(btn && btn.disabled) return;
     hideSplash(evt);
   }
 
@@ -5201,9 +5229,12 @@
   function showStartButton(){
     const track = document.getElementById('splashBarTrack');
     const btn = document.getElementById('splashStartBtn');
+    const hint = document.getElementById('splashStartHint');
     if(track) track.classList.add('splash-bar-fade');
     if(btn){
       btn.classList.add('show');
+      // Agar hali hisobga kirilmagan bo'lsa — eslatma matnini ko'rsatamiz
+      if(btn.disabled && hint) hint.classList.add('show');
       btn.addEventListener('click', (e)=>handleStartClick(e), {once:true});
     }
   }
@@ -5382,6 +5413,8 @@
   const avatarImg = document.getElementById("userAvatarImg");
   const avatarInitial = document.getElementById("userAvatarInitial");
   const authDropdown = document.getElementById("authDropdown");
+  const splashStartBtn = document.getElementById("splashStartBtn");
+  const splashStartHint = document.getElementById("splashStartHint");
 
   if (loginBtn) loginBtn.addEventListener("click", loginWithGoogle);
   if (logoutBtn) logoutBtn.addEventListener("click", () => {
@@ -5410,10 +5443,20 @@
         avatarInitial.style.display = "block";
         avatarInitial.textContent = (user.displayName || user.email || "?").trim().charAt(0).toUpperCase();
       }
+      // Google hisobiga muvaffaqiyatli kirildi — endi "Boshlash" tugmasi bosiladigan bo'ladi.
+      if (splashStartBtn) splashStartBtn.disabled = false;
+      if (splashStartHint) splashStartHint.classList.remove("show");
     } else {
       if (loginBtn) loginBtn.style.display = "flex";
       if (userProfile) userProfile.style.display = "none";
       authDropdown.classList.remove("open");
+      // Hisobga kirilmagan yoki chiqib ketilgan — "Boshlash" qat'iy ravishda o'chiq turadi.
+      if (splashStartBtn) {
+        splashStartBtn.disabled = true;
+        if (splashStartHint && splashStartBtn.classList.contains("show")) {
+          splashStartHint.classList.add("show");
+        }
+      }
     }
   });
 </script>
