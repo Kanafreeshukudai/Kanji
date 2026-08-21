@@ -846,13 +846,25 @@
   }
   .tabs-older-grid{
     display:flex;
+    flex-direction:column;
     flex-wrap:wrap;
+    align-content:flex-start;
+    height:84px;
     gap:8px;
-    padding-bottom:2px;
+    padding-bottom:6px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
   }
+  .tabs-older-grid::-webkit-scrollbar{display:none;}
   .tabs-older-grid .tab-btn{
-    flex:0 1 auto;
+    flex:0 0 38px;
     min-width:74px;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
 
   main{
@@ -2555,9 +2567,9 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19];
-  const NEW_DAY_ID = 18; // tovlanib turadigan tugma — atayin oxirgi (19) emas, undan bitta oldingi kunga qo'yilgan
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+  const NEW_DAY_ID = 20; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -2969,6 +2981,25 @@
     {id:"maiban", day:19, group:"毎", kanji:"毎晩", romaji:"maiban", type:"on + kun", reading:"毎(mai) + 晩(ban)", uz:"har kecha"},
     {id:"maitoshi2", day:19, group:"毎", kanji:"毎年", romaji:"maitoshi", type:"on + kun", reading:"毎(mai) + 年(toshi)", uz:"har yili"},
     {id:"mikkagoto", day:19, group:"毎", kanji:"三日毎", romaji:"mikkagoto", type:"kun + kun + kun", reading:"三(mi) + 日(kka) + 毎(goto)", uz:"har 3 kunda"},
+
+    {id:"umi20", day:20, group:"海", kanji:"海", romaji:"umi", type:"kun'yomi", reading:"海(umi) — yakka kanji", otherReadings:"on: カイ(kai) · kun: うみ(umi)", uz:"dengiz"},
+    {id:"nihonkai", day:20, group:"海", kanji:"日本海", romaji:"nihonkai", type:"on + on + on", reading:"日(ni) + 本(hon) + 海(kai)", uz:"Yaponiya dengizi"},
+    {id:"kaigai", day:20, group:"海", kanji:"海外", romaji:"kaigai", type:"on + on", reading:"海(kai) + 外(gai)", uz:"chet elda"},
+    {id:"kaisui", day:20, group:"海", kanji:"海水", romaji:"kaisui", type:"on + on", reading:"海(kai) + 水(sui)", uz:"dengiz suvi"},
+
+    {id:"eki20", day:20, group:"駅", kanji:"駅", romaji:"eki", type:"on'yomi", reading:"駅(eki) — yakka kanji", otherReadings:"on: エキ(eki)", uz:"stantsiya"},
+    {id:"ekichou", day:20, group:"駅", kanji:"駅長", romaji:"ekichou", type:"on + on", reading:"駅(eki) + 長(chou)", uz:"stansiya boshlig'i"},
+    {id:"ekiin", day:20, group:"駅", kanji:"駅員", romaji:"ekiin", type:"on + on", reading:"駅(eki) + 員(in)", uz:"stantsiya xodimi"},
+
+    {id:"chuu20", day:20, group:"駐", kanji:"駐", romaji:"chuu", type:"on'yomi", reading:"駐(chuu) — yakka kanji", otherReadings:"on: チュウ(chuu)", uz:"to'xtash, yashash, rezident"},
+    {id:"chuushajou2", day:20, group:"駐", kanji:"駐車場", romaji:"chuushajou", type:"on + on + on", reading:"駐(chuu) + 車(sha) + 場(jou)", uz:"avtoturargoh"},
+    {id:"chuuzai", day:20, group:"駐", kanji:"駐在", romaji:"chuuzai", type:"on + on", reading:"駐(chuu) + 在(zai)", uz:"bo'lish (xizmat safarida)"},
+
+    {id:"ken20", day:20, group:"験", kanji:"験", romaji:"ken", type:"on'yomi", reading:"験(ken) — yakka kanji", otherReadings:"on: ケン(ken)", uz:"dalil, tekshirish"},
+    {id:"shiken", day:20, group:"験", kanji:"試験", romaji:"shiken", type:"on + on", reading:"試(shi) + 験(ken)", uz:"imtihon"},
+    {id:"jukensuru", day:20, group:"験", kanji:"受験する", romaji:"juken suru", type:"on + on + —", reading:"受(ju) + 験(ken) + する", uz:"imtihon topshirish"},
+    {id:"keiken", day:20, group:"験", kanji:"経験", romaji:"keiken", type:"on + on", reading:"経(kei) + 験(ken)", uz:"tajriba"},
+    {id:"taiken", day:20, group:"験", kanji:"体験", romaji:"taiken", type:"on + on", reading:"体(tai) + 験(ken)", uz:"tajriba"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
