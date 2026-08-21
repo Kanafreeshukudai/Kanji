@@ -2800,8 +2800,6 @@
     </div>
     <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Yopish">✕</button>
   </div>
-  <!-- TODO: haqiqiy (server asosidagi) global chat ulanganda shu bildirishnomani olib tashlang -->
-  <div class="chat-test-notice">⚠️ Hozircha chat test rejimida — jo'natilgan xabaringiz boshqa foydalanuvchilarga ko'rinmaydi.</div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-bar">
     <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
@@ -5133,26 +5131,27 @@
     hideSplash(evt);
   }
 
-  // ---------- GLOBAL CHAT ----------
-  // Eslatma: bu chat faqat shu qurilma/brauzerda saqlanadi (localStorage),
-  // haqiqiy ko'p qurilmali "global" chat emas — lekin xabarlar tarixi
-  // shu yerda doim turadi va darhol ishlaydi, hech qanday server kerak emas.
-  const CHAT_KEY = 'kanji-flashcard-chat-messages';
-  function loadChatMessages(){
-    try{
-      const raw = localStorage.getItem(CHAT_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    }catch(e){ return []; }
-  }
-  function saveChatMessages(arr){
-    try{ localStorage.setItem(CHAT_KEY, JSON.stringify(arr.slice(-200))); }catch(e){}
-  }
+  // ---------- GLOBAL CHAT (Firebase Firestore orqali, haqiqiy vaqtda) ----------
+  // Haqiqiy Firebase ulanishi va yozish/o'qish funksiyalari sahifa oxiridagi
+  // <script type="module"> ichida turadi (chunki Firestore SDK shu yerda
+  // import qilingan). U yerdan window.__kanjiSendChatMessage (xabar yuborish),
+  // window.__kanjiChatOnMessages (yangi xabarlar kelganda chaqiriladigan hook)
+  // va window.__kanjiCurrentUid / __kanjiCurrentUserName orqali bog'lanamiz.
+  let lastChatMsgs = [];
+  // Modul hali yuklanmagan bo'lsa ham xato bermasin — main script birinchi
+  // ishga tushgani uchun bu funksiyani shu yerda oldindan e'lon qilamiz,
+  // module script keyin kelib uni chaqiradi.
+  window.__kanjiChatOnMessages = function(msgs){
+    lastChatMsgs = Array.isArray(msgs) ? msgs : [];
+    renderChatMessages();
+  };
   function updateChatNickLabel(){
     const label = document.getElementById('chatNickLabel');
     if(!label) return;
-    const nick = getNickname();
-    label.textContent = nick ? (nick + ' sifatida') : 'Mehmon sifatida';
+    const custom = getNickname();
+    const googleName = (typeof window.__kanjiCurrentUserName === 'function') ? window.__kanjiCurrentUserName() : '';
+    const display = custom || googleName;
+    label.textContent = display ? (display + ' sifatida') : 'Mehmon sifatida';
   }
   function formatChatTime(ts){
     try{
@@ -5162,14 +5161,14 @@
   function renderChatMessages(){
     const wrap = document.getElementById('chatMessages');
     if(!wrap) return;
-    const msgs = loadChatMessages();
-    const myNick = getNickname();
+    const msgs = lastChatMsgs;
+    const myUid = (typeof window.__kanjiCurrentUid === 'function') ? window.__kanjiCurrentUid() : null;
     if(!msgs.length){
       wrap.innerHTML = '<div class="chat-empty"><span class="big-em">💬</span>Hali xabar yo\'q.<br>Birinchi bo\'lib yozing!</div>';
       return;
     }
     wrap.innerHTML = msgs.map(m=>{
-      const mine = m.nick === myNick;
+      const mine = !!myUid && m.uid === myUid;
       const safeNick = String(m.nick||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
       const safeText = String(m.text||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
       return `<div class="chat-msg ${mine?'mine':'theirs'}">
@@ -5185,12 +5184,16 @@
     if(!input) return;
     const text = input.value.trim();
     if(!text) return;
-    const nick = getNickname() || 'Mehmon';
-    const msgs = loadChatMessages();
-    msgs.push({nick, text, time: Date.now()});
-    saveChatMessages(msgs);
+    if(typeof window.__kanjiSendChatMessage !== 'function'){
+      alert("Chat hali yuklanmoqda, birozdan keyin qayta urinib ko'ring.");
+      return;
+    }
+    const customNick = getNickname();
     input.value = '';
-    renderChatMessages();
+    input.disabled = true;
+    Promise.resolve(window.__kanjiSendChatMessage(text, customNick || null))
+      .catch(()=>{ alert("Xabar yuborilmadi. Internet aloqasini tekshiring yoki hisobingizga qaytadan kiring."); })
+      .then(()=>{ input.disabled = false; input.focus(); });
   }
   function openChatPanel(){
     const panel = document.getElementById('chatPanel');
@@ -5376,6 +5379,16 @@
     signOut,
     onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    limit,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyALayFF0xGeWLUTO-96Kf8wUgOVldEFS1w",
@@ -5396,6 +5409,7 @@
 
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+  const db = getFirestore(app);
 
   function loginWithGoogle() {
     signInWithPopup(auth, provider)
@@ -5466,6 +5480,56 @@
       }
     }
   });
+
+  // ---------- GLOBAL CHAT (Firestore) ----------
+  // Barcha foydalanuvchilar uchun umumiy, haqiqiy vaqtda yangilanadigan chat.
+  // Xabarlar "chatMessages" kolleksiyasida saqlanadi, faqat Google bilan
+  // kirgan foydalanuvchilar o'qiy va yoza oladi (Firestore Security Rules
+  // orqali cheklanadi — Firebase konsolida sozlanishi kerak).
+  const chatCol = collection(db, "chatMessages");
+  const chatQuery = query(chatCol, orderBy("createdAt", "asc"), limit(200));
+
+  onSnapshot(
+    chatQuery,
+    (snap) => {
+      const msgs = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          uid: data.uid || "",
+          nick: data.nick || "Foydalanuvchi",
+          text: data.text || "",
+          time: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : Date.now()
+        };
+      });
+      if (typeof window.__kanjiChatOnMessages === "function") {
+        window.__kanjiChatOnMessages(msgs);
+      }
+    },
+    (err) => {
+      console.error("Chatni o'qishda xatolik:", err.message);
+    }
+  );
+
+  // Asosiy (module bo'lmagan) skriptdagi chat UI shu funksiyalarni chaqiradi.
+  window.__kanjiSendChatMessage = function (text, customNick) {
+    const user = auth.currentUser;
+    if (!user) return Promise.reject(new Error("not-logged-in"));
+    const nick = (customNick || user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 40);
+    return addDoc(chatCol, {
+      uid: user.uid,
+      nick: nick,
+      text: String(text).slice(0, 500),
+      createdAt: serverTimestamp()
+    });
+  };
+  window.__kanjiCurrentUid = function () {
+    return auth.currentUser ? auth.currentUser.uid : null;
+  };
+  window.__kanjiCurrentUserName = function () {
+    const u = auth.currentUser;
+    return u ? (u.displayName || u.email || "") : "";
+  };
+
 </script>
 </body>
 </html>
