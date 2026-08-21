@@ -261,6 +261,109 @@
   .chat-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
   .chat-toggle-btn svg{width:17px; height:17px; display:block;}
 
+  /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
+  .auth-box{
+    position:fixed;
+    top:16px;
+    right:16px;
+    z-index:500;
+    display:flex;
+    align-items:center;
+  }
+  .auth-login-btn{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:8px 14px 8px 10px;
+    border-radius:999px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:all .2s ease;
+    white-space:nowrap;
+  }
+  .auth-login-btn:active{transform:scale(0.94);}
+  .auth-login-btn svg{width:16px; height:16px; display:block; flex-shrink:0;}
+
+  .auth-profile{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  .auth-avatar-btn{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    padding:0;
+    cursor:pointer;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink);
+    font-size:14px;
+    font-weight:700;
+    transition:all .2s ease;
+  }
+  .auth-avatar-btn:active{transform:scale(0.92);}
+  .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block;}
+
+  .auth-dropdown{
+    position:absolute;
+    top:44px;
+    right:0;
+    min-width:180px;
+    padding:12px;
+    border-radius:16px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--panel-1);
+    backdrop-filter:var(--blur-2) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-2) saturate(var(--sat-1));
+    box-shadow:0 12px 32px var(--glass-shadow);
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    opacity:0;
+    transform:translateY(-6px);
+    pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .auth-dropdown.open{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+  }
+  .auth-name{
+    font-size:13px;
+    color:var(--ink);
+    font-weight:600;
+    text-align:center;
+    word-break:break-word;
+  }
+  .auth-logout-btn{
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg-strong);
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .auth-logout-btn:active{transform:scale(0.96);}
+
   .search-panel{
     width:100%;
     max-width:var(--content-max);
@@ -2491,6 +2594,24 @@
   })();
 </script>
 <body>
+
+<!-- ---------- Firebase Auth: Google bilan kirish ---------- -->
+<div class="auth-box" id="authBox">
+  <button class="auth-login-btn" id="login-btn" type="button">
+    <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+    <span>Google bilan kirish</span>
+  </button>
+  <div class="auth-profile" id="user-profile" style="display:none;">
+    <button class="auth-avatar-btn" id="authAvatarBtn" type="button" aria-label="Profil">
+      <img id="userAvatarImg" src="" alt="" style="display:none;">
+      <span id="userAvatarInitial"></span>
+    </button>
+    <div class="auth-dropdown" id="authDropdown">
+      <span id="user-name" class="auth-name"></span>
+      <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
+    </div>
+  </div>
+</div>
 
 <div class="splash-screen" id="splashScreen" aria-hidden="true">
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
@@ -5201,6 +5322,100 @@
     iframe.srcdoc = decodeSecondPage();
   }
 })();
+</script>
+
+<!-- ---------- Firebase Auth (Google bilan kirish) ---------- -->
+<script type="module">
+  // Diqqat: bare "firebase/app" import'i faqat bundler (Vite/Webpack) bo'lgan
+  // loyihalarda ishlaydi. Oddiy statik HTML uchun Firebase'ning CDN'dagi
+  // tayyor ES-module fayllaridan foydalanamiz.
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getAnalytics, isSupported as analyticsIsSupported } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyALayFF0xGeWLUTO-96Kf8wUgOVldEFS1w",
+    authDomain: "kanjiflashcard-93be1.firebaseapp.com",
+    projectId: "kanjiflashcard-93be1",
+    storageBucket: "kanjiflashcard-93be1.firebasestorage.app",
+    messagingSenderId: "919253211986",
+    appId: "1:919253211986:web:5f6ad32cbd978a273af88b",
+    measurementId: "G-M0ZY600TGF"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
+  // Analytics faqat brauzer uni qo'llab-quvvatlaganda ishga tushiriladi
+  // (masalan, ba'zi WebView'lar yoki reklama-blokerlar buni bloklashi mumkin,
+  // shu sabab bu yerda sahifa ishlashiga xalaqit bermasligi uchun try/catch bor).
+  analyticsIsSupported().then((ok) => { if (ok) { try { getAnalytics(app); } catch (e) {} } }).catch(() => {});
+
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  function loginWithGoogle() {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        console.log("Xush kelibsiz:", user.displayName);
+      })
+      .catch((error) => {
+        console.error("Xatolik yuz berdi:", error.message);
+      });
+  }
+
+  function logout() {
+    signOut(auth);
+  }
+
+  const loginBtn = document.getElementById("login-btn");
+  const userProfile = document.getElementById("user-profile");
+  const userName = document.getElementById("user-name");
+  const logoutBtn = document.getElementById("logout-btn");
+  const avatarBtn = document.getElementById("authAvatarBtn");
+  const avatarImg = document.getElementById("userAvatarImg");
+  const avatarInitial = document.getElementById("userAvatarInitial");
+  const authDropdown = document.getElementById("authDropdown");
+
+  if (loginBtn) loginBtn.addEventListener("click", loginWithGoogle);
+  if (logoutBtn) logoutBtn.addEventListener("click", () => {
+    authDropdown.classList.remove("open");
+    logout();
+  });
+  if (avatarBtn) avatarBtn.addEventListener("click", () => {
+    authDropdown.classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    if (!userProfile) return;
+    if (!userProfile.contains(e.target)) authDropdown.classList.remove("open");
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      if (loginBtn) loginBtn.style.display = "none";
+      if (userProfile) userProfile.style.display = "flex";
+      if (userName) userName.textContent = user.displayName || user.email || "Foydalanuvchi";
+      if (user.photoURL) {
+        avatarImg.src = user.photoURL;
+        avatarImg.style.display = "block";
+        avatarInitial.style.display = "none";
+      } else {
+        avatarImg.style.display = "none";
+        avatarInitial.style.display = "block";
+        avatarInitial.textContent = (user.displayName || user.email || "?").trim().charAt(0).toUpperCase();
+      }
+    } else {
+      if (loginBtn) loginBtn.style.display = "flex";
+      if (userProfile) userProfile.style.display = "none";
+      authDropdown.classList.remove("open");
+    }
+  });
 </script>
 </body>
 </html>
