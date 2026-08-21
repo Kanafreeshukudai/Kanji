@@ -1607,9 +1607,16 @@
   }
   .quiz-kanji{
     font-family:'Shippori Mincho',serif;
-    font-size:52px;
+    font-size:clamp(30px, 10vw, 52px);
     color:var(--ink);
+    max-width:100%;
+    word-break:normal;
+    overflow-wrap:anywhere;
+    line-height:1.2;
   }
+  .quiz-kanji.klen-34{ font-size:clamp(24px, 7.5vw, 40px); }
+  .quiz-kanji.klen-56{ font-size:clamp(19px, 6vw, 32px); }
+  .quiz-kanji.klen-7p{ font-size:clamp(15px, 4.6vw, 25px); }
   .quiz-romaji{color:var(--ink-soft); font-size:14px; margin-top:6px;}
   .quiz-options{display:flex; flex-direction:column; gap:10px;}
   .quiz-opt{
@@ -4252,7 +4259,7 @@
       <div class="quiz-mode-label">${modeLabel}</div>
       <div class="quiz-feedback" id="quizFeedback"></div>
       <div class="quiz-card">
-        <div class="quiz-kanji">${word.kanji}</div>
+        <div class="quiz-kanji${kanjiLenClass(word.kanji)}">${word.kanji}</div>
       </div>
       <div class="quiz-options">
         ${options.map(id=>`<button class="quiz-opt" data-id="${id}">${quizType === 'romaji' ? byId[id].romaji : byId[id].uz}</button>`).join('')}
@@ -4282,7 +4289,7 @@
       <div class="quiz-mode-label">10 soniyada eslashga harakat qiling</div>
       <div class="quiz-mode-sublabel">Bilsangiz, ovoz chiqarib o'qing!</div>
       <div class="quiz-card quiz-card-timed" id="timedCard">
-        <div class="quiz-kanji">${word.kanji}</div>
+        <div class="quiz-kanji${kanjiLenClass(word.kanji)}">${word.kanji}</div>
       </div>
       <div class="quiz-timer-bar"><div class="quiz-timer-fill" id="timedFill"></div></div>
       <div class="quiz-timed-status">
