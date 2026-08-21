@@ -4214,6 +4214,18 @@
     return a;
   }
 
+  // Uzun kanji birikmalar (masalan 4-6+ belgili so'zlar) kartochka ichiga
+  // sig'may, tashqariga chiqib ketmasligi uchun — belgilar soniga qarab
+  // mos "klen-*" klass qaytaradi, shrift o'lchami shunga mos kichrayadi
+  // (CSS'dagi .klen-34 / .klen-56 / .klen-7p qoidalariga qarang).
+  function kanjiLenClass(str){
+    const n = (str || '').length;
+    if(n <= 2) return '';
+    if(n <= 4) return ' klen-34';
+    if(n <= 6) return ' klen-56';
+    return ' klen-7p';
+  }
+
   // savollar shkalasi (Savol X/Y ostidagi chiziq) — savoldan-savolga sakramay,
   // avvalgi qiymatidan yangi qiymatga qarab sekin siljib boradi
   function animateQuizBar(fillEl){
