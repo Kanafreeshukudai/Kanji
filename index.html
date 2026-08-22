@@ -215,9 +215,9 @@
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    right:16px;
-    width:36px;
-    height:36px;
+    right:12px;
+    width:40px;
+    height:40px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -236,16 +236,16 @@
     border-color:var(--accent);
     color:var(--accent-soft);
   }
-  .search-toggle-btn svg{width:17px; height:17px; display:block;}
+  .search-toggle-btn svg{width:19px; height:19px; display:block;}
 
   /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda */
   .chat-toggle-btn{
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    left:16px;
-    width:36px;
-    height:36px;
+    left:12px;
+    width:40px;
+    height:40px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -259,7 +259,7 @@
     transition:all .2s ease;
   }
   .chat-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
-  .chat-toggle-btn svg{width:17px; height:17px; display:block;}
+  .chat-toggle-btn svg{width:19px; height:19px; display:block;}
 
   /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
   .auth-box{
@@ -319,6 +319,35 @@
   }
   .auth-avatar-btn:active{transform:scale(0.92);}
   .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block;}
+
+  /* ---------- AI YORDAMCHI tugmasi — akkaunt belgisining chap tarafida ---------- */
+  .ai-assist-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    height:36px;
+    padding:0 13px 0 11px;
+    margin-right:8px;
+    border-radius:999px;
+    border:1px solid rgba(139,124,246,0.4);
+    background:linear-gradient(150deg, rgba(139,124,246,0.22), rgba(111,92,230,0.1));
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:#cfc7ff;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .ai-assist-btn:active{transform:scale(0.94);}
+  .ai-assist-btn svg{width:16px; height:16px; flex-shrink:0; display:block;}
+  .ai-assist-btn span{line-height:1;}
+  @media (max-width:360px){
+    .ai-assist-btn{width:36px; padding:0; justify-content:center;}
+    .ai-assist-btn span{display:none;}
+  }
 
   .auth-dropdown{
     position:absolute;
@@ -2432,6 +2461,178 @@
   .chat-send-btn:active{transform:scale(0.9);}
   .chat-send-btn:disabled{opacity:0.45; cursor:default;}
 
+  /* ---------- AI YORDAMCHI oynasi — oddiy Chat'dan farqli, violat rangda ---------- */
+  .ai-assist-overlay{
+    position:fixed;
+    inset:0;
+    z-index:600;
+    background:rgba(6,7,9,0.55);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .28s ease;
+  }
+  .ai-assist-overlay.open{opacity:1; pointer-events:auto;}
+
+  .ai-assist-panel{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    z-index:601;
+    width:100%;
+    max-width:480px;
+    height:min(72vh, 580px);
+    transform:translate(-50%, 100%);
+    transition:transform .34s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(180deg, #262138, #1a1726 70%);
+    border:1px solid rgba(139,124,246,0.45);
+    border-bottom:none;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -20px 50px -18px rgba(76,58,196,0.45);
+    padding-bottom:env(safe-area-inset-bottom);
+    overflow:hidden;
+  }
+  .ai-assist-panel.open{transform:translate(-50%, 0);}
+
+  .ai-assist-panel-header{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px 12px;
+    border-bottom:1px solid rgba(139,124,246,0.25);
+  }
+  .ai-assist-panel-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .ai-assist-glow-icon{
+    width:34px; height:34px;
+    flex:none;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(150deg, #8b7cf6, #6f5ce6);
+    color:#fff;
+    box-shadow:0 0 14px rgba(139,124,246,0.55);
+  }
+  .ai-assist-glow-icon svg{width:18px; height:18px;}
+  .ai-assist-panel-title h3{
+    margin:0;
+    font-family:'Shippori Mincho',serif;
+    font-size:16.5px;
+    color:var(--ink);
+  }
+  .ai-assist-panel-title span{
+    font-size:11.5px;
+    color:#b3a9e8;
+  }
+  .ai-assist-close-btn{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid rgba(139,124,246,0.35);
+    background:rgba(139,124,246,0.12);
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .ai-assist-close-btn:active{transform:scale(0.9);}
+
+  .ai-assist-dev-notice{
+    flex:none;
+    margin:12px 16px 0;
+    padding:9px 12px;
+    border-radius:12px;
+    background:rgba(139,124,246,0.14);
+    border:1px solid rgba(139,124,246,0.4);
+    color:#cabffb;
+    font-size:11.5px;
+    line-height:1.5;
+    text-align:center;
+  }
+
+  .ai-assist-messages{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .ai-assist-msg{
+    max-width:82%;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .ai-assist-msg.bot{align-self:flex-start; align-items:flex-start;}
+  .ai-assist-msg.user{align-self:flex-end; align-items:flex-end;}
+  .ai-assist-bubble{
+    padding:9px 13px;
+    border-radius:16px;
+    font-size:13.5px;
+    line-height:1.45;
+    word-break:break-word;
+    white-space:pre-wrap;
+  }
+  .ai-assist-msg.bot .ai-assist-bubble{
+    background:rgba(139,124,246,0.16);
+    border:1px solid rgba(139,124,246,0.35);
+    color:var(--ink);
+    border-bottom-left-radius:4px;
+  }
+  .ai-assist-msg.user .ai-assist-bubble{
+    background:linear-gradient(150deg, #8b7cf6, #6f5ce6);
+    color:#fff;
+    border-bottom-right-radius:4px;
+  }
+
+  .ai-assist-input-bar{
+    flex:none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    border-top:1px solid rgba(139,124,246,0.25);
+    background:rgba(0,0,0,0.15);
+  }
+  .ai-assist-input-bar input{
+    flex:1;
+    min-width:0;
+    background:rgba(139,124,246,0.1);
+    border:1px solid rgba(139,124,246,0.35);
+    border-radius:20px;
+    padding:11px 15px;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:14px;
+    outline:none;
+  }
+  .ai-assist-input-bar input::placeholder{color:var(--ink-faint);}
+  .ai-assist-send-btn{
+    flex:none;
+    width:40px; height:40px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(135deg, #8b7cf6, #6f5ce6);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .ai-assist-send-btn svg{width:17px; height:17px;}
+  .ai-assist-send-btn:active{transform:scale(0.9);}
+
   .splash-credit{
     position:absolute;
     left:0;
@@ -2626,6 +2827,10 @@
 
 <!-- ---------- Firebase Auth: Google bilan kirish ---------- -->
 <div class="auth-box" id="authBox">
+  <button class="ai-assist-btn" id="aiAssistBtn" type="button" aria-label="AI yordamchi">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
+    <span>AI yordamchi</span>
+  </button>
   <div class="auth-profile" id="user-profile" style="display:none;">
     <button class="auth-avatar-btn" id="authAvatarBtn" type="button" aria-label="Profil">
       <img id="userAvatarImg" src="" alt="" style="display:none;">
@@ -2804,6 +3009,37 @@
   <div class="chat-input-bar">
     <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
     <button class="chat-send-btn" id="chatSendBtn" type="button" aria-label="Yuborish">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ---------- AI YORDAMCHI (alohida, oddiy Chat'dan farqli oyna) ---------- -->
+<div class="ai-assist-overlay" id="aiAssistOverlay" aria-hidden="true"></div>
+<div class="ai-assist-panel" id="aiAssistPanel" aria-hidden="true">
+  <div class="ai-assist-panel-header">
+    <div class="ai-assist-panel-title">
+      <span class="ai-assist-glow-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
+      </span>
+      <div>
+        <h3>AI Yordamchi</h3>
+        <span>Shaxsiy AI suhbat</span>
+      </div>
+    </div>
+    <button class="ai-assist-close-btn" id="aiAssistCloseBtn" type="button" aria-label="Yopish">✕</button>
+  </div>
+  <div class="ai-assist-dev-notice">
+    🚧 AI yordamchi hali ishlab chiqish rejimida. Ba'zi imkoniyatlar hozircha ishlamasligi mumkin.
+  </div>
+  <div class="ai-assist-messages" id="aiAssistMessages">
+    <div class="ai-assist-msg bot">
+      <div class="ai-assist-bubble">Salom! Men AI yordamchiman 👋 Hozircha sinov rejimidaman, lekin tez orada Kanji va so'z birikmalarini o'rganishda senga yordam beraman.</div>
+    </div>
+  </div>
+  <div class="ai-assist-input-bar">
+    <input id="aiAssistInput" type="text" maxlength="500" placeholder="AI yordamchiga xabar yozing..." autocomplete="off" autocorrect="off">
+    <button class="ai-assist-send-btn" id="aiAssistSendBtn" type="button" aria-label="Yuborish">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
     </button>
   </div>
@@ -5232,6 +5468,54 @@
       }
     });
     if(nickLabel) nickLabel.style.cursor = 'pointer';
+  })();
+
+  // ---------- AI YORDAMCHI — mustaqil, oddiy Chat'ga bog'liq emas, hozircha faqat lokal demo javob ----------
+  (function initAiAssistWidget(){
+    const btn = document.getElementById('aiAssistBtn');
+    const panel = document.getElementById('aiAssistPanel');
+    const overlay = document.getElementById('aiAssistOverlay');
+    const closeBtn = document.getElementById('aiAssistCloseBtn');
+    const sendBtn = document.getElementById('aiAssistSendBtn');
+    const input = document.getElementById('aiAssistInput');
+    const messages = document.getElementById('aiAssistMessages');
+    if(!btn || !panel) return;
+
+    function addMsg(text, who){
+      const row = document.createElement('div');
+      row.className = 'ai-assist-msg ' + (who === 'user' ? 'user' : 'bot');
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-assist-bubble';
+      bubble.textContent = text;
+      row.appendChild(bubble);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function openPanel(){
+      panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
+      if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+      setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 260);
+    }
+    function closePanel(){
+      panel.classList.remove('open'); panel.setAttribute('aria-hidden','true');
+      if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+    }
+    function sendMsg(){
+      const text = (input.value || '').trim();
+      if(!text) return;
+      addMsg(text, 'user');
+      input.value = '';
+      setTimeout(()=>{
+        addMsg("AI yordamchi hozircha ishlab chiqish rejimida — javob berish funksiyasi tez orada qo'shiladi. 🚧", 'bot');
+      }, 450);
+    }
+
+    btn.addEventListener('click', openPanel);
+    if(closeBtn) closeBtn.addEventListener('click', closePanel);
+    if(overlay) overlay.addEventListener('click', closePanel);
+    if(sendBtn) sendBtn.addEventListener('click', sendMsg);
+    if(input) input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMsg(); });
   })();
 
   // yuklanish tugagach shu funksiya chaqiriladi — endi ekran avtomatik yopilmaydi,
