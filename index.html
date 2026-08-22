@@ -2872,7 +2872,7 @@
   <div class="splash-title">Kanji Flashcard</div>
   <div class="splash-sub">So'z birikmalari</div>
   <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
-  <button class="auth-login-btn splash-login-btn" id="login-btn" type="button">
+  <button class="auth-login-btn splash-login-btn" id="login-btn" type="button" style="display:none;">
     <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
     <span>Google bilan kirish</span>
   </button>
@@ -5839,6 +5839,10 @@
 
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+  // Har safar "Google bilan kirish" bosilganda hisob tanlash oynasi
+  // majburiy ravishda ko'rsatiladi — chiqib ketgandan so'ng brauzer
+  // avvalgi hisobga sukut bo'yicha qayta kiritib yubormasligi uchun.
+  provider.setCustomParameters({ prompt: "select_account" });
   const db = getFirestore(app);
 
   function loginWithGoogle() {
@@ -5853,7 +5857,13 @@
   }
 
   function logout() {
-    signOut(auth);
+    signOut(auth).finally(() => {
+      // Chiqishdan so'ng sahifani qayta yuklaymiz — shu orqali ilova
+      // to'liq boshlang'ich holatga (splash ekran, o'chiq "Boshlash"
+      // tugmasi) qaytadi va keyingi safar kirish uchun foydalanuvchi
+      // qaytadan Google hisobini tanlashi kerak bo'ladi.
+      window.location.reload();
+    });
   }
 
   const loginBtn = document.getElementById("login-btn");
