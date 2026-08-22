@@ -5652,7 +5652,10 @@
         typingRow.remove();
 
         if(!res.ok){
-          throw new Error((data && data.error && data.error.message) || `Server xatosi (${res.status})`);
+          const rawMsg = (data && data.error && data.error.message)
+            || (typeof data === 'string' ? data : '')
+            || JSON.stringify(data).slice(0, 300);
+          throw new Error(rawMsg || `Server xatosi (${res.status})`);
         }
         const choice = data && data.choices && data.choices[0];
         const reply = choice && choice.message && choice.message.content
