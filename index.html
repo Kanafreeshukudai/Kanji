@@ -5566,7 +5566,15 @@
     // orqali yuborish va key'ni serverda saqlash.
     const GEMINI_API_KEY = "AQ.Ab8RN6L8ofcXSZZEI8WbH-8xLoZy8Wdc69avUn6ruvrmw8eQuQ";
     const GEMINI_MODEL = "gemini-2.5-flash";
-    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+    // Diqqat: "AQ." bilan boshlanuvchi yangi formatdagi kalitlar hozircha
+    // Gemini'ning native (generateContent) endpointida ba'zi hisoblarda
+    // 401 "Expected OAuth 2 access token" xatosini bermoqda (Google
+    // tomonidagi hozirgi, hal qilinmagan muammo). Shu sabab bu yerda
+    // Gemini'ning OpenAI-mos (OpenAI-compatible) endpointidan foydalanamiz —
+    // bu baribir Google Gemini serveriga boradi, faqat so'rov/javob formati
+    // OpenAI Chat Completions uslubida bo'ladi va autentifikatsiya oddiy
+    // "Authorization: Bearer <kalit>" sarlavhasi orqali amalga oshadi.
+    const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
     const MAX_HISTORY_TURNS = 12; // so'nggi N ta xabar juftligi saqlanadi (kontekst uchun)
 
     const SYSTEM_PROMPT = [
@@ -5577,7 +5585,7 @@
       "Javoblaringni qisqa, aniq va o'quvchiga tushunarli qil; kerak bo'lsa misollar bilan tushuntir."
     ].join(" ");
 
-    let history = []; // {role:'user'|'model', parts:[{text}]}
+    let history = []; // OpenAI uslubi: {role:'user'|'assistant', content:text}
 
     function addMsg(text, who){
       const row = document.createElement('div');
@@ -5620,7 +5628,7 @@
       if(!text || sendBtn.disabled) return;
       addMsg(text, 'user');
       input.value = '';
-      history.push({role:'user', parts:[{text}]});
+      history.push({role:'user', content:text});
       if(history.length > MAX_HISTORY_TURNS*2) history = history.slice(-MAX_HISTORY_TURNS*2);
 
       sendBtn.disabled = true;
@@ -5631,12 +5639,13 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': GEMINI_API_KEY
+            'Authorization': 'Bearer ' + GEMINI_API_KEY
           },
           body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-            contents: history,
-            generationConfig: { temperature: 0.6, maxOutputTokens: 900 }
+            model: GEMINI_MODEL,
+            messages: [{role:'system', content: SYSTEM_PROMPT}, ...history],
+            temperature: 0.6,
+            max_tokens: 900
           })
         });
         const data = await res.json();
@@ -5645,16 +5654,16 @@
         if(!res.ok){
           throw new Error((data && data.error && data.error.message) || `Server xatosi (${res.status})`);
         }
-        const candidate = data && data.candidates && data.candidates[0];
-        const reply = candidate && candidate.content && candidate.content.parts
-          ? candidate.content.parts.map(p=>p.text||'').join('').trim()
+        const choice = data && data.choices && data.choices[0];
+        const reply = choice && choice.message && choice.message.content
+          ? String(choice.message.content).trim()
           : '';
 
         if(!reply){
           addMsg("Kechirasiz, javob ololmadim. Savolni boshqacharoq qayta yozib ko'ring.", 'bot');
           history.pop();
         } else {
-          history.push({role:'model', parts:[{text: reply}]});
+          history.push({role:'assistant', content: reply});
           addMsg(reply, 'bot');
         }
       } catch(err){
