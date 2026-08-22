@@ -5550,7 +5550,7 @@
     // Shaxsiy/repetitiv loyiha uchun yetarli, lekin uzoq muddatda xavfsizroq
     // yechim — so'rovlarni oddiy backend/proxy (masalan Cloudflare Worker)
     // orqali yuborish va key'ni serverda saqlash.
-    const GEMINI_API_KEY = "AQ.Ab8RN6LIFvGvMRUP9hiw6GWtOfZQXT3Du4vtNwdkFP3phkuOkQ";
+    const GEMINI_API_KEY = "AQ.Ab8RN6L8ofcXSZZEI8WbH-8xLoZy8Wdc69avUn6ruvrmw8eQuQ";
     const GEMINI_MODEL = "gemini-2.5-flash";
     const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
     const MAX_HISTORY_TURNS = 12; // so'nggi N ta xabar juftligi saqlanadi (kontekst uchun)
@@ -5613,9 +5613,12 @@
       const typingRow = addTyping();
 
       try{
-        const res = await fetch(`${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`, {
+        const res = await fetch(GEMINI_ENDPOINT, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': GEMINI_API_KEY
+          },
           body: JSON.stringify({
             system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
             contents: history,
