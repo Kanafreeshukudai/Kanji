@@ -201,8 +201,16 @@
     width:100%;
     max-width:var(--content-max);
     padding:26px 20px 8px;
-    text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
     position:relative;
+  }
+  .header-title-block{
+    flex:1 1 auto;
+    min-width:0;
+    text-align:center;
   }
   .eyebrow{
     font-size:11px;
@@ -222,12 +230,9 @@
 
   /* ---------- QIDIRUV (search) ---------- */
   .search-toggle-btn{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
-    right:50px;
-    width:34px;
-    height:34px;
+    flex:none;
+    width:36px;
+    height:36px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -240,23 +245,19 @@
     cursor:pointer;
     transition:all .2s ease;
   }
-  .search-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
+  .search-toggle-btn:active{transform:scale(0.92);}
   .search-toggle-btn.active{
     background:linear-gradient(165deg, rgba(217,105,79,0.5), rgba(217,105,79,0.28));
     border-color:var(--accent);
     color:var(--accent-soft);
   }
-  .search-toggle-btn svg{width:16px; height:16px; display:block;}
+  .search-toggle-btn svg{width:17px; height:17px; display:block;}
 
-  /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda,
-     markazdagi sarlavhaga nisbatan simmetrik joylashuv */
+  /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda */
   .chat-toggle-btn{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
-    left:50px;
-    width:34px;
-    height:34px;
+    flex:none;
+    width:36px;
+    height:36px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -269,16 +270,8 @@
     cursor:pointer;
     transition:all .2s ease;
   }
-  .chat-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
-  .chat-toggle-btn svg{width:16px; height:16px; display:block;}
-
-  @media (max-width:400px){
-    .search-toggle-btn, .chat-toggle-btn{
-      width:30px; height:30px; right:32px;
-    }
-    .chat-toggle-btn{ left:32px; right:auto; }
-    .search-toggle-btn svg, .chat-toggle-btn svg{width:14px; height:14px;}
-  }
+  .chat-toggle-btn:active{transform:scale(0.92);}
+  .chat-toggle-btn svg{width:17px; height:17px; display:block;}
 
   /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
   .auth-box{
@@ -2913,8 +2906,10 @@
   <button class="chat-toggle-btn" id="chatToggleBtn" type="button" aria-label="Chat">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
   </button>
-  <div class="eyebrow">So'z birikmalari</div>
-  <h1 id="flashcardTitleHold">Kanji Flashcard<span class="hold-progress-track" id="holdProgressTrack" aria-hidden="true"><span class="hold-progress-fill" id="holdProgressFill"></span></span></h1>
+  <div class="header-title-block">
+    <div class="eyebrow">So'z birikmalari</div>
+    <h1 id="flashcardTitleHold">Kanji Flashcard<span class="hold-progress-track" id="holdProgressTrack" aria-hidden="true"><span class="hold-progress-fill" id="holdProgressFill"></span></span></h1>
+  </div>
   <button class="search-toggle-btn" id="searchToggleBtn" type="button" aria-label="Qidiruv">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
   </button>
