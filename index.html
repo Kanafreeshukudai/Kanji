@@ -3050,12 +3050,9 @@
     </div>
     <button class="ai-assist-close-btn" id="aiAssistCloseBtn" type="button" aria-label="Yopish">✕</button>
   </div>
-  <div class="ai-assist-dev-notice">
-    🚧 AI yordamchi hali ishlab chiqish rejimida. Ba'zi imkoniyatlar hozircha ishlamasligi mumkin.
-  </div>
   <div class="ai-assist-messages" id="aiAssistMessages">
     <div class="ai-assist-msg bot">
-      <div class="ai-assist-bubble">Salom! Men AI yordamchiman 👋 Hozircha sinov rejimidaman, lekin tez orada Kanji va so'z birikmalarini o'rganishda senga yordam beraman.</div>
+      <div class="ai-assist-bubble">Salom! Men AI yordamchiman 👋 Menga kanji, so'zlar va grammatika haqida yapon tiliga oid har qanday savol berishing mumkin.</div>
     </div>
   </div>
   <div class="ai-assist-input-bar">
@@ -5538,7 +5535,7 @@
     if(nickLabel) nickLabel.style.cursor = 'pointer';
   })();
 
-  // ---------- AI YORDAMCHI — mustaqil, oddiy Chat'ga bog'liq emas, hozircha faqat lokal demo javob ----------
+  // ---------- AI YORDAMCHI — Gemini API orqali, faqat yapon tili (kanji/so'z/grammatika) mavzusida ----------
   (function initAiAssistWidget(){
     const btn = document.getElementById('aiAssistBtn');
     const panel = document.getElementById('aiAssistPanel');
@@ -5549,6 +5546,25 @@
     const messages = document.getElementById('aiAssistMessages');
     if(!btn || !panel) return;
 
+    // Diqqat: bu key statik saytda ochiq turadi (view-source orqali ko'rinadi).
+    // Shaxsiy/repetitiv loyiha uchun yetarli, lekin uzoq muddatda xavfsizroq
+    // yechim — so'rovlarni oddiy backend/proxy (masalan Cloudflare Worker)
+    // orqali yuborish va key'ni serverda saqlash.
+    const GEMINI_API_KEY = "AQ.Ab8RN6LIFvGvMRUP9hiw6GWtOfZQXT3Du4vtNwdkFP3phkuOkQ";
+    const GEMINI_MODEL = "gemini-2.5-flash";
+    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+    const MAX_HISTORY_TURNS = 12; // so'nggi N ta xabar juftligi saqlanadi (kontekst uchun)
+
+    const SYSTEM_PROMPT = [
+      "Sen ushbu yapon tili o'quv ilovasi ichidagi AI yordamchisan.",
+      "Faqat quyidagi mavzularga oid savollarga javob ber: yapon tili kanjilari (ma'nosi, o'qilishi — kun'yomi/on'yomi, chizish tartibi), yapon so'zlari va lug'at (leksika, sinonim/antonim, qo'llanilishi, misollar), yapon grammatikasi (gap tuzilishi, zarrachalar, fe'l/sifat shakllari, JLPT darajalariga oid mavzular) va umuman yapon tilini o'rganishga bevosita aloqador savollar.",
+      "Agar foydalanuvchi shu mavzulardan tashqari narsa so'rasa (masalan boshqa fanlar, dasturlash, siyosat, shaxsiy maslahat va h.k.), muloyimlik bilan rad et va uni yapon tiliga oid savol berishga taklif qil — lekin boshqa mavzuda batafsil javob berma.",
+      "Javoblarni asosan o'zbek tilida yoz, lekin yapon so'z/kanjilarni original shaklda (kanji, hiragana/katakana, romaji) ko'rsat.",
+      "Javoblaringni qisqa, aniq va o'quvchiga tushunarli qil; kerak bo'lsa misollar bilan tushuntir."
+    ].join(" ");
+
+    let history = []; // {role:'user'|'model', parts:[{text}]}
+
     function addMsg(text, who){
       const row = document.createElement('div');
       row.className = 'ai-assist-msg ' + (who === 'user' ? 'user' : 'bot');
@@ -5558,6 +5574,19 @@
       row.appendChild(bubble);
       messages.appendChild(row);
       messages.scrollTop = messages.scrollHeight;
+      return row;
+    }
+
+    function addTyping(){
+      const row = document.createElement('div');
+      row.className = 'ai-assist-msg bot ai-assist-typing';
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-assist-bubble';
+      bubble.textContent = '···';
+      row.appendChild(bubble);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+      return row;
     }
 
     function openPanel(){
@@ -5571,14 +5600,53 @@
       if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
       unlockPageScroll();
     }
-    function sendMsg(){
+
+    async function sendMsg(){
       const text = (input.value || '').trim();
-      if(!text) return;
+      if(!text || sendBtn.disabled) return;
       addMsg(text, 'user');
       input.value = '';
-      setTimeout(()=>{
-        addMsg("AI yordamchi hozircha ishlab chiqish rejimida — javob berish funksiyasi tez orada qo'shiladi. 🚧", 'bot');
-      }, 450);
+      history.push({role:'user', parts:[{text}]});
+      if(history.length > MAX_HISTORY_TURNS*2) history = history.slice(-MAX_HISTORY_TURNS*2);
+
+      sendBtn.disabled = true;
+      const typingRow = addTyping();
+
+      try{
+        const res = await fetch(`${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: history,
+            generationConfig: { temperature: 0.6, maxOutputTokens: 900 }
+          })
+        });
+        const data = await res.json();
+        typingRow.remove();
+
+        if(!res.ok){
+          throw new Error((data && data.error && data.error.message) || `Server xatosi (${res.status})`);
+        }
+        const candidate = data && data.candidates && data.candidates[0];
+        const reply = candidate && candidate.content && candidate.content.parts
+          ? candidate.content.parts.map(p=>p.text||'').join('').trim()
+          : '';
+
+        if(!reply){
+          addMsg("Kechirasiz, javob ololmadim. Savolni boshqacharoq qayta yozib ko'ring.", 'bot');
+          history.pop();
+        } else {
+          history.push({role:'model', parts:[{text: reply}]});
+          addMsg(reply, 'bot');
+        }
+      } catch(err){
+        typingRow.remove();
+        history.pop(); // muvaffaqiyatsiz so'rovni tarixdan olib tashlaymiz
+        addMsg("Xatolik yuz berdi: " + (err && err.message ? err.message : "internetni tekshiring") + " 🙏", 'bot');
+      } finally {
+        sendBtn.disabled = false;
+      }
     }
 
     btn.addEventListener('click', openPanel);
@@ -5597,8 +5665,13 @@
     if(track) track.classList.add('splash-bar-fade');
     if(btn){
       btn.classList.add('show');
-      // Agar hali hisobga kirilmagan bo'lsa — eslatma matnini ko'rsatamiz
-      if(btn.disabled && hint) hint.classList.add('show');
+      // Agar hisobga kirilmaganligi ANIQ bo'lsa (Firebase auth holati allaqachon
+      // tekshirilgan bo'lsa) — eslatma matnini ko'rsatamiz. Auth holati hali
+      // aniqlanmagan bo'lsa (odatiy holat — Firebase javobi sal kech kelishi
+      // mumkin), eslatmani ko'rsatmaymiz — aks holda allaqachon tizimga
+      // kirgan foydalanuvchiga bir lahzalik noto'g'ri "kiring" ogohlantirishi
+      // milt etib chiqib ketadi.
+      if(btn.disabled && hint && window.__kanjiAuthChecked) hint.classList.add('show');
       btn.addEventListener('click', (e)=>handleStartClick(e), {once:true});
     }
   }
@@ -5805,6 +5878,10 @@
   });
 
   onAuthStateChanged(auth, (user) => {
+    // Auth holati birinchi marta aniqlandi — endi splash ekrani noto'g'ri
+    // "kiring" ogohlantirishini xotirjam ko'rsatishi (yoki ko'rsatmasligi)
+    // mumkin, chunki bu yerda haqiqiy holat ma'lum.
+    window.__kanjiAuthChecked = true;
     if (user) {
       if (loginBtn) loginBtn.style.display = "none";
       if (userProfile) userProfile.style.display = "flex";
