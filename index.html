@@ -114,6 +114,16 @@
     padding-right:env(safe-area-inset-right);
   }
 
+  /* Chat / AI yordamchi oynasi ochiq bo'lganda orqadagi sahifa
+     scroll bo'lib ketmasligi uchun */
+  body.body-scroll-lock{
+    overflow:hidden;
+    position:fixed;
+    left:0;
+    right:0;
+    width:100%;
+  }
+
   /* ---------- LIVING BACKDROP (soft blurred color, so the glass has something nice to catch) ---------- */
   .bg-scene{
     position:fixed;
@@ -215,9 +225,9 @@
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    right:12px;
-    width:40px;
-    height:40px;
+    right:50px;
+    width:34px;
+    height:34px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -236,16 +246,17 @@
     border-color:var(--accent);
     color:var(--accent-soft);
   }
-  .search-toggle-btn svg{width:19px; height:19px; display:block;}
+  .search-toggle-btn svg{width:16px; height:16px; display:block;}
 
-  /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda */
+  /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda,
+     markazdagi sarlavhaga nisbatan simmetrik joylashuv */
   .chat-toggle-btn{
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    left:12px;
-    width:40px;
-    height:40px;
+    left:50px;
+    width:34px;
+    height:34px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -259,7 +270,15 @@
     transition:all .2s ease;
   }
   .chat-toggle-btn:active{transform:translateY(-50%) scale(0.92);}
-  .chat-toggle-btn svg{width:19px; height:19px; display:block;}
+  .chat-toggle-btn svg{width:16px; height:16px; display:block;}
+
+  @media (max-width:400px){
+    .search-toggle-btn, .chat-toggle-btn{
+      width:30px; height:30px; right:32px;
+    }
+    .chat-toggle-btn{ left:32px; right:auto; }
+    .search-toggle-btn svg, .chat-toggle-btn svg{width:14px; height:14px;}
+  }
 
   /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
   .auth-box{
@@ -2309,6 +2328,7 @@
     box-shadow:0 -20px 50px -18px rgba(0,0,0,0.6);
     padding-bottom:env(safe-area-inset-bottom);
     overflow:hidden;
+    overscroll-behavior:contain;
   }
   .chat-panel.open{transform:translate(-50%, 0);}
 
@@ -2369,6 +2389,7 @@
     min-height:0;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:14px 16px;
     display:flex;
     flex-direction:column;
@@ -2492,6 +2513,7 @@
     box-shadow:0 -20px 50px -18px rgba(76,58,196,0.45);
     padding-bottom:env(safe-area-inset-bottom);
     overflow:hidden;
+    overscroll-behavior:contain;
   }
   .ai-assist-panel.open{transform:translate(-50%, 0);}
 
@@ -2563,6 +2585,7 @@
     min-height:0;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
     padding:14px 16px;
     display:flex;
     flex-direction:column;
@@ -2660,6 +2683,9 @@
     letter-spacing:0.12em;
     color:var(--ink-soft);
     opacity:0.45;
+    cursor:pointer;
+    padding:6px;
+    margin:-6px;
   }
   @media (prefers-reduced-motion: reduce){
     .splash-kanji, .splash-title, .splash-sub, .splash-bar-fill{animation:none !important; opacity:1 !important; width:100% !important;}
@@ -2861,7 +2887,7 @@
   <div class="splash-start-hint" id="splashStartHint">Davom etish uchun avval Google hisobingizga kiring</div>
   <div class="splash-credit">
     <span class="splash-credit-name">Created by Doniyorbek</span>
-    <span class="splash-credit-year">2026</span>
+    <span class="splash-credit-year" id="splashCreditYear">2026</span>
   </div>
 </div>
 
@@ -5367,6 +5393,27 @@
     hideSplash(evt);
   }
 
+  // ---------- DEVELOPER REJIMI ----------
+  // "2026" yil yozuviga 3 marta ketma-ket (1 soniya ichida) bosilsa —
+  // Google hisobiga kirmasdan va "Boshlash" tugmasisiz ham splash ekran
+  // to'g'ridan-to'g'ri yopiladi. Faqat sinov/developer maqsadida.
+  (function initDevSkipTap(){
+    const yearEl = document.getElementById('splashCreditYear');
+    if(!yearEl) return;
+    let tapCount = 0;
+    let tapTimer = null;
+    yearEl.addEventListener('click', function(evt){
+      tapCount++;
+      if(tapTimer) clearTimeout(tapTimer);
+      tapTimer = setTimeout(()=>{ tapCount = 0; }, 1000);
+      if(tapCount >= 3){
+        tapCount = 0;
+        if(tapTimer) clearTimeout(tapTimer);
+        hideSplash(evt);
+      }
+    });
+  })();
+
   // ---------- GLOBAL CHAT (Firebase Firestore orqali, haqiqiy vaqtda) ----------
   // Haqiqiy Firebase ulanishi va yozish/o'qish funksiyalari sahifa oxiridagi
   // <script type="module"> ichida turadi (chunki Firestore SDK shu yerda
@@ -5431,6 +5478,30 @@
       .catch(()=>{ alert("Xabar yuborilmadi. Internet aloqasini tekshiring yoki hisobingizga qaytadan kiring."); })
       .then(()=>{ input.disabled = false; input.focus(); });
   }
+  // ---------- SAHIFA SCROLL QULFI ----------
+  // Chat yoki AI yordamchi oynasi ochiq bo'lganda orqadagi sahifa scroll
+  // bo'lib ketmasligi uchun body'ni joyida "muzlatib" turadi, yopilganda
+  // avvalgi scroll pozitsiyasiga qaytaradi. Ikkala panel ham shu sanoqni
+  // ishlatadi — biri ochiq bo'lib ikkinchisi ochilsa ham sahifa qulflangan
+  // holicha qoladi, faqat ikkalasi yopilgach ochiladi.
+  let __scrollLockCount = 0;
+  let __scrollLockY = 0;
+  function lockPageScroll(){
+    if(__scrollLockCount === 0){
+      __scrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.top = (-__scrollLockY) + 'px';
+      document.body.classList.add('body-scroll-lock');
+    }
+    __scrollLockCount++;
+  }
+  function unlockPageScroll(){
+    __scrollLockCount = Math.max(0, __scrollLockCount - 1);
+    if(__scrollLockCount === 0){
+      document.body.classList.remove('body-scroll-lock');
+      document.body.style.top = '';
+      window.scrollTo(0, __scrollLockY);
+    }
+  }
   function openChatPanel(){
     const panel = document.getElementById('chatPanel');
     const overlay = document.getElementById('chatOverlay');
@@ -5438,6 +5509,7 @@
     renderChatMessages();
     if(panel){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
     if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+    lockPageScroll();
     setTimeout(()=>{ try{ document.getElementById('chatInput').focus(); }catch(e){} }, 260);
   }
   function closeChatPanel(){
@@ -5445,6 +5517,7 @@
     const overlay = document.getElementById('chatOverlay');
     if(panel){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
     if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+    unlockPageScroll();
   }
   (function initChatWidget(){
     const fab = document.getElementById('chatToggleBtn');
@@ -5495,11 +5568,13 @@
     function openPanel(){
       panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
       if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+      lockPageScroll();
       setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 260);
     }
     function closePanel(){
       panel.classList.remove('open'); panel.setAttribute('aria-hidden','true');
       if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+      unlockPageScroll();
     }
     function sendMsg(){
       const text = (input.value || '').trim();
