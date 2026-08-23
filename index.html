@@ -3067,8 +3067,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
   const NEW_DAY_ID = 20; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
@@ -3500,6 +3500,30 @@
     {id:"jukensuru", day:20, group:"験", kanji:"受験する", romaji:"juken suru", type:"on + on + —", reading:"受(ju) + 験(ken) + する", uz:"imtihon topshirish"},
     {id:"keiken", day:20, group:"験", kanji:"経験", romaji:"keiken", type:"on + on", reading:"経(kei) + 験(ken)", uz:"tajriba"},
     {id:"taiken", day:20, group:"験", kanji:"体験", romaji:"taiken", type:"on + on", reading:"体(tai) + 験(ken)", uz:"tajriba"},
+
+    {id:"aida21", day:21, group:"間", kanji:"間", romaji:"aida", type:"kun'yomi", reading:"間(aida) — yakka kanji", otherReadings:"on: カン(kan), ケン(ken) · kun: あいだ(aida), ま(ma)", uz:"orasida"},
+    {id:"jikan21", day:21, group:"間", kanji:"時間", romaji:"jikan", type:"on + on", reading:"時(ji) + 間(kan)", uz:"vaqt"},
+    {id:"maniau21", day:21, group:"間", kanji:"間に合う", romaji:"maniau", type:"kun + kun", reading:"間(ma) + 合う(au)", uz:"vaqtida bo'lish"},
+    {id:"machigai21", day:21, group:"間", kanji:"間違い", romaji:"machigai", type:"kun + kun", reading:"間(ma) + 違い(chigai)", uz:"xato"},
+    {id:"ningen21", day:21, group:"間", kanji:"人間", romaji:"ningen", type:"on + on", reading:"人(nin) + 間(gen)", uz:"inson"},
+
+    {id:"bun21", day:21, group:"聞", kanji:"聞", romaji:"kiku", type:"kun'yomi", reading:"聞(kiku) — yakka kanji", otherReadings:"on: モン(mon), ブン(bun) · kun: きく(kiku)", uz:"eshitish"},
+    {id:"kiku21", day:21, group:"聞", kanji:"聞く", romaji:"kiku", type:"kun'yomi", reading:"聞く(kiku)", uz:"tinglamoq"},
+    {id:"kikoeru21", day:21, group:"聞", kanji:"聞こえる", romaji:"kikoeru", type:"kun'yomi", reading:"聞こえる(kikoeru)", uz:"eshitilmoq"},
+    {id:"shinbun21", day:21, group:"聞", kanji:"新聞", romaji:"shinbun", type:"on + on", reading:"新(shin) + 聞(bun)", uz:"gazeta"},
+
+    {id:"kai21", day:21, group:"開", kanji:"開", romaji:"kai", type:"on'yomi", reading:"開(kai) — yakka kanji", otherReadings:"on: カイ(kai) · kun: ひら-く(hiraku), あ-く(aku), あ-ける(akeru)", uz:"ochiq"},
+    {id:"hiraku21", day:21, group:"開", kanji:"開く", romaji:"hiraku", type:"kun'yomi", reading:"開く(hiraku)", uz:"ochilmoq"},
+    {id:"akeru21", day:21, group:"開", kanji:"開ける", romaji:"akeru", type:"kun'yomi", reading:"開ける(akeru)", uz:"ochmoq"},
+    {id:"aku21", day:21, group:"開", kanji:"開く", romaji:"aku", type:"kun'yomi", reading:"開く(aku)", uz:"ochmoq"},
+    {id:"kaiten21", day:21, group:"開", kanji:"開店", romaji:"kaiten", type:"on + on", reading:"開(kai) + 店(ten)", uz:"do'kon ochilishi"},
+    {id:"kaishi21", day:21, group:"開", kanji:"開始", romaji:"kaishi", type:"on + on", reading:"開(kai) + 始(shi)", uz:"boshlanishi"},
+
+    {id:"hei21", day:21, group:"閉", kanji:"閉", romaji:"hei", type:"on'yomi", reading:"閉(hei) — yakka kanji", otherReadings:"on: ヘイ(hei) · kun: し-まる(shimaru), し-める(shimeru), と-じる(tojiru)", uz:"yopiq"},
+    {id:"shimaru21", day:21, group:"閉", kanji:"閉まる", romaji:"shimaru", type:"kun'yomi", reading:"閉まる(shimaru)", uz:"yopilmoq"},
+    {id:"shimeru21", day:21, group:"閉", kanji:"閉める", romaji:"shimeru", type:"kun'yomi", reading:"閉める(shimeru)", uz:"yopmoq"},
+    {id:"tojiru21", day:21, group:"閉", kanji:"閉じる", romaji:"tojiru", type:"kun'yomi", reading:"閉じる(tojiru)", uz:"yopmoq"},
+    {id:"heiten21", day:21, group:"閉", kanji:"閉店", romaji:"heiten", type:"on + on", reading:"閉(hei) + 店(ten)", uz:"do'konning yopilishi"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
