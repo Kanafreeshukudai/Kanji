@@ -2211,6 +2211,56 @@
     .splash-start-btn.show{animation:none !important;}
   }
 
+  /* ---------- SPLASH PHONK MUSIC TOGGLE ---------- */
+  .splash-music-toggle{
+    position:relative;
+    z-index:1;
+    margin-top:22px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.06);
+    color:var(--ink-soft);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .5s ease .15s, transform .5s ease .15s, background .25s ease, border-color .25s ease, color .25s ease;
+    touch-action:manipulation;
+  }
+  .splash-music-toggle.show{opacity:1; transform:translateY(0);}
+  .splash-music-toggle:active{transform:scale(0.94) !important;}
+  .splash-music-toggle .splash-music-icon{flex:none; color:var(--gold);}
+  .splash-eq{display:inline-flex; align-items:flex-end; gap:2.5px; height:13px; flex:none;}
+  .splash-eq span{
+    width:2.5px;
+    height:100%;
+    background:var(--gold);
+    border-radius:2px;
+    transform-origin:bottom;
+    animation:phonkEq 0.9s ease-in-out infinite;
+  }
+  .splash-eq span:nth-child(1){animation-delay:0s;}
+  .splash-eq span:nth-child(2){animation-delay:0.16s;}
+  .splash-eq span:nth-child(3){animation-delay:0.32s;}
+  .splash-eq span:nth-child(4){animation-delay:0.48s;}
+  @keyframes phonkEq{
+    0%,100%{transform:scaleY(0.28);}
+    50%{transform:scaleY(1);}
+  }
+  .splash-music-toggle.muted{background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:var(--ink-soft); opacity:0.65;}
+  .splash-music-toggle.muted .splash-eq span{animation-play-state:paused; transform:scaleY(0.22); background:var(--ink-soft);}
+  .splash-music-toggle.muted .splash-music-icon{color:var(--ink-soft);}
+  @media (prefers-reduced-motion: reduce){
+    .splash-eq span{animation:none !important; transform:scaleY(0.6) !important;}
+  }
+
   /* ---------- NICKNAME MODAL ---------- */
   .nickname-overlay{
     position:fixed;
@@ -2611,6 +2661,30 @@
     color:#fff;
     border-bottom-right-radius:4px;
   }
+  .ai-assist-typing-dots{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:2px 2px;
+  }
+  .ai-assist-typing-dots span{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--ink);
+    opacity:0.55;
+    animation:aiTypingBounce 1.1s ease-in-out infinite;
+  }
+  .ai-assist-typing-dots span:nth-child(1){ animation-delay:0s; }
+  .ai-assist-typing-dots span:nth-child(2){ animation-delay:0.15s; }
+  .ai-assist-typing-dots span:nth-child(3){ animation-delay:0.3s; }
+  @keyframes aiTypingBounce{
+    0%, 60%, 100%{ transform:translateY(0); opacity:0.4; }
+    30%{ transform:translateY(-4px); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ai-assist-typing-dots span{ animation:none; opacity:0.8; }
+  }
 
   .ai-assist-input-bar{
     flex:none;
@@ -2872,6 +2946,19 @@
   <div class="splash-title">Kanji Flashcard</div>
   <div class="splash-sub">So'z birikmalari</div>
   <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
+  <!--
+    PHONK MUSIQA: shu papkada "phonk.mp3" nomli audio fayl bo'lishi kerak
+    (index.html bilan bir joyda, masalan GitHub Pages repo tub papkasida).
+    Qo'shiqning eng zo'r/qisqa qismini shu nom bilan yuklab qo'ying —
+    boshqa nom yoki joy ishlatsangiz, pastdagi src="phonk.mp3" ni
+    o'zgartiring.
+  -->
+  <audio id="splashPhonkAudio" src="phonk.mp3" preload="auto" loop playsinline></audio>
+  <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Musiqani o'chirish">
+    <span class="splash-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+    <svg class="splash-music-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+    <span id="splashMusicLabel">Musiqa</span>
+  </button>
   <button class="auth-login-btn splash-login-btn" id="login-btn" type="button" style="display:none;">
     <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
     <span>Google bilan kirish</span>
@@ -3069,7 +3156,7 @@
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
   const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", custom:"Maxsus Flashcard"};
   const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
-  const NEW_DAY_ID = 20; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
+  const NEW_DAY_ID = 21; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -5383,6 +5470,7 @@
     splash.classList.add('splash-hide');
     SplashLineFX.stop(); // suzuvchi chiziq — splash yopilishi bilan to'xtaydi
     DotsFX.start(); // "Boshlash" bosilgan zahoti — ko'tariluvchi nuqtalar shu yerda boshlanadi
+    if(typeof PhonkFX !== 'undefined' && PhonkFX.fadeOutAndStop) PhonkFX.fadeOutAndStop(700); // musiqa asta pasayib to'xtaydi
     const shell = document.getElementById('appShell');
     const flare = document.getElementById('introFlare');
     const ripple = document.getElementById('introRipple');
@@ -5619,12 +5707,46 @@
       return row;
     }
 
+    // Botning javobini harf-harf, sekin-asta "yozayotgandek" chiqaramiz
+    function typeMsg(text, speedMs){
+      const row = document.createElement('div');
+      row.className = 'ai-assist-msg bot';
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-assist-bubble';
+      row.appendChild(bubble);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+
+      return new Promise((resolve)=>{
+        let i = 0;
+        const total = text.length;
+        // Uzunroq javoblarda tezroq, qisqalarida sekinroq — bir xil umumiy vaqt hissi uchun
+        const perCharDelay = speedMs != null ? speedMs : Math.max(6, Math.min(22, 900 / Math.max(total, 1)));
+        function tick(){
+          // Har bir chaqiriqda bir nechta belgi qo'shamiz — juda uzun matnlarda ilova osilib qolmasin
+          const step = total > 400 ? 3 : 1;
+          i = Math.min(i + step, total);
+          bubble.textContent = text.slice(0, i);
+          messages.scrollTop = messages.scrollHeight;
+          if(i < total){
+            setTimeout(tick, perCharDelay);
+          } else {
+            resolve(row);
+          }
+        }
+        tick();
+      });
+    }
+
     function addTyping(){
       const row = document.createElement('div');
       row.className = 'ai-assist-msg bot ai-assist-typing';
       const bubble = document.createElement('div');
       bubble.className = 'ai-assist-bubble';
-      bubble.textContent = '···';
+      const dots = document.createElement('span');
+      dots.className = 'ai-assist-typing-dots';
+      dots.innerHTML = '<span></span><span></span><span></span>';
+      bubble.appendChild(dots);
       row.appendChild(bubble);
       messages.appendChild(row);
       messages.scrollTop = messages.scrollHeight;
@@ -5683,16 +5805,16 @@
           : '';
 
         if(!reply){
-          addMsg("Kechirasiz, javob ololmadim. Savolni boshqacharoq qayta yozib ko'ring.", 'bot');
+          await typeMsg("Kechirasiz, javob ololmadim. Savolni boshqacharoq qayta yozib ko'ring.");
           history.pop();
         } else {
           history.push({role:'assistant', content: reply});
-          addMsg(reply, 'bot');
+          await typeMsg(reply);
         }
       } catch(err){
         typingRow.remove();
         history.pop(); // muvaffaqiyatsiz so'rovni tarixdan olib tashlaymiz
-        addMsg("Xatolik yuz berdi: " + (err && err.message ? err.message : "internetni tekshiring") + " 🙏", 'bot');
+        await typeMsg("Xatolik yuz berdi: " + (err && err.message ? err.message : "internetni tekshiring") + " 🙏");
       } finally {
         sendBtn.disabled = false;
       }
@@ -5707,6 +5829,96 @@
 
   // yuklanish tugagach shu funksiya chaqiriladi — endi ekran avtomatik yopilmaydi,
   // "Boshlash" tugmasi ko'rinadigan bo'ladi va foydalanuvchi bosishini kutadi
+  // ---------- SPLASH PHONK MUSIQA ----------
+  // Sahifa ochilishi bilan (avtoplay siyosati ruxsat bersa) qisqa phonk
+  // klipni pastdan yuqoriga sekin ovoz bilan chalamiz; brauzer avtomatik
+  // ijroni bloklasa, birinchi teginish/bosishda o'zi ishga tushadi.
+  // "Boshlash" bosilganda musiqa asta pasayib to'xtaydi.
+  const PhonkFX = (function(){
+    const audio = document.getElementById('splashPhonkAudio');
+    const toggle = document.getElementById('splashMusicToggle');
+    const label = document.getElementById('splashMusicLabel');
+    if(!audio || !toggle) return {fadeOutAndStop(){}};
+
+    const TARGET_VOLUME = 0.55;
+    let userMuted = false;
+    let started = false;
+    let fadeTimer = null;
+
+    audio.volume = 0;
+
+    function setToggleState(){
+      const showMuted = userMuted || audio.paused;
+      toggle.classList.toggle('muted', showMuted);
+      toggle.setAttribute('aria-pressed', showMuted ? 'false' : 'true');
+      toggle.setAttribute('aria-label', showMuted ? "Musiqani yoqish" : "Musiqani o'chirish");
+      if(label) label.textContent = showMuted ? 'Musiqa' : 'Musiqa';
+    }
+
+    function fadeTo(target, ms){
+      if(fadeTimer) clearInterval(fadeTimer);
+      const steps = 20;
+      const stepMs = Math.max(16, ms / steps);
+      const startVol = audio.volume;
+      const diff = target - startVol;
+      let i = 0;
+      fadeTimer = setInterval(()=>{
+        i++;
+        audio.volume = Math.max(0, Math.min(1, startVol + diff * (i/steps)));
+        if(i >= steps){
+          clearInterval(fadeTimer);
+          fadeTimer = null;
+          if(target === 0) audio.pause();
+        }
+      }, stepMs);
+    }
+
+    function tryStart(){
+      if(started || userMuted) return;
+      const p = audio.play();
+      if(p && typeof p.then === 'function'){
+        p.then(()=>{
+          started = true;
+          fadeTo(TARGET_VOLUME, 900);
+          setToggleState();
+        }).catch(()=>{
+          // Avtoplay bloklandi — birinchi foydalanuvchi teginishida qayta urinamiz
+        });
+      } else {
+        started = true;
+        fadeTo(TARGET_VOLUME, 900);
+        setToggleState();
+      }
+    }
+
+    // Sahifa yuklanganda darrov urinib ko'ramiz
+    tryStart();
+    // Bloklangan bo'lsa — birinchi teginish/bosish/tugma zarbida ishga tushamiz
+    ['pointerdown', 'keydown', 'touchstart'].forEach(evt=>{
+      document.addEventListener(evt, tryStart, {once:true, passive:true});
+    });
+
+    toggle.addEventListener('click', ()=>{
+      userMuted = !userMuted;
+      if(userMuted){
+        fadeTo(0, 350);
+      } else {
+        started = false;
+        tryStart();
+      }
+      setToggleState();
+    });
+
+    setToggleState();
+
+    return {
+      fadeOutAndStop(ms){
+        if(fadeTimer) clearInterval(fadeTimer);
+        fadeTo(0, ms || 700);
+      }
+    };
+  })();
+
   function showStartButton(){
     const track = document.getElementById('splashBarTrack');
     const btn = document.getElementById('splashStartBtn');
@@ -5723,6 +5935,8 @@
       if(btn.disabled && hint && window.__kanjiAuthChecked) hint.classList.add('show');
       btn.addEventListener('click', (e)=>handleStartClick(e), {once:true});
     }
+    const musicToggle = document.getElementById('splashMusicToggle');
+    if(musicToggle) musicToggle.classList.add('show');
   }
   // ESLATMA: avvalgi xavfsizlik taymeri (20s dan keyin avtomatik ochilish)
   // olib tashlandi — endi splash ekrani faqat foydalanuvchi "Boshlash"
