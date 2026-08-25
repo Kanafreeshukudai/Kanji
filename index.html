@@ -2069,9 +2069,41 @@
     pointer-events:none;
     display:block;
   }
-  .splash-kanji-stage, .splash-title, .splash-sub, .splash-bar-track, .splash-login-btn, .splash-start-btn, .splash-credit{
+  .splash-artwork, .splash-kanji-stage, .splash-title, .splash-sub, .splash-bar-track, .splash-login-btn, .splash-start-btn, .splash-credit{
     position:relative;
     z-index:1;
+  }
+  /* ---------- SPLASH ARTWORK (qo'shiq ustidagi rasm) ----------
+     Kanji animatsiyasi (qo'shiq turgan joy) tepasida turadi va qo'shiqqa
+     "nafas olayotgandek" mos ravishda ozgina yaqinlashib-uzoqlashib turadi —
+     musiqaning zarb tempiga mos, silliq va sezilarsiz masofada. */
+  .splash-artwork{
+    width:132px;
+    height:132px;
+    margin-bottom:20px;
+    border-radius:26px;
+    overflow:hidden;
+    background:#000;
+    border:1px solid rgba(255,255,255,0.14);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 34px rgba(217,60,52,0.28);
+    animation:splashArtworkPulse 1.05s ease-in-out infinite;
+    will-change:transform;
+  }
+  .splash-artwork img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    object-position:center 18%;
+    pointer-events:none;
+    user-select:none;
+  }
+  @keyframes splashArtworkPulse{
+    0%, 100%{ transform:scale(1); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 26px rgba(217,60,52,0.22); }
+    50%{ transform:scale(1.045); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 44px rgba(0,0,0,0.6), 0 0 44px rgba(217,60,52,0.42); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .splash-artwork{ animation:none !important; }
   }
   /* Splash ekrani ichidagi "Google bilan kirish" tugmasi — "Boshlash"
      tugmasidan tepada joylashadi */
@@ -2211,54 +2243,74 @@
     .splash-start-btn.show{animation:none !important;}
   }
 
-  /* ---------- SPLASH PHONK MUSIC TOGGLE ---------- */
-  .splash-music-toggle{
+  /* ---------- SPLASH MUSIC: PLAY/PAUSE TUGMASI + OYNAYOTGANLIK ANIMATSIYASI ----------
+     Tugma va ostidagi "eqvalayzer" animatsiyasi bitta guruh (wrap) sifatida birga
+     paydo bo'ladi/yashiriladi. Qo'shiq chalinayotganda ustunchalar zarb bilan
+     tebranadi; pauza qilinganda tugma play belgisiga aylanadi va ustunchalar
+     to'xtab, xiralashadi. */
+  .splash-music-wrap{
     position:relative;
     z-index:1;
     margin-top:22px;
-    display:inline-flex;
+    display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:8px;
-    padding:7px 14px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,0.18);
-    background:rgba(255,255,255,0.06);
-    color:var(--ink-soft);
-    font-family:'Zen Maru Gothic', sans-serif;
-    font-size:11.5px;
-    font-weight:600;
-    letter-spacing:0.02em;
-    cursor:pointer;
     opacity:0;
     transform:translateY(8px);
-    transition:opacity .5s ease .15s, transform .5s ease .15s, background .25s ease, border-color .25s ease, color .25s ease;
+    transition:opacity .5s ease .15s, transform .5s ease .15s;
+  }
+  .splash-music-wrap.show{opacity:1; transform:translateY(0);}
+  .splash-music-toggle{
+    width:42px;
+    height:42px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    border:1px solid rgba(124,154,107,0.5);
+    background:rgba(124,154,107,0.16);
+    color:var(--moss-soft);
+    cursor:pointer;
+    transition:background .25s ease, border-color .25s ease, color .25s ease;
     touch-action:manipulation;
   }
-  .splash-music-toggle.show{opacity:1; transform:translateY(0);}
-  .splash-music-toggle:active{transform:scale(0.94) !important;}
-  .splash-music-toggle .splash-music-icon{flex:none; color:var(--gold);}
-  .splash-eq{display:inline-flex; align-items:flex-end; gap:2.5px; height:13px; flex:none;}
-  .splash-eq span{
-    width:2.5px;
-    height:100%;
-    background:var(--gold);
-    border-radius:2px;
-    transform-origin:bottom;
-    animation:phonkEq 0.9s ease-in-out infinite;
+  .splash-music-toggle:active{transform:scale(0.9) !important;}
+  .splash-music-toggle svg{width:17px; height:17px; flex:none;}
+  .splash-music-toggle .icon-play{display:none;}
+  .splash-music-wrap.paused .splash-music-toggle{background:rgba(124,154,107,0.06); border-color:rgba(124,154,107,0.22); color:var(--ink-soft);}
+  .splash-music-wrap.paused .splash-music-toggle .icon-pause{display:none;}
+  .splash-music-wrap.paused .splash-music-toggle .icon-play{display:block;}
+  .splash-music-eq{
+    margin-top:10px;
+    display:inline-flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:3px;
+    height:14px;
   }
-  .splash-eq span:nth-child(1){animation-delay:0s;}
-  .splash-eq span:nth-child(2){animation-delay:0.16s;}
-  .splash-eq span:nth-child(3){animation-delay:0.32s;}
-  .splash-eq span:nth-child(4){animation-delay:0.48s;}
-  @keyframes phonkEq{
-    0%,100%{transform:scaleY(0.28);}
+  .splash-music-eq span{
+    width:3px;
+    height:100%;
+    border-radius:2px;
+    background:var(--moss-soft);
+    transform-origin:bottom;
+    animation:splashMusicEq 0.9s ease-in-out infinite;
+  }
+  .splash-music-eq span:nth-child(1){animation-delay:0s;}
+  .splash-music-eq span:nth-child(2){animation-delay:0.15s;}
+  .splash-music-eq span:nth-child(3){animation-delay:0.3s;}
+  .splash-music-eq span:nth-child(4){animation-delay:0.45s;}
+  @keyframes splashMusicEq{
+    0%,100%{transform:scaleY(0.25);}
     50%{transform:scaleY(1);}
   }
-  .splash-music-toggle.muted{background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:var(--ink-soft); opacity:0.65;}
-  .splash-music-toggle.muted .splash-eq span{animation-play-state:paused; transform:scaleY(0.22); background:var(--ink-soft);}
-  .splash-music-toggle.muted .splash-music-icon{color:var(--ink-soft);}
+  .splash-music-wrap.paused .splash-music-eq span{
+    animation-play-state:paused;
+    transform:scaleY(0.2);
+    background:var(--ink-faint);
+  }
   @media (prefers-reduced-motion: reduce){
-    .splash-eq span{animation:none !important; transform:scaleY(0.6) !important;}
+    .splash-music-eq span{animation:none !important; transform:scaleY(0.6) !important;}
   }
 
   /* ---------- NICKNAME MODAL ---------- */
@@ -2938,6 +2990,9 @@
 
 <div class="splash-screen" id="splashScreen" aria-hidden="true">
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
+  <div class="splash-artwork" id="splashArtwork">
+    <img src="splash-art.jpg" alt="" draggable="false">
+  </div>
   <div class="splash-kanji-stage">
     <span class="splash-kanji">山</span>
     <span class="splash-kanji">学</span>
@@ -2947,18 +3002,19 @@
   <div class="splash-sub">So'z birikmalari</div>
   <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
   <!--
-    PHONK MUSIQA: shu papkada "phonk.mp3" nomli audio fayl bo'lishi kerak
+    PHONK MUSIQA: shu papkada "song.m4a" nomli audio fayl bo'lishi kerak
     (index.html bilan bir joyda, masalan GitHub Pages repo tub papkasida).
-    Qo'shiqning eng zo'r/qisqa qismini shu nom bilan yuklab qo'ying —
-    boshqa nom yoki joy ishlatsangiz, pastdagi src="phonk.mp3" ni
+    Boshqa nom yoki joy ishlatsangiz, pastdagi src="song.m4a" ni
     o'zgartiring.
   -->
-  <audio id="splashPhonkAudio" src="phonk.mp3" preload="auto" loop playsinline></audio>
-  <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Musiqani o'chirish">
-    <span class="splash-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
-    <svg class="splash-music-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-    <span id="splashMusicLabel">Musiqa</span>
-  </button>
+  <audio id="splashPhonkAudio" src="song.m4a" preload="auto" loop playsinline></audio>
+  <div class="splash-music-wrap" id="splashMusicWrap">
+    <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
+      <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
+      <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
+    </button>
+    <div class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  </div>
   <button class="auth-login-btn splash-login-btn" id="login-btn" type="button" style="display:none;">
     <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
     <span>Google bilan kirish</span>
@@ -5837,25 +5893,24 @@
   const PhonkFX = (function(){
     const audio = document.getElementById('splashPhonkAudio');
     const toggle = document.getElementById('splashMusicToggle');
-    const label = document.getElementById('splashMusicLabel');
+    const wrap = document.getElementById('splashMusicWrap');
     if(!audio || !toggle) return {fadeOutAndStop(){}};
 
     const TARGET_VOLUME = 0.55;
-    let userMuted = false;
+    let userPaused = false; // foydalanuvchi tugma bilan to'xtatganmi
     let started = false;
     let fadeTimer = null;
 
     audio.volume = 0;
 
     function setToggleState(){
-      const showMuted = userMuted || audio.paused;
-      toggle.classList.toggle('muted', showMuted);
-      toggle.setAttribute('aria-pressed', showMuted ? 'false' : 'true');
-      toggle.setAttribute('aria-label', showMuted ? "Musiqani yoqish" : "Musiqani o'chirish");
-      if(label) label.textContent = showMuted ? 'Musiqa' : 'Musiqa';
+      const showPaused = userPaused || audio.paused;
+      if(wrap) wrap.classList.toggle('paused', showPaused);
+      toggle.setAttribute('aria-pressed', showPaused ? 'false' : 'true');
+      toggle.setAttribute('aria-label', showPaused ? "Qo'shiqni davom ettirish" : "Qo'shiqni pauza qilish");
     }
 
-    function fadeTo(target, ms){
+    function fadeTo(target, ms, onDone){
       if(fadeTimer) clearInterval(fadeTimer);
       const steps = 20;
       const stepMs = Math.max(16, ms / steps);
@@ -5868,13 +5923,13 @@
         if(i >= steps){
           clearInterval(fadeTimer);
           fadeTimer = null;
-          if(target === 0) audio.pause();
+          if(onDone) onDone();
         }
       }, stepMs);
     }
 
     function tryStart(){
-      if(started || userMuted) return;
+      if(started || userPaused) return;
       const p = audio.play();
       if(p && typeof p.then === 'function'){
         p.then(()=>{
@@ -5898,13 +5953,15 @@
       document.addEventListener(evt, tryStart, {once:true, passive:true});
     });
 
+    // Play/Pause (davom ettirish) tugmasi — qo'shiqni haqiqatan pauza/davom qiladi
     toggle.addEventListener('click', ()=>{
-      userMuted = !userMuted;
-      if(userMuted){
-        fadeTo(0, 350);
-      } else {
+      if(audio.paused){
+        userPaused = false;
         started = false;
         tryStart();
+      } else {
+        userPaused = true;
+        fadeTo(0, 300, ()=>{ audio.pause(); });
       }
       setToggleState();
     });
@@ -5914,7 +5971,7 @@
     return {
       fadeOutAndStop(ms){
         if(fadeTimer) clearInterval(fadeTimer);
-        fadeTo(0, ms || 700);
+        fadeTo(0, ms || 700, ()=>{ audio.pause(); });
       }
     };
   })();
@@ -5935,8 +5992,8 @@
       if(btn.disabled && hint && window.__kanjiAuthChecked) hint.classList.add('show');
       btn.addEventListener('click', (e)=>handleStartClick(e), {once:true});
     }
-    const musicToggle = document.getElementById('splashMusicToggle');
-    if(musicToggle) musicToggle.classList.add('show');
+    const musicWrap = document.getElementById('splashMusicWrap');
+    if(musicWrap) musicWrap.classList.add('show');
   }
   // ESLATMA: avvalgi xavfsizlik taymeri (20s dan keyin avtomatik ochilish)
   // olib tashlandi — endi splash ekrani faqat foydalanuvchi "Boshlash"
