@@ -4559,14 +4559,7 @@
       card.style.opacity = '0';
       edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
       setTimeout(cb, 220);
-    }
-    function click(){
-      if(moved) return; // was a drag, not a tap
-      const showingBack = !card.classList.contains('flipped');
-      card.classList.toggle('flipped');
-      // tovush faqat old tomondan orqa tomonga (tarjima/romaji ko'rinayotganda)
-      // o'tilganda chiqadi — orqaga, ya'ni kanji tomoniga qaytilganda jim
-      if(showingBack) playFlipSound();
+    
     }
 
     card.addEventListener('mousedown', pointerDown, {signal});
