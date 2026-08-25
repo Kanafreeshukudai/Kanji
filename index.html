@@ -4559,7 +4559,14 @@
       card.style.opacity = '0';
       edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
       setTimeout(cb, 220);
-    
+    }
+    function click(){
+      if(moved) return; // was a drag, not a tap
+      const showingBack = !card.classList.contains('flipped');
+      card.classList.toggle('flipped');
+      // tovush faqat old tomondan orqa tomonga (tarjima/romaji ko'rinayotganda)
+      // o'tilganda chiqadi — orqaga, ya'ni kanji tomoniga qaytilganda jim
+      if(showingBack) playFlipSound();
     }
 
     card.addEventListener('mousedown', pointerDown, {signal});
@@ -5827,7 +5834,7 @@
     // hal qilinmagan autentifikatsiya muammosiga duch kelgani sabab,
     // Groq (bepul, OpenAI-mos, brauzerdan to'g'ridan-to'g'ri CORS orqali
     // ishlaydigan) xizmatiga o'tildi.
-    const GROQ_API_KEY = "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";
+    const GROQ_API_KEY = "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";
     const GROQ_MODEL = "openai/gpt-oss-120b";
     const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
     const MAX_HISTORY_TURNS = 12; // so'nggi N ta xabar juftligi saqlanadi (kontekst uchun)
