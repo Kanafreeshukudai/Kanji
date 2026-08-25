@@ -5139,51 +5139,52 @@
       if(!ctx) return;
       const now = ctx.currentTime;
 
+      // umumiy "yumshatuvchi" filtr — barcha tovush shu orqali chiqadi,
+      // eng tepadagi tirnaladigan chastotalarnigina kesadi, telefon
+      // dinamiklarida ham silliq eshitilishini ta'minlaydi
+      const masterFilter = ctx.createBiquadFilter();
+      masterFilter.type = 'lowpass';
+      masterFilter.frequency.value = 6500;
+      masterFilter.Q.value = 0.3;
+      masterFilter.connect(ctx.destination);
+
       // yengil "xona aksi" — bell partiallari shu orqali ham chiqadi, biroz
       // kechikib va xiralashib qaytadi, tovushga chuqurlik va iliqlik beradi
       const echoDelay = ctx.createDelay();
-      echoDelay.delayTime.value = 0.11;
+      echoDelay.delayTime.value = 0.12;
       const echoGain = ctx.createGain();
-      echoGain.gain.value = 0.22;
+      echoGain.gain.value = 0.16;
       echoDelay.connect(echoGain);
-      echoGain.connect(ctx.destination);
+      echoGain.connect(masterFilter);
 
-      function bellPartial(freq, peakGain, decay){
+      function bellPartial(freq, peakGain, decay, attack){
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, now);
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(peakGain, now + 0.012); // tez, yumshoq zarba
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + decay); // uzoq, silliq so'nish
+        gain.gain.linearRampToValueAtTime(peakGain, now + (attack || 0.015)); // silliq zarba
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + decay); // uzoq, tabiiy so'nish
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(masterFilter);
         gain.connect(echoDelay);
         osc.start(now);
         osc.stop(now + decay + 0.05);
       }
 
-      // zarba paytidagi juda qisqa "tick" — qo'ng'iroqchaga tayoqcha
-      // tekkanidagi haqiqiy chertilish tovushini beradi
-      const tickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate*0.01), ctx.sampleRate);
-      const tickData = tickBuf.getChannelData(0);
-      for(let i=0;i<tickData.length;i++){ tickData[i] = (Math.random()*2-1) * (1 - i/tickData.length); }
-      const tick = ctx.createBufferSource();
-      tick.buffer = tickBuf;
-      const tickFilter = ctx.createBiquadFilter();
-      tickFilter.type = 'highpass';
-      tickFilter.frequency.value = 3200;
-      const tickGain = ctx.createGain();
-      tickGain.gain.value = 0.05;
-      tick.connect(tickFilter);
-      tickFilter.connect(tickGain);
-      tickGain.connect(ctx.destination);
-      tick.start(now);
+      // asosiy ton — qo'ng'iroqning "tinggg" deb eshitiladigan, eng uzoq
+      // yashaydigan qismi; sof sinus bo'lgani uchun tirnalmaydi
+      bellPartial(659.25, 0.075, 1.15, 0.012);  // E5
 
-      bellPartial(783.99,  0.065, 0.85);  // G5 — asosiy ton, uzoq so'nadi
-      bellPartial(1971.0,  0.020, 0.55);  // ~inharmonik overton — qo'ng'iroq "metall" tovushini beradi
-      bellPartial(1567.98, 0.014, 0.40);  // G6 — yumshoq yorqinlik, tezroq so'nadi
-      bellPartial(392.0,   0.032, 0.95);  // G4 — pastki "tana" toni, iliqlik va to'liqlik beradi
+      // metall jaranglashini beruvchi inharmonik overtonlar — faqat zarba
+      // lahzasida eshitiladi va tez so'nadi, so'ng asosiy ton yolg'iz qoladi
+      // (haqiqiy qo'ng'iroqlarda ham shunday: zarbadan keyin tovush "tozalanadi")
+      bellPartial(1108.7, 0.026, 0.30, 0.006);  // ~1.68x — zarbadagi metall jilosi
+      bellPartial(1585.8, 0.013, 0.16, 0.004);  // ~2.4x — yupqa yuqori jarang, darrov so'nadi
+
+      // pastki oktava — tovushga "tana"/chuqurlik beradi, asosiy ton bilan
+      // birga uzoq so'nadi
+      bellPartial(329.63, 0.030, 1.25, 0.02);   // E4
     }catch(e){}
   }
 
@@ -5834,7 +5835,7 @@
     // hal qilinmagan autentifikatsiya muammosiga duch kelgani sabab,
     // Groq (bepul, OpenAI-mos, brauzerdan to'g'ridan-to'g'ri CORS orqali
     // ishlaydigan) xizmatiga o'tildi.
-    const GROQ_API_KEY = "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";
+    const GROQ_API_KEY = "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";
     const GROQ_MODEL = "openai/gpt-oss-120b";
     const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
     const MAX_HISTORY_TURNS = 12; // so'nggi N ta xabar juftligi saqlanadi (kontekst uchun)
