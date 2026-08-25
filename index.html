@@ -2085,9 +2085,15 @@
     overflow:hidden;
     background:#000;
     border:1px solid rgba(255,255,255,0.14);
-    box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 34px rgba(217,60,52,0.28);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 70px 14px rgba(217,60,52,0.32);
     animation:splashArtworkPulse 1.05s ease-in-out infinite;
+    animation-play-state:paused;
     will-change:transform;
+  }
+  /* Faqat qo'shiq chalinayotganda (play bosilganda) "nafas olish" animatsiyasi
+     ishlaydi — pauza qilinganda to'xtaydi (statik holatda qoladi). */
+  .splash-artwork.playing{
+    animation-play-state:running;
   }
   .splash-artwork img{
     width:100%;
@@ -2099,8 +2105,8 @@
     user-select:none;
   }
   @keyframes splashArtworkPulse{
-    0%, 100%{ transform:scale(1); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 26px rgba(217,60,52,0.22); }
-    50%{ transform:scale(1.045); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 44px rgba(0,0,0,0.6), 0 0 44px rgba(217,60,52,0.42); }
+    0%, 100%{ transform:scale(1); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 55px 10px rgba(217,60,52,0.26); }
+    50%{ transform:scale(1.045); box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 44px rgba(0,0,0,0.6), 0 0 95px 20px rgba(217,60,52,0.48); }
   }
   @media (prefers-reduced-motion: reduce){
     .splash-artwork{ animation:none !important; }
@@ -5122,13 +5128,25 @@
   // Klassik qo'ng'iroqcha (bell) — bitta aniq "ting" zarbasi, keyin uzoq va
   // silliq so'nib boradi. Haqiqiy qo'ng'iroqlarga xos: asosiy ton + biroz
   // "notoʻgʻri" (inharmonik) yuqori overton — shu narsa uni sintetik "bip"dan
-  // farqlab, iliq, jonli va tabiiy qiladi. Faqat kartochka orqa (tarjima/
-  // romaji) tomoniga o'tganda chiqadi.
+  // farqlab, iliq, jonli va tabiiy qiladi. Qo'shimcha: zarba paytidagi qisqa
+  // "tick" (chertilish) transienti, pastki registrda iliqlik beruvchi "tana"
+  // toni va yengil "xona aksi" (kechikish) — bularning barchasi tovushni
+  // to'liqroq, boyroq va quloqqa yanada yoqimli qiladi. Faqat kartochka orqa
+  // (tarjima/romaji) tomoniga o'tganda chiqadi.
   function playFlipSound(){
     try{
       const ctx = getAudioCtx();
       if(!ctx) return;
       const now = ctx.currentTime;
+
+      // yengil "xona aksi" — bell partiallari shu orqali ham chiqadi, biroz
+      // kechikib va xiralashib qaytadi, tovushga chuqurlik va iliqlik beradi
+      const echoDelay = ctx.createDelay();
+      echoDelay.delayTime.value = 0.11;
+      const echoGain = ctx.createGain();
+      echoGain.gain.value = 0.22;
+      echoDelay.connect(echoGain);
+      echoGain.connect(ctx.destination);
 
       function bellPartial(freq, peakGain, decay){
         const osc = ctx.createOscillator();
@@ -5140,13 +5158,32 @@
         gain.gain.exponentialRampToValueAtTime(0.0001, now + decay); // uzoq, silliq so'nish
         osc.connect(gain);
         gain.connect(ctx.destination);
+        gain.connect(echoDelay);
         osc.start(now);
         osc.stop(now + decay + 0.05);
       }
 
+      // zarba paytidagi juda qisqa "tick" — qo'ng'iroqchaga tayoqcha
+      // tekkanidagi haqiqiy chertilish tovushini beradi
+      const tickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate*0.01), ctx.sampleRate);
+      const tickData = tickBuf.getChannelData(0);
+      for(let i=0;i<tickData.length;i++){ tickData[i] = (Math.random()*2-1) * (1 - i/tickData.length); }
+      const tick = ctx.createBufferSource();
+      tick.buffer = tickBuf;
+      const tickFilter = ctx.createBiquadFilter();
+      tickFilter.type = 'highpass';
+      tickFilter.frequency.value = 3200;
+      const tickGain = ctx.createGain();
+      tickGain.gain.value = 0.05;
+      tick.connect(tickFilter);
+      tickFilter.connect(tickGain);
+      tickGain.connect(ctx.destination);
+      tick.start(now);
+
       bellPartial(783.99,  0.065, 0.85);  // G5 — asosiy ton, uzoq so'nadi
       bellPartial(1971.0,  0.020, 0.55);  // ~inharmonik overton — qo'ng'iroq "metall" tovushini beradi
       bellPartial(1567.98, 0.014, 0.40);  // G6 — yumshoq yorqinlik, tezroq so'nadi
+      bellPartial(392.0,   0.032, 0.95);  // G4 — pastki "tana" toni, iliqlik va to'liqlik beradi
     }catch(e){}
   }
 
@@ -5955,6 +5992,7 @@
     const audio = document.getElementById('splashPhonkAudio');
     const toggle = document.getElementById('splashMusicToggle');
     const wrap = document.getElementById('splashMusicWrap');
+    const artwork = document.getElementById('splashArtwork');
     if(!audio || !toggle) return {fadeOutAndStop(){}};
 
     const TARGET_VOLUME = 0.55;
@@ -5967,6 +6005,7 @@
     function setToggleState(){
       const showPaused = userPaused || audio.paused;
       if(wrap) wrap.classList.toggle('paused', showPaused);
+      if(artwork) artwork.classList.toggle('playing', !showPaused);
       toggle.setAttribute('aria-pressed', showPaused ? 'false' : 'true');
       toggle.setAttribute('aria-label', showPaused ? "Qo'shiqni davom ettirish" : "Qo'shiqni pauza qilish");
     }
