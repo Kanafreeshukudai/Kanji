@@ -1784,6 +1784,68 @@
   .quiz-opt.correct{background:var(--moss); border-color:var(--moss); color:#0B0D10;}
   .quiz-opt.wrong{background:var(--accent); border-color:var(--accent); color:#fff;}
 
+  /* ---------- TO'G'RI JAVOBDA: KICHIK SAMURAY QILICH BILAN KESIB O'TADI ----------
+     variant tugmasi ustidan chapdan o'ngga tez o'tib, o'rtada qilich yalt etib
+     yorqin chiziq (slash) qoldiradi, so'ng tugma ikki bo'lakka "kesilib"
+     bir-biridan ajralib ketadi (pastda esa allaqachon yashil "to'g'ri" rangi
+     ko'rinadi) — bu esa haqiqiy kesish illyuziyasini beradi */
+  .quiz-opt{ position:relative; }
+  .samurai-slash-layer{
+    position:absolute; inset:0;
+    pointer-events:none;
+    overflow:visible;
+    z-index:6;
+    border-radius:inherit;
+  }
+  .samurai-fig{
+    position:absolute;
+    top:50%; left:-22%;
+    transform:translateY(-50%) scaleX(1) rotate(0deg);
+    font-size:clamp(20px, 6.5vw, 26px);
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.55));
+    opacity:0;
+    animation:samuraiDash .5s cubic-bezier(.32,0,.24,1) forwards;
+    will-change:left, transform, opacity;
+  }
+  @keyframes samuraiDash{
+    0%{ left:-22%; opacity:0; transform:translateY(-50%) scaleX(1) rotate(0deg); }
+    12%{ opacity:1; }
+    52%{ left:46%; transform:translateY(-50%) scaleX(1) rotate(-10deg); }
+    100%{ left:118%; opacity:0; transform:translateY(-50%) scaleX(1) rotate(6deg); }
+  }
+  .slash-line{
+    position:absolute;
+    top:50%; left:6%; right:6%; height:3px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, #fff 50%, rgba(255,255,255,0.95) 60%, transparent);
+    box-shadow:0 0 10px 2px rgba(255,255,255,0.85), 0 0 20px 5px rgba(201,166,107,0.55);
+    transform:translateY(-50%) scaleX(0) rotate(-6deg);
+    transform-origin:left center;
+    opacity:0;
+    animation:slashSweep .26s ease-out forwards;
+    animation-delay:.2s;
+  }
+  @keyframes slashSweep{
+    0%{ transform:translateY(-50%) scaleX(0) rotate(-6deg); opacity:1; }
+    65%{ transform:translateY(-50%) scaleX(1) rotate(-6deg); opacity:1; }
+    100%{ transform:translateY(-50%) scaleX(1) rotate(-6deg); opacity:0; }
+  }
+  .opt-cut-half{
+    position:absolute; left:-2px; right:-2px;
+    height:54%;
+    border:2px solid var(--glass-border-soft);
+    border-radius:inherit;
+    pointer-events:none;
+    z-index:5;
+    transition:transform .4s cubic-bezier(.3,0,.22,1), opacity .38s ease .02s;
+  }
+  .opt-cut-top{ top:-2px; clip-path:polygon(0 0,100% 0,100% 82%,0 100%); }
+  .opt-cut-bottom{ bottom:-2px; clip-path:polygon(0 18%,100% 0,100% 100%,0 100%); }
+  .opt-cut-top.cut-open{ transform:translate(-16px,-18px) rotate(-5deg); opacity:0; }
+  .opt-cut-bottom.cut-open{ transform:translate(16px,18px) rotate(5deg); opacity:0; }
+  @media (prefers-reduced-motion: reduce){
+    .samurai-fig, .slash-line, .opt-cut-half{ display:none !important; }
+  }
+
   /* natija belgisi ("Ajoyib!" va h.k.) endi qatordan butunlay CHIQARILGAN —
      u konteyner ustiga mutlaq (absolute) joylashadi, shu bois matn uzun yoki
      ikki qatorga bo'linib ketsa ham, na kartaning, na variantlarning o'rni
@@ -5055,6 +5117,62 @@
     });
   }
 
+  // ---------- TO'G'RI JAVOBDA: KICHIK SAMURAY QILICH BILAN KESIB O'TADI ----------
+  // to'g'ri variant tugmasi ustidan kichik samuray (🥷) chapdan o'ngga tez
+  // yugurib o'tadi, o'rtada yorqin "qilich chizig'i" (slash) yaltiraydi,
+  // so'ngra tugmaning ustidan bir lahzalik "arvoh nusxasi" ikki bo'lakka
+  // bo'linib, yuqori-chapga va past-o'ngga uchib ketadi — go'yo samuray uni
+  // kesib tashlagandek. Haqiqiy tugma (allaqachon yashil rangga o'tgan) shu
+  // effekt ostida butun holicha qoladi, shuning uchun bosish/keyingi savolga
+  // o'tish oqimiga xalaqit bermaydi.
+  function playSamuraiCut(btn){
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const old = btn.querySelector('.samurai-slash-layer');
+    if(old) old.remove();
+
+    const layer = document.createElement('div');
+    layer.className = 'samurai-slash-layer';
+    layer.setAttribute('aria-hidden', 'true');
+
+    const fig = document.createElement('span');
+    fig.className = 'samurai-fig';
+    fig.textContent = '🥷';
+
+    const line = document.createElement('div');
+    line.className = 'slash-line';
+
+    // tugmaning HOZIRGI (allaqachon "to'g'ri" yashil rangga o'tgan) fonini
+    // "arvoh" bo'laklariga ham nusxalab qo'yamiz — shunda kesilib uchayotgan
+    // bo'laklar asl tugma bilan bir xil ko'rinadi
+    const computed = getComputedStyle(btn);
+    const top = document.createElement('div');
+    top.className = 'opt-cut-half opt-cut-top';
+    top.style.background = computed.backgroundColor;
+    top.style.borderColor = computed.borderColor;
+
+    const bottom = document.createElement('div');
+    bottom.className = 'opt-cut-half opt-cut-bottom';
+    bottom.style.background = computed.backgroundColor;
+    bottom.style.borderColor = computed.borderColor;
+
+    layer.appendChild(top);
+    layer.appendChild(bottom);
+    layer.appendChild(line);
+    layer.appendChild(fig);
+    btn.appendChild(layer);
+
+    // samuray yugurib o'tib, qilich chizig'i yaltiragandan SO'NG (~0.42s)
+    // bo'laklar bir-biridan "kesilib" ajraladi
+    setTimeout(()=>{
+      top.classList.add('cut-open');
+      bottom.classList.add('cut-open');
+    }, 420);
+
+    // animatsiya tugagach qatlamni tozalab qo'yamiz (keyingi savolga
+    // o'tishdan oldin, DOMda ortiqcha element qolib ketmasligi uchun)
+    setTimeout(()=>{ layer.remove(); }, 950);
+  }
+
   function handleQuizAnswer(btn, correctId, options){
     const chosenId = btn.getAttribute('data-id');
     const allBtns = document.querySelectorAll('.quiz-opt');
@@ -5065,6 +5183,7 @@
       flashPage('flash-correct');
       playCorrectSound();
       showQuizFeedback(true);
+      playSamuraiCut(btn);
     } else {
       btn.classList.add('wrong');
       allBtns.forEach(b=>{ if(b.getAttribute('data-id')===correctId) b.classList.add('correct'); });
@@ -6016,6 +6135,10 @@
     let userPaused = false; // foydalanuvchi tugma bilan to'xtatganmi
     let started = false;
     let fadeTimer = null;
+    // "Boshlash" bosilgach butunlay to'xtatilganini bildiradi — shundan keyin
+    // audio.play() ning kechikib kelgan (async) va'dasi ham qo'shiqni qayta
+    // yoqib yubormasligi uchun kerak (aks holda ba'zida musiqa "qolib ketardi")
+    let stopped = false;
 
     audio.volume = 0;
 
@@ -6046,10 +6169,13 @@
     }
 
     function tryStart(){
-      if(started || userPaused) return;
+      if(started || userPaused || stopped) return;
       const p = audio.play();
       if(p && typeof p.then === 'function'){
         p.then(()=>{
+          // "Boshlash" bosilib ulgurgan bo'lsa (play() va'dasi kech kelgan
+          // bo'lsa ham) — musiqani qayta yoqmasdan, darhol to'xtatamiz
+          if(stopped){ try{ audio.pause(); }catch(e){} return; }
           started = true;
           fadeTo(TARGET_VOLUME, 900);
           setToggleState();
@@ -6057,6 +6183,7 @@
           // Avtoplay bloklandi — birinchi foydalanuvchi teginishida qayta urinamiz
         });
       } else {
+        if(stopped){ try{ audio.pause(); }catch(e){} return; }
         started = true;
         fadeTo(TARGET_VOLUME, 900);
         setToggleState();
@@ -6087,8 +6214,15 @@
 
     return {
       fadeOutAndStop(ms){
+        stopped = true;
+        userPaused = true;
         if(fadeTimer) clearInterval(fadeTimer);
-        fadeTo(0, ms || 700, ()=>{ audio.pause(); });
+        fadeTo(0, ms || 700, ()=>{
+          try{
+            audio.pause();
+            audio.currentTime = 0; // keyingi safar tasodifan qayta ishga tushsa ham, boshidan boshlansin
+          }catch(e){}
+        });
       }
     };
   })();
