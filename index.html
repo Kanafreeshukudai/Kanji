@@ -3216,9 +3216,9 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
-  const NEW_DAY_ID = 22; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+  const NEW_DAY_ID = 23; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -3698,6 +3698,22 @@
     {id:"sukunai22", day:22, group:"少", kanji:"少ない", romaji:"sukunai", type:"kun'yomi", reading:"少ない(sukunai)", uz:"oz, kam"},
     {id:"shounen22", day:22, group:"少", kanji:"少年", romaji:"shounen", type:"on + on", reading:"少(shou) + 年(nen)", uz:"yigit"},
     {id:"shoujo22", day:22, group:"少", kanji:"少女", romaji:"shoujo", type:"on + on", reading:"少(shou) + 女(jo)", uz:"qiz"},
+
+    {id:"ooikanji23", day:23, group:"多", kanji:"多", romaji:"ooi", type:"kun'yomi", reading:"多い(ooi) — yakka kanji", otherReadings:"on: タ(ta) · kun: おお-い(ooi)", uz:"ko'p"},
+    {id:"ooi23", day:23, group:"多", kanji:"多い", romaji:"ooi", type:"kun'yomi", reading:"多い(ooi)", uz:"ko'p"},
+    {id:"tabun23", day:23, group:"多", kanji:"多分", romaji:"tabun", type:"on + on", reading:"多(ta) + 分(bun)", uz:"ehtimol"},
+
+    {id:"takaikanji23", day:23, group:"高", kanji:"高", romaji:"takai", type:"kun'yomi", reading:"高い(takai) — yakka kanji", otherReadings:"on: コウ(kou) · kun: たか-い(takai)", uz:"yuqori, baland, qimmat"},
+    {id:"takai23", day:23, group:"高", kanji:"高い", romaji:"takai", type:"kun'yomi", reading:"高い(takai)", uz:"yuqori, qimmat"},
+    {id:"koukou23", day:23, group:"高", kanji:"高校", romaji:"koukou", type:"on + on", reading:"高(kou) + 校(kou)", uz:"litsey, yuqori maktab"},
+    {id:"saikou23", day:23, group:"高", kanji:"最高", romaji:"saikou", type:"on + on", reading:"最(sai) + 高(kou)", uz:"eng zo'r (N3)"},
+
+    {id:"hayaikanji23", day:23, group:"早", kanji:"早", romaji:"hayai", type:"kun'yomi", reading:"早い(hayai) — yakka kanji", otherReadings:"on: ソウ(sou), サッ(sa) · kun: はや-い(hayai)", uz:"erta, tez"},
+    {id:"hayai23", day:23, group:"早", kanji:"早い", romaji:"hayai", type:"kun'yomi", reading:"早い(hayai)", uz:"erta, tez"},
+
+    {id:"furuikanji23", day:23, group:"古", kanji:"古", romaji:"furui", type:"kun'yomi", reading:"古い(furui) — yakka kanji", otherReadings:"on: コ(ko) · kun: ふる-い(furui)", uz:"eski"},
+    {id:"furui23", day:23, group:"古", kanji:"古い", romaji:"furui", type:"kun'yomi", reading:"古い(furui)", uz:"eski"},
+    {id:"nagoya23", day:23, group:"古", kanji:"名古屋", romaji:"nagoya", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"Nagoya shahri (qo'shimcha bilim)"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
