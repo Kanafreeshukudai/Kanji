@@ -1082,6 +1082,19 @@
   }
   .card.flipped .card-inner{transform:rotateY(180deg); -webkit-transform:rotateY(180deg);}
 
+  /* ---- aylanish paytida GPU yukini yengillatish ----
+     backdrop-filter (blur+saturate) 3D rotateY bilan birga animatsiya qilinganda
+     brauzer har bir kadrda blur namunasini qaytadan hisoblashga majbur bo'ladi —
+     aynan shu narsa aylanishni "qotib-qotib" (janky) ko'rsatadi. Shuning uchun
+     aylanish davom etayotgan paytda (JS orqali qo'shiladigan .flipping klassi)
+     backdrop-filter va og'ir soyalar vaqtincha o'chiriladi, oddiy orqa fon bilan
+     almashtiriladi; transition tugagach avtomatik qaytariladi (pastda, JS). */
+  .card.flipping .face{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .card.flipping .face.back{ animation:none !important; }
+
   /* ---- maxsus kartochka hosil bo'lish animatsiyasi ---- */
   @keyframes cardFormSpin{
     0%{ transform:rotateY(0deg) scale(.22); opacity:0; }
@@ -4656,6 +4669,9 @@
       // lazy will-change: 3D aylanish transitioni boshlanishidan oldin GPU qatlami
       // faqat card-inner uchun yoqiladi, transitionend'da avtomatik o'chadi (pastda)
       inner.style.willChange = 'transform';
+      // aylanish paytida backdrop-filter'ni vaqtincha o'chirib, silliq aylanishni
+      // ta'minlaymiz (pastdagi transitionend'da .flipping olib tashlanadi)
+      card.classList.add('flipping');
       card.classList.toggle('flipped');
       // tovush faqat old tomondan orqa tomonga (tarjima/romaji ko'rinayotganda)
       // o'tilganda chiqadi — orqaga, ya'ni kanji tomoniga qaytilganda jim
@@ -4673,7 +4689,10 @@
     // cardGlow va boshqa vizual effektlarga umuman tegmaydi, faqat
     // will-change'ning bekorga doimiy yonib turishining oldini oladi
     inner.addEventListener('transitionend', (e)=>{
-      if(e.propertyName === 'transform') inner.style.willChange = '';
+      if(e.propertyName === 'transform'){
+        inner.style.willChange = '';
+        card.classList.remove('flipping');
+      }
     }, {signal});
 
     // renderStage() har safar yangi kartochka chiqarganda shu funksiyani chaqirib,
