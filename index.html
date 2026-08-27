@@ -2135,6 +2135,17 @@
     pointer-events:none;
     display:block;
   }
+  .splash-content{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    flex:1 1 auto;
+    min-height:0;
+    width:100%;
+  }
   .splash-artwork, .splash-kanji-stage, .splash-title, .splash-sub, .splash-bar-track, .splash-login-btn, .splash-start-btn, .splash-credit{
     position:relative;
     z-index:1;
@@ -2866,14 +2877,13 @@
   .ai-assist-send-btn:active{transform:scale(0.9);}
 
   .splash-credit{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:26px;
     display:flex;
     flex-direction:column;
     align-items:center;
     gap:2px;
+    margin-top:14px;
+    padding-bottom:26px;
+    flex-shrink:0;
     opacity:0;
     animation:splashFadeUp .9s ease .8s forwards;
   }
@@ -3080,37 +3090,39 @@
 
 <div class="splash-screen" id="splashScreen" aria-hidden="true">
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
-  <div class="splash-artwork" id="splashArtwork">
-    <img src="splash-art.jpg" alt="" draggable="false">
-  </div>
-  <div class="splash-kanji-stage">
-    <span class="splash-kanji">山</span>
-    <span class="splash-kanji">学</span>
-    <span class="splash-kanji">漢</span>
-  </div>
-  <div class="splash-title">Kanji Flashcard</div>
-  <div class="splash-sub">So'z birikmalari</div>
-  <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
-  <!--
-    PHONK MUSIQA: shu papkada "song.m4a" nomli audio fayl bo'lishi kerak
-    (index.html bilan bir joyda, masalan GitHub Pages repo tub papkasida).
-    Boshqa nom yoki joy ishlatsangiz, pastdagi src="song.m4a" ni
-    o'zgartiring.
-  -->
-  <audio id="splashPhonkAudio" src="song.m4a" preload="auto" loop playsinline></audio>
-  <div class="splash-music-wrap" id="splashMusicWrap">
-    <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
-      <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
-      <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
+  <div class="splash-content" id="splashContent">
+    <div class="splash-artwork" id="splashArtwork">
+      <img src="splash-art.jpg" alt="" draggable="false">
+    </div>
+    <div class="splash-kanji-stage">
+      <span class="splash-kanji">山</span>
+      <span class="splash-kanji">学</span>
+      <span class="splash-kanji">漢</span>
+    </div>
+    <div class="splash-title">Kanji Flashcard</div>
+    <div class="splash-sub">So'z birikmalari</div>
+    <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
+    <!--
+      PHONK MUSIQA: shu papkada "song.m4a" nomli audio fayl bo'lishi kerak
+      (index.html bilan bir joyda, masalan GitHub Pages repo tub papkasida).
+      Boshqa nom yoki joy ishlatsangiz, pastdagi src="song.m4a" ni
+      o'zgartiring.
+    -->
+    <audio id="splashPhonkAudio" src="song.m4a" preload="auto" loop playsinline></audio>
+    <div class="splash-music-wrap" id="splashMusicWrap">
+      <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
+        <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
+        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
+      </button>
+      <div class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <button class="auth-login-btn splash-login-btn" id="login-btn" type="button" style="display:none;">
+      <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+      <span>Google bilan kirish</span>
     </button>
-    <div class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <button class="splash-start-btn" id="splashStartBtn" type="button" disabled>Boshlash</button>
+    <div class="splash-start-hint" id="splashStartHint">Davom etish uchun avval Google hisobingizga kiring</div>
   </div>
-  <button class="auth-login-btn splash-login-btn" id="login-btn" type="button" style="display:none;">
-    <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
-    <span>Google bilan kirish</span>
-  </button>
-  <button class="splash-start-btn" id="splashStartBtn" type="button" disabled>Boshlash</button>
-  <div class="splash-start-hint" id="splashStartHint">Davom etish uchun avval Google hisobingizga kiring</div>
   <div class="splash-credit">
     <span class="splash-credit-name">Created by Doniyorbek</span>
     <span class="splash-credit-year" id="splashCreditYear">2026</span>
@@ -3800,8 +3812,8 @@
     {id:"furui23", day:23, group:"古", kanji:"古い", romaji:"furui", type:"kun'yomi", reading:"古い(furui)", uz:"eski"},
     {id:"nagoya23", day:23, group:"古", kanji:"名古屋", romaji:"nagoya", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"Nagoya shahri (qo'shimcha bilim)"},
 
-    {id:"nagaikanji24", day:24, group:"長", kanji:"長", romaji:"nagai", type:"kun'yomi", reading:"長い(nagai) — yakka kanji", otherReadings:"on: チョウ(chou) · kun: なが-い(nagai), おさ(osa)", uz:"uzoq"},
-    {id:"nagai24", day:24, group:"長", kanji:"長い", romaji:"nagai", type:"kun'yomi", reading:"長い(nagai)", uz:"uzoq"},
+    {id:"nagaikanji24", day:24, group:"長", kanji:"長", romaji:"nagai", type:"kun'yomi", reading:"長い(nagai) — yakka kanji", otherReadings:"on: チョウ(chou) · kun: なが-い(nagai), おさ(osa)", uz:"uzun"},
+    {id:"nagai24", day:24, group:"長", kanji:"長い", romaji:"nagai", type:"kun'yomi", reading:"長い(nagai)", uz:"uzun"},
     {id:"shachou24", day:24, group:"長", kanji:"社長", romaji:"shachou", type:"on + on", reading:"社(sha) + 長(chou)", uz:"kompaniya prezidenti"},
     {id:"buchou24", day:24, group:"長", kanji:"部長", romaji:"buchou", type:"on + on", reading:"部(bu) + 長(chou)", uz:"bo'lim boshlig'i"},
 
