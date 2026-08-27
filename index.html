@@ -1814,22 +1814,6 @@
     z-index:6;
     border-radius:inherit;
   }
-  .samurai-fig{
-    position:absolute;
-    top:50%; left:-22%;
-    transform:translateY(-50%) scaleX(1) rotate(0deg);
-    font-size:clamp(20px, 6.5vw, 26px);
-    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.55));
-    opacity:0;
-    animation:samuraiDash .5s cubic-bezier(.32,0,.24,1) forwards;
-    will-change:left, transform, opacity;
-  }
-  @keyframes samuraiDash{
-    0%{ left:-22%; opacity:0; transform:translateY(-50%) scaleX(1) rotate(0deg); }
-    12%{ opacity:1; }
-    52%{ left:46%; transform:translateY(-50%) scaleX(1) rotate(-10deg); }
-    100%{ left:118%; opacity:0; transform:translateY(-50%) scaleX(1) rotate(6deg); }
-  }
   .slash-line{
     position:absolute;
     top:50%; left:6%; right:6%; height:3px;
@@ -1860,7 +1844,7 @@
   .opt-cut-top.cut-open{ transform:translate(-16px,-18px) rotate(-5deg); opacity:0; }
   .opt-cut-bottom.cut-open{ transform:translate(16px,18px) rotate(5deg); opacity:0; }
   @media (prefers-reduced-motion: reduce){
-    .samurai-fig, .slash-line, .opt-cut-half{ display:none !important; }
+    .slash-line, .opt-cut-half{ display:none !important; }
   }
 
   /* natija belgisi ("Ajoyib!" va h.k.) endi qatordan butunlay CHIQARILGAN —
@@ -3295,9 +3279,9 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
-  const NEW_DAY_ID = 23; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+  const NEW_DAY_ID = 24; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -3793,6 +3777,28 @@
     {id:"furuikanji23", day:23, group:"古", kanji:"古", romaji:"furui", type:"kun'yomi", reading:"古い(furui) — yakka kanji", otherReadings:"on: コ(ko) · kun: ふる-い(furui)", uz:"eski"},
     {id:"furui23", day:23, group:"古", kanji:"古い", romaji:"furui", type:"kun'yomi", reading:"古い(furui)", uz:"eski"},
     {id:"nagoya23", day:23, group:"古", kanji:"名古屋", romaji:"nagoya", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"Nagoya shahri (qo'shimcha bilim)"},
+
+    {id:"nagaikanji24", day:24, group:"長", kanji:"長", romaji:"nagai", type:"kun'yomi", reading:"長い(nagai) — yakka kanji", otherReadings:"on: チョウ(chou) · kun: なが-い(nagai), おさ(osa)", uz:"uzoq"},
+    {id:"nagai24", day:24, group:"長", kanji:"長い", romaji:"nagai", type:"kun'yomi", reading:"長い(nagai)", uz:"uzoq"},
+    {id:"shachou24", day:24, group:"長", kanji:"社長", romaji:"shachou", type:"on + on", reading:"社(sha) + 長(chou)", uz:"kompaniya prezidenti"},
+    {id:"buchou24", day:24, group:"長", kanji:"部長", romaji:"buchou", type:"on + on", reading:"部(bu) + 長(chou)", uz:"bo'lim boshlig'i"},
+
+    {id:"motokanji24", day:24, group:"元", kanji:"元", romaji:"moto", type:"kun'yomi", reading:"元(moto) — yakka kanji", otherReadings:"on: ゲン(gen), ガン(gan) · kun: もと(moto)", uz:"kelib chiqishi, oldingi"},
+    {id:"genkina24", day:24, group:"元", kanji:"元気な", romaji:"genki na", type:"on + on", reading:"元(gen) + 気(ki)", uz:"baquvvat"},
+    {id:"ganjitsu24", day:24, group:"元", kanji:"元日", romaji:"ganjitsu", type:"on + on", reading:"元(gan) + 日(jitsu)", uz:"Yangi yil kuni"},
+    {id:"jimoto24", day:24, group:"元", kanji:"地元", romaji:"jimoto", type:"on + kun", reading:"地(ji) + 元(moto)", uz:"mahalliy"},
+
+    {id:"rakukanji24", day:24, group:"楽", kanji:"楽", romaji:"tanoshii", type:"kun'yomi", reading:"楽しい(tanoshii) — yakka kanji", otherReadings:"on: ガク(gaku), ラク(raku) · kun: たの-しい(tanoshii), たの-しむ(tanoshimu)", uz:"quvnoq, yoqimli"},
+    {id:"ongaku24", day:24, group:"楽", kanji:"音楽", romaji:"ongaku", type:"on + on", reading:"音(on) + 楽(gaku)", uz:"musiqa"},
+    {id:"tanoshii24", day:24, group:"楽", kanji:"楽しい", romaji:"tanoshii", type:"kun'yomi", reading:"楽しい(tanoshii)", uz:"qiziqarli, zavqli"},
+    {id:"rakuna24", day:24, group:"楽", kanji:"楽な", romaji:"rakuna", type:"kun'yomi", reading:"楽な(rakuna)", uz:"oson, qulay"},
+    {id:"kirakuni24", day:24, group:"楽", kanji:"気楽に", romaji:"kirakuni", type:"on + on", reading:"気(ki) + 楽(raku)", uz:"xavotirsiz, ikkilanmasdan"},
+
+    {id:"tadashiikanji24", day:24, group:"正", kanji:"正", romaji:"tadashii", type:"kun'yomi", reading:"正しい(tadashii) — yakka kanji", otherReadings:"on: セイ(sei), ショウ(shou) · kun: ただ-しい(tadashii)", uz:"to'g'ri"},
+    {id:"tadashii24", day:24, group:"正", kanji:"正しい", romaji:"tadashii", type:"kun'yomi", reading:"正しい(tadashii)", uz:"to'g'ri"},
+    {id:"seikakuna24", day:24, group:"正", kanji:"正確な", romaji:"seikaku na", type:"on + on", reading:"正(sei) + 確(kaku)", uz:"aniq"},
+    {id:"shoujikina24", day:24, group:"正", kanji:"正直な", romaji:"shoujiki na", type:"on + on", reading:"正(shou) + 直(jiki)", uz:"halol"},
+    {id:"oshougatsu24", day:24, group:"正", kanji:"お正月", romaji:"oshougatsu", type:"— + on + on", reading:"お + 正(shou) + 月(gatsu)", uz:"Yangi yil (bayrami)"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -5157,12 +5163,11 @@
     });
   }
 
-  // ---------- TO'G'RI JAVOBDA: KICHIK SAMURAY QILICH BILAN KESIB O'TADI ----------
-  // to'g'ri variant tugmasi ustidan kichik samuray (🥷) chapdan o'ngga tez
-  // yugurib o'tadi, o'rtada yorqin "qilich chizig'i" (slash) yaltiraydi,
-  // so'ngra tugmaning ustidan bir lahzalik "arvoh nusxasi" ikki bo'lakka
-  // bo'linib, yuqori-chapga va past-o'ngga uchib ketadi — go'yo samuray uni
-  // kesib tashlagandek. Haqiqiy tugma (allaqachon yashil rangga o'tgan) shu
+  // ---------- TO'G'RI JAVOBDA: QILICH BILAN KESIB O'TADI ----------
+  // to'g'ri variant tugmasi ustida o'rtada yorqin "qilich chizig'i" (slash)
+  // yaltiraydi, so'ngra tugmaning ustidan bir lahzalik "arvoh nusxasi" ikki
+  // bo'lakka bo'linib, yuqori-chapga va past-o'ngga uchib ketadi — go'yo
+  // kesib tashlangandek. Haqiqiy tugma (allaqachon yashil rangga o'tgan) shu
   // effekt ostida butun holicha qoladi, shuning uchun bosish/keyingi savolga
   // o'tish oqimiga xalaqit bermaydi.
   function playSamuraiCut(btn){
@@ -5173,10 +5178,6 @@
     const layer = document.createElement('div');
     layer.className = 'samurai-slash-layer';
     layer.setAttribute('aria-hidden', 'true');
-
-    const fig = document.createElement('span');
-    fig.className = 'samurai-fig';
-    fig.textContent = '🥷';
 
     const line = document.createElement('div');
     line.className = 'slash-line';
@@ -5198,7 +5199,6 @@
     layer.appendChild(top);
     layer.appendChild(bottom);
     layer.appendChild(line);
-    layer.appendChild(fig);
     btn.appendChild(layer);
 
     // samuray yugurib o'tib, qilich chizig'i yaltiragandan SO'NG (~0.42s)
