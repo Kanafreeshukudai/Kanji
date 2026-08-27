@@ -273,6 +273,37 @@
   .chat-toggle-btn:active{transform:scale(0.92);}
   .chat-toggle-btn svg{width:17px; height:17px; display:block;}
 
+  /* Chat/AI yordamchi ishlatilayotganda (panel ochiq turganda) tugma
+     tovlanib (shimmer/glow) turadi — foydalanuvchiga qaysi tugma faol
+     ekanini bildiradi. */
+  @keyframes btnUseShimmer{
+    0%{ background-position:200% 0; }
+    100%{ background-position:-200% 0; }
+  }
+  @keyframes btnUseGlow{
+    0%, 100%{ box-shadow:0 0 0 1px rgba(255,255,255,0.12), 0 0 0 0 rgba(217,60,52,0); }
+    50%{ box-shadow:0 0 0 1px rgba(255,255,255,0.22), 0 0 16px 4px rgba(217,60,52,0.45); }
+  }
+  .chat-toggle-btn.in-use, .ai-assist-btn.in-use{
+    position:relative;
+    overflow:hidden;
+    animation:btnUseGlow 1.4s ease-in-out infinite;
+  }
+  .chat-toggle-btn.in-use::after, .ai-assist-btn.in-use::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,0.65) 50%, transparent 65%);
+    background-size:200% 100%;
+    animation:btnUseShimmer 2.4s linear infinite;
+    pointer-events:none;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .chat-toggle-btn.in-use, .ai-assist-btn.in-use{animation:none;}
+    .chat-toggle-btn.in-use::after, .ai-assist-btn.in-use::after{animation:none; display:none;}
+  }
+
   /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
   .auth-box{
     width:100%;
@@ -5987,18 +6018,22 @@
   function openChatPanel(){
     const panel = document.getElementById('chatPanel');
     const overlay = document.getElementById('chatOverlay');
+    const fabBtn = document.getElementById('chatToggleBtn');
     updateChatNickLabel();
     renderChatMessages();
     if(panel){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
     if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+    if(fabBtn) fabBtn.classList.add('in-use');
     lockPageScroll();
     setTimeout(()=>{ try{ document.getElementById('chatInput').focus(); }catch(e){} }, 260);
   }
   function closeChatPanel(){
     const panel = document.getElementById('chatPanel');
     const overlay = document.getElementById('chatOverlay');
+    const fabBtn = document.getElementById('chatToggleBtn');
     if(panel){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
     if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+    if(fabBtn) fabBtn.classList.remove('in-use');
     unlockPageScroll();
   }
   // ---------- NICKNAME MODAL (zamonaviy oyna, prompt() o'rniga) ----------
@@ -6162,12 +6197,14 @@
     function openPanel(){
       panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
       if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+      if(btn) btn.classList.add('in-use');
       lockPageScroll();
       setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 260);
     }
     function closePanel(){
       panel.classList.remove('open'); panel.setAttribute('aria-hidden','true');
       if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+      if(btn) btn.classList.remove('in-use');
       unlockPageScroll();
     }
 
