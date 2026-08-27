@@ -1679,29 +1679,32 @@
      chetki ramkasi o'z rangida bir maromda, pulsatsiyasiz yonib turadi ---------- */
   #view-all .quiz-launch{
     --glow-rgb:217,105,79;
+    background:transparent;
     border:1px solid rgba(var(--glow-rgb),0.9);
-    box-shadow:0 10px 24px -8px rgba(217,105,79,0.4), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
   }
   #view-all .quiz-launch-romaji{
     --glow-rgb:124,154,107;
     border-color:rgba(var(--glow-rgb),0.9);
-    box-shadow:0 10px 24px -8px rgba(124,154,107,0.4), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
   }
   #view-all .quiz-launch-timed{
     --glow-rgb:201,166,107;
+    color:var(--gold);
     border-color:rgba(var(--glow-rgb),0.9);
-    box-shadow:0 10px 24px -8px rgba(201,166,107,0.45), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
   }
   #view-all .quiz-launch:disabled{
-    background:var(--panel-2); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
+    background:rgba(255,255,255,0.04); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
   }
   #view-all .flashcard-convert-btn{
     --glow-rgb:92,130,166;
+    background:transparent;
     border:1px solid rgba(var(--glow-rgb),0.9);
-    box-shadow:0 10px 24px -8px rgba(92,130,166,0.45), 0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.6), 0 0 12px 1px rgba(var(--glow-rgb),0.5);
   }
   #view-all .flashcard-convert-btn.disabled{
-    background:var(--panel-2); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
+    background:rgba(255,255,255,0.04); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
   }
   #view-all .flashcard-shuffle-btn{
     --glow-rgb:217,105,79;
@@ -2400,6 +2403,7 @@
   }
   .nickname-overlay.show{opacity:1; pointer-events:auto;}
   .nickname-card{
+    position:relative;
     width:100%;
     max-width:320px;
     border-radius:22px;
@@ -2460,6 +2464,23 @@
     box-shadow:none;
   }
   .nickname-confirm-btn:disabled:active{transform:none;}
+  .nickname-close-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .nickname-close-btn:active{transform:scale(0.9);}
 
   /* ---------- GLOBAL CHAT (shu qurilmada saqlanadi) ---------- */
   .chat-overlay{
@@ -3220,11 +3241,12 @@
 <!-- ---------- NICKNAME MODAL ---------- -->
 <div class="nickname-overlay" id="nicknameOverlay" aria-hidden="true">
   <div class="nickname-card">
-    <div class="nickname-emoji">👋</div>
-    <h2>Sizni qanday chaqiraylik?</h2>
-    <p>Davom etish uchun nickname kiriting. Bu ism chatda boshqalarga shu nom bilan ko'rinadi.</p>
+    <button class="nickname-close-btn" id="nicknameCloseBtn" type="button" aria-label="Yopish">✕</button>
+    <div class="nickname-emoji">✏️</div>
+    <h2>Nickname'ni tahrirlash</h2>
+    <p>Bu ism chatda boshqalarga shu nom bilan ko'rinadi.</p>
     <input class="nickname-input" id="nicknameInput" type="text" maxlength="18" placeholder="Nickname" autocomplete="off" autocorrect="off" spellcheck="false" required>
-    <button class="nickname-confirm-btn" id="nicknameConfirmBtn" type="button" disabled>Davom etish</button>
+    <button class="nickname-confirm-btn" id="nicknameConfirmBtn" type="button" disabled>Saqlash</button>
   </div>
 </div>
 
@@ -5967,6 +5989,55 @@
     if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
     unlockPageScroll();
   }
+  // ---------- NICKNAME MODAL (zamonaviy oyna, prompt() o'rniga) ----------
+  function openNicknameModal(){
+    const overlay = document.getElementById('nicknameOverlay');
+    const input = document.getElementById('nicknameInput');
+    const confirmBtn = document.getElementById('nicknameConfirmBtn');
+    if(!overlay || !input || !confirmBtn) return;
+    input.value = getNickname();
+    confirmBtn.disabled = input.value.trim().length === 0;
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    lockPageScroll();
+    setTimeout(()=>{ input.focus(); input.select(); }, 260);
+  }
+  function closeNicknameModal(){
+    const overlay = document.getElementById('nicknameOverlay');
+    if(!overlay || !overlay.classList.contains('show')) return;
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    unlockPageScroll();
+  }
+  function confirmNicknameModal(){
+    const input = document.getElementById('nicknameInput');
+    const confirmBtn = document.getElementById('nicknameConfirmBtn');
+    if(!input || confirmBtn.disabled) return;
+    const val = input.value.trim().slice(0, 18);
+    if(!val) return;
+    setNickname(val);
+    updateChatNickLabel();
+    renderChatMessages();
+    closeNicknameModal();
+  }
+  (function initNicknameModal(){
+    const overlay = document.getElementById('nicknameOverlay');
+    const card = overlay ? overlay.querySelector('.nickname-card') : null;
+    const input = document.getElementById('nicknameInput');
+    const confirmBtn = document.getElementById('nicknameConfirmBtn');
+    const closeBtn = document.getElementById('nicknameCloseBtn');
+    if(overlay) overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeNicknameModal(); });
+    if(card) card.addEventListener('click', (e)=> e.stopPropagation());
+    if(closeBtn) closeBtn.addEventListener('click', closeNicknameModal);
+    if(confirmBtn) confirmBtn.addEventListener('click', confirmNicknameModal);
+    if(input){
+      input.addEventListener('input', ()=>{ confirmBtn.disabled = input.value.trim().length === 0; });
+      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') confirmNicknameModal(); });
+    }
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && overlay && overlay.classList.contains('show')) closeNicknameModal();
+    });
+  })();
   (function initChatWidget(){
     const fab = document.getElementById('chatToggleBtn');
     const closeBtn = document.getElementById('chatCloseBtn');
@@ -5979,15 +6050,8 @@
     if(overlay) overlay.addEventListener('click', closeChatPanel);
     if(sendBtn) sendBtn.addEventListener('click', sendChatMessage);
     if(input) input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendChatMessage(); });
-    // chat sarlavhasidagi nickname bosilsa — nickname'ni o'zgartirish imkoni
-    if(nickLabel) nickLabel.addEventListener('click', ()=>{
-      const cur = getNickname();
-      const next = prompt("Nickname'ingizni o'zgartiring:", cur);
-      if(next !== null){
-        const val = next.trim().slice(0,18);
-        if(val){ setNickname(val); updateChatNickLabel(); renderChatMessages(); }
-      }
-    });
+    // chat sarlavhasidagi nickname bosilsa — zamonaviy oyna orqali tahrirlanadi
+    if(nickLabel) nickLabel.addEventListener('click', openNicknameModal);
     if(nickLabel) nickLabel.style.cursor = 'pointer';
   })();
 
