@@ -375,6 +375,37 @@
     object-fit:cover;
     display:block;
     background:var(--glass-bg);
+    cursor:pointer;
+  }
+
+  /* ---------- Banner video bosilganda chiqadigan "tez kunda" bildirishnomasi ---------- */
+  .banner-soon-toast{
+    position:fixed;
+    left:50%;
+    bottom:32px;
+    transform:translateX(-50%) translateY(12px);
+    max-width:88vw;
+    padding:11px 18px;
+    border-radius:999px;
+    border:1px solid var(--glass-border-soft);
+    background:rgba(20,18,30,0.92);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:#f1ecff;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:13px;
+    font-weight:700;
+    text-align:center;
+    white-space:nowrap;
+    box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    opacity:0;
+    pointer-events:none;
+    z-index:9999;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .banner-soon-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
   }
 
   /* ---------- AI YORDAMCHI tugmasi — akkaunt belgisining chap tarafida ---------- */
@@ -6115,6 +6146,26 @@
     // chat sarlavhasidagi nickname bosilsa — zamonaviy oyna orqali tahrirlanadi
     if(nickLabel) nickLabel.addEventListener('click', openNicknameModal);
     if(nickLabel) nickLabel.style.cursor = 'pointer';
+  })();
+
+  // ---------- Banner video bosilganda "tez kunda yangi funksiya" bildirishnomasi ----------
+  (function initBannerSoonToast(){
+    const video = document.getElementById('authBannerVideo');
+    if(!video) return;
+    let toastEl = null;
+    let hideTimer = null;
+    function showToast(){
+      if(!toastEl){
+        toastEl = document.createElement('div');
+        toastEl.className = 'banner-soon-toast';
+        toastEl.textContent = "Tez kunda yangi funksiya qo'shiladi";
+        document.body.appendChild(toastEl);
+      }
+      clearTimeout(hideTimer);
+      requestAnimationFrame(()=>{ toastEl.classList.add('show'); });
+      hideTimer = setTimeout(()=>{ toastEl.classList.remove('show'); }, 2200);
+    }
+    video.addEventListener('click', showToast);
   })();
 
   // ---------- AI YORDAMCHI — Groq API orqali, faqat yapon tili (kanji/so'z/grammatika) mavzusida ----------
