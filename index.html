@@ -1650,7 +1650,12 @@
     display:flex;
     flex-wrap:wrap;
     gap:10px;
-    margin-top:18px;
+    margin:18px auto 0;
+    /* boshqa qatorlar (Bilganlarim/Hammasi, Kunlar) kabi katta ekranda ham
+       standart (tor) enida qoladi — aks holda tugmalar "Hammasi" bosilgach
+       butun main kengligiga cho'zilib ketardi. */
+    max-width:480px;
+    width:calc(100% - 40px);
   }
   .quiz-launch{
     position:relative;
@@ -1698,8 +1703,11 @@
     align-items:center;
     justify-content:space-between;
     gap:10px;
-    width:100%;
-    margin-top:14px;
+    width:calc(100% - 40px);
+    /* yuqoridagi qatorlar bilan bir xil ustunda turishi uchun — katta
+       ekranda ham 480px'dan kengaymaydi */
+    max-width:480px;
+    margin:14px auto 0;
     background:var(--slate);
     color:#fff;
     border:none;
