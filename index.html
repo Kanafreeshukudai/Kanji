@@ -307,7 +307,10 @@
   /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
   .auth-box{
     width:100%;
-    max-width:var(--content-max);
+    /* katta ekranda ham telefon-eni (480px) saqlaydi — pastdagi
+       Bilganlarim/Hammasi/Kunlar qatorlari bilan bir xil ustunda turishi
+       uchun (faqat kartochkalar maydoni kengayadi, header emas). */
+    max-width:480px;
     display:flex;
     justify-content:flex-end;
     align-items:center;
@@ -3390,9 +3393,9 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
-  const NEW_DAY_ID = 24; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25];
+  const NEW_DAY_ID = 25; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -3910,6 +3913,26 @@
     {id:"seikakuna24", day:24, group:"正", kanji:"正確な", romaji:"seikaku na", type:"on + on", reading:"正(sei) + 確(kaku)", uz:"aniq"},
     {id:"shoujikina24", day:24, group:"正", kanji:"正直な", romaji:"shoujiki na", type:"on + on", reading:"正(shou) + 直(jiki)", uz:"halol"},
     {id:"oshougatsu24", day:24, group:"正", kanji:"お正月", romaji:"oshougatsu", type:"— + on + on", reading:"お + 正(shou) + 月(gatsu)", uz:"Yangi yil (bayrami)"},
+
+    // ---- 25-kun ----
+    {id:"higashi25", day:25, group:"東", kanji:"東", romaji:"higashi", type:"kun'yomi", reading:"東(higashi) — yakka kanji", otherReadings:"kun: ひがし(higashi) · on: トウ(tou)", uz:"sharq"},
+    {id:"higashiguchi25", day:25, group:"東", kanji:"東口", romaji:"higashiguchi", type:"kun + kun", reading:"東(higashi) + 口(guchi)", uz:"sharqiy chiqish"},
+    {id:"toukyou25", day:25, group:"東", kanji:"東京", romaji:"toukyou", type:"on + on", reading:"東(tou) + 京(kyou)", uz:"Tokio"},
+    {id:"touhokuchihou25", day:25, group:"東", kanji:"東北地方", romaji:"touhoku chihou", type:"on + on + on + on", reading:"東(tou) + 北(hoku) + 地(chi) + 方(hou)", uz:"Toxoku hududi"},
+    {id:"toukaichihou25", day:25, group:"東", kanji:"東海地方", romaji:"toukai chihou", type:"on + on + on + on", reading:"東(tou) + 海(kai) + 地(chi) + 方(hou)", uz:"Tokay hududi"},
+
+    {id:"nishi25", day:25, group:"西", kanji:"西", romaji:"nishi", type:"kun'yomi", reading:"西(nishi) — yakka kanji", otherReadings:"kun: にし(nishi) · on: セイ(sei), サイ(sai)", uz:"g'arb"},
+    {id:"nishiguchi25", day:25, group:"西", kanji:"西口", romaji:"nishiguchi", type:"kun + kun", reading:"西(nishi) + 口(guchi)", uz:"g'arbiy chiqish"},
+    {id:"kansaichihou25", day:25, group:"西", kanji:"関西地方", romaji:"kansai chihou", type:"on + on + on + on", reading:"関(kan) + 西(sai) + 地(chi) + 方(hou)", uz:"Kansay hududi"},
+    {id:"taiseiyou25", day:25, group:"西", kanji:"大西洋", romaji:"taiseiyou", type:"on + on + on", reading:"大(tai) + 西(sei) + 洋(you)", uz:"Atlantika"},
+
+    {id:"minami25", day:25, group:"南", kanji:"南", romaji:"minami", type:"kun'yomi", reading:"南(minami) — yakka kanji", otherReadings:"kun: みなみ(minami) · on: ナン(nan)", uz:"janub"},
+    {id:"minamiguchi25", day:25, group:"南", kanji:"南口", romaji:"minamiguchi", type:"kun + kun", reading:"南(minami) + 口(guchi)", uz:"janubiy chiqish"},
+    {id:"tounanajia25", day:25, group:"南", kanji:"東南アジア", romaji:"tounan ajia", type:"on + on + —", reading:"東(tou) + 南(nan) + アジア(ajia)", uz:"Janubi-Sharqiy Osiyo"},
+
+    {id:"kita25", day:25, group:"北", kanji:"北", romaji:"kita", type:"kun'yomi", reading:"北(kita) — yakka kanji", otherReadings:"kun: きた(kita) · on: ホク(hoku)", uz:"shimol"},
+    {id:"kitaguchi25", day:25, group:"北", kanji:"北口", romaji:"kitaguchi", type:"kun + kun", reading:"北(kita) + 口(guchi)", uz:"shimoliy chiqish"},
+    {id:"hokkaidou25", day:25, group:"北", kanji:"北海道", romaji:"hokkaidou", type:"on + on + on", reading:"北(hok) + 海(kai) + 道(dou)", uz:"Hokkaydo (hudud nomi)"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
