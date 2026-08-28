@@ -363,6 +363,20 @@
   .auth-avatar-btn:active{transform:scale(0.92);}
   .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block;}
 
+  /* ---------- BANNER VIDEO — auth-box ichida, AI yordamchi tugmasi bilan avatar chap tarafida ---------- */
+  .auth-banner-video{
+    flex:1 1 auto;
+    min-width:0;
+    height:36px;
+    margin-right:10px;
+    border-radius:12px;
+    border:1px solid var(--glass-border-soft);
+    overflow:hidden;
+    object-fit:cover;
+    display:block;
+    background:var(--glass-bg);
+  }
+
   /* ---------- AI YORDAMCHI tugmasi — akkaunt belgisining chap tarafida ---------- */
   .ai-assist-btn{
     display:flex;
@@ -3103,6 +3117,7 @@
 
 <!-- ---------- Firebase Auth: Google bilan kirish ---------- -->
 <div class="auth-box" id="authBox">
+  <video class="auth-banner-video" id="authBannerVideo" src="banner.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
   <button class="ai-assist-btn" id="aiAssistBtn" type="button" aria-label="AI yordamchi">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
     <span>AI yordamchi</span>
@@ -6586,6 +6601,14 @@
       window.location.reload();
     });
   }
+
+  (function(){
+    var bannerVideo = document.getElementById("authBannerVideo");
+    if(bannerVideo){
+      bannerVideo.muted = true;
+      bannerVideo.play && bannerVideo.play().catch(function(){});
+    }
+  })();
 
   const loginBtn = document.getElementById("login-btn");
   const userProfile = document.getElementById("user-profile");
