@@ -2962,6 +2962,31 @@
   }
   .ai-assist-send-btn svg{width:17px; height:17px;}
   .ai-assist-send-btn:active{transform:scale(0.9);}
+  .ai-assist-mic-btn{
+    flex:none;
+    width:40px; height:40px;
+    border-radius:50%;
+    border:1px solid rgba(139,124,246,0.35);
+    background:rgba(139,124,246,0.1);
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .ai-assist-mic-btn svg{width:17px; height:17px;}
+  .ai-assist-mic-btn:active{transform:scale(0.9);}
+  .ai-assist-mic-btn.recording{
+    background:linear-gradient(135deg, #f65c6f, #e63b4e);
+    border-color:transparent;
+    color:#fff;
+    animation:aiMicPulse 1.1s ease-in-out infinite;
+  }
+  @keyframes aiMicPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(230,59,78,0.45);}
+    50%{box-shadow:0 0 0 8px rgba(230,59,78,0);}
+  }
 
   .splash-credit{
     display:flex;
@@ -3391,6 +3416,9 @@
   </div>
   <div class="ai-assist-input-bar">
     <input id="aiAssistInput" type="text" maxlength="500" placeholder="AI yordamchiga xabar yozing..." autocomplete="off" autocorrect="off">
+    <button class="ai-assist-mic-btn" id="aiAssistMicBtn" type="button" aria-label="Ovozli xabar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+    </button>
     <button class="ai-assist-send-btn" id="aiAssistSendBtn" type="button" aria-label="Yuborish">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
     </button>
@@ -6206,6 +6234,7 @@
     const overlay = document.getElementById('aiAssistOverlay');
     const closeBtn = document.getElementById('aiAssistCloseBtn');
     const sendBtn = document.getElementById('aiAssistSendBtn');
+    const micBtn = document.getElementById('aiAssistMicBtn');
     const input = document.getElementById('aiAssistInput');
     const messages = document.getElementById('aiAssistMessages');
     if(!btn || !panel) return;
@@ -6363,7 +6392,95 @@
     if(overlay) overlay.addEventListener('click', closePanel);
     if(sendBtn) sendBtn.addEventListener('click', sendMsg);
     if(input) input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMsg(); });
+
+    // ---------- Ovozli xabar (Groq Whisper orqali) ----------
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let recStream = null;
+
+    async function startRecording(){
+      if(isRecording) return;
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        await typeMsg("Kechirasiz, bu brauzer mikrofonni qo'llab-quvvatlamaydi. 🙏");
+        return;
+      }
+      try{
+        recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch(err){
+        await typeMsg("Mikrofonga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering. 🙏");
+        return;
+      }
+      audioChunks = [];
+      let mimeType = 'audio/webm';
+      if(window.MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType)){
+        mimeType = '';
+      }
+      try{
+        mediaRecorder = mimeType ? new MediaRecorder(recStream, { mimeType }) : new MediaRecorder(recStream);
+      } catch(err){
+        mediaRecorder = new MediaRecorder(recStream);
+      }
+      mediaRecorder.addEventListener('dataavailable', (e)=>{ if(e.data && e.data.size > 0) audioChunks.push(e.data); });
+      mediaRecorder.addEventListener('stop', onRecordingStop);
+      mediaRecorder.start();
+      isRecording = true;
+      if(micBtn) micBtn.classList.add('recording');
+      if(input) input.placeholder = 'Tinglayapman... (to\'xtatish uchun bosing)';
+    }
+
+    function stopRecording(){
+      if(!isRecording || !mediaRecorder) return;
+      isRecording = false;
+      if(micBtn) micBtn.classList.remove('recording');
+      if(input) input.placeholder = 'AI yordamchiga xabar yozing...';
+      try{ mediaRecorder.stop(); } catch(err){}
+      if(recStream){
+        recStream.getTracks().forEach(t=>t.stop());
+        recStream = null;
+      }
+    }
+
+    async function onRecordingStop(){
+      if(!audioChunks.length) return;
+      const blob = new Blob(audioChunks, { type: audioChunks[0].type || 'audio/webm' });
+      audioChunks = [];
+      if(blob.size < 800) return; // juda qisqa/bo'sh yozuv
+
+      if(input){ input.disabled = true; input.placeholder = "Ovoz matnga o'girilyapti..."; }
+      if(micBtn) micBtn.disabled = true;
+
+      try{
+        const form = new FormData();
+        form.append('file', blob, 'audio.webm');
+        const res = await fetch(PROXY_URL + '/transcribe', { method: 'POST', body: form });
+        const data = await res.json();
+        if(!res.ok){
+          throw new Error((data && data.error && data.error.message) || "Transkripsiya xatosi");
+        }
+        const text = (data && data.text ? data.text : '').trim();
+        if(text && input){
+          input.value = input.value ? (input.value + ' ' + text) : text;
+          input.focus();
+        } else if(!text){
+          await typeMsg("Ovozni aniq eshitolmadim, qaytadan urinib ko'ring. 🙏");
+        }
+      } catch(err){
+        await typeMsg("Ovozni matnga o'girishda xatolik: " + (err && err.message ? err.message : "qayta urinib ko'ring") + " 🙏");
+      } finally {
+        if(input){ input.disabled = false; input.placeholder = 'AI yordamchiga xabar yozing...'; }
+        if(micBtn) micBtn.disabled = false;
+      }
+    }
+
+    if(micBtn){
+      micBtn.addEventListener('click', ()=>{
+        if(isRecording) stopRecording();
+        else startRecording();
+      });
+    }
   })();
+
 
   // yuklanish tugagach shu funksiya chaqiriladi — endi ekran avtomatik yopilmaydi,
   // "Boshlash" tugmasi ko'rinadigan bo'ladi va foydalanuvchi bosishini kutadi
