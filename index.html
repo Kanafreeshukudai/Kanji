@@ -6393,84 +6393,95 @@
     if(sendBtn) sendBtn.addEventListener('click', sendMsg);
     if(input) input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMsg(); });
 
-    // ---------- Ovozli xabar (Groq Whisper orqali) ----------
-    let mediaRecorder = null;
-    let audioChunks = [];
+    // ---------- Ovozli xabar (Web Speech API — gapirayotgan vaqtning o'zida yozadi) ----------
+    // Eski versiyada butun ovoz avval MediaRecorder bilan yig'ilib, faqat "to'xtatish"
+    // bosilgandan keyin Whisper API'ga yuborilardi — shuning uchun matn faqat oxirida
+    // bir martada paydo bo'lardi. Endi brauzerning o'ziga xos nutqni tanish tizimi
+    // (SpeechRecognition) ishlatiladi: u gapirilayotgan so'zlarni REAL VAQTDA aniqlab,
+    // natijani (hali tugallanmagan "interim" va tasdiqlangan "final" qismlarni) uzluksiz
+    // qaytarib turadi — shu bois matn maydoniga gapirilayotgan payt harakatlanib yoziladi.
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
     let isRecording = false;
-    let recStream = null;
+    let recBaseValue = ''; // mikrofon bosilgan paytda maydonda turgan matn (unga qo'shib boramiz)
+    let recFinalText = '';  // shu tinglash seansi davomida tasdiqlangan (final) matn
 
-    async function startRecording(){
+    function applyRecognitionResult(finalPart, interimPart){
+      if(!input) return;
+      const sep = recBaseValue && (finalPart || interimPart) ? ' ' : '';
+      input.value = recBaseValue + sep + (finalPart + interimPart).trim();
+    }
+
+    function startRecording(){
       if(isRecording) return;
-      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-        await typeMsg("Kechirasiz, bu brauzer mikrofonni qo'llab-quvvatlamaydi. 🙏");
+      if(!SpeechRecognitionCtor){
+        // Brauzer Web Speech API'ni qo'llab-quvvatlamasa, foydalanuvchini ogohlantiramiz.
+        // (Masalan, Firefox'da hali to'liq qo'llab-quvvatlanmaydi — Chrome/Safari tavsiya etiladi.)
+        typeMsg("Kechirasiz, bu brauzer real vaqtli ovozli yozuvni qo'llab-quvvatlamaydi. Google Chrome'dan foydalanib ko'ring. 🙏");
         return;
       }
+      recognition = new SpeechRecognitionCtor();
+      recognition.lang = 'uz-UZ'; // o'zbekcha tan olinmasa, brauzer avtomatik yaqin tilga (masalan ru/en) moslashtirishi mumkin
+      recognition.continuous = true;      // mikrofon o'chirilmaguncha tinglashda davom etadi
+      recognition.interimResults = true;  // hali tugallanmagan so'zlarni ham darhol qaytaradi
+      recognition.maxAlternatives = 1;
+
+      recBaseValue = (input && input.value) ? input.value.trim() : '';
+      recFinalText = '';
+
+      recognition.addEventListener('result', (e)=>{
+        let finalPart = '';
+        let interimPart = '';
+        for(let i = e.resultIndex; i < e.results.length; i++){
+          const res = e.results[i];
+          if(res.isFinal) finalPart += res[0].transcript;
+          else interimPart += res[0].transcript;
+        }
+        if(finalPart) recFinalText += (recFinalText ? ' ' : '') + finalPart.trim();
+        applyRecognitionResult(recFinalText, interimPart);
+      });
+
+      recognition.addEventListener('error', (e)=>{
+        if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+          typeMsg("Mikrofonga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering. 🙏");
+        } else if(e.error === 'no-speech'){
+          // ovoz sezilmasa ham tinglashni davom ettiramiz, xato sifatida ko'rsatmaymiz
+          return;
+        } else if(e.error !== 'aborted'){
+          typeMsg("Ovozni tanishda xatolik: " + e.error + " 🙏");
+        }
+        stopRecording();
+      });
+
+      // continuous=true bo'lsa ham ba'zi brauzerlar bir muddatdan so'ng o'zi to'xtaydi —
+      // agar foydalanuvchi hali mikrofonni o'chirmagan bo'lsa, tinglashni avtomatik qayta boshlaymiz
+      recognition.addEventListener('end', ()=>{
+        if(isRecording){
+          try{ recognition.start(); } catch(err){}
+        }
+      });
+
       try{
-        recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recognition.start();
       } catch(err){
-        await typeMsg("Mikrofonga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering. 🙏");
+        typeMsg("Mikrofonni ishga tushirib bo'lmadi. Qaytadan urinib ko'ring. 🙏");
         return;
       }
-      audioChunks = [];
-      let mimeType = 'audio/webm';
-      if(window.MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType)){
-        mimeType = '';
-      }
-      try{
-        mediaRecorder = mimeType ? new MediaRecorder(recStream, { mimeType }) : new MediaRecorder(recStream);
-      } catch(err){
-        mediaRecorder = new MediaRecorder(recStream);
-      }
-      mediaRecorder.addEventListener('dataavailable', (e)=>{ if(e.data && e.data.size > 0) audioChunks.push(e.data); });
-      mediaRecorder.addEventListener('stop', onRecordingStop);
-      mediaRecorder.start();
       isRecording = true;
       if(micBtn) micBtn.classList.add('recording');
       if(input) input.placeholder = 'Tinglayapman... (to\'xtatish uchun bosing)';
     }
 
     function stopRecording(){
-      if(!isRecording || !mediaRecorder) return;
+      if(!isRecording) return;
       isRecording = false;
       if(micBtn) micBtn.classList.remove('recording');
       if(input) input.placeholder = 'AI yordamchiga xabar yozing...';
-      try{ mediaRecorder.stop(); } catch(err){}
-      if(recStream){
-        recStream.getTracks().forEach(t=>t.stop());
-        recStream = null;
+      if(recognition){
+        try{ recognition.stop(); } catch(err){}
+        recognition = null;
       }
-    }
-
-    async function onRecordingStop(){
-      if(!audioChunks.length) return;
-      const blob = new Blob(audioChunks, { type: audioChunks[0].type || 'audio/webm' });
-      audioChunks = [];
-      if(blob.size < 800) return; // juda qisqa/bo'sh yozuv
-
-      if(input){ input.disabled = true; input.placeholder = "Ovoz matnga o'girilyapti..."; }
-      if(micBtn) micBtn.disabled = true;
-
-      try{
-        const form = new FormData();
-        form.append('file', blob, 'audio.webm');
-        const res = await fetch(PROXY_URL + '/transcribe', { method: 'POST', body: form });
-        const data = await res.json();
-        if(!res.ok){
-          throw new Error((data && data.error && data.error.message) || "Transkripsiya xatosi");
-        }
-        const text = (data && data.text ? data.text : '').trim();
-        if(text && input){
-          input.value = input.value ? (input.value + ' ' + text) : text;
-          input.focus();
-        } else if(!text){
-          await typeMsg("Ovozni aniq eshitolmadim, qaytadan urinib ko'ring. 🙏");
-        }
-      } catch(err){
-        await typeMsg("Ovozni matnga o'girishda xatolik: " + (err && err.message ? err.message : "qayta urinib ko'ring") + " 🙏");
-      } finally {
-        if(input){ input.disabled = false; input.placeholder = 'AI yordamchiga xabar yozing...'; }
-        if(micBtn) micBtn.disabled = false;
-      }
+      if(input) input.focus();
     }
 
     if(micBtn){
