@@ -440,6 +440,45 @@
     .ai-assist-btn span{display:none;}
   }
 
+  /* ---------- FAQAT ADMIN uchun: foydalanuvchilar online/offline tugmasi ----------
+     Bu tugma faqat oldindan belgilangan admin email bilan kirilganda
+     script orqali display:flex qilinadi; hech qachon boshqa
+     foydalanuvchilarga ko'rinmaydi. */
+  .presence-toggle-btn{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    width:36px;
+    height:36px;
+    margin-right:8px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--moss-soft);
+    cursor:pointer;
+    position:relative;
+    transition:all .2s ease;
+  }
+  .presence-toggle-btn:active{transform:scale(0.92);}
+  .presence-toggle-btn svg{width:17px; height:17px; display:block;}
+  .presence-toggle-btn .presence-count-badge{
+    position:absolute;
+    top:-3px; right:-3px;
+    min-width:15px;
+    height:15px;
+    padding:0 3px;
+    border-radius:999px;
+    background:var(--moss);
+    color:#0d1108;
+    font-size:9.5px;
+    font-weight:800;
+    line-height:15px;
+    text-align:center;
+    box-shadow:0 0 0 2px var(--bg-1);
+  }
+
   .auth-dropdown{
     position:absolute;
     top:44px;
@@ -2667,6 +2706,130 @@
     text-align:center;
   }
 
+  /* ---------- FAQAT ADMIN paneli: foydalanuvchilar online/offline ro'yxati ---------- */
+  .presence-overlay{
+    position:fixed;
+    inset:0;
+    z-index:600;
+    background:rgba(6,7,9,0.5);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .28s ease;
+  }
+  .presence-overlay.open{opacity:1; pointer-events:auto;}
+  .presence-panel{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    z-index:601;
+    width:100%;
+    max-width:480px;
+    height:min(72vh, 580px);
+    transform:translate(-50%, 100%);
+    transition:transform .34s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(180deg, var(--panel-2), var(--panel-1) 70%);
+    border:1px solid var(--glass-border-soft);
+    border-bottom:none;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -20px 50px -18px rgba(0,0,0,0.6);
+    padding-bottom:env(safe-area-inset-bottom);
+    overflow:hidden;
+    overscroll-behavior:contain;
+  }
+  .presence-panel.open{transform:translate(-50%, 0);}
+  .presence-panel-header{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px 12px;
+    border-bottom:1px solid var(--glass-border-soft);
+  }
+  .presence-panel-title{display:flex; flex-direction:column; gap:2px;}
+  .presence-panel-title h3{
+    margin:0;
+    font-family:'Shippori Mincho',serif;
+    font-size:16.5px;
+    color:var(--ink);
+  }
+  .presence-panel-title span{font-size:11.5px; color:var(--ink-faint);}
+  .presence-close-btn{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .presence-close-btn:active{transform:scale(0.9);}
+  .presence-list{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:10px 14px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    overscroll-behavior:contain;
+  }
+  .presence-empty{
+    margin:auto;
+    text-align:center;
+    color:var(--ink-faint);
+    font-size:12.5px;
+    padding:30px 20px;
+  }
+  .presence-item{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:9px 10px;
+    border-radius:14px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border-soft);
+  }
+  .presence-avatar{
+    position:relative;
+    width:36px; height:36px;
+    flex:none;
+    border-radius:50%;
+    overflow:hidden;
+    background:var(--panel-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink);
+    font-size:13px;
+    font-weight:700;
+  }
+  .presence-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .presence-dot{
+    position:absolute;
+    right:-1px; bottom:-1px;
+    width:11px; height:11px;
+    border-radius:50%;
+    border:2px solid var(--panel-1);
+    background:var(--ink-faint);
+  }
+  .presence-dot.online{background:var(--moss-soft); box-shadow:0 0 6px rgba(147,177,127,0.7);}
+  .presence-info{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px;}
+  .presence-name{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .presence-status{font-size:11px; color:var(--ink-faint);}
+  .presence-status.online{color:var(--moss-soft);}
+
   .chat-messages{
     flex:1;
     min-height:0;
@@ -3189,6 +3352,12 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
     <span>AI yordamchi</span>
   </button>
+  <!-- FAQAT ADMIN uchun: skriptda faqat belgilangan admin email bilan
+       kirilganda display:flex qilinadi, aks holda butunlay yashirin qoladi. -->
+  <button class="presence-toggle-btn" id="presenceToggleBtn" type="button" aria-label="Foydalanuvchilar" title="Foydalanuvchilar online/offline">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+    <span class="presence-count-badge" id="presenceCountBadge" style="display:none;">0</span>
+  </button>
   <div class="auth-profile" id="user-profile" style="display:none;">
     <button class="auth-avatar-btn" id="authAvatarBtn" type="button" aria-label="Profil">
       <img id="userAvatarImg" src="" alt="" style="display:none;">
@@ -3376,6 +3545,21 @@
 </div>
 
 <!-- ---------- GLOBAL CHAT ---------- -->
+<!-- FAQAT ADMIN paneli: online/offline foydalanuvchilar ro'yxati -->
+<div class="presence-overlay" id="presenceOverlay" aria-hidden="true"></div>
+<div class="presence-panel" id="presencePanel" aria-hidden="true">
+  <div class="presence-panel-header">
+    <div class="presence-panel-title">
+      <h3>Foydalanuvchilar</h3>
+      <span id="presenceSubtitle">Online: 0</span>
+    </div>
+    <button class="presence-close-btn" id="presenceCloseBtn" type="button" aria-label="Yopish">&#10005;</button>
+  </div>
+  <div class="presence-list" id="presenceList">
+    <div class="presence-empty" id="presenceEmpty">Hozircha hech kim yo'q</div>
+  </div>
+</div>
+
 <div class="chat-overlay" id="chatOverlay" aria-hidden="true"></div>
 <div class="chat-panel" id="chatPanel" aria-hidden="true">
   <div class="chat-panel-header">
@@ -6757,12 +6941,25 @@
     getFirestore,
     collection,
     addDoc,
+    doc,
+    setDoc,
     query,
     orderBy,
     limit,
     onSnapshot,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // FAQAT ADMIN: shu email bilan kirilgandagina "Foydalanuvchilar
+  // online/offline" paneli ko'rinadi. Bu faqat mijoz (client) tarafidagi
+  // ko'rinish nazorati — chinakam himoya uchun Firebase konsolida
+  // "presence" kolleksiyasini o'qish Firestore Security Rules orqali ham
+  // shu admin UID/emailiga cheklab qo'yilishi tavsiya etiladi.
+  const PRESENCE_ADMIN_EMAIL = "doniyorbektoshmatov7@gmail.com";
+  // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
+  // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
+  const PRESENCE_STALE_MS = 35000;
+  const PRESENCE_HEARTBEAT_MS = 20000;
 
   const firebaseConfig = {
     apiKey: "AIzaSyALayFF0xGeWLUTO-96Kf8wUgOVldEFS1w",
@@ -6863,6 +7060,8 @@
       // Google hisobiga muvaffaqiyatli kirildi — endi "Boshlash" tugmasi bosiladigan bo'ladi.
       if (splashStartBtn) splashStartBtn.disabled = false;
       if (splashStartHint) splashStartHint.classList.remove("show");
+      startPresenceHeartbeat(user);
+      setupPresenceAdminUI(user);
     } else {
       if (loginBtn) loginBtn.style.display = "flex";
       if (userProfile) userProfile.style.display = "none";
@@ -6874,8 +7073,213 @@
           splashStartHint.classList.add("show");
         }
       }
+      stopPresenceHeartbeat();
+      teardownPresenceAdminUI();
     }
   });
+
+  // ---------- FOYDALANUVCHILAR ONLINE/OFFLINE (Firestore "presence") ----------
+  // Har bir kirgan foydalanuvchi uchun "presence/{uid}" hujjati bor.
+  // Sahifa ochiq turganda har PRESENCE_HEARTBEAT_MS millisoniyada
+  // "hali shu yerdaman" deb yangilanadi; sahifa yopilganda/fon rejimga
+  // o'tganda "online:false" deb belgilashga urinib ko'riladi (kafolatsiz,
+  // shuning uchun ro'yxatni ko'rsatishda asosiy mezon — so'nggi ko'rinish
+  // vaqtining yangiligi, ya'ni PRESENCE_STALE_MS ichida bo'lishi).
+  const presenceCol = collection(db, "presence");
+  let presenceHeartbeatTimer = null;
+  let presenceUnsub = null;
+  let presenceRefreshTimer = null;
+  let presenceLastDocs = [];
+
+  function presenceDocRef(uid) {
+    return doc(db, "presence", uid);
+  }
+
+  async function presenceBeat(user, online) {
+    try {
+      await setDoc(presenceDocRef(user.uid), {
+        uid: user.uid,
+        nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
+        photoURL: user.photoURL || "",
+        online: online,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.error("Presence yozishda xatolik:", e.message);
+    }
+  }
+
+  function handlePresenceVisibility() {
+    const user = auth.currentUser;
+    if (!user) return;
+    if (document.visibilityState === "hidden") {
+      presenceBeat(user, false);
+    } else {
+      presenceBeat(user, true);
+    }
+  }
+
+  function handlePresenceUnload() {
+    const user = auth.currentUser;
+    if (!user) return;
+    presenceBeat(user, false);
+  }
+
+  function startPresenceHeartbeat(user) {
+    stopPresenceHeartbeat();
+    presenceBeat(user, true);
+    presenceHeartbeatTimer = setInterval(() => presenceBeat(user, true), PRESENCE_HEARTBEAT_MS);
+    document.addEventListener("visibilitychange", handlePresenceVisibility);
+    window.addEventListener("beforeunload", handlePresenceUnload);
+    window.addEventListener("pagehide", handlePresenceUnload);
+  }
+
+  function stopPresenceHeartbeat() {
+    const user = auth.currentUser;
+    if (presenceHeartbeatTimer) {
+      clearInterval(presenceHeartbeatTimer);
+      presenceHeartbeatTimer = null;
+    }
+    document.removeEventListener("visibilitychange", handlePresenceVisibility);
+    window.removeEventListener("beforeunload", handlePresenceUnload);
+    window.removeEventListener("pagehide", handlePresenceUnload);
+  }
+
+  function presenceIsFresh(lastSeen) {
+    if (!lastSeen || typeof lastSeen.toMillis !== "function") return true; // hali yozilmoqda (pending)
+    return (Date.now() - lastSeen.toMillis()) < PRESENCE_STALE_MS;
+  }
+
+  function presenceRenderList() {
+    const listEl = document.getElementById("presenceList");
+    const emptyEl = document.getElementById("presenceEmpty");
+    const subtitleEl = document.getElementById("presenceSubtitle");
+    const badgeEl = document.getElementById("presenceCountBadge");
+    if (!listEl) return;
+
+    const items = presenceLastDocs.map((d) => {
+      const data = d.data();
+      const fresh = presenceIsFresh(data.lastSeen);
+      return {
+        uid: data.uid || d.id,
+        nick: data.nick || "Foydalanuvchi",
+        photoURL: data.photoURL || "",
+        online: data.online !== false && fresh
+      };
+    });
+    items.sort((a, b) => {
+      if (a.online !== b.online) return a.online ? -1 : 1;
+      return a.nick.localeCompare(b.nick);
+    });
+
+    const onlineCount = items.filter((i) => i.online).length;
+    if (subtitleEl) subtitleEl.textContent = "Online: " + onlineCount + " / Jami: " + items.length;
+    if (badgeEl) {
+      if (onlineCount > 0) {
+        badgeEl.textContent = String(onlineCount);
+        badgeEl.style.display = "flex";
+      } else {
+        badgeEl.style.display = "none";
+      }
+    }
+
+    listEl.querySelectorAll(".presence-item").forEach((el) => el.remove());
+    if (items.length === 0) {
+      if (emptyEl) emptyEl.style.display = "block";
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = "none";
+
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "presence-item";
+
+      const avatar = document.createElement("div");
+      avatar.className = "presence-avatar";
+      if (item.photoURL) {
+        const img = document.createElement("img");
+        img.src = item.photoURL;
+        img.alt = "";
+        avatar.appendChild(img);
+      } else {
+        avatar.textContent = item.nick.trim().charAt(0).toUpperCase();
+      }
+      const dot = document.createElement("span");
+      dot.className = "presence-dot" + (item.online ? " online" : "");
+      avatar.appendChild(dot);
+
+      const info = document.createElement("div");
+      info.className = "presence-info";
+      const nameEl = document.createElement("div");
+      nameEl.className = "presence-name";
+      nameEl.textContent = item.nick;
+      const statusEl = document.createElement("div");
+      statusEl.className = "presence-status" + (item.online ? " online" : "");
+      statusEl.textContent = item.online ? "Online" : "Offline";
+      info.appendChild(nameEl);
+      info.appendChild(statusEl);
+
+      row.appendChild(avatar);
+      row.appendChild(info);
+      listEl.appendChild(row);
+    });
+  }
+
+  function setupPresenceAdminUI(user) {
+    const toggleBtn = document.getElementById("presenceToggleBtn");
+    const isAdmin = !!user.email && user.email.toLowerCase() === PRESENCE_ADMIN_EMAIL.toLowerCase();
+    if (!isAdmin) {
+      teardownPresenceAdminUI();
+      return;
+    }
+    if (toggleBtn) toggleBtn.style.display = "flex";
+    if (presenceUnsub) return; // allaqachon tinglanmoqda
+
+    presenceUnsub = onSnapshot(
+      presenceCol,
+      (snap) => {
+        presenceLastDocs = snap.docs;
+        presenceRenderList();
+      },
+      (err) => {
+        console.error("Presence ro'yxatini o'qishda xatolik:", err.message);
+      }
+    );
+    if (presenceRefreshTimer) clearInterval(presenceRefreshTimer);
+    // Snapshot yangilanmasa ham, vaqt o'tishi bilan "online -> offline"ga
+    // aylanishini ko'rsatish uchun ro'yxatni davriy qayta chizamiz.
+    presenceRefreshTimer = setInterval(presenceRenderList, 10000);
+  }
+
+  function teardownPresenceAdminUI() {
+    const toggleBtn = document.getElementById("presenceToggleBtn");
+    const panel = document.getElementById("presencePanel");
+    const overlay = document.getElementById("presenceOverlay");
+    if (toggleBtn) toggleBtn.style.display = "none";
+    if (panel) panel.classList.remove("open");
+    if (overlay) overlay.classList.remove("open");
+    if (presenceUnsub) { presenceUnsub(); presenceUnsub = null; }
+    if (presenceRefreshTimer) { clearInterval(presenceRefreshTimer); presenceRefreshTimer = null; }
+    presenceLastDocs = [];
+  }
+
+  (function initPresenceUI() {
+    const toggleBtn = document.getElementById("presenceToggleBtn");
+    const closeBtn = document.getElementById("presenceCloseBtn");
+    const overlay = document.getElementById("presenceOverlay");
+    const panel = document.getElementById("presencePanel");
+    function openPanel() {
+      if (overlay) overlay.classList.add("open");
+      if (panel) panel.classList.add("open");
+    }
+    function closePanel() {
+      if (overlay) overlay.classList.remove("open");
+      if (panel) panel.classList.remove("open");
+    }
+    if (toggleBtn) toggleBtn.addEventListener("click", openPanel);
+    if (closeBtn) closeBtn.addEventListener("click", closePanel);
+    if (overlay) overlay.addEventListener("click", closePanel);
+  })();
 
   // ---------- GLOBAL CHAT (Firestore) ----------
   // Barcha foydalanuvchilar uchun umumiy, haqiqiy vaqtda yangilanadigan chat.
