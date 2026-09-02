@@ -527,6 +527,127 @@
   }
   .auth-logout-btn:active{transform:scale(0.96);}
 
+  .auth-notes-btn{
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .auth-notes-btn:active{transform:scale(0.96);}
+
+  /* ---------- SHAXSIY QAYDLAR (Google akkauntga bog'liq, Firestore'da saqlanadi) ---------- */
+  .notes-overlay{
+    position:fixed;
+    inset:0;
+    z-index:600;
+    background:rgba(6,7,9,0.5);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .28s ease;
+  }
+  .notes-overlay.open{opacity:1; pointer-events:auto;}
+  .notes-panel{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    z-index:601;
+    width:100%;
+    max-width:480px;
+    height:min(72vh, 580px);
+    transform:translate(-50%, 100%);
+    transition:transform .34s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(180deg, var(--panel-2), var(--panel-1) 70%);
+    border:1px solid var(--glass-border-soft);
+    border-bottom:none;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -20px 50px -18px rgba(0,0,0,0.6);
+    padding-bottom:env(safe-area-inset-bottom);
+    overflow:hidden;
+    overscroll-behavior:contain;
+  }
+  .notes-panel.open{transform:translate(-50%, 0);}
+  .notes-panel-header{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px 12px;
+    border-bottom:1px solid var(--glass-border-soft);
+  }
+  .notes-panel-title{display:flex; flex-direction:column; gap:2px;}
+  .notes-panel-title h3{
+    margin:0;
+    font-family:'Shippori Mincho',serif;
+    font-size:16.5px;
+    color:var(--ink);
+  }
+  .notes-panel-title span{font-size:11.5px; color:var(--ink-faint);}
+  .notes-close-btn{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .notes-close-btn:active{transform:scale(0.9);}
+  .notes-body{
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:column;
+    padding:14px 18px;
+    min-height:0;
+  }
+  .notes-textarea{
+    flex:1 1 auto;
+    width:100%;
+    resize:none;
+    border-radius:16px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:14px;
+    line-height:1.6;
+    padding:12px 14px;
+    box-sizing:border-box;
+  }
+  .notes-textarea:focus{outline:none; border-color:var(--gold);}
+  .notes-footer{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding-top:10px;
+  }
+  .notes-status{font-size:11.5px; color:var(--ink-faint);}
+  .notes-save-btn{
+    padding:9px 18px;
+    border-radius:12px;
+    border:none;
+    background:var(--gold);
+    color:#12141c;
+    font-size:13px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .notes-save-btn:active{transform:scale(0.96);}
+  .notes-save-btn:disabled{opacity:0.5; cursor:default;}
+
   .search-panel{
     width:100%;
     max-width:var(--content-max);
@@ -3367,6 +3488,7 @@
     </button>
     <div class="auth-dropdown" id="authDropdown">
       <span id="user-name" class="auth-name"></span>
+      <button id="notes-btn" class="auth-notes-btn" type="button">📝 Qaydlar</button>
       <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
     </div>
   </div>
@@ -3559,6 +3681,25 @@
   </div>
   <div class="presence-list" id="presenceList">
     <div class="presence-empty" id="presenceEmpty">Hozircha hech kim yo'q</div>
+  </div>
+</div>
+
+<!-- ---------- SHAXSIY QAYDLAR: har bir akkaunt uchun alohida, Google akkaunt (uid) bo'yicha Firestore'da saqlanadi ---------- -->
+<div class="notes-overlay" id="notesOverlay" aria-hidden="true"></div>
+<div class="notes-panel" id="notesPanel" aria-hidden="true">
+  <div class="notes-panel-header">
+    <div class="notes-panel-title">
+      <h3>Qaydlar</h3>
+      <span id="notesSubtitle">Akkauntingizga saqlanadi</span>
+    </div>
+    <button class="notes-close-btn" id="notesCloseBtn" type="button" aria-label="Yopish">&#10005;</button>
+  </div>
+  <div class="notes-body">
+    <textarea class="notes-textarea" id="notesTextarea" placeholder="Shu yerga qaydlaringizni yozing..."></textarea>
+    <div class="notes-footer">
+      <span class="notes-status" id="notesStatus"></span>
+      <button class="notes-save-btn" id="notesSaveBtn" type="button">Saqlash</button>
+    </div>
   </div>
 </div>
 
@@ -6945,6 +7086,7 @@
     addDoc,
     doc,
     setDoc,
+    getDoc,
     query,
     orderBy,
     limit,
@@ -7064,6 +7206,8 @@
       if (splashStartHint) splashStartHint.classList.remove("show");
       startPresenceHeartbeat(user);
       setupPresenceAdminUI(user);
+      currentNotesUser = user;
+      loadUserNote(user);
     } else {
       if (loginBtn) loginBtn.style.display = "flex";
       if (userProfile) userProfile.style.display = "none";
@@ -7077,6 +7221,10 @@
       }
       stopPresenceHeartbeat();
       teardownPresenceAdminUI();
+      currentNotesUser = null;
+      closeNotesPanel();
+      const notesTextarea = document.getElementById("notesTextarea");
+      if (notesTextarea) notesTextarea.value = "";
     }
   });
 
@@ -7281,6 +7429,93 @@
     if (toggleBtn) toggleBtn.addEventListener("click", openPanel);
     if (closeBtn) closeBtn.addEventListener("click", closePanel);
     if (overlay) overlay.addEventListener("click", closePanel);
+  })();
+
+  // ---------- SHAXSIY QAYDLAR (Firestore "userNotes/{uid}") ----------
+  // Har bir Google akkaunt uchun bitta qayd hujjati bor: userNotes/{uid}.
+  // Qayd faqat shu akkauntga tegishli va boshqalarga ko'rinmaydi.
+  let currentNotesUser = null;
+  let notesLoadedText = "";
+  let notesSaveTimer = null;
+
+  function notesDocRef(uid) {
+    return doc(db, "userNotes", uid);
+  }
+
+  async function loadUserNote(user) {
+    const textarea = document.getElementById("notesTextarea");
+    const status = document.getElementById("notesStatus");
+    if (!textarea) return;
+    textarea.value = "";
+    textarea.disabled = true;
+    if (status) status.textContent = "Yuklanmoqda...";
+    try {
+      const snap = await getDoc(notesDocRef(user.uid));
+      if (currentNotesUser && currentNotesUser.uid === user.uid) {
+        const text = snap.exists() ? (snap.data().text || "") : "";
+        textarea.value = text;
+        notesLoadedText = text;
+        if (status) status.textContent = "";
+      }
+    } catch (err) {
+      console.error("Qaydni yuklashda xatolik:", err.message);
+      if (status) status.textContent = "Yuklab bo'lmadi";
+    } finally {
+      textarea.disabled = false;
+    }
+  }
+
+  async function saveUserNote() {
+    const textarea = document.getElementById("notesTextarea");
+    const status = document.getElementById("notesStatus");
+    const saveBtn = document.getElementById("notesSaveBtn");
+    if (!textarea || !currentNotesUser) return;
+    const text = textarea.value;
+    if (saveBtn) saveBtn.disabled = true;
+    if (status) status.textContent = "Saqlanmoqda...";
+    try {
+      await setDoc(notesDocRef(currentNotesUser.uid), {
+        text: text,
+        email: currentNotesUser.email || null,
+        updatedAt: serverTimestamp()
+      });
+      notesLoadedText = text;
+      if (status) status.textContent = "Saqlandi ✓";
+      if (notesSaveTimer) clearTimeout(notesSaveTimer);
+      notesSaveTimer = setTimeout(() => { if (status) status.textContent = ""; }, 2000);
+    } catch (err) {
+      console.error("Qaydni saqlashda xatolik:", err.message);
+      if (status) status.textContent = "Saqlab bo'lmadi";
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  function closeNotesPanel() {
+    const overlay = document.getElementById("notesOverlay");
+    const panel = document.getElementById("notesPanel");
+    if (overlay) overlay.classList.remove("open");
+    if (panel) panel.classList.remove("open");
+  }
+
+  (function initNotesUI() {
+    const notesBtn = document.getElementById("notes-btn");
+    const overlay = document.getElementById("notesOverlay");
+    const panel = document.getElementById("notesPanel");
+    const closeBtn = document.getElementById("notesCloseBtn");
+    const saveBtn = document.getElementById("notesSaveBtn");
+    function openPanel() {
+      if (overlay) overlay.classList.add("open");
+      if (panel) panel.classList.add("open");
+    }
+    if (notesBtn) notesBtn.addEventListener("click", () => {
+      if (!currentNotesUser) return;
+      authDropdown.classList.remove("open");
+      openPanel();
+    });
+    if (closeBtn) closeBtn.addEventListener("click", closeNotesPanel);
+    if (overlay) overlay.addEventListener("click", closeNotesPanel);
+    if (saveBtn) saveBtn.addEventListener("click", saveUserNote);
   })();
 
   // ---------- GLOBAL CHAT (Firestore) ----------
