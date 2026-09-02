@@ -634,6 +634,67 @@
     padding-top:10px;
   }
   .notes-status{font-size:11.5px; color:var(--ink-faint);}
+  .notes-new-btn{
+    padding:9px 14px;
+    border-radius:12px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:12.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .notes-new-btn:active{transform:scale(0.96);}
+  .notes-chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+    max-height:88px;
+    overflow-y:auto;
+  }
+  .notes-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    max-width:180px;
+    padding:6px 8px 6px 12px;
+    border-radius:999px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:11.5px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .notes-chip-label{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    max-width:130px;
+  }
+  .notes-chip.active{
+    border-color:var(--gold);
+    background:linear-gradient(165deg, rgba(201,166,107,0.28), rgba(201,166,107,0.14));
+    color:var(--gold);
+  }
+  .notes-chip-del{
+    flex:none;
+    width:16px; height:16px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,0.14);
+    color:inherit;
+    font-size:10px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .notes-chip-empty{font-size:11.5px; color:var(--ink-faint); padding:4px 2px;}
   .notes-save-btn{
     padding:9px 18px;
     border-radius:12px;
@@ -3695,8 +3756,10 @@
     <button class="notes-close-btn" id="notesCloseBtn" type="button" aria-label="Yopish">&#10005;</button>
   </div>
   <div class="notes-body">
+    <div class="notes-chip-row" id="notesChipRow"></div>
     <textarea class="notes-textarea" id="notesTextarea" placeholder="Shu yerga qaydlaringizni yozing..."></textarea>
     <div class="notes-footer">
+      <button class="notes-new-btn" id="notesNewBtn" type="button">+ Yangi</button>
       <span class="notes-status" id="notesStatus"></span>
       <button class="notes-save-btn" id="notesSaveBtn" type="button">Saqlash</button>
     </div>
@@ -7087,6 +7150,8 @@
     doc,
     setDoc,
     getDoc,
+    getDocs,
+    deleteDoc,
     query,
     orderBy,
     limit,
@@ -7207,7 +7272,7 @@
       startPresenceHeartbeat(user);
       setupPresenceAdminUI(user);
       currentNotesUser = user;
-      loadUserNote(user);
+      loadUserNotes(user);
     } else {
       if (loginBtn) loginBtn.style.display = "flex";
       if (userProfile) userProfile.style.display = "none";
@@ -7222,6 +7287,8 @@
       stopPresenceHeartbeat();
       teardownPresenceAdminUI();
       currentNotesUser = null;
+      notesList = [];
+      activeNoteId = null;
       closeNotesPanel();
       const notesTextarea = document.getElementById("notesTextarea");
       if (notesTextarea) notesTextarea.value = "";
@@ -7431,34 +7498,89 @@
     if (overlay) overlay.addEventListener("click", closePanel);
   })();
 
-  // ---------- SHAXSIY QAYDLAR (Firestore "userNotes/{uid}") ----------
-  // Har bir Google akkaunt uchun bitta qayd hujjati bor: userNotes/{uid}.
-  // Qayd faqat shu akkauntga tegishli va boshqalarga ko'rinmaydi.
+  // ---------- SHAXSIY QAYDLAR (Firestore "userNotes/{uid}/items/{noteId}") ----------
+  // Har bir Google akkaunt o'zining bir nechta qaydini saqlashi mumkin.
+  // Har bir qayd alohida hujjat, faqat shu akkauntga tegishli va boshqalarga ko'rinmaydi.
   let currentNotesUser = null;
-  let notesLoadedText = "";
-  let notesSaveTimer = null;
+  let notesList = [];       // {id, text, updatedAt}
+  let activeNoteId = null;  // hozir tahrirlanayotgan qaydning id'si, yangi qayd uchun null
+  let notesStatusTimer = null;
 
-  function notesDocRef(uid) {
-    return doc(db, "userNotes", uid);
+  function notesItemsCol(uid) {
+    return collection(db, "userNotes", uid, "items");
+  }
+  function notesItemRef(uid, noteId) {
+    return doc(db, "userNotes", uid, "items", noteId);
   }
 
-  async function loadUserNote(user) {
+  function noteChipLabel(text) {
+    const t = (text || "").trim().replace(/\s+/g, " ");
+    if (!t) return "(bo'sh qayd)";
+    return t.length > 22 ? t.slice(0, 22) + "…" : t;
+  }
+
+  function renderNotesChips() {
+    const row = document.getElementById("notesChipRow");
+    if (!row) return;
+    if (notesList.length === 0) {
+      row.innerHTML = `<div class="notes-chip-empty">Hali qayd yo'q — yozib "Saqlash"ni bosing</div>`;
+      return;
+    }
+    row.innerHTML = notesList.map(n => `
+      <button type="button" class="notes-chip${n.id === activeNoteId ? ' active' : ''}" data-id="${n.id}">
+        <span class="notes-chip-label">${(noteChipLabel(n.text)).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</span>
+        <span class="notes-chip-del" data-del-id="${n.id}" aria-label="O'chirish">&#10005;</span>
+      </button>
+    `).join("");
+    row.querySelectorAll(".notes-chip").forEach(chip => {
+      chip.addEventListener("click", (e) => {
+        if (e.target.closest(".notes-chip-del")) return;
+        selectNote(chip.getAttribute("data-id"));
+      });
+    });
+    row.querySelectorAll(".notes-chip-del").forEach(delBtn => {
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteNote(delBtn.getAttribute("data-del-id"));
+      });
+    });
+  }
+
+  function selectNote(noteId) {
+    const textarea = document.getElementById("notesTextarea");
+    const note = notesList.find(n => n.id === noteId);
+    if (!textarea || !note) return;
+    activeNoteId = noteId;
+    textarea.value = note.text || "";
+    renderNotesChips();
+    textarea.focus();
+  }
+
+  function startNewNote() {
+    const textarea = document.getElementById("notesTextarea");
+    activeNoteId = null;
+    if (textarea) { textarea.value = ""; textarea.focus(); }
+    renderNotesChips();
+  }
+
+  async function loadUserNotes(user) {
     const textarea = document.getElementById("notesTextarea");
     const status = document.getElementById("notesStatus");
     if (!textarea) return;
+    notesList = [];
+    activeNoteId = null;
     textarea.value = "";
     textarea.disabled = true;
     if (status) status.textContent = "Yuklanmoqda...";
     try {
-      const snap = await getDoc(notesDocRef(user.uid));
+      const snap = await getDocs(query(notesItemsCol(user.uid), orderBy("updatedAt", "desc")));
       if (currentNotesUser && currentNotesUser.uid === user.uid) {
-        const text = snap.exists() ? (snap.data().text || "") : "";
-        textarea.value = text;
-        notesLoadedText = text;
+        notesList = snap.docs.map(d => ({ id: d.id, text: d.data().text || "" }));
+        renderNotesChips();
         if (status) status.textContent = "";
       }
     } catch (err) {
-      console.error("Qaydni yuklashda xatolik:", err.message);
+      console.error("Qaydlarni yuklashda xatolik:", err.message);
       if (status) status.textContent = "Yuklab bo'lmadi";
     } finally {
       textarea.disabled = false;
@@ -7474,20 +7596,44 @@
     if (saveBtn) saveBtn.disabled = true;
     if (status) status.textContent = "Saqlanmoqda...";
     try {
-      await setDoc(notesDocRef(currentNotesUser.uid), {
-        text: text,
-        email: currentNotesUser.email || null,
-        updatedAt: serverTimestamp()
-      });
-      notesLoadedText = text;
+      if (activeNoteId) {
+        // mavjud qaydni tahrirlash — o'sha hujjat ustiga yoziladi
+        await setDoc(notesItemRef(currentNotesUser.uid, activeNoteId), {
+          text: text,
+          updatedAt: serverTimestamp()
+        });
+        const idx = notesList.findIndex(n => n.id === activeNoteId);
+        if (idx !== -1) notesList[idx].text = text;
+      } else {
+        // yangi qayd — yangi hujjat sifatida qo'shiladi
+        const ref = await addDoc(notesItemsCol(currentNotesUser.uid), {
+          text: text,
+          updatedAt: serverTimestamp()
+        });
+        activeNoteId = ref.id;
+        notesList.unshift({ id: ref.id, text: text });
+      }
+      renderNotesChips();
       if (status) status.textContent = "Saqlandi ✓";
-      if (notesSaveTimer) clearTimeout(notesSaveTimer);
-      notesSaveTimer = setTimeout(() => { if (status) status.textContent = ""; }, 2000);
+      if (notesStatusTimer) clearTimeout(notesStatusTimer);
+      notesStatusTimer = setTimeout(() => { if (status) status.textContent = ""; }, 2000);
     } catch (err) {
       console.error("Qaydni saqlashda xatolik:", err.message);
       if (status) status.textContent = "Saqlab bo'lmadi";
     } finally {
       if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  async function deleteNote(noteId) {
+    if (!currentNotesUser) return;
+    try {
+      await deleteDoc(notesItemRef(currentNotesUser.uid, noteId));
+      notesList = notesList.filter(n => n.id !== noteId);
+      if (activeNoteId === noteId) startNewNote();
+      else renderNotesChips();
+    } catch (err) {
+      console.error("Qaydni o'chirishda xatolik:", err.message);
     }
   }
 
@@ -7504,6 +7650,7 @@
     const panel = document.getElementById("notesPanel");
     const closeBtn = document.getElementById("notesCloseBtn");
     const saveBtn = document.getElementById("notesSaveBtn");
+    const newBtn = document.getElementById("notesNewBtn");
     function openPanel() {
       if (overlay) overlay.classList.add("open");
       if (panel) panel.classList.add("open");
@@ -7516,6 +7663,7 @@
     if (closeBtn) closeBtn.addEventListener("click", closeNotesPanel);
     if (overlay) overlay.addEventListener("click", closeNotesPanel);
     if (saveBtn) saveBtn.addEventListener("click", saveUserNote);
+    if (newBtn) newBtn.addEventListener("click", startNewNote);
   })();
 
   // ---------- GLOBAL CHAT (Firestore) ----------
