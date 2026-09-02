@@ -6955,7 +6955,7 @@
   // ko'rinish nazorati — chinakam himoya uchun Firebase konsolida
   // "presence" kolleksiyasini o'qish Firestore Security Rules orqali ham
   // shu admin UID/emailiga cheklab qo'yilishi tavsiya etiladi.
-  const PRESENCE_ADMIN_EMAIL = "doniyorbektoshmatov7@gmail.com";
+  const PRESENCE_ADMIN_EMAILS = ["doniyorbektoshmatov7@gmail.com", "gulchiroyjumayeva018@gmail.com"];
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
   const PRESENCE_STALE_MS = 35000;
@@ -7227,7 +7227,7 @@
 
   function setupPresenceAdminUI(user) {
     const toggleBtn = document.getElementById("presenceToggleBtn");
-    const isAdmin = !!user.email && user.email.toLowerCase() === PRESENCE_ADMIN_EMAIL.toLowerCase();
+    const isAdmin = !!user.email && PRESENCE_ADMIN_EMAILS.some(function(e){ return e.toLowerCase() === user.email.toLowerCase(); });
     if (!isAdmin) {
       teardownPresenceAdminUI();
       return;
