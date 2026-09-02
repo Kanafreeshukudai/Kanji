@@ -348,11 +348,12 @@
     width:36px;
     height:36px;
     border-radius:50%;
-    border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg);
-    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    padding:0;
+    border:2px solid transparent;
+    background:
+      linear-gradient(var(--bg-2), var(--bg-2)) padding-box,
+      conic-gradient(from 180deg, #ff6b6b, #ffc371, #4facfe, #a78bfa, #ff6b6b) border-box;
+    box-sizing:border-box;
+    padding:2px;
     cursor:pointer;
     overflow:hidden;
     display:flex;
@@ -364,7 +365,8 @@
     transition:all .2s ease;
   }
   .auth-avatar-btn:active{transform:scale(0.92);}
-  .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block;}
+  .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; background:var(--bg-2);}
+  .auth-avatar-btn span#userAvatarInitial{width:100%; height:100%; border-radius:50%; background:var(--bg-2); display:flex; align-items:center; justify-content:center;}
 
   /* ---------- BANNER VIDEO — auth-box ichida, AI yordamchi tugmasi bilan avatar chap tarafida ---------- */
   .auth-banner-video{
