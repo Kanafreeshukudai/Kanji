@@ -3846,6 +3846,7 @@
     {id:"denen", day:1, group:"田", kanji:"田園", romaji:"den'en", type:"on + on", reading:"田(den) + 園(en)", uz:"qishloq yerlari"},
 
     // ---- 2-kun ----
+    {id:"hi_nichi", day:2, group:"日", kanji:"日", romaji:"hi", type:"kun'yomi", reading:"日(hi) — yakka kanji", otherReadings:"kun: ひ(hi), か(ka) · on: ニチ(nichi), ジツ(jitsu)", uz:"kun, quyosh"},
     {id:"nichiyoubi", day:2, group:"日", kanji:"日曜日", romaji:"nichiyoubi", type:"on + kun", reading:"日(nichi) + 曜(you) + 日(bi)", uz:"yakshanba"},
     {id:"nihon", day:2, group:"日", kanji:"日本", romaji:"nihon", type:"on + on", reading:"日(ni) + 本(hon)", uz:"Yaponiya"},
     {id:"tanjoubi", day:2, group:"日", kanji:"誕生日", romaji:"tanjoubi", type:"on + on + kun", reading:"誕(tan) + 生(jou) + 日(bi)", uz:"tug'ilgan kun"},
@@ -3880,6 +3881,12 @@
     {id:"ryoukin", day:3, group:"金", kanji:"料金", romaji:"ryoukin", type:"on + on", reading:"料(ryou) + 金(kin)", uz:"to'lov"},
     {id:"zeikin", day:3, group:"金", kanji:"税金", romaji:"zeikin", type:"on + on", reading:"税(zei) + 金(kin)", uz:"soliq"},
     {id:"kinkakuji", day:3, group:"金", kanji:"金閣寺", romaji:"kinkakuji", type:"on + on + on", reading:"金(kin) + 閣(kaku) + 寺(ji)", uz:"Kinkaku-ji ibodatxonasi"},
+
+    {id:"tsuchi", day:3, group:"土", kanji:"土", romaji:"tsuchi", type:"kun'yomi", reading:"土(tsuchi) — yakka kanji", otherReadings:"kun: つち(tsuchi) · on: ド(do), ト(to)", uz:"tuproq"},
+    {id:"omiyage", day:3, group:"土", kanji:"お土産", romaji:"omiyage", type:"— + jukujikun", reading:"お + 土産(miyage) — maxsus o'qilish", uz:"sovg'a"},
+    {id:"tochi", day:3, group:"土", kanji:"土地", romaji:"tochi", type:"on + on", reading:"土(to) + 地(chi)", uz:"yer"},
+    {id:"dosokugenkin", day:3, group:"土", kanji:"土足厳禁", romaji:"dosoku genkin", type:"on + on + on + on", reading:"土(do) + 足(soku) + 厳(gen) + 禁(kin)", uz:"Oyoq kiyim bilan kirish qat'iyan man etiladi"},
+    {id:"doyoubi", day:3, group:"土", kanji:"土曜日", romaji:"doyoubi", type:"on + on + kun", reading:"土(do) + 曜(you) + 日(bi)", uz:"Shanba"},
 
     // ---- 4-kun ----
     {id:"kuruma", day:4, group:"車", kanji:"車", romaji:"kuruma", type:"kun'yomi", reading:"車(kuruma) — yakka kanji", otherReadings:"kun: くるま(kuruma) · on: シャ(sha)", uz:"mashina"},
@@ -5546,8 +5553,29 @@
     }
     const word = byId[quizItems[quizIdx]];
     // build 4 options: correct + 3 distractors (shu viktorina o'z manbasidan, kifoya bo'lmasa hammasidan)
+    // Bir xil tarjima/romaji matnli variantlar takrorlanib chiqmasligi uchun,
+    // avval faqat matni (uz yoki romaji) boshqacha bo'lgan so'zlar orasidan tanlaymiz;
+    // agar noyob variant yetarlicha topilmasa (juda kam noyob tarjima bo'lsa), qolganini
+    // to'ldirish uchun takrorlanishlarga ham ruxsat beramiz.
+    const optField = quizType === 'romaji' ? 'romaji' : 'uz';
     const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
-    let distractors = shuffle(pool.filter(id=>id!==word.id)).slice(0,3);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word[optField]]);
+    let distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id][optField];
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
     const options = shuffle([word.id, ...distractors]);
 
     const modeLabel = quizType === 'romaji' ? "Kanjining romajisini toping" : "Kanjining ma'nosini toping";
