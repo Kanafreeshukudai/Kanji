@@ -6913,6 +6913,103 @@
 
   // yuklanish tugagach shu funksiya chaqiriladi — endi ekran avtomatik yopilmaydi,
   // "Boshlash" tugmasi ko'rinadigan bo'ladi va foydalanuvchi bosishini kutadi
+  // ---------- RASMNING MUSIQA RITMIGA HAMOHANG "ZARBA" ANIMATSIYASI ----------
+  // Ilgari rasm shunchaki belgilangan 1.05s tsiklda pulslardi (haqiqiy
+  // qo'shiqqa bog'liq emas edi). Endi Web Audio API orqali haqiqiy audio
+  // oqimining bas (past chastota) energiyasi har kadrda o'lchanadi va har bir
+  // zarb (kick/bass hit) sezilganda rasm bir zumda "ezilib" yaqinlashadi,
+  // so'ng tabiiy tarzda asta uzoqlashib (kichrayib) yana tinch holatga
+  // qaytadi — xuddi ekvalayzer indikatorlari kabi qo'shiqning o'ziga qarab.
+  const BeatSync = (function(){
+    const audio = document.getElementById('splashPhonkAudio');
+    const artwork = document.getElementById('splashArtwork');
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if(!audio || !artwork || !AudioCtor) return { start(){}, stop(){} };
+
+    let ctx = null, analyser = null, source = null, freqData = null;
+    let rafId = null;
+    let punch = 0;              // 0..1 — zarbadan keyin asta so'nadigan "yaqinlashish" kuchi
+    const energyHistory = [];   // so'nggi ~0.7s bas energiyasi (lokal o'rtachani bilish uchun)
+    let lastBeatTime = 0;
+
+    const MIN_BEAT_INTERVAL_MS = 220; // ketma-ket zarblar orasidagi eng kichik oraliq (juda tez-tez "titramasin")
+    const DECAY = 0.90;                // har kadrda "yaqinlashish"ning so'nish tezligi (uzoqlashish tuyg'usi)
+    const MAX_SCALE_DELTA = 0.06;      // eng kuchli zarbdagi maksimal kattalashuv (avvalgi pulsga yaqin)
+    const BEAT_RATIO = 1.28;           // instant energiya lokal o'rtachadan necha barobar oshsa — zarb hisoblanadi
+    const BEAT_FLOOR = 0.12;           // juda past ovozda (tishinlik) yolg'on zarb ushlab qolinmasligi uchun chegara
+
+    function ensureGraph(){
+      if(ctx) return true;
+      try{
+        ctx = new AudioCtor();
+        source = ctx.createMediaElementSource(audio);
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.55;
+        // Musiqa eshitilishda davom etishi uchun analyser orqali destination'ga ulanadi
+        source.connect(analyser);
+        analyser.connect(ctx.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        return true;
+      }catch(e){
+        // Masalan, brauzer AudioContext'ni cheklagan yoki boshqa sabab —
+        // bunday holda eski statik CSS puls animatsiyasi ishlashda davom etadi
+        ctx = null;
+        return false;
+      }
+    }
+
+    function bassEnergy(){
+      analyser.getByteFrequencyData(freqData);
+      const nyquist = ctx.sampleRate / 2;
+      const binHz = nyquist / freqData.length;
+      // ~20–180Hz — kick/bass zarbalari asosan shu diapazonda seziladi
+      const loBin = Math.max(1, Math.floor(20 / binHz));
+      const hiBin = Math.min(freqData.length - 1, Math.ceil(180 / binHz));
+      let sum = 0, count = 0;
+      for(let i = loBin; i <= hiBin; i++){ sum += freqData[i]; count++; }
+      return count ? (sum / count) / 255 : 0;
+    }
+
+    function loop(){
+      rafId = requestAnimationFrame(loop);
+      if(!analyser || audio.paused){ return; }
+      const e = bassEnergy();
+      energyHistory.push(e);
+      if(energyHistory.length > 43) energyHistory.shift();
+      let avg = 0;
+      for(let i = 0; i < energyHistory.length; i++) avg += energyHistory[i];
+      avg = energyHistory.length ? avg / energyHistory.length : 0;
+
+      const now = performance.now();
+      if(e > avg * BEAT_RATIO && e > BEAT_FLOOR && (now - lastBeatTime) > MIN_BEAT_INTERVAL_MS){
+        lastBeatTime = now;
+        punch = 1; // zarb aniqlandi — rasm shu zahoti "ezilib" yaqinlashadi
+      }
+      punch *= DECAY; // keyingi zarbgacha asta uzoqlashib, tinch holatga qaytadi
+
+      const scale = 1 + punch * MAX_SCALE_DELTA;
+      artwork.style.transform = 'scale(' + scale.toFixed(4) + ')';
+    }
+
+    return {
+      start(){
+        if(!ensureGraph()) return;
+        if(ctx.state === 'suspended') ctx.resume();
+        // Endi rasmni JS boshqaradi — eski statik CSS puls animatsiyasi o'chiriladi
+        artwork.style.animation = 'none';
+        if(!rafId) loop();
+      },
+      stop(){
+        if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+        artwork.style.transform = '';
+        artwork.style.animation = '';
+        punch = 0;
+        energyHistory.length = 0;
+      }
+    };
+  })();
+
   // ---------- SPLASH PHONK MUSIQA ----------
   // Sahifa ochilishi bilan (avtoplay siyosati ruxsat bersa) qisqa phonk
   // klipni pastdan yuqoriga sekin ovoz bilan chalamiz; brauzer avtomatik
@@ -6973,6 +7070,7 @@
           started = true;
           fadeTo(TARGET_VOLUME, 900);
           setToggleState();
+          BeatSync.start();
         }).catch(()=>{
           // Avtoplay bloklandi — birinchi foydalanuvchi teginishida qayta urinamiz
         });
@@ -6981,6 +7079,7 @@
         started = true;
         fadeTo(TARGET_VOLUME, 900);
         setToggleState();
+        BeatSync.start();
       }
     }
 
@@ -6999,7 +7098,7 @@
         tryStart();
       } else {
         userPaused = true;
-        fadeTo(0, 300, ()=>{ audio.pause(); });
+        fadeTo(0, 300, ()=>{ audio.pause(); BeatSync.stop(); });
       }
       setToggleState();
     });
@@ -7016,6 +7115,7 @@
             audio.pause();
             audio.currentTime = 0; // keyingi safar tasodifan qayta ishga tushsa ham, boshidan boshlansin
           }catch(e){}
+          BeatSync.stop();
         });
       }
     };
