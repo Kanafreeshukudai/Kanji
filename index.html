@@ -228,6 +228,82 @@
     color:var(--ink);
   }
 
+  /* ---------- KARTOCHKA ALMASHISH (foydalanuvchilar o'rtasida kanji
+     kartochka uzatish) tugmasi — header'da qidiruv tugmasi yonida.
+     Hozircha faqat vizual: ikonka ichida ikkita mini-kartochka bir-biriga
+     qarama-qarshi tomonlarga uzatilib turgandek uzluksiz aylanadi.
+     Funksionallik keyingi bosqichda qo'shiladi. ---------- */
+  .card-transfer-btn{
+    flex:none;
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .2s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .card-transfer-btn:active{transform:scale(0.92);}
+
+  .ct-stage{
+    position:relative;
+    width:24px;
+    height:17px;
+    display:block;
+  }
+  .ct-card{
+    position:absolute;
+    top:1px;
+    width:11px;
+    height:15px;
+    border-radius:2.5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:6.5px;
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    line-height:1;
+    color:rgba(255,255,255,0.92);
+    box-shadow:0 1px 3px rgba(0,0,0,0.55);
+  }
+  .ct-card-1{
+    left:0;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    animation:ctCardOne 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  .ct-card-2{
+    right:0;
+    background:linear-gradient(155deg, var(--slate), #82a6c9);
+    animation:ctCardTwo 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  /* 1-kartochka: chapdan boshlanadi -> o'ngga uzatiladi -> yana chapga qaytadi */
+  @keyframes ctCardOne{
+    0%, 6%{ transform:translateX(0) rotate(0deg); z-index:2; }
+    46%,54%{ transform:translateX(12px) rotate(10deg); z-index:2; }
+    55%{ z-index:1; }
+    94%,100%{ transform:translateX(0) rotate(0deg); z-index:1; }
+  }
+  /* 2-kartochka: o'ngdan boshlanadi -> chapga uzatiladi -> yana o'ngga qaytadi
+     (1-kartochka bilan qarama-qarshi yo'nalishda, bir vaqtda) */
+  @keyframes ctCardTwo{
+    0%, 6%{ transform:translateX(0) rotate(0deg); z-index:1; }
+    46%,54%{ transform:translateX(-12px) rotate(-10deg); z-index:1; }
+    55%{ z-index:2; }
+    94%,100%{ transform:translateX(0) rotate(0deg); z-index:2; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-card-1, .ct-card-2{ animation:none; }
+  }
+
   /* ---------- QIDIRUV (search) ---------- */
   .search-toggle-btn{
     flex:none;
@@ -253,25 +329,26 @@
   }
   .search-toggle-btn svg{width:17px; height:17px; display:block;}
 
-  /* Chat tugmasi — qidiruv tugmasi bilan bir qatorda, header ichida, chap tomonda */
+  /* Chat tugmasi — endi header'da emas, akkaunt (profil) menyusi ichida,
+     "Qaydlar"/"Chiqish" tugmalari bilan bir qatorda joylashgan */
   .chat-toggle-btn{
-    flex:none;
-    width:36px;
-    height:36px;
     display:flex;
     align-items:center;
     justify-content:center;
-    border-radius:50%;
+    gap:7px;
+    padding:8px 10px;
+    border-radius:10px;
     border:1px solid var(--glass-border-soft);
     background:var(--glass-bg);
-    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    color:var(--ink-soft);
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:600;
+    font-family:inherit;
     cursor:pointer;
     transition:all .2s ease;
   }
-  .chat-toggle-btn:active{transform:scale(0.92);}
-  .chat-toggle-btn svg{width:17px; height:17px; display:block;}
+  .chat-toggle-btn:active{transform:scale(0.96);}
+  .chat-toggle-btn svg{width:16px; height:16px; flex:none; display:block;}
 
   /* Chat/AI yordamchi ishlatilayotganda (panel ochiq turganda) tugma
      tovlanib (shimmer/glow) turadi — foydalanuvchiga qaysi tugma faol
@@ -2803,6 +2880,126 @@
   }
   .nickname-close-btn:active{transform:scale(0.9);}
 
+  /* ---------- KARTOCHKA ALMASHISH: bildirishnoma oynasi ---------- */
+  .card-transfer-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(6,7,9,0.62);
+    backdrop-filter:blur(10px) saturate(140%);
+    -webkit-backdrop-filter:blur(10px) saturate(140%);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+  }
+  .card-transfer-overlay.show{opacity:1; pointer-events:auto;}
+  .card-transfer-modal{
+    position:relative;
+    width:100%;
+    max-width:400px;
+    border-radius:26px;
+    padding:34px 26px 28px;
+    text-align:center;
+    background:linear-gradient(165deg, var(--panel-2), var(--panel-1));
+    border:1px solid var(--glass-border-soft);
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);
+    transform:translateY(14px) scale(0.96);
+    transition:transform .32s cubic-bezier(.2,.8,.2,1);
+  }
+  .card-transfer-overlay.show .card-transfer-modal{transform:translateY(0) scale(1);}
+  .card-transfer-close-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .card-transfer-close-btn:active{transform:scale(0.9);}
+  .card-transfer-modal-icon{
+    width:70px;
+    height:52px;
+    margin:0 auto 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .ct-stage-lg{
+    position:relative;
+    width:70px;
+    height:50px;
+    display:block;
+  }
+  .ct-card-lg{
+    position:absolute;
+    top:2px;
+    width:30px;
+    height:42px;
+    border-radius:6px;
+    font-size:17px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.55);
+  }
+  .ct-card-lg.ct-card-1{
+    left:0;
+    animation:ctCardOneLg 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  .ct-card-lg.ct-card-2{
+    right:0;
+    animation:ctCardTwoLg 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  @keyframes ctCardOneLg{
+    0%, 6%{ transform:translateX(0) rotate(0deg); z-index:2; }
+    46%,54%{ transform:translateX(38px) rotate(10deg); z-index:2; }
+    55%{ z-index:1; }
+    94%,100%{ transform:translateX(0) rotate(0deg); z-index:1; }
+  }
+  @keyframes ctCardTwoLg{
+    0%, 6%{ transform:translateX(0) rotate(0deg); z-index:1; }
+    46%,54%{ transform:translateX(-38px) rotate(-10deg); z-index:1; }
+    55%{ z-index:2; }
+    94%,100%{ transform:translateX(0) rotate(0deg); z-index:2; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-card-lg.ct-card-1, .ct-card-lg.ct-card-2{ animation:none; }
+  }
+  .card-transfer-modal h2{
+    font-family:'Shippori Mincho', serif;
+    font-size:20px;
+    margin:0 0 12px;
+    color:var(--ink);
+  }
+  .card-transfer-modal p{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.65;
+  }
+  .card-transfer-badge{
+    display:inline-block;
+    margin-top:16px;
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent-soft);
+    background:rgba(217,105,79,0.14);
+    border:1px solid rgba(217,105,79,0.35);
+  }
+
   /* ---------- GLOBAL CHAT (shu qurilmada saqlanadi) ---------- */
   .chat-overlay{
     position:fixed;
@@ -3549,6 +3746,10 @@
     </button>
     <div class="auth-dropdown" id="authDropdown">
       <span id="user-name" class="auth-name"></span>
+      <button class="chat-toggle-btn" id="chatToggleBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        <span>Chat</span>
+      </button>
       <button id="notes-btn" class="auth-notes-btn" type="button">📝 Qaydlar</button>
       <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
     </div>
@@ -3615,8 +3816,12 @@
 <div class="app-shell" id="appShell">
 
 <header>
-  <button class="chat-toggle-btn" id="chatToggleBtn" type="button" aria-label="Chat">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+  <!-- Kartochka almashish tugmasi — chat tugmasi turgan joyda (chat esa endi profil/akkaunt menyusi ichiga ko'chirildi) -->
+  <button class="card-transfer-btn" id="cardTransferBtn" type="button" aria-label="Kartochka almashish" title="Do'stlar bilan kartochka almashish">
+    <span class="ct-stage" aria-hidden="true">
+      <span class="ct-card ct-card-1">漢</span>
+      <span class="ct-card ct-card-2">字</span>
+    </span>
   </button>
   <div class="header-title-block">
     <div class="eyebrow">So'z birikmalari</div>
@@ -3726,6 +3931,22 @@
     <p>Bu ism chatda boshqalarga shu nom bilan ko'rinadi.</p>
     <input class="nickname-input" id="nicknameInput" type="text" maxlength="18" placeholder="Nickname" autocomplete="off" autocorrect="off" spellcheck="false" required>
     <button class="nickname-confirm-btn" id="nicknameConfirmBtn" type="button" disabled>Saqlash</button>
+  </div>
+</div>
+
+<!-- ---------- KARTOCHKA ALMASHISH: bildirishnoma oynasi ---------- -->
+<div class="card-transfer-overlay" id="cardTransferOverlay" aria-hidden="true">
+  <div class="card-transfer-modal">
+    <button class="card-transfer-close-btn" id="cardTransferCloseBtn" type="button" aria-label="Yopish">✕</button>
+    <div class="card-transfer-modal-icon">
+      <span class="ct-stage-lg" aria-hidden="true">
+        <span class="ct-card ct-card-1 ct-card-lg">漢</span>
+        <span class="ct-card ct-card-2 ct-card-lg">字</span>
+      </span>
+    </div>
+    <h2>Kartochka almashish</h2>
+    <p>Tez kunda turli foydalanuvchilar bir-birlariga kanji kartochkani so'roq o'yini tarzida yubora olishadi — qabul qilgan odam esa javobini yo'llaydi. Har bir xonada 4 tagacha foydalanuvchi ishtirok etadi.</p>
+    <span class="card-transfer-badge">Tez kunda</span>
   </div>
 </div>
 
@@ -6608,6 +6829,34 @@
       if(e.key === 'Escape' && overlay && overlay.classList.contains('show')) closeNicknameModal();
     });
   })();
+  // ---------- KARTOCHKA ALMASHISH: bildirishnoma oynasi ----------
+  function openCardTransferModal(){
+    const overlay = document.getElementById('cardTransferOverlay');
+    if(!overlay) return;
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    lockPageScroll();
+  }
+  function closeCardTransferModal(){
+    const overlay = document.getElementById('cardTransferOverlay');
+    if(!overlay || !overlay.classList.contains('show')) return;
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    unlockPageScroll();
+  }
+  (function initCardTransferModal(){
+    const overlay = document.getElementById('cardTransferOverlay');
+    const modal = overlay ? overlay.querySelector('.card-transfer-modal') : null;
+    const closeBtn = document.getElementById('cardTransferCloseBtn');
+    const openBtn = document.getElementById('cardTransferBtn');
+    if(openBtn) openBtn.addEventListener('click', openCardTransferModal);
+    if(overlay) overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeCardTransferModal(); });
+    if(modal) modal.addEventListener('click', (e)=> e.stopPropagation());
+    if(closeBtn) closeBtn.addEventListener('click', closeCardTransferModal);
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && overlay && overlay.classList.contains('show')) closeCardTransferModal();
+    });
+  })();
   (function initChatWidget(){
     const fab = document.getElementById('chatToggleBtn');
     const closeBtn = document.getElementById('chatCloseBtn');
@@ -6615,7 +6864,11 @@
     const sendBtn = document.getElementById('chatSendBtn');
     const input = document.getElementById('chatInput');
     const nickLabel = document.getElementById('chatNickLabel');
-    if(fab) fab.addEventListener('click', openChatPanel);
+    if(fab) fab.addEventListener('click', ()=>{
+      const dropdown = document.getElementById('authDropdown');
+      if(dropdown) dropdown.classList.remove('open');
+      openChatPanel();
+    });
     if(closeBtn) closeBtn.addEventListener('click', closeChatPanel);
     if(overlay) overlay.addEventListener('click', closeChatPanel);
     if(sendBtn) sendBtn.addEventListener('click', sendChatMessage);
