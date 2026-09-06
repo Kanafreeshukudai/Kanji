@@ -3000,7 +3000,7 @@
     border:1px solid rgba(217,105,79,0.35);
   }
 
-  /* ---------- HONA YARATISH: ishtirokchi o'rindiqlari ---------- */
+  /* ---------- XONA YARATISH: ishtirokchi o'rindiqlari ---------- */
   .ct-seats{
     display:flex;
     justify-content:center;
@@ -3055,7 +3055,7 @@
   }
   .ct-seat.ct-seat-filled .ct-seat-label{color:var(--ink); font-weight:600;}
 
-  /* ---------- HONA YARATISH: parametrlar ---------- */
+  /* ---------- XONA YARATISH: parametrlar ---------- */
   .ct-settings{
     display:flex;
     flex-direction:column;
@@ -3119,7 +3119,7 @@
   }
   .ct-create-room-btn:active{transform:scale(0.97);}
 
-  /* ---------- HONA: yuqori tab (Yaratish / Kirish) ---------- */
+  /* ---------- XONA: yuqori tab (Yaratish / Kirish) ---------- */
   .ct-top-tabs{
     width:100%;
     margin-bottom:18px;
@@ -3131,7 +3131,7 @@
   }
   .ct-join-tabs .ct-segment-btn{flex:1;}
 
-  /* ---------- HONA: ochiq honalar ro'yxati ---------- */
+  /* ---------- XONA: ochiq xonalar ro'yxati ---------- */
   .ct-room-list{
     display:flex;
     flex-direction:column;
@@ -3201,7 +3201,7 @@
     cursor:default;
   }
 
-  /* ---------- HONA: kod bilan kirish ---------- */
+  /* ---------- XONA: kod bilan kirish ---------- */
   .ct-code-form{
     display:flex;
     gap:8px;
@@ -3238,7 +3238,7 @@
     text-align:center;
   }
 
-  /* ---------- HONA: kutish xonasi ---------- */
+  /* ---------- XONA: kutish xonasi ---------- */
   .ct-code-display{
     text-align:center;
     margin:6px 0 18px;
@@ -3312,8 +3312,8 @@
     filter:grayscale(0.3);
   }
   .ct-start-room-btn.hidden{display:none;}
-  /* hona "boshlandi" holatiga o'tganda ko'rinadigan vaqtinchalik joy —
-     honaning ichki (o'yin) qismi keyingi bosqichda shu yerga yoziladi */
+  /* xona "boshlandi" holatiga o'tganda ko'rinadigan vaqtinchalik joy —
+     xonaning ichki (o'yin) qismi keyingi bosqichda shu yerga yoziladi */
   .ct-room-started-hint{
     text-align:center;
     font-size:13px;
@@ -4269,7 +4269,7 @@
   </div>
 </div>
 
-<!-- ---------- KARTOCHKA ALMASHISH: hona yaratish oynasi ---------- -->
+<!-- ---------- KARTOCHKA ALMASHISH: xona yaratish oynasi ---------- -->
 <div class="card-transfer-overlay" id="cardTransferOverlay" aria-hidden="true">
   <div class="card-transfer-modal">
     <button class="card-transfer-close-btn" id="cardTransferCloseBtn" type="button" aria-label="Yopish">✕</button>
@@ -4280,21 +4280,21 @@
       </span>
     </div>
 
-    <!-- Yuqori tab: Hona yaratish / Honaga kirish -->
+    <!-- Yuqori tab: Xona yaratish / Xonaga kirish -->
     <div class="ct-segment ct-top-tabs" id="ctTopTabs">
       <button type="button" class="ct-segment-btn active" data-ct-tab="create">Yaratish</button>
       <button type="button" class="ct-segment-btn" data-ct-tab="join">Kirish</button>
     </div>
 
-    <!-- ---------- HONA YARATISH ---------- -->
+    <!-- ---------- XONA YARATISH ---------- -->
     <div id="ctCreateView">
-      <h2>Hona yaratish</h2>
+      <h2>Xona yaratish</h2>
       <p>Do'stlaringiz bilan kanji kartochkalarni so'roq o'yini tarzida almashing — kartochka yuborasiz, ular javobini qaytaradi.</p>
 
       <!-- Ishtirokchilar uchun joylar: 1-o'rindiq — siz, qolganlari hozircha bo'sh -->
       <div class="ct-seats" id="ctSeats" aria-hidden="true"></div>
 
-      <!-- Hona parametrlari -->
+      <!-- Xona parametrlari -->
       <div class="ct-settings">
         <div class="ct-setting-row">
           <span class="ct-setting-label">Ishtirokchilar soni</span>
@@ -4305,7 +4305,7 @@
           </div>
         </div>
         <div class="ct-setting-row">
-          <span class="ct-setting-label">Hona turi</span>
+          <span class="ct-setting-label">Xona turi</span>
           <div class="ct-segment" id="ctVisibilitySegment">
             <button type="button" class="ct-segment-btn active" data-visibility="public">Ochiq</button>
             <button type="button" class="ct-segment-btn" data-visibility="private">Yopiq</button>
@@ -4313,23 +4313,23 @@
         </div>
       </div>
 
-      <button class="ct-create-room-btn" id="ctCreateRoomBtn" type="button">Hona yaratish</button>
+      <button class="ct-create-room-btn" id="ctCreateRoomBtn" type="button">Xona yaratish</button>
       <div class="ct-error" id="ctCreateError"></div>
     </div>
 
-    <!-- ---------- HONAGA KIRISH ---------- -->
+    <!-- ---------- XONAGA KIRISH ---------- -->
     <div id="ctJoinView" class="hidden">
-      <h2>Honaga kirish</h2>
-      <p>Ochiq honalardan birini tanlang yoki do'stingiz bergan kodni kiriting.</p>
+      <h2>Xonaga kirish</h2>
+      <p>Ochiq xonalardan birini tanlang yoki do'stingiz bergan kodni kiriting.</p>
 
       <div class="ct-segment ct-join-tabs" id="ctJoinTabs">
-        <button type="button" class="ct-segment-btn active" data-ct-jointab="public">Ochiq honalar</button>
+        <button type="button" class="ct-segment-btn active" data-ct-jointab="public">Ochiq xonalar</button>
         <button type="button" class="ct-segment-btn" data-ct-jointab="code">Kod bilan</button>
       </div>
 
       <div id="ctPublicRoomsView">
         <div class="ct-room-list" id="ctPublicRoomsList">
-          <div class="ct-room-list-empty">Honalar qidirilmoqda...</div>
+          <div class="ct-room-list-empty">Xonalar qidirilmoqda...</div>
         </div>
       </div>
 
@@ -4342,23 +4342,23 @@
       </div>
     </div>
 
-    <!-- ---------- KUTISH XONASI (yaratilgan/qo'shilgan hona) ---------- -->
+    <!-- ---------- KUTISH XONASI (yaratilgan/qo'shilgan xona) ---------- -->
     <div id="ctWaitingView" class="hidden">
       <h2 id="ctWaitingTitle">Kutilmoqda...</h2>
       <div class="ct-seats" id="ctWaitingSeats" aria-hidden="true"></div>
       <div class="ct-code-display hidden" id="ctCodeDisplay">
-        <span class="ct-code-display-label">Honaga kirish kodi</span>
+        <span class="ct-code-display-label">Xonaga kirish kodi</span>
         <div class="ct-code-display-value" id="ctCodeValue"></div>
         <button class="ct-code-copy-btn" id="ctCodeCopyBtn" type="button">Nusxalash</button>
-        <p class="ct-code-hint">Bu kodni do'stlaringizga yuboring — ular shu kod bilan honaga kira oladi.</p>
+        <p class="ct-code-hint">Bu kodni do'stlaringizga yuboring — ular shu kod bilan xonaga kira oladi.</p>
       </div>
       <p class="ct-waiting-hint" id="ctWaitingHint">Boshqa ishtirokchilarni kuting...</p>
       <!-- Faqat xostga ko'rinadi, kamida 2 ta ishtirokchi bo'lganda yoqiladi -->
       <button class="ct-start-room-btn hidden" id="ctStartRoomBtn" type="button" disabled>Boshlash</button>
-      <!-- Hona boshlangandan keyin ko'rinadi — honaning ichki (o'yin) qismi
+      <!-- Xona boshlangandan keyin ko'rinadi — xonaning ichki (o'yin) qismi
            hali yozilmagan, shuning uchun hozircha shu qisqa xabar chiqadi.
-           TODO: keyingi bosqichda shu yerga honaning ichki UI/logikasi yoziladi. -->
-      <p class="ct-room-started-hint hidden" id="ctRoomStartedHint">Hona boshlandi! O'yin tez orada shu yerda ochiladi...</p>
+           TODO: keyingi bosqichda shu yerga xonaning ichki UI/logikasi yoziladi. -->
+      <p class="ct-room-started-hint hidden" id="ctRoomStartedHint">Xona boshlandi! Ushbu bo'lim hali yakunlanmagan — birozdan kutishingizni so'raymiz.</p>
       <button class="ct-leave-btn" id="ctLeaveRoomBtn" type="button">Chiqish</button>
     </div>
   </div>
@@ -7267,7 +7267,7 @@
     const sizeSegment = document.getElementById('ctSizeSegment');
     const visibilitySegment = document.getElementById('ctVisibilitySegment');
     const createRoomBtn = document.getElementById('ctCreateRoomBtn');
-    let roomSize = 3; // standart: 3 kishilik hona
+    let roomSize = 3; // standart: 3 kishilik xona
 
     function escapeCt(str){
       return String(str).replace(/[&<>"']/g, (c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -7318,7 +7318,7 @@
         btn.addEventListener('click', ()=> setActiveSegmentBtn(visibilitySegment, btn));
       });
     }
-    // ---------- HONA: yordamchi elementlar ----------
+    // ---------- XONA: yordamchi elementlar ----------
     const topTabs = document.getElementById('ctTopTabs');
     const createView = document.getElementById('ctCreateView');
     const joinView = document.getElementById('ctJoinView');
@@ -7362,21 +7362,21 @@
       const {db, collection, query, where, onSnapshot} = window.__kanjiFB;
       stopPublicRoomsListener();
       if(!publicRoomsList) return;
-      publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Honalar qidirilmoqda...</div>';
+      publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Xonalar qidirilmoqda...</div>';
       const q = query(collection(db, 'cardRooms'), where('visibility', '==', 'public'), where('status', '==', 'waiting'));
       publicRoomsUnsub = onSnapshot(q, (snap)=>{
         const rooms = [];
         snap.forEach(d=> rooms.push({ id: d.id, ...d.data() }));
         renderPublicRooms(rooms);
       }, (err)=>{
-        console.error("Ochiq honalarni yuklashda xatolik:", err.message);
-        publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Honalarni yuklab bo\'lmadi.</div>';
+        console.error("Ochiq xonalarni yuklashda xatolik:", err.message);
+        publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Xonalarni yuklab bo\'lmadi.</div>';
       });
     }
     function renderPublicRooms(rooms){
       if(!publicRoomsList) return;
       if(rooms.length === 0){
-        publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Hozircha ochiq honalar yo\'q. Birinchi bo\'lib yarating!</div>';
+        publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Hozircha ochiq xonalar yo\'q. Birinchi bo\'lib yarating!</div>';
         return;
       }
       const user = window.__kanjiFB.auth.currentUser;
@@ -7390,7 +7390,7 @@
           <div class="ct-room-item" data-room-id="${escapeCt(r.id)}">
             <div class="ct-room-item-avatar">${avatarHTML}</div>
             <div class="ct-room-item-info">
-              <div class="ct-room-item-name">${escapeCt(r.hostName || 'Foydalanuvchi')}ning honasi</div>
+              <div class="ct-room-item-name">${escapeCt(r.hostName || 'Foydalanuvchi')}ning xonasi</div>
               <div class="ct-room-item-meta">${count}/${r.size} ishtirokchi</div>
             </div>
             <button class="ct-room-join-btn" type="button" data-room-id="${escapeCt(r.id)}" ${(full && !alreadyIn) ? 'disabled' : ''}>${btnText}</button>
@@ -7405,7 +7405,7 @@
       });
     }
 
-    // ---------- HONA: yaratish ----------
+    // ---------- XONA: yaratish ----------
     async function createRoom(){
       const {auth, db, collection, doc, setDoc, addDoc, serverTimestamp} = window.__kanjiFB;
       const user = auth.currentUser;
@@ -7434,15 +7434,15 @@
         }
         enterWaitingRoom(roomRef, { isHost: true, code });
       }catch(e){
-        console.error("Hona yaratishda xatolik:", e.message);
-        showCtError('ctCreateError', "Hona yaratib bo'lmadi. Birozdan so'ng qayta urinib ko'ring.");
+        console.error("Xona yaratishda xatolik:", e.message);
+        showCtError('ctCreateError', "Xona yaratib bo'lmadi. Birozdan so'ng qayta urinib ko'ring.");
       }finally{
         createRoomBtn.disabled = false;
       }
     }
     if(createRoomBtn) createRoomBtn.addEventListener('click', createRoom);
 
-    // ---------- HONA: kirish (ochiq honaga yoki kod bilan) ----------
+    // ---------- XONA: kirish (ochiq xonaga yoki kod bilan) ----------
     async function joinPublicRoom(roomId){
       const {auth, db, doc, updateDoc, arrayUnion} = window.__kanjiFB;
       const user = auth.currentUser;
@@ -7452,8 +7452,8 @@
         await updateDoc(roomRef, { participantUids: arrayUnion(user.uid) });
         enterWaitingRoom(roomRef, { isHost: false });
       }catch(e){
-        console.error("Honaga kirishda xatolik:", e.message);
-        showCardTransferToast("Honaga kirib bo'lmadi — u to'lib qolgan bo'lishi mumkin.");
+        console.error("Xonaga kirishda xatolik:", e.message);
+        showCardTransferToast("Xonaga kirib bo'lmadi — u to'lib qolgan bo'lishi mumkin.");
       }
     }
     async function joinRoomByCode(){
@@ -7469,7 +7469,7 @@
         enterWaitingRoom(roomRef, { isHost: false, code });
       }catch(e){
         console.error("Kod bilan kirishda xatolik:", e.message);
-        showCtError('ctCodeError', "Kod noto'g'ri, hona to'liq yoki allaqachon boshlangan.");
+        showCtError('ctCodeError', "Kod noto'g'ri, xona to'liq yoki allaqachon boshlangan.");
       }finally{
         joinByCodeBtn.disabled = false;
       }
@@ -7480,10 +7480,11 @@
       codeInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') joinRoomByCode(); });
     }
 
-    // ---------- HONA: kutish xonasi (yaratilgan/qo'shilgan hona) ----------
+    // ---------- XONA: kutish xonasi (yaratilgan/qo'shilgan xona) ----------
     let waitingRoomUnsub = null;
     let waitingRoomRef = null;
     let waitingRoomIsHost = false;
+    let waitingRoomWasStarted = false;
 
     function renderWaitingSeats(data){
       if(!waitingSeatsEl) return;
@@ -7502,8 +7503,9 @@
       waitingSeatsEl.innerHTML = html;
       const uids2 = data.participantUids || [];
       const isStarted = data.status === 'started';
+      waitingRoomWasStarted = isStarted;
       if(waitingTitleEl){
-        waitingTitleEl.textContent = isStarted ? "Hona boshlandi!" : (uids2.length >= data.size ? "Hona to'ldi!" : "Kutilmoqda...");
+        waitingTitleEl.textContent = isStarted ? "Xona boshlandi!" : (uids2.length >= data.size ? "Xona to'ldi!" : "Kutilmoqda...");
       }
       // ---------- "Boshlash" tugmasi: faqat xostga ko'rinadi, kamida
       // 2 ta ishtirokchi bo'lgandagina bosish mumkin bo'ladi ----------
@@ -7515,8 +7517,8 @@
           startRoomBtn.classList.add('hidden');
         }
       }
-      // Hona boshlangach — kutish bilan bog'liq matn/tugmalar yashirilib,
-      // o'rniga vaqtinchalik "boshlandi" xabari ko'rsatiladi. Honaning
+      // Xona boshlangach — kutish bilan bog'liq matn/tugmalar yashirilib,
+      // o'rniga vaqtinchalik "boshlandi" xabari ko'rsatiladi. Xonaning
       // ichki (o'yin) qismi hali yozilmagan, keyingi bosqichda shu yerga
       // qo'shiladi.
       if(waitingHintEl) waitingHintEl.classList.toggle('hidden', isStarted);
@@ -7529,8 +7531,8 @@
       try{
         await updateDoc(waitingRoomRef, { status: 'started', startedAt: serverTimestamp() });
       }catch(e){
-        console.error("Honani boshlashda xatolik:", e.message);
-        showCardTransferToast("Honani boshlab bo'lmadi. Qayta urinib ko'ring.");
+        console.error("Xonani boshlashda xatolik:", e.message);
+        showCardTransferToast("Xonani boshlab bo'lmadi. Qayta urinib ko'ring.");
         startRoomBtn.disabled = false;
       }
     }
@@ -7540,6 +7542,7 @@
       stopPublicRoomsListener();
       waitingRoomRef = roomRef;
       waitingRoomIsHost = !!(opts && opts.isHost);
+      waitingRoomWasStarted = false;
       if(topTabs) topTabs.classList.add('hidden');
       if(createView) createView.classList.add('hidden');
       if(joinView) joinView.classList.add('hidden');
@@ -7558,19 +7561,31 @@
       if(waitingRoomUnsub) waitingRoomUnsub();
       waitingRoomUnsub = onSnapshot(roomRef, (snap)=>{
         if(!snap.exists()){
-          showCardTransferToast("Hona yopildi");
+          // Xona hujjati o'chirilgan bo'lsa — bu xost xonani tark etgani
+          // yoki bekor qilgani degani. Agar xona allaqachon "boshlandi"
+          // bosqichida bo'lsa, ishtirokchi uchun butun kartochka almashish
+          // oynasi to'liq yopiladi; hali boshlanmagan bo'lsa, faqat
+          // yaratish/kirish bosqichiga qaytariladi.
+          const wasStarted = waitingRoomWasStarted;
           exitWaitingRoom();
+          if(wasStarted){
+            showCardTransferToast("Xost xonani tark etdi — xona yopildi");
+            closeCardTransferModal();
+          } else {
+            showCardTransferToast("Xona yopildi");
+          }
           return;
         }
         renderWaitingSeats(snap.data());
       }, (err)=>{
-        console.error("Honani kuzatishda xatolik:", err.message);
+        console.error("Xonani kuzatishda xatolik:", err.message);
       });
     }
     function exitWaitingRoom(){
       if(waitingRoomUnsub){ waitingRoomUnsub(); waitingRoomUnsub = null; }
       waitingRoomRef = null;
       waitingRoomIsHost = false;
+      waitingRoomWasStarted = false;
       if(waitingView) waitingView.classList.add('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
       if(topTabs) topTabs.classList.remove('hidden');
@@ -7605,12 +7620,12 @@
             }
           }
         }catch(e){
-          console.error("Honadan chiqishda xatolik:", e.message);
+          console.error("Xonadan chiqishda xatolik:", e.message);
         }
       });
     }
 
-    // ---------- HONA: yuqori va ichki tab almashtirgichlar ----------
+    // ---------- XONA: yuqori va ichki tab almashtirgichlar ----------
     function switchCtTab(tab){
       if(topTabs) topTabs.querySelectorAll('.ct-segment-btn').forEach(b=> b.classList.toggle('active', b.dataset.ctTab === tab));
       if(createView) createView.classList.toggle('hidden', tab !== 'create');
@@ -8382,12 +8397,12 @@
   provider.setCustomParameters({ prompt: "select_account" });
   const db = getFirestore(app);
 
-  // ---------- HONA (kartochka almashish) uchun ko'prik ----------
+  // ---------- XONA (kartochka almashish) uchun ko'prik ----------
   // Yuqoridagi (module bo'lmagan) oddiy <script> blokidagi "Kartochka almashish"
   // kodi (createRoom, joinRoomByCode va h.k.) shu <script type="module"> ichidagi
   // auth/db/Firestore funksiyalarini to'g'ridan-to'g'ri ko'ra olmaydi — modullar
   // alohida scope'da ishlaydi. Shu sabab xona yaratish tugmasi bosilganda
-  // "auth is not defined" kabi xatolik jim tarzda yuz berib, hona yaratilmay
+  // "auth is not defined" kabi xatolik jim tarzda yuz berib, xona yaratilmay
   // qolardi. Kerakli narsalarni window ustiga chiqarib, oddiy skript ularni
   // window.__kanjiFB orqali (chaqirilgan paytda) o'qiy oladigan qilamiz.
   window.__kanjiFB = {
@@ -8398,7 +8413,7 @@
 
   // Bu <script type="module"> tashqarisidagi (oddiy) skriptlar Firebase
   // import'lariga to'g'ridan-to'g'ri murojaat qila olmaydi (modul o'z
-  // alohida qamrovida ishlaydi) — shuning uchun "Hona yaratish/kirish"
+  // alohida qamrovida ishlaydi) — shuning uchun "Xona yaratish/kirish"
   // funksiyalari (cardRooms) kerak bo'lgan narsalarni shu global ombordan
   // (lazy, chaqiruv payti) olib ishlatadi.
   window.__kanjiFirebase = {
