@@ -7317,6 +7317,7 @@
       if(publicRoomsUnsub){ publicRoomsUnsub(); publicRoomsUnsub = null; }
     }
     function startPublicRoomsListener(){
+      const {db, collection, query, where, onSnapshot} = window.__kanjiFB;
       stopPublicRoomsListener();
       if(!publicRoomsList) return;
       publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Honalar qidirilmoqda...</div>';
@@ -7336,7 +7337,7 @@
         publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Hozircha ochiq honalar yo\'q. Birinchi bo\'lib yarating!</div>';
         return;
       }
-      const user = auth.currentUser;
+      const user = window.__kanjiFB.auth.currentUser;
       publicRoomsList.innerHTML = rooms.map(r=>{
         const count = (r.participantUids || []).length;
         const full = count >= r.size;
@@ -7364,6 +7365,7 @@
 
     // ---------- HONA: yaratish ----------
     async function createRoom(){
+      const {auth, db, collection, doc, setDoc, addDoc, serverTimestamp} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
       const visibilityBtn = visibilitySegment && visibilitySegment.querySelector('.ct-segment-btn.active');
@@ -7400,6 +7402,7 @@
 
     // ---------- HONA: kirish (ochiq honaga yoki kod bilan) ----------
     async function joinPublicRoom(roomId){
+      const {auth, db, doc, updateDoc, arrayUnion} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
       const roomRef = doc(db, 'cardRooms', roomId);
@@ -7412,6 +7415,7 @@
       }
     }
     async function joinRoomByCode(){
+      const {auth, db, doc, updateDoc, arrayUnion} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
       const code = (codeInput && codeInput.value || '').trim().toUpperCase();
@@ -7460,6 +7464,7 @@
       }
     }
     function enterWaitingRoom(roomRef, opts){
+      const {onSnapshot} = window.__kanjiFB;
       stopPublicRoomsListener();
       waitingRoomRef = roomRef;
       waitingRoomIsHost = !!(opts && opts.isHost);
@@ -7506,6 +7511,7 @@
     }
     if(leaveRoomBtn){
       leaveRoomBtn.addEventListener('click', async ()=>{
+        const {auth, getDoc, deleteDoc, updateDoc} = window.__kanjiFB;
         const ref = waitingRoomRef;
         const wasHost = waitingRoomIsHost;
         const user = auth.currentUser;
@@ -8299,6 +8305,20 @@
   // avvalgi hisobga sukut bo'yicha qayta kiritib yubormasligi uchun.
   provider.setCustomParameters({ prompt: "select_account" });
   const db = getFirestore(app);
+
+  // ---------- HONA (kartochka almashish) uchun ko'prik ----------
+  // Yuqoridagi (module bo'lmagan) oddiy <script> blokidagi "Kartochka almashish"
+  // kodi (createRoom, joinRoomByCode va h.k.) shu <script type="module"> ichidagi
+  // auth/db/Firestore funksiyalarini to'g'ridan-to'g'ri ko'ra olmaydi — modullar
+  // alohida scope'da ishlaydi. Shu sabab xona yaratish tugmasi bosilganda
+  // "auth is not defined" kabi xatolik jim tarzda yuz berib, hona yaratilmay
+  // qolardi. Kerakli narsalarni window ustiga chiqarib, oddiy skript ularni
+  // window.__kanjiFB orqali (chaqirilgan paytda) o'qiy oladigan qilamiz.
+  window.__kanjiFB = {
+    auth, db,
+    collection, addDoc, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc,
+    arrayUnion, query, where, orderBy, limit, onSnapshot, serverTimestamp
+  };
 
   // Bu <script type="module"> tashqarisidagi (oddiy) skriptlar Firebase
   // import'lariga to'g'ridan-to'g'ri murojaat qila olmaydi (modul o'z
