@@ -3000,6 +3000,308 @@
     border:1px solid rgba(217,105,79,0.35);
   }
 
+  /* ---------- HONA YARATISH: ishtirokchi o'rindiqlari ---------- */
+  .ct-seats{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:12px;
+    margin:20px 0 18px;
+    flex-wrap:wrap;
+  }
+  .ct-seat{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    width:60px;
+  }
+  .ct-seat-avatar{
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    font-weight:700;
+    color:var(--ink);
+    flex:none;
+    box-sizing:border-box;
+  }
+  .ct-seat-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
+  .ct-seat.ct-seat-filled .ct-seat-avatar{
+    border:2px solid transparent;
+    padding:2px;
+    background:
+      linear-gradient(var(--bg-2), var(--bg-2)) padding-box,
+      conic-gradient(from 180deg, #ff6b6b, #ffc371, #4facfe, #a78bfa, #ff6b6b) border-box;
+  }
+  .ct-seat.ct-seat-empty .ct-seat-avatar{
+    border:2px dashed var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:19px;
+    font-weight:400;
+  }
+  .ct-seat-label{
+    font-size:10.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    max-width:60px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ct-seat.ct-seat-filled .ct-seat-label{color:var(--ink); font-weight:600;}
+
+  /* ---------- HONA YARATISH: parametrlar ---------- */
+  .ct-settings{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:20px;
+    text-align:left;
+  }
+  .ct-setting-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .ct-setting-label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    flex:none;
+  }
+  .ct-segment{
+    display:flex;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border-soft);
+    border-radius:999px;
+    padding:3px;
+    gap:2px;
+  }
+  .ct-segment-btn{
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    font-size:12px;
+    font-weight:600;
+    font-family:inherit;
+    padding:6px 13px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:all .2s ease;
+    white-space:nowrap;
+  }
+  .ct-segment-btn.active{
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff;
+    box-shadow:0 2px 8px rgba(217,105,79,0.35);
+  }
+  .ct-segment-btn:active{transform:scale(0.94);}
+
+  .ct-create-room-btn{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff;
+    font-size:14.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    transition:all .2s ease;
+    box-shadow:0 6px 18px -6px rgba(217,105,79,0.55);
+  }
+  .ct-create-room-btn:active{transform:scale(0.97);}
+
+  /* ---------- HONA: yuqori tab (Yaratish / Kirish) ---------- */
+  .ct-top-tabs{
+    width:100%;
+    margin-bottom:18px;
+  }
+  .ct-top-tabs .ct-segment-btn{flex:1;}
+  .ct-join-tabs{
+    width:100%;
+    margin:14px 0 16px;
+  }
+  .ct-join-tabs .ct-segment-btn{flex:1;}
+
+  /* ---------- HONA: ochiq honalar ro'yxati ---------- */
+  .ct-room-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    max-height:min(50vh, 340px);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    text-align:left;
+  }
+  .ct-room-list-empty{
+    text-align:center;
+    color:var(--ink-faint);
+    font-size:12.5px;
+    padding:22px 6px;
+  }
+  .ct-room-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    border-radius:14px;
+    padding:9px 10px;
+  }
+  .ct-room-item-avatar{
+    flex:none;
+    width:38px; height:38px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(217,105,79,0.16);
+    color:var(--accent-soft);
+    font-weight:700;
+    font-size:14px;
+    overflow:hidden;
+  }
+  .ct-room-item-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .ct-room-item-info{flex:1; min-width:0;}
+  .ct-room-item-name{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ct-room-item-meta{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:1px;
+  }
+  .ct-room-join-btn{
+    flex:none;
+    border:none;
+    border-radius:999px;
+    padding:7px 14px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:12px;
+    cursor:pointer;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff;
+    transition:all .2s ease;
+  }
+  .ct-room-join-btn:active{transform:scale(0.94);}
+  .ct-room-join-btn:disabled{
+    opacity:0.4;
+    cursor:default;
+  }
+
+  /* ---------- HONA: kod bilan kirish ---------- */
+  .ct-code-form{
+    display:flex;
+    gap:8px;
+  }
+  .ct-code-input{
+    flex:1;
+    min-width:0;
+    box-sizing:border-box;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border);
+    border-radius:13px;
+    padding:12px 14px;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-align:center;
+    text-transform:uppercase;
+    outline:none;
+  }
+  .ct-code-input::placeholder{
+    letter-spacing:normal;
+    text-transform:none;
+    font-weight:500;
+    color:var(--ink-faint);
+  }
+  .ct-code-form .ct-create-room-btn{width:auto; flex:none; padding:12px 18px;}
+  .ct-error{
+    min-height:16px;
+    margin-top:10px;
+    font-size:12px;
+    color:var(--accent-soft);
+    text-align:center;
+  }
+
+  /* ---------- HONA: kutish xonasi ---------- */
+  .ct-code-display{
+    text-align:center;
+    margin:6px 0 18px;
+    padding:16px 14px;
+    border-radius:16px;
+    border:1px solid rgba(201,166,107,0.4);
+    background:linear-gradient(165deg, rgba(201,166,107,0.16), rgba(201,166,107,0.06));
+  }
+  .ct-code-display-label{
+    display:block;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .ct-code-display-value{
+    font-family:'Shippori Mincho', serif;
+    font-size:30px;
+    font-weight:600;
+    letter-spacing:0.14em;
+    color:var(--ink);
+  }
+  .ct-code-copy-btn{
+    margin-top:10px;
+    border:1px solid rgba(201,166,107,0.5);
+    background:rgba(201,166,107,0.14);
+    color:var(--gold);
+    font-family:inherit;
+    font-weight:700;
+    font-size:12px;
+    padding:6px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .ct-code-copy-btn:active{transform:scale(0.95);}
+  .ct-code-hint{
+    margin:10px 0 0;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  .ct-waiting-hint{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:4px 0 18px;
+  }
+  .ct-leave-btn{
+    width:100%;
+    padding:12px;
+    border:1.5px solid var(--glass-border-soft);
+    border-radius:14px;
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .ct-leave-btn:active{transform:scale(0.97);}
+
   /* ---------- GLOBAL CHAT (shu qurilmada saqlanadi) ---------- */
   .chat-overlay{
     position:fixed;
@@ -3934,7 +4236,7 @@
   </div>
 </div>
 
-<!-- ---------- KARTOCHKA ALMASHISH: bildirishnoma oynasi ---------- -->
+<!-- ---------- KARTOCHKA ALMASHISH: hona yaratish oynasi ---------- -->
 <div class="card-transfer-overlay" id="cardTransferOverlay" aria-hidden="true">
   <div class="card-transfer-modal">
     <button class="card-transfer-close-btn" id="cardTransferCloseBtn" type="button" aria-label="Yopish">✕</button>
@@ -3944,9 +4246,82 @@
         <span class="ct-card ct-card-2 ct-card-lg">字</span>
       </span>
     </div>
-    <h2>Kartochka almashish</h2>
-    <p>Tez kunda turli foydalanuvchilar bir-birlariga kanji kartochkani so'roq o'yini tarzida yubora olishadi — qabul qilgan odam esa javobini yo'llaydi. Har bir xonada 4 tagacha foydalanuvchi ishtirok etadi.</p>
-    <span class="card-transfer-badge">Tez kunda</span>
+
+    <!-- Yuqori tab: Hona yaratish / Honaga kirish -->
+    <div class="ct-segment ct-top-tabs" id="ctTopTabs">
+      <button type="button" class="ct-segment-btn active" data-ct-tab="create">Yaratish</button>
+      <button type="button" class="ct-segment-btn" data-ct-tab="join">Kirish</button>
+    </div>
+
+    <!-- ---------- HONA YARATISH ---------- -->
+    <div id="ctCreateView">
+      <h2>Hona yaratish</h2>
+      <p>Do'stlaringiz bilan kanji kartochkalarni so'roq o'yini tarzida almashing — kartochka yuborasiz, ular javobini qaytaradi.</p>
+
+      <!-- Ishtirokchilar uchun joylar: 1-o'rindiq — siz, qolganlari hozircha bo'sh -->
+      <div class="ct-seats" id="ctSeats" aria-hidden="true"></div>
+
+      <!-- Hona parametrlari -->
+      <div class="ct-settings">
+        <div class="ct-setting-row">
+          <span class="ct-setting-label">Ishtirokchilar soni</span>
+          <div class="ct-segment" id="ctSizeSegment">
+            <button type="button" class="ct-segment-btn" data-size="2">2</button>
+            <button type="button" class="ct-segment-btn active" data-size="3">3</button>
+            <button type="button" class="ct-segment-btn" data-size="4">4</button>
+          </div>
+        </div>
+        <div class="ct-setting-row">
+          <span class="ct-setting-label">Hona turi</span>
+          <div class="ct-segment" id="ctVisibilitySegment">
+            <button type="button" class="ct-segment-btn active" data-visibility="public">Ochiq</button>
+            <button type="button" class="ct-segment-btn" data-visibility="private">Yopiq</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="ct-create-room-btn" id="ctCreateRoomBtn" type="button">Hona yaratish</button>
+      <div class="ct-error" id="ctCreateError"></div>
+    </div>
+
+    <!-- ---------- HONAGA KIRISH ---------- -->
+    <div id="ctJoinView" class="hidden">
+      <h2>Honaga kirish</h2>
+      <p>Ochiq honalardan birini tanlang yoki do'stingiz bergan kodni kiriting.</p>
+
+      <div class="ct-segment ct-join-tabs" id="ctJoinTabs">
+        <button type="button" class="ct-segment-btn active" data-ct-jointab="public">Ochiq honalar</button>
+        <button type="button" class="ct-segment-btn" data-ct-jointab="code">Kod bilan</button>
+      </div>
+
+      <div id="ctPublicRoomsView">
+        <div class="ct-room-list" id="ctPublicRoomsList">
+          <div class="ct-room-list-empty">Honalar qidirilmoqda...</div>
+        </div>
+      </div>
+
+      <div id="ctCodeJoinView" class="hidden">
+        <div class="ct-code-form">
+          <input class="ct-code-input" id="ctCodeInput" type="text" inputmode="text" maxlength="6" placeholder="Masalan: A1B2C3" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="ct-create-room-btn" id="ctJoinByCodeBtn" type="button">Kirish</button>
+        </div>
+        <div class="ct-error" id="ctCodeError"></div>
+      </div>
+    </div>
+
+    <!-- ---------- KUTISH XONASI (yaratilgan/qo'shilgan hona) ---------- -->
+    <div id="ctWaitingView" class="hidden">
+      <h2 id="ctWaitingTitle">Kutilmoqda...</h2>
+      <div class="ct-seats" id="ctWaitingSeats" aria-hidden="true"></div>
+      <div class="ct-code-display hidden" id="ctCodeDisplay">
+        <span class="ct-code-display-label">Honaga kirish kodi</span>
+        <div class="ct-code-display-value" id="ctCodeValue"></div>
+        <button class="ct-code-copy-btn" id="ctCodeCopyBtn" type="button">Nusxalash</button>
+        <p class="ct-code-hint">Bu kodni do'stlaringizga yuboring — ular shu kod bilan honaga kira oladi.</p>
+      </div>
+      <p class="ct-waiting-hint">Boshqa ishtirokchilarni kuting...</p>
+      <button class="ct-leave-btn" id="ctLeaveRoomBtn" type="button">Chiqish</button>
+    </div>
   </div>
 </div>
 
@@ -6849,7 +7224,339 @@
     const modal = overlay ? overlay.querySelector('.card-transfer-modal') : null;
     const closeBtn = document.getElementById('cardTransferCloseBtn');
     const openBtn = document.getElementById('cardTransferBtn');
-    if(openBtn) openBtn.addEventListener('click', openCardTransferModal);
+    const seatsEl = document.getElementById('ctSeats');
+    const sizeSegment = document.getElementById('ctSizeSegment');
+    const visibilitySegment = document.getElementById('ctVisibilitySegment');
+    const createRoomBtn = document.getElementById('ctCreateRoomBtn');
+    let roomSize = 3; // standart: 3 kishilik hona
+
+    function escapeCt(str){
+      return String(str).replace(/[&<>"']/g, (c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function getHostAvatarHTML(){
+      const initialSpan = document.getElementById('userAvatarInitial');
+      if(initialSpan && initialSpan.innerHTML.trim()) return initialSpan.innerHTML;
+      return '👤';
+    }
+    function getHostName(){
+      const nameEl = document.getElementById('user-name');
+      const name = nameEl && nameEl.textContent.trim();
+      return name || 'Siz';
+    }
+    // Ishtirokchi o'rindiqlarini chizish: 1-o'rindiq — hozirgi foydalanuvchi (akk),
+    // qolganlari hali bo'sh — kelajakda boshqa foydalanuvchilar shu joylarga qo'shiladi
+    function renderSeats(count){
+      if(!seatsEl) return;
+      let html = '<div class="ct-seat ct-seat-filled">' +
+                    '<div class="ct-seat-avatar">' + getHostAvatarHTML() + '</div>' +
+                    '<div class="ct-seat-label">' + escapeCt(getHostName()) + '</div>' +
+                  '</div>';
+      for(let i = 1; i < count; i++){
+        html += '<div class="ct-seat ct-seat-empty">' +
+                    '<div class="ct-seat-avatar">+</div>' +
+                    '<div class="ct-seat-label">Bo\'sh joy</div>' +
+                  '</div>';
+      }
+      seatsEl.innerHTML = html;
+    }
+    function setActiveSegmentBtn(container, btn){
+      if(!container) return;
+      container.querySelectorAll('.ct-segment-btn').forEach(b=> b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    if(sizeSegment){
+      sizeSegment.querySelectorAll('.ct-segment-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          setActiveSegmentBtn(sizeSegment, btn);
+          roomSize = parseInt(btn.dataset.size, 10) || 3;
+          renderSeats(roomSize);
+        });
+      });
+    }
+    if(visibilitySegment){
+      visibilitySegment.querySelectorAll('.ct-segment-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> setActiveSegmentBtn(visibilitySegment, btn));
+      });
+    }
+    // ---------- HONA: yordamchi elementlar ----------
+    const topTabs = document.getElementById('ctTopTabs');
+    const createView = document.getElementById('ctCreateView');
+    const joinView = document.getElementById('ctJoinView');
+    const waitingView = document.getElementById('ctWaitingView');
+    const joinTabs = document.getElementById('ctJoinTabs');
+    const publicRoomsView = document.getElementById('ctPublicRoomsView');
+    const codeJoinView = document.getElementById('ctCodeJoinView');
+    const publicRoomsList = document.getElementById('ctPublicRoomsList');
+    const codeInput = document.getElementById('ctCodeInput');
+    const joinByCodeBtn = document.getElementById('ctJoinByCodeBtn');
+    const waitingSeatsEl = document.getElementById('ctWaitingSeats');
+    const waitingTitleEl = document.getElementById('ctWaitingTitle');
+    const codeDisplayEl = document.getElementById('ctCodeDisplay');
+    const codeValueEl = document.getElementById('ctCodeValue');
+    const codeCopyBtn = document.getElementById('ctCodeCopyBtn');
+    const leaveRoomBtn = document.getElementById('ctLeaveRoomBtn');
+
+    // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
+    const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    function generateRoomCode(){
+      let code = '';
+      for(let i=0;i<6;i++) code += ROOM_CODE_CHARS[Math.floor(Math.random()*ROOM_CODE_CHARS.length)];
+      return code;
+    }
+    function showCtError(elId, text){
+      const el = document.getElementById(elId);
+      if(!el) return;
+      el.textContent = text;
+      clearTimeout(el._hideTimer);
+      el._hideTimer = setTimeout(()=>{ el.textContent = ''; }, 4000);
+    }
+
+    let publicRoomsUnsub = null;
+    function stopPublicRoomsListener(){
+      if(publicRoomsUnsub){ publicRoomsUnsub(); publicRoomsUnsub = null; }
+    }
+    function startPublicRoomsListener(){
+      stopPublicRoomsListener();
+      if(!publicRoomsList) return;
+      publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Honalar qidirilmoqda...</div>';
+      const q = query(collection(db, 'cardRooms'), where('visibility', '==', 'public'), where('status', '==', 'waiting'));
+      publicRoomsUnsub = onSnapshot(q, (snap)=>{
+        const rooms = [];
+        snap.forEach(d=> rooms.push({ id: d.id, ...d.data() }));
+        renderPublicRooms(rooms);
+      }, (err)=>{
+        console.error("Ochiq honalarni yuklashda xatolik:", err.message);
+        publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Honalarni yuklab bo\'lmadi.</div>';
+      });
+    }
+    function renderPublicRooms(rooms){
+      if(!publicRoomsList) return;
+      if(rooms.length === 0){
+        publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Hozircha ochiq honalar yo\'q. Birinchi bo\'lib yarating!</div>';
+        return;
+      }
+      const user = auth.currentUser;
+      publicRoomsList.innerHTML = rooms.map(r=>{
+        const count = (r.participantUids || []).length;
+        const full = count >= r.size;
+        const alreadyIn = user && (r.participantUids || []).includes(user.uid);
+        const avatarHTML = r.hostPhoto ? `<img src="${escapeCt(r.hostPhoto)}" alt="">` : escapeCt((r.hostName || '?').trim().charAt(0).toUpperCase());
+        const btnText = alreadyIn ? "Ichkariga" : full ? "To'liq" : "Kirish";
+        return `
+          <div class="ct-room-item" data-room-id="${escapeCt(r.id)}">
+            <div class="ct-room-item-avatar">${avatarHTML}</div>
+            <div class="ct-room-item-info">
+              <div class="ct-room-item-name">${escapeCt(r.hostName || 'Foydalanuvchi')}ning honasi</div>
+              <div class="ct-room-item-meta">${count}/${r.size} ishtirokchi</div>
+            </div>
+            <button class="ct-room-join-btn" type="button" data-room-id="${escapeCt(r.id)}" ${(full && !alreadyIn) ? 'disabled' : ''}>${btnText}</button>
+          </div>`;
+      }).join('');
+    }
+    if(publicRoomsList){
+      publicRoomsList.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.ct-room-join-btn');
+        if(!btn || btn.disabled) return;
+        joinPublicRoom(btn.getAttribute('data-room-id'));
+      });
+    }
+
+    // ---------- HONA: yaratish ----------
+    async function createRoom(){
+      const user = auth.currentUser;
+      if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
+      const visibilityBtn = visibilitySegment && visibilitySegment.querySelector('.ct-segment-btn.active');
+      const visibility = visibilityBtn ? visibilityBtn.dataset.visibility : 'public';
+      const baseData = {
+        hostUid: user.uid,
+        hostName: getHostName(),
+        hostPhoto: user.photoURL || '',
+        participantUids: [user.uid],
+        status: 'waiting',
+        size: roomSize,
+        visibility: visibility,
+        createdAt: serverTimestamp()
+      };
+      createRoomBtn.disabled = true;
+      try{
+        let roomRef, code = null;
+        if(visibility === 'private'){
+          code = generateRoomCode();
+          roomRef = doc(db, 'cardRooms', code);
+          await setDoc(roomRef, { ...baseData, code });
+        } else {
+          roomRef = await addDoc(collection(db, 'cardRooms'), baseData);
+        }
+        enterWaitingRoom(roomRef, { isHost: true, code });
+      }catch(e){
+        console.error("Hona yaratishda xatolik:", e.message);
+        showCtError('ctCreateError', "Hona yaratib bo'lmadi. Birozdan so'ng qayta urinib ko'ring.");
+      }finally{
+        createRoomBtn.disabled = false;
+      }
+    }
+    if(createRoomBtn) createRoomBtn.addEventListener('click', createRoom);
+
+    // ---------- HONA: kirish (ochiq honaga yoki kod bilan) ----------
+    async function joinPublicRoom(roomId){
+      const user = auth.currentUser;
+      if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
+      const roomRef = doc(db, 'cardRooms', roomId);
+      try{
+        await updateDoc(roomRef, { participantUids: arrayUnion(user.uid) });
+        enterWaitingRoom(roomRef, { isHost: false });
+      }catch(e){
+        console.error("Honaga kirishda xatolik:", e.message);
+        showCardTransferToast("Honaga kirib bo'lmadi — u to'lib qolgan bo'lishi mumkin.");
+      }
+    }
+    async function joinRoomByCode(){
+      const user = auth.currentUser;
+      if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
+      const code = (codeInput && codeInput.value || '').trim().toUpperCase();
+      if(!code){ showCtError('ctCodeError', "Avval kodni kiriting."); return; }
+      const roomRef = doc(db, 'cardRooms', code);
+      joinByCodeBtn.disabled = true;
+      try{
+        await updateDoc(roomRef, { participantUids: arrayUnion(user.uid) });
+        enterWaitingRoom(roomRef, { isHost: false, code });
+      }catch(e){
+        console.error("Kod bilan kirishda xatolik:", e.message);
+        showCtError('ctCodeError', "Kod noto'g'ri, hona to'liq yoki allaqachon boshlangan.");
+      }finally{
+        joinByCodeBtn.disabled = false;
+      }
+    }
+    if(joinByCodeBtn) joinByCodeBtn.addEventListener('click', joinRoomByCode);
+    if(codeInput){
+      codeInput.addEventListener('input', ()=>{ codeInput.value = codeInput.value.toUpperCase(); });
+      codeInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') joinRoomByCode(); });
+    }
+
+    // ---------- HONA: kutish xonasi (yaratilgan/qo'shilgan hona) ----------
+    let waitingRoomUnsub = null;
+    let waitingRoomRef = null;
+    let waitingRoomIsHost = false;
+
+    function renderWaitingSeats(data){
+      if(!waitingSeatsEl) return;
+      const uids = data.participantUids || [];
+      let html = '';
+      for(let i=0;i<data.size;i++){
+        if(i < uids.length){
+          const isHostSeat = uids[i] === data.hostUid;
+          const label = isHostSeat ? (data.hostName || 'Xost') : "Ishtirokchi";
+          const avatar = (isHostSeat && data.hostPhoto) ? `<img src="${escapeCt(data.hostPhoto)}" alt="">` : (isHostSeat ? escapeCt((data.hostName||'?').trim().charAt(0).toUpperCase()) : '👤');
+          html += `<div class="ct-seat ct-seat-filled"><div class="ct-seat-avatar">${avatar}</div><div class="ct-seat-label">${escapeCt(label)}</div></div>`;
+        } else {
+          html += '<div class="ct-seat ct-seat-empty"><div class="ct-seat-avatar">+</div><div class="ct-seat-label">Bo\'sh joy</div></div>';
+        }
+      }
+      waitingSeatsEl.innerHTML = html;
+      if(waitingTitleEl){
+        const uids2 = data.participantUids || [];
+        waitingTitleEl.textContent = uids2.length >= data.size ? "Hona to'ldi!" : "Kutilmoqda...";
+      }
+    }
+    function enterWaitingRoom(roomRef, opts){
+      stopPublicRoomsListener();
+      waitingRoomRef = roomRef;
+      waitingRoomIsHost = !!(opts && opts.isHost);
+      if(topTabs) topTabs.classList.add('hidden');
+      if(createView) createView.classList.add('hidden');
+      if(joinView) joinView.classList.add('hidden');
+      if(waitingView) waitingView.classList.remove('hidden');
+      if(codeDisplayEl){
+        if(opts && opts.code){
+          codeDisplayEl.classList.remove('hidden');
+          if(codeValueEl) codeValueEl.textContent = opts.code;
+        } else {
+          codeDisplayEl.classList.add('hidden');
+        }
+      }
+      if(waitingRoomUnsub) waitingRoomUnsub();
+      waitingRoomUnsub = onSnapshot(roomRef, (snap)=>{
+        if(!snap.exists()){
+          showCardTransferToast("Hona yopildi");
+          exitWaitingRoom();
+          return;
+        }
+        renderWaitingSeats(snap.data());
+      }, (err)=>{
+        console.error("Honani kuzatishda xatolik:", err.message);
+      });
+    }
+    function exitWaitingRoom(){
+      if(waitingRoomUnsub){ waitingRoomUnsub(); waitingRoomUnsub = null; }
+      waitingRoomRef = null;
+      waitingRoomIsHost = false;
+      if(waitingView) waitingView.classList.add('hidden');
+      if(topTabs) topTabs.classList.remove('hidden');
+      switchCtTab('create');
+    }
+    if(codeCopyBtn){
+      codeCopyBtn.addEventListener('click', ()=>{
+        const code = codeValueEl ? codeValueEl.textContent : '';
+        if(!code) return;
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(code).then(()=> showCardTransferToast("Kod nusxalandi")).catch(()=>{});
+        }
+      });
+    }
+    if(leaveRoomBtn){
+      leaveRoomBtn.addEventListener('click', async ()=>{
+        const ref = waitingRoomRef;
+        const wasHost = waitingRoomIsHost;
+        const user = auth.currentUser;
+        exitWaitingRoom();
+        if(!ref) return;
+        try{
+          if(wasHost){
+            await deleteDoc(ref);
+          } else if(user){
+            const snap = await getDoc(ref);
+            if(snap.exists()){
+              const data = snap.data();
+              const remaining = (data.participantUids || []).filter(uid=> uid !== user.uid);
+              await updateDoc(ref, { participantUids: remaining });
+            }
+          }
+        }catch(e){
+          console.error("Honadan chiqishda xatolik:", e.message);
+        }
+      });
+    }
+
+    // ---------- HONA: yuqori va ichki tab almashtirgichlar ----------
+    function switchCtTab(tab){
+      if(topTabs) topTabs.querySelectorAll('.ct-segment-btn').forEach(b=> b.classList.toggle('active', b.dataset.ctTab === tab));
+      if(createView) createView.classList.toggle('hidden', tab !== 'create');
+      if(joinView) joinView.classList.toggle('hidden', tab !== 'join');
+      if(tab === 'join') startPublicRoomsListener();
+      else stopPublicRoomsListener();
+    }
+    function switchCtJoinTab(tab){
+      if(joinTabs) joinTabs.querySelectorAll('.ct-segment-btn').forEach(b=> b.classList.toggle('active', b.dataset.ctJointab === tab));
+      if(publicRoomsView) publicRoomsView.classList.toggle('hidden', tab !== 'public');
+      if(codeJoinView) codeJoinView.classList.toggle('hidden', tab !== 'code');
+    }
+    if(topTabs){
+      topTabs.querySelectorAll('.ct-segment-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> switchCtTab(btn.dataset.ctTab));
+      });
+    }
+    if(joinTabs){
+      joinTabs.querySelectorAll('.ct-segment-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> switchCtJoinTab(btn.dataset.ctJointab));
+      });
+    }
+
+    if(openBtn) openBtn.addEventListener('click', ()=>{
+      renderSeats(roomSize);
+      if(!waitingRoomRef) switchCtTab('create');
+      openCardTransferModal();
+    });
     if(overlay) overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeCardTransferModal(); });
     if(modal) modal.addEventListener('click', (e)=> e.stopPropagation());
     if(closeBtn) closeBtn.addEventListener('click', closeCardTransferModal);
@@ -6857,6 +7564,20 @@
       if(e.key === 'Escape' && overlay && overlay.classList.contains('show')) closeCardTransferModal();
     });
   })();
+  // Kartochka almashish oynasi uchun kichik bildirishnoma (mavjud banner-soon-toast uslubidan foydalanadi)
+  let cardTransferToastEl = null;
+  let cardTransferToastTimer = null;
+  function showCardTransferToast(text){
+    if(!cardTransferToastEl){
+      cardTransferToastEl = document.createElement('div');
+      cardTransferToastEl.className = 'banner-soon-toast';
+      document.body.appendChild(cardTransferToastEl);
+    }
+    cardTransferToastEl.textContent = text;
+    clearTimeout(cardTransferToastTimer);
+    requestAnimationFrame(()=>{ cardTransferToastEl.classList.add('show'); });
+    cardTransferToastTimer = setTimeout(()=>{ cardTransferToastEl.classList.remove('show'); }, 2200);
+  }
   (function initChatWidget(){
     const fab = document.getElementById('chatToggleBtn');
     const closeBtn = document.getElementById('chatCloseBtn');
@@ -7533,7 +8254,10 @@
     getDoc,
     getDocs,
     deleteDoc,
+    updateDoc,
+    arrayUnion,
     query,
+    where,
     orderBy,
     limit,
     onSnapshot,
@@ -7575,6 +8299,17 @@
   // avvalgi hisobga sukut bo'yicha qayta kiritib yubormasligi uchun.
   provider.setCustomParameters({ prompt: "select_account" });
   const db = getFirestore(app);
+
+  // Bu <script type="module"> tashqarisidagi (oddiy) skriptlar Firebase
+  // import'lariga to'g'ridan-to'g'ri murojaat qila olmaydi (modul o'z
+  // alohida qamrovida ishlaydi) — shuning uchun "Hona yaratish/kirish"
+  // funksiyalari (cardRooms) kerak bo'lgan narsalarni shu global ombordan
+  // (lazy, chaqiruv payti) olib ishlatadi.
+  window.__kanjiFirebase = {
+    auth, db,
+    doc, setDoc, addDoc, getDoc, deleteDoc, updateDoc, arrayUnion,
+    collection, query, where, onSnapshot, serverTimestamp
+  };
 
   function loginWithGoogle() {
     signInWithPopup(auth, provider)
