@@ -3288,6 +3288,39 @@
     color:var(--ink-soft);
     margin:4px 0 18px;
   }
+  /* faqat xonani yaratgan (host) ko'radigan "Boshlash" tugmasi — kamida
+     2 ta ishtirokchi bo'lgandagina yoqiladi (pastdagi JS shartiga qarang) */
+  .ct-start-room-btn{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(155deg, var(--moss), var(--moss-soft));
+    color:#fff;
+    font-size:14.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    transition:all .2s ease;
+    box-shadow:0 6px 18px -6px rgba(124,154,107,0.55);
+    margin-bottom:10px;
+  }
+  .ct-start-room-btn:active{transform:scale(0.97);}
+  .ct-start-room-btn:disabled{
+    opacity:0.4;
+    cursor:default;
+    filter:grayscale(0.3);
+  }
+  .ct-start-room-btn.hidden{display:none;}
+  /* hona "boshlandi" holatiga o'tganda ko'rinadigan vaqtinchalik joy —
+     honaning ichki (o'yin) qismi keyingi bosqichda shu yerga yoziladi */
+  .ct-room-started-hint{
+    text-align:center;
+    font-size:13px;
+    color:var(--moss-soft);
+    font-weight:700;
+    margin:4px 0 18px;
+  }
   .ct-leave-btn{
     width:100%;
     padding:12px;
@@ -4319,7 +4352,13 @@
         <button class="ct-code-copy-btn" id="ctCodeCopyBtn" type="button">Nusxalash</button>
         <p class="ct-code-hint">Bu kodni do'stlaringizga yuboring — ular shu kod bilan honaga kira oladi.</p>
       </div>
-      <p class="ct-waiting-hint">Boshqa ishtirokchilarni kuting...</p>
+      <p class="ct-waiting-hint" id="ctWaitingHint">Boshqa ishtirokchilarni kuting...</p>
+      <!-- Faqat xostga ko'rinadi, kamida 2 ta ishtirokchi bo'lganda yoqiladi -->
+      <button class="ct-start-room-btn hidden" id="ctStartRoomBtn" type="button" disabled>Boshlash</button>
+      <!-- Hona boshlangandan keyin ko'rinadi — honaning ichki (o'yin) qismi
+           hali yozilmagan, shuning uchun hozircha shu qisqa xabar chiqadi.
+           TODO: keyingi bosqichda shu yerga honaning ichki UI/logikasi yoziladi. -->
+      <p class="ct-room-started-hint hidden" id="ctRoomStartedHint">Hona boshlandi! O'yin tez orada shu yerda ochiladi...</p>
       <button class="ct-leave-btn" id="ctLeaveRoomBtn" type="button">Chiqish</button>
     </div>
   </div>
@@ -7296,6 +7335,9 @@
     const codeValueEl = document.getElementById('ctCodeValue');
     const codeCopyBtn = document.getElementById('ctCodeCopyBtn');
     const leaveRoomBtn = document.getElementById('ctLeaveRoomBtn');
+    const startRoomBtn = document.getElementById('ctStartRoomBtn');
+    const waitingHintEl = document.getElementById('ctWaitingHint');
+    const roomStartedHintEl = document.getElementById('ctRoomStartedHint');
 
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
     const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -7458,11 +7500,41 @@
         }
       }
       waitingSeatsEl.innerHTML = html;
+      const uids2 = data.participantUids || [];
+      const isStarted = data.status === 'started';
       if(waitingTitleEl){
-        const uids2 = data.participantUids || [];
-        waitingTitleEl.textContent = uids2.length >= data.size ? "Hona to'ldi!" : "Kutilmoqda...";
+        waitingTitleEl.textContent = isStarted ? "Hona boshlandi!" : (uids2.length >= data.size ? "Hona to'ldi!" : "Kutilmoqda...");
+      }
+      // ---------- "Boshlash" tugmasi: faqat xostga ko'rinadi, kamida
+      // 2 ta ishtirokchi bo'lgandagina bosish mumkin bo'ladi ----------
+      if(startRoomBtn){
+        if(waitingRoomIsHost && !isStarted){
+          startRoomBtn.classList.remove('hidden');
+          startRoomBtn.disabled = uids2.length < 2;
+        } else {
+          startRoomBtn.classList.add('hidden');
+        }
+      }
+      // Hona boshlangach — kutish bilan bog'liq matn/tugmalar yashirilib,
+      // o'rniga vaqtinchalik "boshlandi" xabari ko'rsatiladi. Honaning
+      // ichki (o'yin) qismi hali yozilmagan, keyingi bosqichda shu yerga
+      // qo'shiladi.
+      if(waitingHintEl) waitingHintEl.classList.toggle('hidden', isStarted);
+      if(roomStartedHintEl) roomStartedHintEl.classList.toggle('hidden', !isStarted);
+    }
+    async function startRoom(){
+      const {updateDoc, serverTimestamp} = window.__kanjiFB;
+      if(!waitingRoomRef || !waitingRoomIsHost || !startRoomBtn) return;
+      startRoomBtn.disabled = true;
+      try{
+        await updateDoc(waitingRoomRef, { status: 'started', startedAt: serverTimestamp() });
+      }catch(e){
+        console.error("Honani boshlashda xatolik:", e.message);
+        showCardTransferToast("Honani boshlab bo'lmadi. Qayta urinib ko'ring.");
+        startRoomBtn.disabled = false;
       }
     }
+    if(startRoomBtn) startRoomBtn.addEventListener('click', startRoom);
     function enterWaitingRoom(roomRef, opts){
       const {onSnapshot} = window.__kanjiFB;
       stopPublicRoomsListener();
@@ -7472,6 +7544,9 @@
       if(createView) createView.classList.add('hidden');
       if(joinView) joinView.classList.add('hidden');
       if(waitingView) waitingView.classList.remove('hidden');
+      if(startRoomBtn) startRoomBtn.classList.add('hidden');
+      if(waitingHintEl) waitingHintEl.classList.remove('hidden');
+      if(roomStartedHintEl) roomStartedHintEl.classList.add('hidden');
       if(codeDisplayEl){
         if(opts && opts.code){
           codeDisplayEl.classList.remove('hidden');
@@ -7497,6 +7572,7 @@
       waitingRoomRef = null;
       waitingRoomIsHost = false;
       if(waitingView) waitingView.classList.add('hidden');
+      if(startRoomBtn) startRoomBtn.classList.add('hidden');
       if(topTabs) topTabs.classList.remove('hidden');
       switchCtTab('create');
     }
