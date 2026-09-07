@@ -2904,7 +2904,7 @@
     border-radius:26px;
     padding:34px 26px 28px;
     text-align:center;
-    background:linear-gradient(165deg, var(--panel-2), var(--panel-1));
+    background:var(--bg-1);
     border:1px solid var(--glass-border-soft);
     box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);
     transform:translateY(14px) scale(0.96);
@@ -3031,11 +3031,9 @@
   }
   .ct-seat-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
   .ct-seat.ct-seat-filled .ct-seat-avatar{
-    border:2px solid transparent;
+    border:2px solid var(--glass-border);
     padding:2px;
-    background:
-      linear-gradient(var(--bg-2), var(--bg-2)) padding-box,
-      conic-gradient(from 180deg, #ff6b6b, #ffc371, #4facfe, #a78bfa, #ff6b6b) border-box;
+    background:var(--bg-2);
   }
   .ct-seat.ct-seat-empty .ct-seat-avatar{
     border:2px dashed var(--glass-border-soft);
@@ -3321,7 +3319,7 @@
     z-index:10700;
     display:flex;
     flex-direction:column;
-    background:radial-gradient(ellipse at 50% 30%, rgba(167,139,250,0.14), transparent 60%), var(--bg-1);
+    background:var(--bg-1);
     padding:max(16px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
   }
   .ct-room-page-top{
@@ -3378,14 +3376,12 @@
     color:var(--ink);
     flex:none;
     box-sizing:border-box;
-    border:2px solid transparent;
+    border:2px solid var(--glass-border);
     padding:2px;
-    background:
-      linear-gradient(var(--bg-2), var(--bg-2)) padding-box,
-      conic-gradient(from 180deg, #ff6b6b, #ffc371, #4facfe, #a78bfa, #ff6b6b) border-box;
+    background:var(--bg-2);
   }
   .ct-table-seat.ct-table-seat-self .ct-table-seat-avatar{
-    box-shadow:0 0 0 4px rgba(167,139,250,0.22);
+    box-shadow:0 0 0 4px rgba(255,255,255,0.14);
   }
   .ct-table-seat.ct-table-seat-empty .ct-table-seat-avatar{
     border:2px dashed var(--glass-border-soft);
@@ -7537,6 +7533,11 @@
         hostName: getHostName(),
         hostPhoto: user.photoURL || '',
         participantUids: [user.uid],
+        // Har bir ishtirokchining ismi/rasmi shu yerda saqlanadi (uid bo'yicha),
+        // shunda xonani yaratgan xost ham, boshqa ishtirokchilar ham kirgan
+        // har bir kishining kimligini ko'ra oladi — faqat o'zi kirgan kishi
+        // emas.
+        participants: { [user.uid]: { name: getHostName(), photo: user.photoURL || '' } },
         status: 'waiting',
         size: roomSize,
         visibility: visibility,
@@ -7569,7 +7570,10 @@
       if(!user){ showCardTransferToast("Avval Google orqali kiring"); return; }
       const roomRef = doc(db, 'cardRooms', roomId);
       try{
-        await updateDoc(roomRef, { participantUids: arrayUnion(user.uid) });
+        await updateDoc(roomRef, {
+          participantUids: arrayUnion(user.uid),
+          [`participants.${user.uid}`]: { name: getHostName(), photo: user.photoURL || '' }
+        });
         enterWaitingRoom(roomRef, { isHost: false });
       }catch(e){
         console.error("Xonaga kirishda xatolik:", e.message);
@@ -7585,7 +7589,10 @@
       const roomRef = doc(db, 'cardRooms', code);
       joinByCodeBtn.disabled = true;
       try{
-        await updateDoc(roomRef, { participantUids: arrayUnion(user.uid) });
+        await updateDoc(roomRef, {
+          participantUids: arrayUnion(user.uid),
+          [`participants.${user.uid}`]: { name: getHostName(), photo: user.photoURL || '' }
+        });
         enterWaitingRoom(roomRef, { isHost: false, code });
       }catch(e){
         console.error("Kod bilan kirishda xatolik:", e.message);
@@ -7643,16 +7650,24 @@
           const uid = uids[i];
           const isHostSeat = uid === data.hostUid;
           const isSelf = !!(user && uid === user.uid);
+          const profile = (data.participants && data.participants[uid]) || null;
           let name, avatarHTML;
           if(isSelf){
             name = 'Siz';
-            const photo = isHostSeat ? data.hostPhoto : (user.photoURL || '');
-            const initial = ((isHostSeat ? data.hostName : (user.displayName || user.email)) || '?').trim().charAt(0).toUpperCase();
+            const photo = (profile && profile.photo) || (isHostSeat ? data.hostPhoto : (user.photoURL || ''));
+            const initial = ((profile && profile.name) || (isHostSeat ? data.hostName : (user.displayName || user.email)) || '?').trim().charAt(0).toUpperCase();
             avatarHTML = photo ? `<img src="${escapeCt(photo)}" alt="">` : escapeCt(initial);
+          } else if(profile && profile.name){
+            // Ismi/rasmi saqlangan har bir ishtirokchi (xost bo'lsin, keyin
+            // qo'shilgan bo'lsin) — hammaga o'z ismi bilan ko'rinadi.
+            name = profile.name;
+            avatarHTML = profile.photo ? `<img src="${escapeCt(profile.photo)}" alt="">` : escapeCt(profile.name.trim().charAt(0).toUpperCase());
           } else if(isHostSeat){
             name = data.hostName || 'Xost';
             avatarHTML = data.hostPhoto ? `<img src="${escapeCt(data.hostPhoto)}" alt="">` : escapeCt((data.hostName||'?').trim().charAt(0).toUpperCase());
           } else {
+            // Eski xonalar (bu yangilanishdan oldin yaratilgan) uchun zaxira —
+            // profil ma'lumoti saqlanmagan bo'lsa umumiy belgi ko'rsatiladi.
             name = 'Ishtirokchi';
             avatarHTML = '👤';
           }
@@ -7675,9 +7690,20 @@
       let html = '';
       for(let i=0;i<data.size;i++){
         if(i < uids.length){
-          const isHostSeat = uids[i] === data.hostUid;
-          const label = isHostSeat ? (data.hostName || 'Xost') : "Ishtirokchi";
-          const avatar = (isHostSeat && data.hostPhoto) ? `<img src="${escapeCt(data.hostPhoto)}" alt="">` : (isHostSeat ? escapeCt((data.hostName||'?').trim().charAt(0).toUpperCase()) : '👤');
+          const uid = uids[i];
+          const isHostSeat = uid === data.hostUid;
+          const profile = (data.participants && data.participants[uid]) || null;
+          let label, avatar;
+          if(profile && profile.name){
+            label = profile.name;
+            avatar = profile.photo ? `<img src="${escapeCt(profile.photo)}" alt="">` : escapeCt(profile.name.trim().charAt(0).toUpperCase());
+          } else if(isHostSeat){
+            label = data.hostName || 'Xost';
+            avatar = data.hostPhoto ? `<img src="${escapeCt(data.hostPhoto)}" alt="">` : escapeCt((data.hostName||'?').trim().charAt(0).toUpperCase());
+          } else {
+            label = "Ishtirokchi";
+            avatar = '👤';
+          }
           html += `<div class="ct-seat ct-seat-filled"><div class="ct-seat-avatar">${avatar}</div><div class="ct-seat-label">${escapeCt(label)}</div></div>`;
         } else {
           html += '<div class="ct-seat ct-seat-empty"><div class="ct-seat-avatar">+</div><div class="ct-seat-label">Bo\'sh joy</div></div>';
