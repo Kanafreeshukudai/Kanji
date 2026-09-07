@@ -3314,6 +3314,42 @@
   .ct-start-room-btn.hidden{display:none;}
   /* xona "boshlandi" holatiga o'tganda ko'rinadigan vaqtinchalik joy —
      xonaning ichki (o'yin) qismi keyingi bosqichda shu yerga yoziladi */
+  /* ---------- XONA: ichkarida (o'yin ichi) ---------- */
+  .ct-room-inside{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:22px 16px 20px;
+    margin:4px 0 4px;
+    border-radius:16px;
+    background:linear-gradient(180deg, rgba(167,139,250,0.10), rgba(79,172,254,0.06));
+    border:1px solid var(--glass-border-soft);
+  }
+  .ct-room-inside.hidden{display:none;}
+  .ct-room-inside-icon{
+    font-size:34px;
+    line-height:1;
+    margin-bottom:4px;
+    animation:ctInsidePulse 2.4s ease-in-out infinite;
+  }
+  @keyframes ctInsidePulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.12);}
+  }
+  .ct-room-inside-text{
+    font-size:15.5px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0;
+  }
+  .ct-room-inside-subtext{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:2px 0 0;
+    text-align:center;
+    max-width:280px;
+  }
   .ct-room-started-hint{
     text-align:center;
     font-size:13px;
@@ -4355,10 +4391,15 @@
       <p class="ct-waiting-hint" id="ctWaitingHint">Boshqa ishtirokchilarni kuting...</p>
       <!-- Faqat xostga ko'rinadi, kamida 2 ta ishtirokchi bo'lganda yoqiladi -->
       <button class="ct-start-room-btn hidden" id="ctStartRoomBtn" type="button" disabled>Boshlash</button>
-      <!-- Xona boshlangandan keyin ko'rinadi — xonaning ichki (o'yin) qismi
-           hali yozilmagan, shuning uchun hozircha shu qisqa xabar chiqadi.
-           TODO: keyingi bosqichda shu yerga xonaning ichki UI/logikasi yoziladi. -->
-      <p class="ct-room-started-hint hidden" id="ctRoomStartedHint">Xona boshlandi! Ushbu bo'lim hali yakunlanmagan — birozdan kutishingizni so'raymiz.</p>
+      <!-- Xona boshlangandan keyin ko'rinadi — xonaning ichki qismi.
+           Hozircha faqat ishtirokchilar xonaga joylashib olganini
+           ko'rsatadi (o'rindiqlar yuqorida, ctWaitingSeats orqali).
+           TODO: keyingi bosqichda kartochka almashish mantig'i shu yerga qo'shiladi. -->
+      <div class="ct-room-inside hidden" id="ctRoomInsideView">
+        <div class="ct-room-inside-icon">🀄</div>
+        <p class="ct-room-inside-text">Hammangiz xonaga joylashdingiz!</p>
+        <p class="ct-room-inside-subtext">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</p>
+      </div>
       <button class="ct-leave-btn" id="ctLeaveRoomBtn" type="button">Chiqish</button>
     </div>
   </div>
@@ -7337,7 +7378,7 @@
     const leaveRoomBtn = document.getElementById('ctLeaveRoomBtn');
     const startRoomBtn = document.getElementById('ctStartRoomBtn');
     const waitingHintEl = document.getElementById('ctWaitingHint');
-    const roomStartedHintEl = document.getElementById('ctRoomStartedHint');
+    const roomInsideViewEl = document.getElementById('ctRoomInsideView');
 
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
     const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -7522,7 +7563,7 @@
       // ichki (o'yin) qismi hali yozilmagan, keyingi bosqichda shu yerga
       // qo'shiladi.
       if(waitingHintEl) waitingHintEl.classList.toggle('hidden', isStarted);
-      if(roomStartedHintEl) roomStartedHintEl.classList.toggle('hidden', !isStarted);
+      if(roomInsideViewEl) roomInsideViewEl.classList.toggle('hidden', !isStarted);
     }
     async function startRoom(){
       const {updateDoc, serverTimestamp} = window.__kanjiFB;
@@ -7549,7 +7590,7 @@
       if(waitingView) waitingView.classList.remove('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
       if(waitingHintEl) waitingHintEl.classList.remove('hidden');
-      if(roomStartedHintEl) roomStartedHintEl.classList.add('hidden');
+      if(roomInsideViewEl) roomInsideViewEl.classList.add('hidden');
       if(codeDisplayEl){
         if(opts && opts.code){
           codeDisplayEl.classList.remove('hidden');
