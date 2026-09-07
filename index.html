@@ -3314,41 +3314,111 @@
   .ct-start-room-btn.hidden{display:none;}
   /* xona "boshlandi" holatiga o'tganda ko'rinadigan vaqtinchalik joy —
      xonaning ichki (o'yin) qismi keyingi bosqichda shu yerga yoziladi */
-  /* ---------- XONA: ichkarida (o'yin ichi) ---------- */
-  .ct-room-inside{
+  /* ---------- XONA ICHKARISI: katta sahifa (stol atrofida o'tirish) ---------- */
+  .ct-room-page{
+    position:fixed;
+    inset:0;
+    z-index:10700;
+    display:flex;
+    flex-direction:column;
+    background:radial-gradient(ellipse at 50% 30%, rgba(167,139,250,0.14), transparent 60%), var(--bg-1);
+    padding:max(16px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+  }
+  .ct-room-page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex:none;
+  }
+  .ct-room-page-title{
+    font-family:'Shippori Mincho', serif;
+    font-size:16.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .ct-room-page-leave-btn{
+    font-size:12.5px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .ct-room-page-leave-btn:active{transform:scale(0.95);}
+  .ct-table{
+    position:relative;
+    flex:1;
+    width:100%;
+    max-width:480px;
+    margin:6px auto 0;
+    min-height:280px;
+  }
+  .ct-table-seat{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:6px;
-    padding:22px 16px 20px;
-    margin:4px 0 4px;
-    border-radius:16px;
-    background:linear-gradient(180deg, rgba(167,139,250,0.10), rgba(79,172,254,0.06));
-    border:1px solid var(--glass-border-soft);
+    gap:7px;
+    width:76px;
   }
-  .ct-room-inside.hidden{display:none;}
-  .ct-room-inside-icon{
-    font-size:34px;
-    line-height:1;
-    margin-bottom:4px;
-    animation:ctInsidePulse 2.4s ease-in-out infinite;
-  }
-  @keyframes ctInsidePulse{
-    0%,100%{transform:scale(1);}
-    50%{transform:scale(1.12);}
-  }
-  .ct-room-inside-text{
-    font-size:15.5px;
+  .ct-table-seat-avatar{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
     font-weight:700;
     color:var(--ink);
-    margin:0;
+    flex:none;
+    box-sizing:border-box;
+    border:2px solid transparent;
+    padding:2px;
+    background:
+      linear-gradient(var(--bg-2), var(--bg-2)) padding-box,
+      conic-gradient(from 180deg, #ff6b6b, #ffc371, #4facfe, #a78bfa, #ff6b6b) border-box;
   }
-  .ct-room-inside-subtext{
-    font-size:12.5px;
+  .ct-table-seat.ct-table-seat-self .ct-table-seat-avatar{
+    box-shadow:0 0 0 4px rgba(167,139,250,0.22);
+  }
+  .ct-table-seat.ct-table-seat-empty .ct-table-seat-avatar{
+    border:2px dashed var(--glass-border-soft);
+    background:var(--glass-bg);
     color:var(--ink-soft);
-    margin:2px 0 0;
+    font-size:22px;
+    font-weight:400;
+  }
+  .ct-table-seat-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
+  .ct-table-seat-label{
+    font-size:11.5px;
+    color:var(--ink-soft);
     text-align:center;
-    max-width:280px;
+    max-width:76px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ct-table-seat.ct-table-seat-self .ct-table-seat-label{color:var(--ink); font-weight:700;}
+  .ct-table-center-hint{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    max-width:190px;
+    text-align:center;
+    font-size:12px;
+    line-height:1.55;
+    color:var(--ink-soft);
+    padding:14px;
+    border-radius:14px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border-soft);
   }
   .ct-room-started-hint{
     text-align:center;
@@ -4391,17 +4461,24 @@
       <p class="ct-waiting-hint" id="ctWaitingHint">Boshqa ishtirokchilarni kuting...</p>
       <!-- Faqat xostga ko'rinadi, kamida 2 ta ishtirokchi bo'lganda yoqiladi -->
       <button class="ct-start-room-btn hidden" id="ctStartRoomBtn" type="button" disabled>Boshlash</button>
-      <!-- Xona boshlangandan keyin ko'rinadi — xonaning ichki qismi.
-           Hozircha faqat ishtirokchilar xonaga joylashib olganini
-           ko'rsatadi (o'rindiqlar yuqorida, ctWaitingSeats orqali).
-           TODO: keyingi bosqichda kartochka almashish mantig'i shu yerga qo'shiladi. -->
-      <div class="ct-room-inside hidden" id="ctRoomInsideView">
-        <div class="ct-room-inside-icon">🀄</div>
-        <p class="ct-room-inside-text">Hammangiz xonaga joylashdingiz!</p>
-        <p class="ct-room-inside-subtext">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</p>
-      </div>
       <button class="ct-leave-btn" id="ctLeaveRoomBtn" type="button">Chiqish</button>
     </div>
+  </div>
+</div>
+
+<!-- ---------- KARTOCHKA ALMASHISH: xona ICHKARISI — stol atrofida ishtirokchilar joylashuvi ----------
+     "Boshlash" bosilgach ochiladigan to'liq ekran. Hozircha faqat barcha
+     ishtirokchilarning stol atrofida joylashib olganini ko'rsatadi.
+     TODO: keyingi bosqichda kartochka almashish mantig'i shu sahifaga qo'shiladi. -->
+<div class="ct-room-page hidden" id="ctRoomPage" aria-hidden="true">
+  <div class="ct-room-page-top">
+    <span class="ct-room-page-title">Xona boshlandi</span>
+    <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
+  </div>
+  <p class="ct-room-started-hint">Hammangiz stol atrofiga joylashdingiz!</p>
+  <div class="ct-table" id="ctTable">
+    <div class="ct-table-center-hint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
+    <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -7378,7 +7455,9 @@
     const leaveRoomBtn = document.getElementById('ctLeaveRoomBtn');
     const startRoomBtn = document.getElementById('ctStartRoomBtn');
     const waitingHintEl = document.getElementById('ctWaitingHint');
-    const roomInsideViewEl = document.getElementById('ctRoomInsideView');
+    const roomPageEl = document.getElementById('ctRoomPage');
+    const roomPageLeaveBtn = document.getElementById('ctRoomPageLeaveBtn');
+    const tableSeatsEl = document.getElementById('ctTableSeats');
 
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
     const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -7526,7 +7605,70 @@
     let waitingRoomRef = null;
     let waitingRoomIsHost = false;
     let waitingRoomWasStarted = false;
+    // Xona to'lgach (barcha o'rinlar band bo'lgach) xost tomonidan avtomatik
+    // "boshlash" birdan ortiq marta yuborilmasligi uchun himoya bayrog'i —
+    // har bir yangi kutish xonasiga kirilganda qayta tiklanadi.
+    let waitingRoomAutoStartTriggered = false;
 
+    // ---------- XONA ICHKARISI: to'liq ekran, stol atrofida joylashuv ----------
+    function openRoomPage(){
+      if(!roomPageEl) return;
+      roomPageEl.classList.remove('hidden');
+      roomPageEl.setAttribute('aria-hidden', 'false');
+      lockPageScroll();
+    }
+    function closeRoomPage(){
+      if(!roomPageEl || roomPageEl.classList.contains('hidden')) return;
+      roomPageEl.classList.add('hidden');
+      roomPageEl.setAttribute('aria-hidden', 'true');
+      unlockPageScroll();
+    }
+    // Ishtirokchilarni stol atrofiga bir xilda taqsimlaydi: har doim
+    // "o'zim" pastki markazda (180°) turadi, qolganlari shu nuqtadan
+    // teng burchaklarda aylana bo'ylab joylashadi.
+    function renderTableSeats(data){
+      if(!tableSeatsEl) return;
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      const uids = data.participantUids || [];
+      const size = data.size || uids.length || 1;
+      let html = '';
+      for(let i=0;i<size;i++){
+        const angleDeg = 180 + i * (360/size);
+        const angleRad = angleDeg * Math.PI/180;
+        const leftPct = (50 + 38*Math.sin(angleRad)).toFixed(2);
+        const topPct = (50 - 38*Math.cos(angleRad)).toFixed(2);
+        const style = `left:${leftPct}%; top:${topPct}%;`;
+        if(i < uids.length){
+          const uid = uids[i];
+          const isHostSeat = uid === data.hostUid;
+          const isSelf = !!(user && uid === user.uid);
+          let name, avatarHTML;
+          if(isSelf){
+            name = 'Siz';
+            const photo = isHostSeat ? data.hostPhoto : (user.photoURL || '');
+            const initial = ((isHostSeat ? data.hostName : (user.displayName || user.email)) || '?').trim().charAt(0).toUpperCase();
+            avatarHTML = photo ? `<img src="${escapeCt(photo)}" alt="">` : escapeCt(initial);
+          } else if(isHostSeat){
+            name = data.hostName || 'Xost';
+            avatarHTML = data.hostPhoto ? `<img src="${escapeCt(data.hostPhoto)}" alt="">` : escapeCt((data.hostName||'?').trim().charAt(0).toUpperCase());
+          } else {
+            name = 'Ishtirokchi';
+            avatarHTML = '👤';
+          }
+          html += `<div class="ct-table-seat${isSelf ? ' ct-table-seat-self' : ''}" style="${style}">
+              <div class="ct-table-seat-avatar">${avatarHTML}</div>
+              <div class="ct-table-seat-label">${escapeCt(name)}</div>
+            </div>`;
+        } else {
+          html += `<div class="ct-table-seat ct-table-seat-empty" style="${style}">
+              <div class="ct-table-seat-avatar">+</div>
+              <div class="ct-table-seat-label">Bo'sh joy</div>
+            </div>`;
+        }
+      }
+      tableSeatsEl.innerHTML = html;
+    }
     function renderWaitingSeats(data){
       if(!waitingSeatsEl) return;
       const uids = data.participantUids || [];
@@ -7546,7 +7688,7 @@
       const isStarted = data.status === 'started';
       waitingRoomWasStarted = isStarted;
       if(waitingTitleEl){
-        waitingTitleEl.textContent = isStarted ? "Xona boshlandi!" : (uids2.length >= data.size ? "Xona to'ldi!" : "Kutilmoqda...");
+        waitingTitleEl.textContent = uids2.length >= data.size ? "Xona to'ldi!" : "Kutilmoqda...";
       }
       // ---------- "Boshlash" tugmasi: faqat xostga ko'rinadi, kamida
       // 2 ta ishtirokchi bo'lgandagina bosish mumkin bo'ladi ----------
@@ -7558,12 +7700,28 @@
           startRoomBtn.classList.add('hidden');
         }
       }
-      // Xona boshlangach — kutish bilan bog'liq matn/tugmalar yashirilib,
-      // o'rniga vaqtinchalik "boshlandi" xabari ko'rsatiladi. Xonaning
-      // ichki (o'yin) qismi hali yozilmagan, keyingi bosqichda shu yerga
-      // qo'shiladi.
       if(waitingHintEl) waitingHintEl.classList.toggle('hidden', isStarted);
-      if(roomInsideViewEl) roomInsideViewEl.classList.toggle('hidden', !isStarted);
+      // ---------- Xona to'lganda avtomatik boshlash ----------
+      // Barcha o'rinlar band bo'lib, xona hali "waiting" holatida bo'lsa,
+      // xostning kliyenti xonani o'zi avtomatik boshlaydi — host tugmani
+      // qo'lda bosishini kutmasdan, to'lgan zahoti hammaga xona ichkarisiga
+      // kirish va stol atrofida joylashish amalga oshadi. Bayroq bir nechta
+      // snapshot hodisasida takroriy so'rov yuborilishining oldini oladi.
+      if(waitingRoomIsHost && !isStarted && !waitingRoomAutoStartTriggered &&
+         data.size > 0 && uids2.length >= data.size){
+        waitingRoomAutoStartTriggered = true;
+        startRoom();
+      }
+      // Xona boshlangach — kichik oyna yopilib, ishtirokchilar stol
+      // atrofida joylashgan to'liq ekran ochiladi. Kartochka almashish
+      // mantig'i keyingi bosqichda shu ekranga qo'shiladi.
+      if(isStarted){
+        closeCardTransferModal();
+        openRoomPage();
+        renderTableSeats(data);
+      } else {
+        closeRoomPage();
+      }
     }
     async function startRoom(){
       const {updateDoc, serverTimestamp} = window.__kanjiFB;
@@ -7584,13 +7742,14 @@
       waitingRoomRef = roomRef;
       waitingRoomIsHost = !!(opts && opts.isHost);
       waitingRoomWasStarted = false;
+      waitingRoomAutoStartTriggered = false;
       if(topTabs) topTabs.classList.add('hidden');
       if(createView) createView.classList.add('hidden');
       if(joinView) joinView.classList.add('hidden');
       if(waitingView) waitingView.classList.remove('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
       if(waitingHintEl) waitingHintEl.classList.remove('hidden');
-      if(roomInsideViewEl) roomInsideViewEl.classList.add('hidden');
+      closeRoomPage();
       if(codeDisplayEl){
         if(opts && opts.code){
           codeDisplayEl.classList.remove('hidden');
@@ -7627,6 +7786,7 @@
       waitingRoomRef = null;
       waitingRoomIsHost = false;
       waitingRoomWasStarted = false;
+      closeRoomPage();
       if(waitingView) waitingView.classList.add('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
       if(topTabs) topTabs.classList.remove('hidden');
@@ -7641,30 +7801,30 @@
         }
       });
     }
-    if(leaveRoomBtn){
-      leaveRoomBtn.addEventListener('click', async ()=>{
-        const {auth, getDoc, deleteDoc, updateDoc} = window.__kanjiFB;
-        const ref = waitingRoomRef;
-        const wasHost = waitingRoomIsHost;
-        const user = auth.currentUser;
-        exitWaitingRoom();
-        if(!ref) return;
-        try{
-          if(wasHost){
-            await deleteDoc(ref);
-          } else if(user){
-            const snap = await getDoc(ref);
-            if(snap.exists()){
-              const data = snap.data();
-              const remaining = (data.participantUids || []).filter(uid=> uid !== user.uid);
-              await updateDoc(ref, { participantUids: remaining });
-            }
+    async function leaveRoom(){
+      const {auth, getDoc, deleteDoc, updateDoc} = window.__kanjiFB;
+      const ref = waitingRoomRef;
+      const wasHost = waitingRoomIsHost;
+      const user = auth.currentUser;
+      exitWaitingRoom();
+      if(!ref) return;
+      try{
+        if(wasHost){
+          await deleteDoc(ref);
+        } else if(user){
+          const snap = await getDoc(ref);
+          if(snap.exists()){
+            const data = snap.data();
+            const remaining = (data.participantUids || []).filter(uid=> uid !== user.uid);
+            await updateDoc(ref, { participantUids: remaining });
           }
-        }catch(e){
-          console.error("Xonadan chiqishda xatolik:", e.message);
         }
-      });
+      }catch(e){
+        console.error("Xonadan chiqishda xatolik:", e.message);
+      }
     }
+    if(leaveRoomBtn) leaveRoomBtn.addEventListener('click', leaveRoom);
+    if(roomPageLeaveBtn) roomPageLeaveBtn.addEventListener('click', leaveRoom);
 
     // ---------- XONA: yuqori va ichki tab almashtirgichlar ----------
     function switchCtTab(tab){
