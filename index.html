@@ -3647,6 +3647,19 @@
   }
   .presence-status{font-size:11px; color:var(--ink-faint);}
   .presence-status.online{color:var(--moss-soft);}
+  .presence-owner-badge{
+    flex:none;
+    align-self:center;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:#0B0D10;
+    background:var(--gold);
+    padding:4px 10px;
+    border-radius:999px;
+    box-shadow:0 0 8px rgba(201,166,107,0.45);
+  }
 
   .chat-messages{
     flex:1;
@@ -8771,6 +8784,7 @@
       await setDoc(presenceDocRef(user.uid), {
         uid: user.uid,
         nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
+        email: (user.email || "").toString().slice(0, 120),
         photoURL: user.photoURL || "",
         online: online,
         lastSeen: serverTimestamp()
@@ -8821,6 +8835,24 @@
     return (Date.now() - lastSeen.toMillis()) < PRESENCE_STALE_MS;
   }
 
+  // Firestore Timestamp'ni "5 daqiqa oldin" kabi o'qilishi oson matnga aylantiradi.
+  function presenceFormatLastSeen(lastSeen) {
+    if (!lastSeen || typeof lastSeen.toMillis !== "function") return "hozirgina";
+    const diffMs = Date.now() - lastSeen.toMillis();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 45) return "hozirgina";
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return diffMin + " daqiqa oldin";
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return diffHour + " soat oldin";
+    const diffDay = Math.floor(diffHour / 24);
+    if (diffDay < 30) return diffDay + " kun oldin";
+    const diffMonth = Math.floor(diffDay / 30);
+    if (diffMonth < 12) return diffMonth + " oy oldin";
+    const diffYear = Math.floor(diffMonth / 12);
+    return diffYear + " yil oldin";
+  }
+
   function presenceRenderList() {
     const listEl = document.getElementById("presenceList");
     const emptyEl = document.getElementById("presenceEmpty");
@@ -8834,7 +8866,9 @@
       return {
         uid: data.uid || d.id,
         nick: data.nick || "Foydalanuvchi",
+        email: data.email || "",
         photoURL: data.photoURL || "",
+        lastSeen: data.lastSeen || null,
         online: data.online !== false && fresh
       };
     });
@@ -8886,12 +8920,24 @@
       nameEl.textContent = item.nick;
       const statusEl = document.createElement("div");
       statusEl.className = "presence-status" + (item.online ? " online" : "");
-      statusEl.textContent = item.online ? "Online" : "Offline";
+      statusEl.textContent = item.online
+        ? "Online"
+        : "So'nggi faollik: " + presenceFormatLastSeen(item.lastSeen);
       info.appendChild(nameEl);
       info.appendChild(statusEl);
 
       row.appendChild(avatar);
       row.appendChild(info);
+
+      // Egasi (owner) uchun o'ng tarafda maxsus bildirishnoma
+      const isOwner = !!item.email && item.email.toLowerCase() === "doniyorbektoshmatov7@gmail.com";
+      if (isOwner) {
+        const ownerBadge = document.createElement("span");
+        ownerBadge.className = "presence-owner-badge";
+        ownerBadge.textContent = "Owner";
+        row.appendChild(ownerBadge);
+      }
+
       listEl.appendChild(row);
     });
   }
