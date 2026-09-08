@@ -3416,6 +3416,24 @@
     background:var(--glass-bg);
     border:1px solid var(--glass-border-soft);
   }
+  .ct-table-center-hint.picker-open{max-width:min(92%,340px); width:92%;}
+  .ct-day-picker-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:6px;
+  }
+  .ct-day-picker-btn{
+    padding:9px 0;
+    border-radius:10px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg-strong);
+    color:var(--ink);
+    font-size:12px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .ct-day-picker-btn:active{transform:scale(0.92);}
   .ct-room-started-hint{
     text-align:center;
     font-size:13px;
@@ -3423,6 +3441,24 @@
     font-weight:700;
     margin:4px 0 18px;
   }
+  /* ---------- XONA ICHKARISI: "Flashcard tanlash" tugmasi ---------- */
+  .ct-choose-flashcard-btn{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff;
+    font-size:14.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    transition:all .2s ease;
+    box-shadow:0 6px 18px -6px rgba(217,105,79,0.55);
+    margin:0 0 14px;
+    flex:none;
+  }
+  .ct-choose-flashcard-btn:active{transform:scale(0.97);}
   .ct-leave-btn{
     width:100%;
     padding:12px;
@@ -4485,8 +4521,9 @@
     <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
   </div>
   <p class="ct-room-started-hint">Hammangiz stol atrofiga joylashdingiz!</p>
+  <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">Flashcard tanlash</button>
   <div class="ct-table" id="ctTable">
-    <div class="ct-table-center-hint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
+    <div class="ct-table-center-hint" id="ctTableCenterHint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
     <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
   </div>
 </div>
@@ -7466,6 +7503,8 @@
     const waitingHintEl = document.getElementById('ctWaitingHint');
     const roomPageEl = document.getElementById('ctRoomPage');
     const roomPageLeaveBtn = document.getElementById('ctRoomPageLeaveBtn');
+    const chooseFlashcardBtn = document.getElementById('ctChooseFlashcardBtn');
+    const centerHintEl = document.getElementById('ctTableCenterHint');
     const tableSeatsEl = document.getElementById('ctTableSeats');
 
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
@@ -7698,6 +7737,7 @@
       tableSeatsEl.innerHTML = html;
     }
     function renderWaitingSeats(data){
+      lastRoomData = data;
       if(!waitingSeatsEl) return;
       const uids = data.participantUids || [];
       let html = '';
@@ -7758,6 +7798,7 @@
         closeCardTransferModal();
         openRoomPage();
         renderTableSeats(data);
+        updateCenterHint(data);
       } else {
         closeRoomPage();
       }
@@ -7825,6 +7866,8 @@
       waitingRoomRef = null;
       waitingRoomIsHost = false;
       waitingRoomWasStarted = false;
+      dayPickerOpen = false;
+      lastRoomData = null;
       closeRoomPage();
       if(waitingView) waitingView.classList.add('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
@@ -7864,6 +7907,51 @@
     }
     if(leaveRoomBtn) leaveRoomBtn.addEventListener('click', leaveRoom);
     if(roomPageLeaveBtn) roomPageLeaveBtn.addEventListener('click', leaveRoom);
+    // ---------- XONA ICHKARISI: "Flashcard tanlash" — mavjud kunlar (WORDS
+    // massividagi `day` maydoni) ro'yxatidan birini tanlab, xona hujjatiga
+    // yozamiz. Firestore snapshot orqali barcha ishtirokchilarga avtomatik
+    // sinxronlanadi — alohida "yuborish" mantig'i shart emas. ----------
+    let dayPickerOpen = false;
+    let lastRoomData = null;
+    function updateCenterHint(data){
+      if(dayPickerOpen || !centerHintEl) return;
+      centerHintEl.classList.remove('picker-open');
+      if(data && data.selectedDay){
+        const label = DAY_LABELS[data.selectedDay] || data.selectedDay;
+        const count = WORDS.filter(w => w.day === data.selectedDay).length;
+        centerHintEl.textContent = `Tanlangan: ${label} (${count} ta kanji)`;
+      } else {
+        centerHintEl.textContent = "Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.";
+      }
+    }
+    function openDayPicker(){
+      if(!centerHintEl) return;
+      dayPickerOpen = true;
+      centerHintEl.classList.add('picker-open');
+      centerHintEl.innerHTML = '<div class="ct-day-picker-grid">' +
+        DAY_ORDER.map(d => `<button type="button" class="ct-day-picker-btn" data-day="${d}">${DAY_LABELS[d]}</button>`).join('') +
+        '</div>';
+    }
+    async function selectFlashcardDay(day){
+      dayPickerOpen = false;
+      updateCenterHint(lastRoomData);
+      if(!waitingRoomRef) return;
+      const {updateDoc} = window.__kanjiFB;
+      try{
+        await updateDoc(waitingRoomRef, { selectedDay: day });
+      }catch(e){
+        console.error("Kunni tanlashda xatolik:", e.message);
+      }
+    }
+    if(chooseFlashcardBtn) chooseFlashcardBtn.addEventListener('click', () => {
+      if(dayPickerOpen){ dayPickerOpen = false; updateCenterHint(lastRoomData); }
+      else openDayPicker();
+    });
+    if(centerHintEl) centerHintEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.ct-day-picker-btn');
+      if(!btn) return;
+      selectFlashcardDay(parseInt(btn.dataset.day, 10));
+    });
 
     // ---------- XONA: yuqori va ichki tab almashtirgichlar ----------
     function switchCtTab(tab){
