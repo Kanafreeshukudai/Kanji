@@ -3401,6 +3401,38 @@
     text-overflow:ellipsis;
   }
   .ct-table-seat.ct-table-seat-self .ct-table-seat-label{color:var(--ink); font-weight:700;}
+  /* ---------- XONA ICHKARISI: har bir ishtirokchi o'z o'rnida ko'rsatadigan kartochka ---------- */
+  .ct-table-seat-card{
+    margin-top:1px;
+    padding:5px 6px 4px;
+    border-radius:10px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg-strong);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1px;
+    max-width:76px;
+    box-sizing:border-box;
+    cursor:pointer;
+  }
+  .ct-table-seat-card:active{transform:scale(0.94);}
+  .ct-table-seat-card-kanji{
+    font-size:15px;
+    font-weight:700;
+    font-family:'Shippori Mincho', serif;
+    color:var(--ink);
+    line-height:1.15;
+  }
+  .ct-table-seat-card-sub{
+    font-size:9px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:68px;
+  }
+  .ct-table-seat-card.revealed .ct-table-seat-card-sub{color:var(--moss-soft); font-weight:700;}
   .ct-table-center-hint{
     position:absolute;
     left:50%;
@@ -3434,6 +3466,102 @@
     cursor:pointer;
   }
   .ct-day-picker-btn:active{transform:scale(0.92);}
+  /* ---------- XONA ICHKARISI: kun tanlangach chiqadigan kanji tanlash paneli ---------- */
+  .ct-kanji-picker-head{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:8px;
+    position:relative;
+  }
+  .ct-kanji-picker-back{
+    position:absolute;
+    left:0;
+    top:50%;
+    transform:translateY(-50%);
+    padding:4px 8px;
+    border:none;
+    background:none;
+    color:var(--accent-soft);
+    font-size:12px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .ct-kanji-picker-title{
+    font-size:12.5px;
+    font-weight:800;
+    color:var(--ink);
+    letter-spacing:0.02em;
+  }
+  .ct-kanji-picker-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:6px;
+    max-height:44vh;
+    overflow-y:auto;
+    padding:2px;
+  }
+  .ct-kanji-picker-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    padding:8px 2px;
+    border-radius:10px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg-strong);
+    color:var(--ink);
+    font-family:'Shippori Mincho', serif;
+    cursor:pointer;
+  }
+  .ct-kanji-picker-btn.selected{
+    border-color:var(--accent);
+    background:rgba(217,105,79,0.22);
+    box-shadow:0 0 0 2px rgba(217,105,79,0.35);
+  }
+  .ct-kanji-picker-btn:active{transform:scale(0.93);}
+  .ct-kanji-picker-char{font-size:19px; font-weight:700; line-height:1.1;}
+  .ct-kanji-picker-romaji{font-size:9.5px; color:var(--ink-soft); font-family:'Zen Maru Gothic', sans-serif;}
+  .ct-kanji-picker-send{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .ct-kanji-picker-send:disabled{opacity:0.4; cursor:default;}
+  .ct-kanji-picker-send:not(:disabled):active{transform:scale(0.97);}
+  /* ---------- XONA ICHKARISI: yuborilgan kartochka ko'rinishi ---------- */
+  .ct-sent-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  .ct-sent-card-sender{
+    font-size:10.5px;
+    color:var(--accent-soft);
+    font-weight:700;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+  }
+  .ct-sent-card-kanji{
+    font-size:40px;
+    font-weight:700;
+    font-family:'Shippori Mincho', serif;
+    color:var(--ink);
+    line-height:1.2;
+  }
+  .ct-sent-card-romaji{font-size:12px; color:var(--ink-soft);}
+  .ct-sent-card-uz{font-size:12px; color:var(--moss-soft); font-weight:700;}
   .ct-room-started-hint{
     text-align:center;
     font-size:13px;
@@ -7506,6 +7634,17 @@
     const chooseFlashcardBtn = document.getElementById('ctChooseFlashcardBtn');
     const centerHintEl = document.getElementById('ctTableCenterHint');
     const tableSeatsEl = document.getElementById('ctTableSeats');
+    // Har bir o'rindagi kartochkani bosganda tarjima (uz) ko'rsatiladi/berkitiladi —
+    // bu faqat shu qurilmadagi ko'rinish, Firestore'ga yozilmaydi.
+    const revealedUids = new Set();
+    if(tableSeatsEl) tableSeatsEl.addEventListener('click', (e)=>{
+      const cardEl = e.target.closest('.ct-table-seat-card');
+      if(!cardEl || !lastRoomData) return;
+      const uid = cardEl.dataset.cardUid;
+      if(!uid) return;
+      if(revealedUids.has(uid)) revealedUids.delete(uid); else revealedUids.add(uid);
+      renderTableSeats(lastRoomData);
+    });
 
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
     const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -7723,9 +7862,17 @@
             name = 'Ishtirokchi';
             avatarHTML = '👤';
           }
+          const card = data.cards && data.cards[uid];
+          const cardHTML = card
+            ? `<div class="ct-table-seat-card${revealedUids.has(uid) ? ' revealed' : ''}" data-card-uid="${escapeCt(uid)}">
+                 <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
+                 <span class="ct-table-seat-card-sub">${escapeCt(revealedUids.has(uid) ? (card.uz || '') : (card.romaji || ''))}</span>
+               </div>`
+            : '';
           html += `<div class="ct-table-seat${isSelf ? ' ct-table-seat-self' : ''}" style="${style}">
               <div class="ct-table-seat-avatar">${avatarHTML}</div>
               <div class="ct-table-seat-label">${escapeCt(name)}</div>
+              ${cardHTML}
             </div>`;
         } else {
           html += `<div class="ct-table-seat ct-table-seat-empty" style="${style}">
@@ -7867,6 +8014,9 @@
       waitingRoomIsHost = false;
       waitingRoomWasStarted = false;
       dayPickerOpen = false;
+      kanjiPickerOpen = false;
+      kanjiPickerDay = null;
+      selectedKanjiId = null;
       lastRoomData = null;
       closeRoomPage();
       if(waitingView) waitingView.classList.add('hidden');
@@ -7907,50 +8057,98 @@
     }
     if(leaveRoomBtn) leaveRoomBtn.addEventListener('click', leaveRoom);
     if(roomPageLeaveBtn) roomPageLeaveBtn.addEventListener('click', leaveRoom);
-    // ---------- XONA ICHKARISI: "Flashcard tanlash" — mavjud kunlar (WORDS
-    // massividagi `day` maydoni) ro'yxatidan birini tanlab, xona hujjatiga
-    // yozamiz. Firestore snapshot orqali barcha ishtirokchilarga avtomatik
-    // sinxronlanadi — alohida "yuborish" mantig'i shart emas. ----------
+    // ---------- XONA ICHKARISI: "Flashcard tanlash" — avval mavjud kunlar
+    // (WORDS massividagi `day` maydoni) ro'yxatidan biri tanlanadi, so'ng
+    // o'sha kun ichidagi kanjilar chiqadi — ulardan birini tanlab, "Yuborish"
+    // bilan xona hujjatining `cards.<uid>` maydoniga (FAQAT shu ishtirokchi
+    // uchun, boshqalarnikini ustidan yozmasdan) saqlaymiz. Har bir ishtirokchi
+    // o'z kartasini mustaqil tanlaydi va Firestore snapshot orqali bu
+    // barchaga darhol sinxronlanadi — natijada har kim stol atrofidagi o'z
+    // o'rnida o'zining tanlagan kartochkasini ko'radi (renderTableSeats
+    // ichida `data.cards[uid]` orqali chiziladi). ----------
     let dayPickerOpen = false;
+    let kanjiPickerOpen = false;
+    let kanjiPickerDay = null;
+    let selectedKanjiId = null;
     let lastRoomData = null;
     function updateCenterHint(data){
-      if(dayPickerOpen || !centerHintEl) return;
+      if(dayPickerOpen || kanjiPickerOpen || !centerHintEl) return;
       centerHintEl.classList.remove('picker-open');
-      if(data && data.selectedDay){
-        const label = DAY_LABELS[data.selectedDay] || data.selectedDay;
-        const count = WORDS.filter(w => w.day === data.selectedDay).length;
-        centerHintEl.textContent = `Tanlangan: ${label} (${count} ta kanji)`;
-      } else {
-        centerHintEl.textContent = "Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.";
-      }
+      centerHintEl.textContent = "Har kim o'z kartochkasini tanlashi uchun \"Flashcard tanlash\"ni bosing — u stol atrofidagi o'rningizda barchaga ko'rinadi.";
     }
     function openDayPicker(){
       if(!centerHintEl) return;
       dayPickerOpen = true;
+      kanjiPickerOpen = false;
       centerHintEl.classList.add('picker-open');
       centerHintEl.innerHTML = '<div class="ct-day-picker-grid">' +
         DAY_ORDER.map(d => `<button type="button" class="ct-day-picker-btn" data-day="${d}">${DAY_LABELS[d]}</button>`).join('') +
         '</div>';
     }
-    async function selectFlashcardDay(day){
+    function openKanjiPicker(day){
+      if(!centerHintEl) return;
       dayPickerOpen = false;
+      kanjiPickerOpen = true;
+      kanjiPickerDay = day;
+      selectedKanjiId = null;
+      centerHintEl.classList.add('picker-open');
+      renderKanjiPicker();
+    }
+    function renderKanjiPicker(){
+      if(!centerHintEl || !kanjiPickerOpen) return;
+      const words = WORDS.filter(w => w.day === kanjiPickerDay);
+      centerHintEl.innerHTML =
+        `<div class="ct-kanji-picker-head">
+           <button type="button" class="ct-kanji-picker-back" id="ctKanjiPickerBack">‹ Kunlar</button>
+           <span class="ct-kanji-picker-title">${escapeCt(DAY_LABELS[kanjiPickerDay] || kanjiPickerDay)}</span>
+         </div>
+         <div class="ct-kanji-picker-grid">` +
+        words.map(w => `<button type="button" class="ct-kanji-picker-btn${w.id===selectedKanjiId ? ' selected' : ''}" data-word-id="${w.id}">
+             <span class="ct-kanji-picker-char">${escapeCt(w.kanji)}</span>
+             <span class="ct-kanji-picker-romaji">${escapeCt(w.romaji || '')}</span>
+           </button>`).join('') +
+        `</div>
+         <button type="button" class="ct-kanji-picker-send" id="ctKanjiPickerSend"${selectedKanjiId ? '' : ' disabled'}>Yuborish</button>`;
+    }
+    async function sendFlashcard(){
+      if(!kanjiPickerDay || !selectedKanjiId || !waitingRoomRef) return;
+      const word = WORDS.find(w => w.id === selectedKanjiId);
+      if(!word) return;
+      const {updateDoc, serverTimestamp, auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user) return;
+      dayPickerOpen = false;
+      kanjiPickerOpen = false;
       updateCenterHint(lastRoomData);
-      if(!waitingRoomRef) return;
-      const {updateDoc} = window.__kanjiFB;
       try{
-        await updateDoc(waitingRoomRef, { selectedDay: day });
+        await updateDoc(waitingRoomRef, {
+          [`cards.${user.uid}`]: {
+            wordId: word.id,
+            day: kanjiPickerDay,
+            kanji: word.kanji,
+            romaji: word.romaji || "",
+            uz: word.uz || "",
+            sentAt: serverTimestamp()
+          }
+        });
       }catch(e){
-        console.error("Kunni tanlashda xatolik:", e.message);
+        console.error("Kartochka yuborishda xatolik:", e.message);
+        showCardTransferToast("Kartochkani yuborib bo'lmadi. Qayta urinib ko'ring.");
       }
     }
     if(chooseFlashcardBtn) chooseFlashcardBtn.addEventListener('click', () => {
-      if(dayPickerOpen){ dayPickerOpen = false; updateCenterHint(lastRoomData); }
+      if(dayPickerOpen || kanjiPickerOpen){ dayPickerOpen = false; kanjiPickerOpen = false; updateCenterHint(lastRoomData); }
       else openDayPicker();
     });
     if(centerHintEl) centerHintEl.addEventListener('click', (e) => {
-      const btn = e.target.closest('.ct-day-picker-btn');
-      if(!btn) return;
-      selectFlashcardDay(parseInt(btn.dataset.day, 10));
+      const dayBtn = e.target.closest('.ct-day-picker-btn');
+      if(dayBtn){ openKanjiPicker(parseInt(dayBtn.dataset.day, 10)); return; }
+      const backBtn = e.target.closest('#ctKanjiPickerBack');
+      if(backBtn){ openDayPicker(); return; }
+      const sendBtn = e.target.closest('#ctKanjiPickerSend');
+      if(sendBtn){ sendFlashcard(); return; }
+      const kanjiBtn = e.target.closest('.ct-kanji-picker-btn');
+      if(kanjiBtn){ selectedKanjiId = kanjiBtn.dataset.wordId; renderKanjiPicker(); return; }
     });
 
     // ---------- XONA: yuqori va ichki tab almashtirgichlar ----------
