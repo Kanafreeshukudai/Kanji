@@ -3433,6 +3433,46 @@
     max-width:68px;
   }
   .ct-table-seat-card.revealed .ct-table-seat-card-sub{color:var(--moss-soft); font-weight:700;}
+  /* ---------- BOSHQA ISHTIROKCHI KARTOCHKASI: faqat kanji ko'rinadi, romanji
+     yozib topish kerak ---------- */
+  .ct-table-seat-card.guess-pending{cursor:default;}
+  .ct-table-seat-card.guess-correct{border-color:rgba(124,154,107,0.55); background:rgba(124,154,107,0.16);}
+  .ct-table-seat-card.guess-correct .ct-table-seat-card-sub{color:var(--moss-soft); font-weight:700;}
+  .ct-guess-form{display:flex; align-items:center; gap:3px; margin-top:2px;}
+  .ct-guess-input{
+    width:50px;
+    font-size:9.5px;
+    padding:3px 4px;
+    border-radius:6px;
+    border:1px solid var(--glass-border-soft);
+    background:rgba(0,0,0,0.28);
+    color:var(--ink);
+    text-align:center;
+    outline:none;
+    font-family:inherit;
+  }
+  .ct-guess-input:focus{border-color:var(--accent);}
+  .ct-guess-input.wrong{border-color:rgba(217,60,52,0.8);}
+  .ct-guess-check-btn{
+    font-size:11px;
+    line-height:1;
+    padding:3px 6px;
+    border-radius:6px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    cursor:pointer;
+    flex:none;
+  }
+  .ct-guess-check-btn:active{transform:scale(0.92);}
+  .ct-guess-wrong-hint{font-size:8px; color:var(--accent-soft); margin-top:1px;}
+  .ct-guess-correct-mark{font-size:10px; font-weight:700; color:var(--moss-soft);}
+  .ct-table-seat-score{
+    font-size:9px;
+    font-weight:700;
+    color:var(--gold);
+    margin-top:-3px;
+  }
   .ct-table-center-hint{
     position:absolute;
     left:50%;
@@ -7634,17 +7674,80 @@
     const chooseFlashcardBtn = document.getElementById('ctChooseFlashcardBtn');
     const centerHintEl = document.getElementById('ctTableCenterHint');
     const tableSeatsEl = document.getElementById('ctTableSeats');
-    // Har bir o'rindagi kartochkani bosganda tarjima (uz) ko'rsatiladi/berkitiladi —
-    // bu faqat shu qurilmadagi ko'rinish, Firestore'ga yozilmaydi.
-    const revealedUids = new Set();
-    if(tableSeatsEl) tableSeatsEl.addEventListener('click', (e)=>{
-      const cardEl = e.target.closest('.ct-table-seat-card');
-      if(!cardEl || !lastRoomData) return;
-      const uid = cardEl.dataset.cardUid;
-      if(!uid) return;
-      if(revealedUids.has(uid)) revealedUids.delete(uid); else revealedUids.add(uid);
-      renderTableSeats(lastRoomData);
-    });
+    // Boshqa ishtirokchi kartochkasini taxmin qilish uchun mahalliy qoralama:
+    // Firestore snapshot kelganda butun stol qayta chizilgani uchun,
+    // hozircha kim nima yozayotgani shu Map orqali saqlanib turadi (aks
+    // holda har safar boshqa birov kartochka yuborganda yozilayotgan matn
+    // o'chib qolar edi).
+    const guessDrafts = new Map();
+    // renderTableSeats o'ziga kelgan `data` parametridan foydalanadi (har doim
+    // eng so'nggi snapshot), shu sabab lastRoomData'ga emas shu `data`ga qarab tekshiradi.
+    function currentGuessRecordSync(data, uid){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !data) return null;
+      return (data.guesses && data.guesses[`${user.uid}_${uid}`]) || null;
+    }
+    function currentGuessRecord(uid){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !lastRoomData) return null;
+      return (lastRoomData.guesses && lastRoomData.guesses[`${user.uid}_${uid}`]) || null;
+    }
+    async function submitGuess(uid, rawAnswer){
+      const {auth, updateDoc, serverTimestamp, increment} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !waitingRoomRef || !lastRoomData) return;
+      const card = lastRoomData.cards && lastRoomData.cards[uid];
+      if(!card) return;
+      const existing = currentGuessRecord(uid);
+      if(existing && existing.correct) return;
+      const answer = (rawAnswer || '').toString().trim();
+      if(!answer) return;
+      const norm = s => (s || '').toString().trim().toLowerCase().replace(/\s+/g, '');
+      const isCorrect = norm(answer) === norm(card.romaji);
+      const key = `${user.uid}_${uid}`;
+      const updates = {
+        [`guesses.${key}`]: { correct: isCorrect, answer, checkedAt: serverTimestamp() }
+      };
+      // To'g'ri topilsa — taxmin qilgan kishining umumiy ochkosiga +1
+      // qo'shiladi. Xato bo'lsa ochko o'zgarmaydi (0 bilan qoladi) va
+      // ishtirokchi qayta urinib ko'rishi mumkin.
+      if(isCorrect) updates[`scores.${user.uid}`] = increment(1);
+      try{
+        await updateDoc(waitingRoomRef, updates);
+        if(isCorrect) guessDrafts.delete(uid); else guessDrafts.set(uid, answer);
+      }catch(e){
+        console.error("Javobni tekshirishda xatolik:", e.message);
+        showCardTransferToast("Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
+      }
+    }
+    if(tableSeatsEl){
+      tableSeatsEl.addEventListener('input', (e)=>{
+        const input = e.target.closest('.ct-guess-input');
+        if(!input) return;
+        const uid = input.dataset.guessUid;
+        if(!uid) return;
+        guessDrafts.set(uid, input.value);
+        input.classList.remove('wrong');
+      });
+      tableSeatsEl.addEventListener('keydown', (e)=>{
+        if(e.key !== 'Enter') return;
+        const input = e.target.closest('.ct-guess-input');
+        if(!input) return;
+        e.preventDefault();
+        const uid = input.dataset.guessUid;
+        if(uid) submitGuess(uid, input.value);
+      });
+      tableSeatsEl.addEventListener('click', (e)=>{
+        const checkBtn = e.target.closest('.ct-guess-check-btn');
+        if(!checkBtn) return;
+        const uid = checkBtn.dataset.guessUid;
+        if(!uid) return;
+        const input = tableSeatsEl.querySelector(`.ct-guess-input[data-guess-uid="${uid}"]`);
+        submitGuess(uid, input ? input.value : '');
+      });
+    }
 
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
     const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -7863,15 +7966,45 @@
             avatarHTML = '👤';
           }
           const card = data.cards && data.cards[uid];
-          const cardHTML = card
-            ? `<div class="ct-table-seat-card${revealedUids.has(uid) ? ' revealed' : ''}" data-card-uid="${escapeCt(uid)}">
-                 <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
-                 <span class="ct-table-seat-card-sub">${escapeCt(revealedUids.has(uid) ? (card.uz || '') : (card.romaji || ''))}</span>
-               </div>`
-            : '';
+          let cardHTML = '';
+          if(card){
+            if(isSelf){
+              // O'zi yuborgan kartochka — o'ziga kanji va romanjisi bilan ko'rinadi
+              // (buni allaqachon o'zi tanlagan, shu sabab yashirishning hojati yo'q).
+              cardHTML = `<div class="ct-table-seat-card" data-card-uid="${escapeCt(uid)}">
+                   <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
+                   <span class="ct-table-seat-card-sub">${escapeCt(card.romaji || '')}</span>
+                 </div>`;
+            } else {
+              // Boshqa ishtirokchining kartochkasi — faqat kanji jo'natiladi
+              // (ko'rinadi), romanjisi va tarjimasi berkitiladi. Uni topib
+              // yozish kerak, sayt to'g'ri/xato ekanini tekshiradi.
+              const guess = currentGuessRecordSync(data, uid);
+              if(guess && guess.correct){
+                cardHTML = `<div class="ct-table-seat-card guess-correct" data-card-uid="${escapeCt(uid)}">
+                     <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
+                     <span class="ct-table-seat-card-sub">${escapeCt(card.romaji || '')} <span class="ct-guess-correct-mark">&#10003;</span></span>
+                   </div>`;
+              } else {
+                const wasWrong = !!(guess && guess.correct === false);
+                const draftVal = guessDrafts.has(uid) ? guessDrafts.get(uid) : (guess ? (guess.answer || '') : '');
+                cardHTML = `<div class="ct-table-seat-card guess-pending" data-card-uid="${escapeCt(uid)}">
+                     <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
+                     <div class="ct-guess-form">
+                       <input type="text" class="ct-guess-input${wasWrong ? ' wrong' : ''}" data-guess-uid="${escapeCt(uid)}" value="${escapeCt(draftVal)}" placeholder="romaji" autocomplete="off" autocorrect="off" spellcheck="false">
+                       <button type="button" class="ct-guess-check-btn" data-guess-uid="${escapeCt(uid)}">&#10003;</button>
+                     </div>
+                     ${wasWrong ? '<div class="ct-guess-wrong-hint">Noto\'g\'ri, qayta urining</div>' : ''}
+                   </div>`;
+              }
+            }
+          }
+          const score = (data.scores && data.scores[uid]) || 0;
+          const scoreHTML = score > 0 ? `<div class="ct-table-seat-score">&#9733; ${score}</div>` : '';
           html += `<div class="ct-table-seat${isSelf ? ' ct-table-seat-self' : ''}" style="${style}">
               <div class="ct-table-seat-avatar">${avatarHTML}</div>
               <div class="ct-table-seat-label">${escapeCt(name)}</div>
+              ${scoreHTML}
               ${cardHTML}
             </div>`;
         } else {
@@ -8114,23 +8247,30 @@
       if(!kanjiPickerDay || !selectedKanjiId || !waitingRoomRef) return;
       const word = WORDS.find(w => w.id === selectedKanjiId);
       if(!word) return;
-      const {updateDoc, serverTimestamp, auth} = window.__kanjiFB;
+      const {updateDoc, serverTimestamp, auth, deleteField} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user) return;
       dayPickerOpen = false;
       kanjiPickerOpen = false;
       updateCenterHint(lastRoomData);
+      const updates = {
+        [`cards.${user.uid}`]: {
+          wordId: word.id,
+          day: kanjiPickerDay,
+          kanji: word.kanji,
+          romaji: word.romaji || "",
+          uz: word.uz || "",
+          sentAt: serverTimestamp()
+        }
+      };
+      // Kartochka yangilansa, boshqalarning shu kartochka bo'yicha eski
+      // taxminlari (to'g'ri/xato belgisi) endi eskirgan bo'ladi — shu sabab
+      // tozalanadi, har kim yangi kartochkani qaytadan topishi kerak bo'ladi.
+      // Ilgari to'g'ri topib olingan ochkolar esa qaytarib olinmaydi.
+      const otherUids = ((lastRoomData && lastRoomData.participantUids) || []).filter(uid => uid !== user.uid);
+      otherUids.forEach(uid => { updates[`guesses.${uid}_${user.uid}`] = deleteField(); });
       try{
-        await updateDoc(waitingRoomRef, {
-          [`cards.${user.uid}`]: {
-            wordId: word.id,
-            day: kanjiPickerDay,
-            kanji: word.kanji,
-            romaji: word.romaji || "",
-            uz: word.uz || "",
-            sentAt: serverTimestamp()
-          }
-        });
+        await updateDoc(waitingRoomRef, updates);
       }catch(e){
         console.error("Kartochka yuborishda xatolik:", e.message);
         showCardTransferToast("Kartochkani yuborib bo'lmadi. Qayta urinib ko'ring.");
@@ -8884,7 +9024,9 @@
     orderBy,
     limit,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    increment,
+    deleteField
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   // FAQAT ADMIN: shu email bilan kirilgandagina "Foydalanuvchilar
@@ -8934,7 +9076,7 @@
   window.__kanjiFB = {
     auth, db,
     collection, addDoc, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc,
-    arrayUnion, query, where, orderBy, limit, onSnapshot, serverTimestamp
+    arrayUnion, query, where, orderBy, limit, onSnapshot, serverTimestamp, increment, deleteField
   };
 
   // Bu <script type="module"> tashqarisidagi (oddiy) skriptlar Firebase
