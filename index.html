@@ -7768,6 +7768,41 @@
       });
     }
 
+    // ---------- XONA: "jonli" ekanini bildiruvchi yurak urishi (heartbeat) ----------
+    // MUAMMO: foydalanuvchi "Chiqish" tugmasini bosmasdan (ilova/varaqni yopib,
+    // sahifani yangilab yoki ulanishni yo'qotib) xonani tark etsa, xona hujjati
+    // Firestore'da "status: waiting" holicha abadiy qolib ketardi — chunki
+    // leaveRoom() faqat tugma bosilganda ishlaydi. Natijada "Ochiq xonalar"
+    // ro'yxatida (query faqat visibility/status bo'yicha filtrlaydi, faollikni
+    // tekshirmaydi) allaqachon tashlab ketilgan xonalar abadiy ko'rinib turaverardi.
+    // YECHIM: xost xona ichida turganda har ROOM_HEARTBEAT_MS'da xona hujjatiga
+    // "lastActivity" yozib turadi. Ro'yxat chizilganda shu maydon ROOM_STALE_MS'dan
+    // eski bo'lgan xonalar "tashlab ketilgan" deb hisoblanib: (1) ro'yxatdan
+    // yashiriladi va (2) agar xona aynan shu foydalanuvchiga tegishli bo'lsa,
+    // Firestore'dan ham o'chirib tashlanadi — xuddi presence tizimidagi
+    // "lastSeen" mezoni kabi.
+    const ROOM_HEARTBEAT_MS = 20000;
+    const ROOM_STALE_MS = 45000;
+    let roomHeartbeatTimer = null;
+    function startRoomHeartbeat(roomRef){
+      stopRoomHeartbeat();
+      const {updateDoc, serverTimestamp} = window.__kanjiFB;
+      const beat = () => { updateDoc(roomRef, { lastActivity: serverTimestamp() }).catch(()=>{}); };
+      beat();
+      roomHeartbeatTimer = setInterval(beat, ROOM_HEARTBEAT_MS);
+    }
+    function stopRoomHeartbeat(){
+      if(roomHeartbeatTimer){ clearInterval(roomHeartbeatTimer); roomHeartbeatTimer = null; }
+    }
+    function roomLastActivityMs(r){
+      const ts = r.lastActivity || r.createdAt;
+      if(!ts || typeof ts.toMillis !== 'function') return Date.now(); // hali yozilmoqda (pending) — yangi hisoblanadi
+      return ts.toMillis();
+    }
+    function isRoomStale(r){
+      return (Date.now() - roomLastActivityMs(r)) > ROOM_STALE_MS;
+    }
+
     // xato/kod belgilari chalkashtirmasligi uchun O/0, I/1 kabi belgilar chiqarib tashlangan
     const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     function generateRoomCode(){
@@ -7788,14 +7823,29 @@
       if(publicRoomsUnsub){ publicRoomsUnsub(); publicRoomsUnsub = null; }
     }
     function startPublicRoomsListener(){
-      const {db, collection, query, where, onSnapshot} = window.__kanjiFB;
+      const {db, collection, query, where, onSnapshot, doc} = window.__kanjiFB;
       stopPublicRoomsListener();
       if(!publicRoomsList) return;
       publicRoomsList.innerHTML = '<div class="ct-room-list-empty">Xonalar qidirilmoqda...</div>';
       const q = query(collection(db, 'cardRooms'), where('visibility', '==', 'public'), where('status', '==', 'waiting'));
+      const {auth, deleteDoc} = window.__kanjiFB;
       publicRoomsUnsub = onSnapshot(q, (snap)=>{
         const rooms = [];
-        snap.forEach(d=> rooms.push({ id: d.id, ...d.data() }));
+        const user = auth.currentUser;
+        snap.forEach(d=>{
+          const r = { id: d.id, ...d.data() };
+          if(isRoomStale(r)){
+            // Tashlab ketilgan (stale) xona — ro'yxatda ko'rsatmaymiz.
+            // O'zimizga tegishli bo'lsa, Firestore'dan ham tozalab qo'yamiz,
+            // shunda "Yaratish" bo'limida xuddi shu nom bilan duplikat xonalar
+            // to'planib qolmaydi.
+            if(user && r.hostUid === user.uid){
+              deleteDoc(doc(db, 'cardRooms', r.id)).catch(()=>{});
+            }
+            return;
+          }
+          rooms.push(r);
+        });
         renderPublicRooms(rooms);
       }, (err)=>{
         console.error("Ochiq xonalarni yuklashda xatolik:", err.message);
@@ -7854,7 +7904,8 @@
         status: 'waiting',
         size: roomSize,
         visibility: visibility,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        lastActivity: serverTimestamp()
       };
       createRoomBtn.disabled = true;
       try{
@@ -8137,6 +8188,11 @@
           codeDisplayEl.classList.add('hidden');
         }
       }
+      // Faqat xost "jonliman" signalini yuborib turadi — shu orqali xona
+      // "Ochiq xonalar" ro'yxatida faol ko'rinib turadi. Xost chiqib ketsa
+      // (yoki ilovani yopsa) heartbeat to'xtaydi va xona tez orada eskirgan
+      // (stale) deb hisoblanib, ro'yxatdan avtomatik yo'qoladi.
+      if(waitingRoomIsHost) startRoomHeartbeat(roomRef); else stopRoomHeartbeat();
       if(waitingRoomUnsub) waitingRoomUnsub();
       waitingRoomUnsub = onSnapshot(roomRef, (snap)=>{
         if(!snap.exists()){
@@ -8161,6 +8217,7 @@
       });
     }
     function exitWaitingRoom(){
+      stopRoomHeartbeat();
       if(waitingRoomUnsub){ waitingRoomUnsub(); waitingRoomUnsub = null; }
       waitingRoomRef = null;
       waitingRoomIsHost = false;
@@ -8200,7 +8257,13 @@
           if(snap.exists()){
             const data = snap.data();
             const remaining = (data.participantUids || []).filter(uid=> uid !== user.uid);
-            await updateDoc(ref, { participantUids: remaining });
+            if(remaining.length === 0){
+              // Hech kim qolmadi — xonani ro'yxatda bo'sh holda saqlab
+              // o'tirmasdan butunlay o'chiramiz.
+              await deleteDoc(ref);
+            } else {
+              await updateDoc(ref, { participantUids: remaining, lastActivity: window.__kanjiFB.serverTimestamp() });
+            }
           }
         }
       }catch(e){
@@ -8209,6 +8272,23 @@
     }
     if(leaveRoomBtn) leaveRoomBtn.addEventListener('click', leaveRoom);
     if(roomPageLeaveBtn) roomPageLeaveBtn.addEventListener('click', leaveRoom);
+    // Sahifa yopilganda/fonga o'tganda "Chiqish" tugmasi bosilmagan bo'lsa
+    // ham, imkon qadar xonani darhol tozalab ketishga urinamiz (kafolatsiz —
+    // shuning uchun yuqoridagi heartbeat/eskirish filtri asosiy himoya bo'lib qoladi).
+    function handleRoomUnload(){
+      if(!waitingRoomRef) return;
+      const {auth, deleteDoc, updateDoc, arrayRemove} = window.__kanjiFB;
+      const user = auth.currentUser;
+      try{
+        if(waitingRoomIsHost){
+          deleteDoc(waitingRoomRef).catch(()=>{});
+        } else if(user){
+          updateDoc(waitingRoomRef, { participantUids: arrayRemove(user.uid) }).catch(()=>{});
+        }
+      }catch(e){}
+    }
+    window.addEventListener('pagehide', handleRoomUnload);
+    window.addEventListener('beforeunload', handleRoomUnload);
     // ---------- XONA ICHKARISI: "Flashcard tanlash" — avval mavjud kunlar
     // (WORDS massividagi `day` maydoni) ro'yxatidan biri tanlanadi, so'ng
     // o'sha kun ichidagi kanjilar chiqadi — ulardan birini tanlab, "Yuborish"
@@ -9038,6 +9118,7 @@
     deleteDoc,
     updateDoc,
     arrayUnion,
+    arrayRemove,
     query,
     where,
     orderBy,
@@ -9095,7 +9176,7 @@
   window.__kanjiFB = {
     auth, db,
     collection, addDoc, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc,
-    arrayUnion, query, where, orderBy, limit, onSnapshot, serverTimestamp, increment, deleteField
+    arrayUnion, arrayRemove, query, where, orderBy, limit, onSnapshot, serverTimestamp, increment, deleteField
   };
 
   // Bu <script type="module"> tashqarisidagi (oddiy) skriptlar Firebase
