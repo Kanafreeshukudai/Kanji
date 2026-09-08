@@ -3349,9 +3349,9 @@
     position:relative;
     flex:1;
     width:100%;
-    max-width:480px;
+    max-width:560px;
     margin:6px auto 0;
-    min-height:280px;
+    min-height:340px;
   }
   .ct-table-seat{
     position:absolute;
@@ -3362,7 +3362,7 @@
     flex-direction:column;
     align-items:center;
     gap:7px;
-    width:76px;
+    width:112px;
   }
   .ct-table-seat-avatar{
     width:58px;
@@ -3392,45 +3392,47 @@
   }
   .ct-table-seat-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
   .ct-table-seat-label{
-    font-size:11.5px;
+    font-size:12.5px;
     color:var(--ink-soft);
     text-align:center;
-    max-width:76px;
+    max-width:112px;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
   }
   .ct-table-seat.ct-table-seat-self .ct-table-seat-label{color:var(--ink); font-weight:700;}
-  /* ---------- XONA ICHKARISI: har bir ishtirokchi o'z o'rnida ko'rsatadigan kartochka ---------- */
+  /* ---------- XONA ICHKARISI: har bir ishtirokchi o'z o'rnida ko'rsatadigan kartochka ----------
+     Qabul qilingan (boshqadan kelgan) kanji kartochkasi yaxshiroq ko'rinishi
+     va yozish maydoni qulayroq bo'lishi uchun kattalashtirilgan o'lchamlar. */
   .ct-table-seat-card{
-    margin-top:1px;
-    padding:5px 6px 4px;
-    border-radius:10px;
+    margin-top:2px;
+    padding:10px 12px 9px;
+    border-radius:16px;
     border:1px solid var(--glass-border-soft);
     background:var(--glass-bg-strong);
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:1px;
-    max-width:76px;
+    gap:3px;
+    max-width:112px;
     box-sizing:border-box;
     cursor:pointer;
   }
   .ct-table-seat-card:active{transform:scale(0.94);}
   .ct-table-seat-card-kanji{
-    font-size:15px;
+    font-size:28px;
     font-weight:700;
     font-family:'Shippori Mincho', serif;
     color:var(--ink);
     line-height:1.15;
   }
   .ct-table-seat-card-sub{
-    font-size:9px;
+    font-size:12.5px;
     color:var(--ink-soft);
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    max-width:68px;
+    max-width:100px;
   }
   .ct-table-seat-card.revealed .ct-table-seat-card-sub{color:var(--moss-soft); font-weight:700;}
   /* ---------- BOSHQA ISHTIROKCHI KARTOCHKASI: faqat kanji ko'rinadi, romanji
@@ -3438,12 +3440,12 @@
   .ct-table-seat-card.guess-pending{cursor:default;}
   .ct-table-seat-card.guess-correct{border-color:rgba(124,154,107,0.55); background:rgba(124,154,107,0.16);}
   .ct-table-seat-card.guess-correct .ct-table-seat-card-sub{color:var(--moss-soft); font-weight:700;}
-  .ct-guess-form{display:flex; align-items:center; gap:3px; margin-top:2px;}
+  .ct-guess-form{display:flex; align-items:center; gap:5px; margin-top:5px;}
   .ct-guess-input{
-    width:50px;
-    font-size:9.5px;
-    padding:3px 4px;
-    border-radius:6px;
+    width:76px;
+    font-size:14px;
+    padding:7px 8px;
+    border-radius:9px;
     border:1px solid var(--glass-border-soft);
     background:rgba(0,0,0,0.28);
     color:var(--ink);
@@ -3454,10 +3456,10 @@
   .ct-guess-input:focus{border-color:var(--accent);}
   .ct-guess-input.wrong{border-color:rgba(217,60,52,0.8);}
   .ct-guess-check-btn{
-    font-size:11px;
+    font-size:16px;
     line-height:1;
-    padding:3px 6px;
-    border-radius:6px;
+    padding:6px 10px;
+    border-radius:9px;
     border:1px solid var(--glass-border-soft);
     background:var(--glass-bg);
     color:var(--ink-soft);
@@ -3465,13 +3467,13 @@
     flex:none;
   }
   .ct-guess-check-btn:active{transform:scale(0.92);}
-  .ct-guess-wrong-hint{font-size:8px; color:var(--accent-soft); margin-top:1px;}
-  .ct-guess-correct-mark{font-size:10px; font-weight:700; color:var(--moss-soft);}
+  .ct-guess-wrong-hint{font-size:10.5px; color:var(--accent-soft); margin-top:2px;}
+  .ct-guess-correct-mark{font-size:14px; font-weight:700; color:var(--moss-soft);}
   .ct-table-seat-score{
-    font-size:9px;
+    font-size:11px;
     font-weight:700;
     color:var(--gold);
-    margin-top:-3px;
+    margin-top:-2px;
   }
   .ct-table-center-hint{
     position:absolute;
@@ -7680,6 +7682,23 @@
     // holda har safar boshqa birov kartochka yuborganda yozilayotgan matn
     // o'chib qolar edi).
     const guessDrafts = new Map();
+    // ---------- JAVOB BERGANDA O'Z AVATARINI YASHIL/QIZIL YONIB-SO'NISHI ----------
+    // To'g'ri javob — yashil, xato javob — qizil porlash, so'ng asta-sekin
+    // so'nib, avatar odatdagidek holatga qaytadi. Firestore snapshot kelganda
+    // butun stol qayta chizilgani sabab, holat shu o'zgaruvchida saqlanadi va
+    // renderTableSeats har safar shunga qarab animatsiyani davom ettiradi.
+    const SELF_AVATAR_FLASH_MS = 1100;
+    let selfAvatarFlash = null; // {type:'correct'|'wrong', startedAt:number}
+    let selfAvatarFlashTimer = null;
+    function triggerSelfAvatarFlash(type){
+      selfAvatarFlash = { type, startedAt: Date.now() };
+      renderTableSeats(lastRoomData);
+      if(selfAvatarFlashTimer) clearTimeout(selfAvatarFlashTimer);
+      selfAvatarFlashTimer = setTimeout(() => {
+        selfAvatarFlash = null;
+        renderTableSeats(lastRoomData);
+      }, SELF_AVATAR_FLASH_MS);
+    }
     // renderTableSeats o'ziga kelgan `data` parametridan foydalanadi (har doim
     // eng so'nggi snapshot), shu sabab lastRoomData'ga emas shu `data`ga qarab tekshiradi.
     function currentGuessRecordSync(data, uid){
