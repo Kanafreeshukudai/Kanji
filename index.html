@@ -3375,7 +3375,7 @@
      lekin o'zi kichik va ixcham qoladi. */
   .ct-scoreboard{
     position:absolute;
-    top:64px;
+    top:calc(160px + env(safe-area-inset-top));
     right:12px;
     z-index:5;
     width:118px;
@@ -3618,11 +3618,48 @@
     text-align:center;
     font-size:12px;
     line-height:1.55;
+    font-weight:600;
     color:var(--ink-soft);
     padding:14px;
     border-radius:14px;
     background:var(--glass-bg);
     border:1px solid var(--glass-border-soft);
+  }
+  /* ---------- TOVLANUVCHI NUR: qo'llanma matni ustidan sekin o'tuvchi oltin porlash ----------
+     Faqat oddiy qo'llanma matni holatida (kun/kanji tanlash paneli OCHIQ
+     BO'LMAGANDA) ishlaydi — .picker-open holatida bu joyga tugmali panel
+     joylashtirilgani uchun, matn shaffoflashtirish o'sha tugmalarga
+     tegmasligi kerak. Matn rangi shaffof qilinib, orqasiga kengroq oltin-
+     kumush gradient qo'yiladi, so'ng background-position orqali chapdan
+     o'ngga siljitiladi — nur bir uchdan ikkinchisiga "yugurib" o'tayotgandek
+     tovlanish hosil bo'ladi. Ranglar sayt palitrasidagi --gold o'zgaruvchisi
+     asosida. */
+  .ct-table-center-hint:not(.picker-open){
+    background-image:linear-gradient(180deg, var(--glass-bg), var(--glass-bg)),
+      linear-gradient(100deg,
+        var(--ink-soft) 0%,
+        var(--ink-soft) 38%,
+        var(--gold) 48%,
+        #f2e4bf 50%,
+        var(--gold) 52%,
+        var(--ink-soft) 62%,
+        var(--ink-soft) 100%);
+    background-size:100% 100%, 260% 100%;
+    background-position:0 0, 0 0;
+    background-repeat:no-repeat, no-repeat;
+    -webkit-background-clip:padding-box, text;
+    background-clip:padding-box, text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    animation:centerHintShimmer 4.5s ease-in-out infinite;
+  }
+  @keyframes centerHintShimmer{
+    0%{ background-position:0 0, -40% 0; }
+    50%{ background-position:0 0, 140% 0; }
+    100%{ background-position:0 0, 140% 0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-table-center-hint:not(.picker-open){ animation:none; background-position:0 0, 46% 0; }
   }
   .ct-table-center-hint.picker-open{max-width:min(92%,340px); width:92%;}
   /* ---------- XONA MARKAZI: qabul qilingan kartochka(lar) ----------
@@ -3646,42 +3683,112 @@
   }
   .ct-center-card{
     pointer-events:auto;
-    padding:22px 28px 20px;
-    border-radius:24px;
+    padding:26px 28px 22px;
+    border-radius:28px;
     border:1px solid var(--glass-border);
-    background:var(--glass-bg-strong);
-    backdrop-filter:blur(var(--blur-2)) saturate(var(--sat-1));
-    -webkit-backdrop-filter:blur(var(--blur-2)) saturate(var(--sat-1));
-    box-shadow:0 14px 34px var(--glass-shadow);
+    background:linear-gradient(165deg, var(--glass-bg-strong) 0%, rgba(255,255,255,0.04) 100%);
+    backdrop-filter:blur(var(--blur-3)) saturate(var(--sat-2));
+    -webkit-backdrop-filter:blur(var(--blur-3)) saturate(var(--sat-2));
+    box-shadow:0 20px 46px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.16), inset 0 0 0 1px rgba(255,255,255,0.03);
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:7px;
+    gap:8px;
     max-width:min(82vw,300px);
     box-sizing:border-box;
+    position:relative;
+    overflow:hidden;
+    animation:ctCenterCardIn .4s cubic-bezier(.2,.8,.2,1);
+  }
+  /* yuqori chetdagi ingichka rangli chiziq — kartochka "jonli" kelganini his qildiradi */
+  .ct-center-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    background:linear-gradient(90deg, transparent, var(--accent), var(--gold), var(--accent), transparent);
+    opacity:0.9;
+  }
+  @keyframes ctCenterCardIn{
+    from{ opacity:0; transform:scale(0.88) translateY(12px); }
+    to{ opacity:1; transform:scale(1) translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-center-card{ animation:none; }
   }
   .ct-center-card-from{
-    font-size:12.5px;
-    letter-spacing:0.03em;
-    color:var(--ink-soft);
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--accent-soft);
+    padding:4px 12px;
+    border-radius:999px;
+    background:rgba(217,105,79,0.14);
+    border:1px solid rgba(217,105,79,0.3);
   }
   .ct-center-card-kanji{
     font-size:64px;
     line-height:1.1;
+    margin:8px 0 2px;
+    text-shadow:0 4px 26px rgba(217,105,79,0.3);
   }
-  .ct-center-guess-form{gap:9px; margin-top:8px;}
+  .ct-center-guess-form{gap:9px; margin-top:10px;}
   .ct-center-guess-input{
     width:152px;
     font-size:19px;
+    font-weight:700;
+    letter-spacing:0.04em;
     padding:13px 14px;
-    border-radius:13px;
+    border-radius:14px;
+    border:1.5px solid var(--glass-border-soft);
+    background:rgba(0,0,0,0.32);
+    box-shadow:inset 0 1px 4px rgba(0,0,0,0.35);
+    transition:border-color .18s ease, box-shadow .18s ease;
+  }
+  .ct-center-guess-input:focus{
+    border-color:var(--accent);
+    box-shadow:inset 0 1px 4px rgba(0,0,0,0.35), 0 0 0 3px rgba(217,105,79,0.22);
+  }
+  .ct-center-guess-input.wrong{
+    border-color:rgba(217,60,52,0.85);
+    animation:ctGuessShake .34s ease;
+  }
+  @keyframes ctGuessShake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-5px); }
+    75%{ transform:translateX(5px); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-center-guess-input.wrong{ animation:none; }
   }
   .ct-center-guess-check-btn{
-    font-size:20px;
-    padding:12px 16px;
-    border-radius:13px;
+    font-size:19px;
+    padding:12px 17px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.2);
+    background:linear-gradient(155deg, var(--moss), var(--moss-soft));
+    color:#fff;
+    box-shadow:0 8px 18px -6px rgba(124,154,107,0.55), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition:transform .15s ease, box-shadow .15s ease;
   }
-  .ct-center-guess-wrong-hint{font-size:11.5px; margin-top:3px;}
+  .ct-center-guess-check-btn:active{
+    transform:scale(0.92);
+    box-shadow:0 4px 10px -4px rgba(124,154,107,0.5);
+  }
+  .ct-center-guess-wrong-hint{
+    font-size:11.5px;
+    font-weight:600;
+    margin-top:4px;
+    color:var(--accent-soft);
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .ct-center-guess-wrong-hint::before{
+    content:"⚠";
+    font-size:11px;
+  }
   @media (max-width:380px){
     .ct-center-card-kanji{font-size:52px;}
     .ct-center-guess-input{width:118px; font-size:17px;}
@@ -3799,15 +3906,6 @@
   }
   .ct-sent-card-romaji{font-size:12px; color:var(--ink-soft);}
   .ct-sent-card-uz{font-size:12px; color:var(--moss-soft); font-weight:700;}
-  .ct-room-started-hint{
-    position:relative;
-    z-index:1;
-    text-align:center;
-    font-size:13px;
-    color:var(--moss-soft);
-    font-weight:700;
-    margin:4px 0 18px;
-  }
   /* ---------- XONA ICHKARISI: "Flashcard tanlash" tugmasi ----------
      Asosiy chaqiriq (CTA) tugmasi — silliq nur chizig'i (shine) yuqori
      chetda, ingichka issiq rangli hoshiya va sekin "nafas oluvchi" porlash
@@ -3823,7 +3921,7 @@
     padding:14px;
     border:1px solid rgba(255,255,255,0.22);
     border-radius:16px;
-    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    background:linear-gradient(155deg, rgba(163,230,53,0.86), rgba(190,242,100,0.86));
     color:#fff;
     font-size:14.5px;
     font-weight:700;
@@ -3832,7 +3930,7 @@
     cursor:pointer;
     overflow:hidden;
     transition:transform .2s ease, box-shadow .2s ease;
-    box-shadow:0 8px 22px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
+    box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
     margin:0 0 14px;
     flex:none;
     animation:chooseFlashcardGlow 2.8s ease-in-out infinite;
@@ -3853,13 +3951,13 @@
     filter:drop-shadow(0 1px 1px rgba(0,0,0,0.2));
   }
   @keyframes chooseFlashcardGlow{
-    0%,100%{ box-shadow:0 8px 22px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04); }
-    50%{ box-shadow:0 10px 28px -6px rgba(217,105,79,0.85), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.06); }
+    0%,100%{ box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04); }
+    50%{ box-shadow:0 10px 28px -6px rgba(163,230,53,0.8), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.06); }
   }
   @media (prefers-reduced-motion: reduce){
     .ct-choose-flashcard-btn{ animation:none; }
   }
-  .ct-choose-flashcard-btn:active{transform:scale(0.97); box-shadow:0 4px 14px -6px rgba(217,105,79,0.55);}
+  .ct-choose-flashcard-btn:active{transform:scale(0.97); box-shadow:0 4px 14px -6px rgba(163,230,53,0.5);}
   .ct-leave-btn{
     width:100%;
     padding:12px;
@@ -4922,7 +5020,6 @@
     <span class="ct-room-page-title">Xona boshlandi</span>
     <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
   </div>
-  <p class="ct-room-started-hint">Hammangiz stol atrofiga joylashdingiz!</p>
   <!-- ---------- YON TARAFDAGI KICHIK OYNA: ishtirokchilar + ochkolar ----------
        Har bir ishtirokchining ismi, avatari va joriy ochkosi ko'proq ochko
        tartibida (yuqoridan pastga kamayib boruvchi) shu yerda ko'rsatiladi —
