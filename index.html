@@ -3322,7 +3322,21 @@
     background:var(--bg-1);
     padding:max(16px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
   }
+  /* ---------- XONA ICHKARISI: fonda suzib yuruvchi oq zarrachalar ----------
+     Xona sahifasining eng orqa qatlami — stol va tugmalar ustida emas,
+     ularning tagida turadi. Zarrachalar oq rangda, har xil kattalikda
+     (yaqin/uzoq taassurot uchun) va har xil tezlik/yo'nalishda suzadi. */
+  .ct-room-particles{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events:none;
+  }
   .ct-room-page-top{
+    position:relative;
+    z-index:1;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -3347,11 +3361,80 @@
   .ct-room-page-leave-btn:active{transform:scale(0.95);}
   .ct-table{
     position:relative;
+    z-index:1;
     flex:1;
     width:100%;
     max-width:560px;
     margin:6px auto 0;
     min-height:340px;
+  }
+  /* ---------- YON TARAFDAGI KICHIK OYNA: ishtirokchilar + ochkolar ----------
+     ct-room-page position:fixed bo'lgani uchun shu yerda position:absolute
+     unga nisbatan joylashadi — stol/kartochkalar ustida, doim o'ng yon
+     tomonda suzib turadi. Ko'p ishtirokchi bo'lsa ichkarida scroll bo'ladi,
+     lekin o'zi kichik va ixcham qoladi. */
+  .ct-scoreboard{
+    position:absolute;
+    top:64px;
+    right:12px;
+    z-index:5;
+    width:118px;
+    max-height:min(46vh, 260px);
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border-radius:14px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border-soft);
+    box-sizing:border-box;
+    -webkit-backdrop-filter:blur(var(--blur-2));
+    backdrop-filter:blur(var(--blur-2));
+  }
+  .ct-scoreboard:empty{display:none;}
+  .ct-scoreboard-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .ct-scoreboard-row-self{
+    border-radius:9px;
+    background:rgba(255,255,255,0.07);
+    margin:-2px -3px;
+    padding:2px 3px;
+  }
+  .ct-scoreboard-avatar{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    font-weight:700;
+    color:var(--ink);
+    background:var(--bg-2);
+    border:1px solid var(--glass-border);
+    overflow:hidden;
+  }
+  .ct-scoreboard-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .ct-scoreboard-name{
+    flex:1;
+    min-width:0;
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ct-scoreboard-row-self .ct-scoreboard-name{color:var(--ink); font-weight:700;}
+  .ct-scoreboard-score{
+    flex:none;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--gold);
   }
   .ct-table-seat{
     position:absolute;
@@ -3391,6 +3474,57 @@
     font-weight:400;
   }
   .ct-table-seat-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
+  /* ---------- JAVOB BERGANDA AVATAR ORTIDAGI YASHIL/QIZIL AURA ----------
+     Slot — avatarning o'zi bilan bir xil o'lchamda, position:relative
+     konteyner; aura esa shu slotning ::before psevdo-elementi sifatida,
+     avatar ORQASIDA (z-index pastroq), markazdan kattalashib chiqib,
+     porlab so'nadigan doira sifatida chiziladi. To'g'ri javob — moss
+     (yashil), xato javob — accent (qizil) rangda. */
+  .ct-table-seat-avatar-slot{
+    position:relative;
+    width:58px;
+    height:58px;
+    flex:none;
+  }
+  .ct-table-seat-avatar-slot .ct-table-seat-avatar{
+    position:relative;
+    z-index:1;
+  }
+  .ct-table-seat-avatar-slot::before{
+    content:"";
+    position:absolute;
+    left:50%; top:50%;
+    width:58px; height:58px;
+    border-radius:50%;
+    z-index:0;
+    opacity:0;
+    pointer-events:none;
+    filter:blur(var(--blur-2));
+  }
+  .ct-table-seat-avatar-slot.avatar-aura-correct::before{
+    background:radial-gradient(circle, rgba(124,154,107,0.95) 0%, rgba(124,154,107,0.55) 45%, rgba(124,154,107,0) 72%);
+    animation:avatarAuraPulse 1.1s ease-out forwards;
+  }
+  .ct-table-seat-avatar-slot.avatar-aura-wrong::before{
+    background:radial-gradient(circle, rgba(217,60,52,0.95) 0%, rgba(217,60,52,0.55) 45%, rgba(217,60,52,0) 72%);
+    animation:avatarAuraPulse 1.1s ease-out forwards;
+  }
+  .ct-table-seat-avatar-slot.avatar-aura-correct .ct-table-seat-avatar{
+    border-color:var(--moss-soft);
+    transition:border-color .18s ease;
+  }
+  .ct-table-seat-avatar-slot.avatar-aura-wrong .ct-table-seat-avatar{
+    border-color:var(--accent);
+    transition:border-color .18s ease;
+  }
+  @keyframes avatarAuraPulse{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.7); }
+    18%{ opacity:1; transform:translate(-50%,-50%) scale(1.7); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(2.4); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-table-seat-avatar-slot::before{ animation:none !important; }
+  }
   .ct-table-seat-label{
     font-size:12.5px;
     color:var(--ink-soft);
@@ -3666,30 +3800,66 @@
   .ct-sent-card-romaji{font-size:12px; color:var(--ink-soft);}
   .ct-sent-card-uz{font-size:12px; color:var(--moss-soft); font-weight:700;}
   .ct-room-started-hint{
+    position:relative;
+    z-index:1;
     text-align:center;
     font-size:13px;
     color:var(--moss-soft);
     font-weight:700;
     margin:4px 0 18px;
   }
-  /* ---------- XONA ICHKARISI: "Flashcard tanlash" tugmasi ---------- */
+  /* ---------- XONA ICHKARISI: "Flashcard tanlash" tugmasi ----------
+     Asosiy chaqiriq (CTA) tugmasi — silliq nur chizig'i (shine) yuqori
+     chetda, ingichka issiq rangli hoshiya va sekin "nafas oluvchi" porlash
+     animatsiyasi bilan, ko'zga yoqimli va e'tiborni tortadigan holatda. */
   .ct-choose-flashcard-btn{
+    position:relative;
+    z-index:1;
     width:100%;
-    padding:13px;
-    border:none;
-    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:14px;
+    border:1px solid rgba(255,255,255,0.22);
+    border-radius:16px;
     background:linear-gradient(155deg, var(--accent), var(--accent-soft));
     color:#fff;
     font-size:14.5px;
     font-weight:700;
+    letter-spacing:0.15px;
     font-family:inherit;
     cursor:pointer;
-    transition:all .2s ease;
-    box-shadow:0 6px 18px -6px rgba(217,105,79,0.55);
+    overflow:hidden;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 8px 22px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
     margin:0 0 14px;
     flex:none;
+    animation:chooseFlashcardGlow 2.8s ease-in-out infinite;
   }
-  .ct-choose-flashcard-btn:active{transform:scale(0.97);}
+  .ct-choose-flashcard-btn::before{
+    /* nafis, yuqoridan pastga so'nib boruvchi shisha nur chizig'i */
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0) 58%);
+    pointer-events:none;
+  }
+  .ct-choose-flashcard-btn-icon{
+    width:18px;
+    height:18px;
+    flex:none;
+    position:relative;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+  }
+  @keyframes chooseFlashcardGlow{
+    0%,100%{ box-shadow:0 8px 22px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04); }
+    50%{ box-shadow:0 10px 28px -6px rgba(217,105,79,0.85), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.06); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-choose-flashcard-btn{ animation:none; }
+  }
+  .ct-choose-flashcard-btn:active{transform:scale(0.97); box-shadow:0 4px 14px -6px rgba(217,105,79,0.55);}
   .ct-leave-btn{
     width:100%;
     padding:12px;
@@ -4747,12 +4917,25 @@
      ishtirokchilarning stol atrofida joylashib olganini ko'rsatadi.
      TODO: keyingi bosqichda kartochka almashish mantig'i shu sahifaga qo'shiladi. -->
 <div class="ct-room-page hidden" id="ctRoomPage" aria-hidden="true">
+  <canvas class="ct-room-particles" id="ctRoomParticles" aria-hidden="true"></canvas>
   <div class="ct-room-page-top">
     <span class="ct-room-page-title">Xona boshlandi</span>
     <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
   </div>
   <p class="ct-room-started-hint">Hammangiz stol atrofiga joylashdingiz!</p>
-  <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">Flashcard tanlash</button>
+  <!-- ---------- YON TARAFDAGI KICHIK OYNA: ishtirokchilar + ochkolar ----------
+       Har bir ishtirokchining ismi, avatari va joriy ochkosi ko'proq ochko
+       tartibida (yuqoridan pastga kamayib boruvchi) shu yerda ko'rsatiladi —
+       o'rindiqlardagi kichik ochko yozuvidan farqli, hammani bir joyda,
+       bir qarashda solishtirish uchun. renderScoreboard() to'ldiradi. -->
+  <div class="ct-scoreboard" id="ctScoreboard" aria-hidden="true"></div>
+  <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">
+    <svg class="ct-choose-flashcard-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3.2" y="5.5" width="13" height="16" rx="2.6" transform="rotate(-8 9.7 13.5)"></rect>
+      <rect x="7.5" y="3" width="13" height="16" rx="2.6" fill="rgba(255,255,255,0.14)"></rect>
+    </svg>
+    <span>Flashcard tanlash</span>
+  </button>
   <div class="ct-table" id="ctTable">
     <div class="ct-table-center-hint" id="ctTableCenterHint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
     <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
@@ -7743,22 +7926,44 @@
     // holda har safar boshqa birov kartochka yuborganda yozilayotgan matn
     // o'chib qolar edi).
     const guessDrafts = new Map();
-    // ---------- JAVOB BERGANDA O'Z AVATARINI YASHIL/QIZIL YONIB-SO'NISHI ----------
-    // To'g'ri javob — yashil, xato javob — qizil porlash, so'ng asta-sekin
-    // so'nib, avatar odatdagidek holatga qaytadi. Firestore snapshot kelganda
-    // butun stol qayta chizilgani sabab, holat shu o'zgaruvchida saqlanadi va
-    // renderTableSeats har safar shunga qarab animatsiyani davom ettiradi.
-    const SELF_AVATAR_FLASH_MS = 1100;
-    let selfAvatarFlash = null; // {type:'correct'|'wrong', startedAt:number}
-    let selfAvatarFlashTimer = null;
-    function triggerSelfAvatarFlash(type){
-      selfAvatarFlash = { type, startedAt: Date.now() };
-      renderTableSeats(lastRoomData);
-      if(selfAvatarFlashTimer) clearTimeout(selfAvatarFlashTimer);
-      selfAvatarFlashTimer = setTimeout(() => {
-        selfAvatarFlash = null;
+    // ---------- JAVOB BERGANDA AVATAR ORTIDA YASHIL/QIZIL AURA YONIB-SO'NISHI ----------
+    // To'g'ri javob — yashil (moss), xato javob — qizil (accent) aura porlab,
+    // so'ng asta-sekin so'nadi. Bu holat Firestore orqali (`avatarFlashes`
+    // maydoni) butun xonaga translyatsiya qilinadi, shu sababli javob bergan
+    // odamning o'zi emas — xonadagi HAR BIR ishtirokchi buni real vaqtda
+    // ko'radi. Har bir yangi flash `at` (client vaqti) bilan belgilanadi;
+    // shu qiymat orqali "avvalgi snapshot'da ko'rilgan flash" bilan "yangi
+    // flash" farqlanadi — aks holda daftar (guesses) yoki chat kabi
+    // aloqador bo'lmagan har qanday yangilanishda ham eski aura qayta
+    // portlab ketishi mumkin edi.
+    const AVATAR_AURA_MS = 1100;
+    const avatarAuraSeenAt = new Map();   // uid -> oxirgi ko'rilgan flash `at` qiymati
+    const avatarAuraActive = new Map();   // uid -> {type:'correct'|'wrong', timer}
+    function triggerAvatarAura(uid, type){
+      const prev = avatarAuraActive.get(uid);
+      if(prev && prev.timer) clearTimeout(prev.timer);
+      const timer = setTimeout(() => {
+        avatarAuraActive.delete(uid);
         renderTableSeats(lastRoomData);
-      }, SELF_AVATAR_FLASH_MS);
+      }, AVATAR_AURA_MS);
+      avatarAuraActive.set(uid, { type, timer });
+      renderTableSeats(lastRoomData);
+    }
+    // Firestore snapshot kelganda chaqiriladi — `data.avatarFlashes` ichidagi
+    // har bir yozuvni tekshirib, hali ko'rsatilmagan (yangi) va juda eski
+    // bo'lmagan (masalan xonaga endi qo'shilgan foydalanuvchi eski flashlarni
+    // qayta ko'rmasligi uchun) flashlarni animatsiya qiladi.
+    function processAvatarAuraFlashes(data){
+      if(!data || !data.avatarFlashes) return;
+      const flashes = data.avatarFlashes;
+      Object.keys(flashes).forEach(uid => {
+        const f = flashes[uid];
+        if(!f || !f.at) return;
+        if(avatarAuraSeenAt.get(uid) === f.at) return;
+        avatarAuraSeenAt.set(uid, f.at);
+        if(Date.now() - f.at > AVATAR_AURA_MS) return;
+        triggerAvatarAura(uid, f.type === 'correct' ? 'correct' : 'wrong');
+      });
     }
     // renderTableSeats o'ziga kelgan `data` parametridan foydalanadi (har doim
     // eng so'nggi snapshot), shu sabab lastRoomData'ga emas shu `data`ga qarab tekshiradi.
@@ -7786,9 +7991,18 @@
       if(!answer) return;
       const norm = s => (s || '').toString().trim().toLowerCase().replace(/\s+/g, '');
       const isCorrect = norm(answer) === norm(card.romaji);
+      // Javob berilgan zahoti — o'zimiz uchun darhol tovush effekti (mavjud
+      // to'g'ri/xato tovushlar bilan bir xil, viktorinada ishlatilgani kabi),
+      // Firestore javobini kutib o'tirmaydi, shu bilan darhol his-tuyg'u beradi.
+      if(isCorrect) playCorrectSound(); else playWrongSound();
       const key = `${user.uid}_${uid}`;
       const updates = {
-        [`guesses.${key}`]: { correct: isCorrect, answer, checkedAt: serverTimestamp() }
+        [`guesses.${key}`]: { correct: isCorrect, answer, checkedAt: serverTimestamp() },
+        // Javob bergan kishining avatari ortida hammaga ko'rinadigan
+        // yashil/qizil aura — `at` client vaqti sifatida yoziladi (serverTimestamp
+        // emas), shunda barcha ishtirokchilarning animatsiyasi bir xil, kechikishsiz
+        // boshlanadi va har bir flash o'ziga xos qiymat bilan aniq ajraladi.
+        [`avatarFlashes.${user.uid}`]: { type: isCorrect ? 'correct' : 'wrong', at: Date.now() }
       };
       // To'g'ri topilsa — taxmin qilgan kishining umumiy ochkosiga +1
       // qo'shiladi. Xato bo'lsa ochko o'zgarmaydi (0 bilan qoladi) va
@@ -8042,18 +8256,103 @@
     // har bir yangi kutish xonasiga kirilganda qayta tiklanadi.
     let waitingRoomAutoStartTriggered = false;
 
+    // ---------- XONA ICHKARISI: fonda suzib yuruvchi oq zarrachalar ----------
+    // Har bir zarrachaning "depth" (0=uzoq, 1=yaqin) qiymati uning kattaligini,
+    // tezligini va yorqinligini belgilaydi — shu bilan uzoq/yaqin taassuroti
+    // hosil bo'ladi. Yo'nalish har biri uchun tasodifiy, ba'zilari tez, ba'zilari
+    // sekin suzadi.
+    const roomParticlesCanvas = document.getElementById('ctRoomParticles');
+    const roomParticlesCtx = roomParticlesCanvas ? roomParticlesCanvas.getContext('2d') : null;
+    let roomParticlesList = [];
+    let roomParticlesRAF = null;
+    let roomParticlesResizeHandler = null;
+    let roomParticlesLastTs = null;
+
+    function makeRoomParticle(w, h){
+      const depth = Math.random();
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 5 + depth * 24;
+      return {
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 0.6 + depth * 2.1,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        o: 0.12 + depth * 0.5
+      };
+    }
+    function resizeRoomParticles(){
+      if(!roomParticlesCanvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = roomParticlesCanvas.clientWidth;
+      const h = roomParticlesCanvas.clientHeight;
+      roomParticlesCanvas.width = Math.round(w * dpr);
+      roomParticlesCanvas.height = Math.round(h * dpr);
+      if(roomParticlesCtx) roomParticlesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function initRoomParticles(){
+      if(!roomParticlesCanvas) return;
+      resizeRoomParticles();
+      const w = roomParticlesCanvas.clientWidth;
+      const h = roomParticlesCanvas.clientHeight;
+      const isLite = document.documentElement.classList.contains('lite');
+      const count = isLite ? 18 : (w < 420 ? 34 : 56);
+      roomParticlesList = Array.from({length: count}, () => makeRoomParticle(w, h));
+    }
+    function stepRoomParticles(ts){
+      if(!roomParticlesCanvas || !roomParticlesCtx){ roomParticlesRAF = null; return; }
+      const w = roomParticlesCanvas.clientWidth;
+      const h = roomParticlesCanvas.clientHeight;
+      if(roomParticlesLastTs == null) roomParticlesLastTs = ts;
+      const dt = Math.min((ts - roomParticlesLastTs) / 1000, 0.05);
+      roomParticlesLastTs = ts;
+      roomParticlesCtx.clearRect(0, 0, w, h);
+      roomParticlesCtx.fillStyle = '#ffffff';
+      for(const p of roomParticlesList){
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if(p.x < -6) p.x = w + 6;
+        if(p.x > w + 6) p.x = -6;
+        if(p.y < -6) p.y = h + 6;
+        if(p.y > h + 6) p.y = -6;
+        roomParticlesCtx.globalAlpha = p.o;
+        roomParticlesCtx.beginPath();
+        roomParticlesCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        roomParticlesCtx.fill();
+      }
+      roomParticlesCtx.globalAlpha = 1;
+      roomParticlesRAF = requestAnimationFrame(stepRoomParticles);
+    }
+    function startRoomParticles(){
+      if(!roomParticlesCanvas || roomParticlesRAF) return;
+      initRoomParticles();
+      roomParticlesLastTs = null;
+      roomParticlesRAF = requestAnimationFrame(stepRoomParticles);
+      if(!roomParticlesResizeHandler){
+        roomParticlesResizeHandler = () => { resizeRoomParticles(); };
+        window.addEventListener('resize', roomParticlesResizeHandler);
+      }
+    }
+    function stopRoomParticles(){
+      if(roomParticlesRAF){ cancelAnimationFrame(roomParticlesRAF); roomParticlesRAF = null; }
+      if(roomParticlesResizeHandler){ window.removeEventListener('resize', roomParticlesResizeHandler); roomParticlesResizeHandler = null; }
+      roomParticlesLastTs = null;
+    }
+
     // ---------- XONA ICHKARISI: to'liq ekran, stol atrofida joylashuv ----------
     function openRoomPage(){
       if(!roomPageEl) return;
       roomPageEl.classList.remove('hidden');
       roomPageEl.setAttribute('aria-hidden', 'false');
       lockPageScroll();
+      startRoomParticles();
     }
     function closeRoomPage(){
       if(!roomPageEl || roomPageEl.classList.contains('hidden')) return;
       roomPageEl.classList.add('hidden');
       roomPageEl.setAttribute('aria-hidden', 'true');
       unlockPageScroll();
+      stopRoomParticles();
     }
     // Ishtirokchilarni stol atrofiga bir xilda taqsimlaydi: har doim
     // "o'zim" pastki markazda (180°) turadi, qolganlari shu nuqtadan
@@ -8143,8 +8442,15 @@
           }
           const score = (data.scores && data.scores[uid]) || 0;
           const scoreHTML = score > 0 ? `<div class="ct-table-seat-score">&#9733; ${score}</div>` : '';
+          // Javob berganda ushbu ishtirokchi avatari ortida yonib-so'nuvchi
+          // yashil/qizil aura — barcha ishtirokchilarga bir xilda ko'rinadi
+          // (avatarAuraActive Firestore orqali translyatsiya qilingan holatdan to'ldiriladi).
+          const aura = avatarAuraActive.get(uid);
+          const auraClass = aura ? (aura.type === 'correct' ? ' avatar-aura-correct' : ' avatar-aura-wrong') : '';
           html += `<div class="ct-table-seat${isSelf ? ' ct-table-seat-self' : ''}" style="${style}">
-              <div class="ct-table-seat-avatar">${avatarHTML}</div>
+              <div class="ct-table-seat-avatar-slot${auraClass}">
+                <div class="ct-table-seat-avatar">${avatarHTML}</div>
+              </div>
               <div class="ct-table-seat-label">${escapeCt(name)}</div>
               ${scoreHTML}
               ${cardHTML}
@@ -8167,6 +8473,51 @@
       if(centerHintEl){
         centerHintEl.style.display = (centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen) ? 'none' : '';
       }
+      renderScoreboard(data);
+    }
+    // ---------- YON TARAFDAGI KICHIK OYNA: ismi/avatari + ochkosi bilan
+    // ishtirokchilar ro'yxati (renderTableSeats har chaqirilganda yangilanadi) ----------
+    function renderScoreboard(data){
+      const scoreboardEl = document.getElementById('ctScoreboard');
+      if(!scoreboardEl) return;
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      const uids = data.participantUids || [];
+      if(!uids.length){ scoreboardEl.innerHTML = ''; return; }
+      const rows = uids.map(uid => {
+        const isHostSeat = uid === data.hostUid;
+        const isSelf = !!(user && uid === user.uid);
+        const profile = (data.participants && data.participants[uid]) || null;
+        let name, avatarHTML;
+        if(isSelf){
+          name = 'Siz';
+          const photo = (profile && profile.photo) || (isHostSeat ? data.hostPhoto : (user.photoURL || ''));
+          const initial = ((profile && profile.name) || (isHostSeat ? data.hostName : (user.displayName || user.email)) || '?').trim().charAt(0).toUpperCase();
+          avatarHTML = photo ? `<img src="${escapeCt(photo)}" alt="">` : escapeCt(initial);
+        } else if(profile && profile.name){
+          name = profile.name;
+          avatarHTML = profile.photo ? `<img src="${escapeCt(profile.photo)}" alt="">` : escapeCt(profile.name.trim().charAt(0).toUpperCase());
+        } else if(isHostSeat){
+          name = data.hostName || 'Xost';
+          avatarHTML = data.hostPhoto ? `<img src="${escapeCt(data.hostPhoto)}" alt="">` : escapeCt((data.hostName||'?').trim().charAt(0).toUpperCase());
+        } else {
+          name = 'Ishtirokchi';
+          avatarHTML = '👤';
+        }
+        const score = (data.scores && data.scores[uid]) || 0;
+        return {name, avatarHTML, isSelf, score};
+      });
+      // Ko'proq ochko yig'gan ishtirokchi yuqorida chiqishi uchun ochko
+      // bo'yicha kamayish tartibida saralanadi (teng ochkoda dastlabki
+      // o'rindiq tartibi saqlanadi — Array.sort barqaror/stable saralaydi).
+      rows.sort((a,b) => b.score - a.score);
+      scoreboardEl.innerHTML = rows.map(r => `
+        <div class="ct-scoreboard-row${r.isSelf ? ' ct-scoreboard-row-self' : ''}">
+          <div class="ct-scoreboard-avatar">${r.avatarHTML}</div>
+          <div class="ct-scoreboard-name">${escapeCt(r.name)}</div>
+          <div class="ct-scoreboard-score">${r.score}</div>
+        </div>
+      `).join('');
     }
     function renderWaitingSeats(data){
       lastRoomData = data;
@@ -8229,6 +8580,7 @@
       if(isStarted){
         closeCardTransferModal();
         openRoomPage();
+        processAvatarAuraFlashes(data);
         renderTableSeats(data);
         updateCenterHint(data);
       } else {
