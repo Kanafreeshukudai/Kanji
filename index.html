@@ -3704,6 +3704,25 @@
   }
   .ct-results-continue:hover{transform:translateY(-1px);}
   .ct-results-continue:active{transform:scale(0.97) translateY(0);}
+  /* ---------- Natijalar oynasi: "Davom etish" tugmasi ostidagi ikkinchi
+     darajali "Chiqish" tugmasi — bosilsa, faqat shu odamning stoldagi
+     o'rni bo'shab, u xonadan chiqib ketadi (xona boshqalar uchun davom etadi) ---------- */
+  .ct-results-leave{
+    width:100%;
+    margin-top:9px;
+    padding:11px;
+    border:1px solid var(--glass-border-soft);
+    border-radius:13px;
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-size:13px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:transform .16s ease, background .16s ease, color .16s ease;
+  }
+  .ct-results-leave:hover{color:var(--ink); background:var(--glass-bg-strong);}
+  .ct-results-leave:active{transform:scale(0.97);}
   .ct-table-seat{
     position:absolute;
     left:50%;
@@ -3947,6 +3966,18 @@
     gap:12px;
     width:max-content;
     max-width:88vw;
+    /* Bir vaqtning o'zida bir nechta kartochka javob kutayotganda (bir
+       nechta ishtirokchi parallel kartochka yuborsa) bu ustun juda
+       balandlashib, stol chegarasidan tashqariga — tepadagi "Musobaqani
+       tugatish"/"Chiqish" tugmalari yoki "Flashcard tanlash" tugmasi
+       ustiga chiqib ketishi mumkin edi. Balandligi stol maydoni bilan
+       cheklanib, ortig'i ichki scroll bilan ko'rinadi — shu bilan
+       tugmalar hech qachon boshqa tugmalar ustiga minib qolmaydi. */
+    max-height:100%;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:4px 0;
     pointer-events:none;
   }
   .ct-center-card{
@@ -5422,6 +5453,7 @@
       <div class="ct-results-winner" id="ctResultsWinner"></div>
       <div class="ct-results-list" id="ctResultsList"></div>
       <button class="ct-results-continue" id="ctResultsContinueBtn" type="button">Davom etish</button>
+      <button class="ct-results-leave" id="ctResultsLeaveBtn" type="button">Chiqish</button>
     </div>
   </div>
 </div>
@@ -8408,6 +8440,7 @@
     const resultsListEl = document.getElementById('ctResultsList');
     const resultsCloseBtn = document.getElementById('ctResultsCloseBtn');
     const resultsContinueBtn = document.getElementById('ctResultsContinueBtn');
+    const resultsLeaveBtn = document.getElementById('ctResultsLeaveBtn');
     const chooseFlashcardBtn = document.getElementById('ctChooseFlashcardBtn');
     const centerHintEl = document.getElementById('ctTableCenterHint');
     const tableSeatsEl = document.getElementById('ctTableSeats');
@@ -8746,6 +8779,11 @@
     // "boshlash" birdan ortiq marta yuborilmasligi uchun himoya bayrog'i —
     // har bir yangi kutish xonasiga kirilganda qayta tiklanadi.
     let waitingRoomAutoStartTriggered = false;
+    // Musobaqa "tugatildi" deb belgilangan oxirgi vaqt (ms) — shu qiymat
+    // o'zgarganda (ya'ni kimdir "Musobaqani tugatish"ni bosganda) natijalar
+    // oynasi BARCHA ishtirokchilarga bir vaqtda ochiladi, faqat tugmani
+    // bosgan odamga emas. Har bir yangi kutish xonasiga kirilganda tiklanadi.
+    let lastFinishedRoundMs = null;
 
     // ---------- XONA ICHKARISI: fonda suzib yuruvchi oq zarrachalar ----------
     // Har bir zarrachaning "depth" (0=uzoq, 1=yaqin) qiymati uning kattaligini,
@@ -9073,9 +9111,37 @@
       resultsOverlay.setAttribute('aria-hidden', 'true');
       if(resultsConfettiEl) resultsConfettiEl.innerHTML = '';
     }
-    if(finishRoomBtn) finishRoomBtn.addEventListener('click', openResultsOverlay);
+    // ---------- "Musobaqani tugatish" tugmasi ----------
+    // Bu endi natijalar oynasini faqat bosgan odamning o'zida ochmaydi —
+    // Firestore hujjatiga "finishedAt" belgisi yoziladi va shu orqali
+    // real-vaqtli snapshot (pastdagi enterWaitingRoom ichidagi onSnapshot)
+    // BARCHA ishtirokchilarga bir vaqtning o'zida natijalar oynasini ochadi.
+    async function finishRoomForEveryone(){
+      const {serverTimestamp, updateDoc} = window.__kanjiFB;
+      if(!waitingRoomRef) return;
+      if(finishRoomBtn) finishRoomBtn.disabled = true;
+      try{
+        await updateDoc(waitingRoomRef, { finishedAt: serverTimestamp() });
+      }catch(e){
+        console.error("Musobaqani tugatishda xatolik:", e.message);
+        showCardTransferToast("Musobaqani tugatib bo'lmadi. Qayta urinib ko'ring.");
+      }finally{
+        if(finishRoomBtn) finishRoomBtn.disabled = false;
+      }
+    }
+    // ---------- Natijalar oynasidagi "Chiqish" tugmasi ----------
+    // Xona ichida turgan har qanday ishtirokchi (jumladan xonani yaratgan
+    // xost) natijalar oynasidan "Chiqish"ni bossa, faqat o'zining stoldagi
+    // o'rni bo'shab, xonadan chiqib ketadi — xona qolgan ishtirokchilar
+    // uchun yopilmasdan davom etadi.
+    function leaveRoomFromResults(){
+      closeResultsOverlay();
+      leaveRoom();
+    }
+    if(finishRoomBtn) finishRoomBtn.addEventListener('click', finishRoomForEveryone);
     if(resultsCloseBtn) resultsCloseBtn.addEventListener('click', closeResultsOverlay);
     if(resultsContinueBtn) resultsContinueBtn.addEventListener('click', closeResultsOverlay);
+    if(resultsLeaveBtn) resultsLeaveBtn.addEventListener('click', leaveRoomFromResults);
     if(resultsOverlay) resultsOverlay.addEventListener('click', (e)=>{ if(e.target === resultsOverlay) closeResultsOverlay(); });
     function renderWaitingSeats(data){
       lastRoomData = data;
@@ -9165,6 +9231,7 @@
       waitingRoomIsHost = !!(opts && opts.isHost);
       waitingRoomWasStarted = false;
       waitingRoomAutoStartTriggered = false;
+      lastFinishedRoundMs = null;
       if(topTabs) topTabs.classList.add('hidden');
       if(createView) createView.classList.add('hidden');
       if(joinView) joinView.classList.add('hidden');
@@ -9203,7 +9270,21 @@
           }
           return;
         }
-        renderWaitingSeats(snap.data());
+        const data = snap.data();
+        // ---------- Musobaqa "tugatildi" belgisini kuzatish ----------
+        // `finishedAt` maydoni o'zgarganda (avvalgisidan farqli yangi
+        // qiymatga ega bo'lsa) — bu kimdir "Musobaqani tugatish"ni
+        // bosgani degani. Shu payt natijalar oynasi shu snapshotni
+        // olayotgan HAR BIR ishtirokchida (tugmani bosgan odam ham,
+        // qolganlar ham) bir vaqtda ochiladi.
+        const finishedMs = (data.finishedAt && typeof data.finishedAt.toMillis === 'function')
+          ? data.finishedAt.toMillis() : null;
+        if(finishedMs && finishedMs !== lastFinishedRoundMs){
+          lastFinishedRoundMs = finishedMs;
+          lastRoomData = data;
+          openResultsOverlay();
+        }
+        renderWaitingSeats(data);
       }, (err)=>{
         console.error("Xonani kuzatishda xatolik:", err.message);
       });
@@ -9235,14 +9316,20 @@
       });
     }
     async function leaveRoom(){
-      const {auth, getDoc, deleteDoc, updateDoc} = window.__kanjiFB;
+      const {auth, getDoc, deleteDoc, updateDoc, serverTimestamp} = window.__kanjiFB;
       const ref = waitingRoomRef;
       const wasHost = waitingRoomIsHost;
+      // Musobaqa allaqachon boshlangan (yoki tugatilgan/natijalar ko'rsatilgan)
+      // bo'lsa, xonani yaratgan (xost) chiqib ketsa ham xona butunlay
+      // o'chirilmaydi — faqat o'zining o'rni bo'shab, qolgan ishtirokchilar
+      // uchun xona davom etadi. Xona hali "kutish" bosqichida (o'yin
+      // boshlanmagan) bo'lsagina, xost chiqishi butun xonani bekor qiladi.
+      const wasStarted = waitingRoomWasStarted;
       const user = auth.currentUser;
       exitWaitingRoom();
       if(!ref) return;
       try{
-        if(wasHost){
+        if(wasHost && !wasStarted){
           await deleteDoc(ref);
         } else if(user){
           const snap = await getDoc(ref);
@@ -9254,7 +9341,9 @@
               // o'tirmasdan butunlay o'chiramiz.
               await deleteDoc(ref);
             } else {
-              await updateDoc(ref, { participantUids: remaining, lastActivity: window.__kanjiFB.serverTimestamp() });
+              // Chiqqan odamning o'rni bo'shaydi, xona (va boshqa
+              // ishtirokchilar) davom etaveradi — xost bo'lsa ham xuddi shu.
+              await updateDoc(ref, { participantUids: remaining, lastActivity: serverTimestamp() });
             }
           }
         }
