@@ -8879,9 +8879,18 @@
     // ---------- XONA ICHKARISI: to'liq ekran, stol atrofida joylashuv ----------
     function openRoomPage(){
       if(!roomPageEl) return;
+      // MUHIM: bu funksiya xona hujjati real-vaqtda har yangilanganda
+      // (onSnapshot) qayta-qayta chaqiriladi — shu sabab lockPageScroll()
+      // faqat sahifa haqiqatan ham "yopiq"dan "ochiq"ga o'tayotganda bir
+      // marta chaqirilishi kerak. Aks holda har snapshot yangilanishida
+      // qulf hisoblagichi (__scrollLockCount) o'sib boraveradi, lekin
+      // closeRoomPage() xonadan chiqishda uni faqat bir marta pasaytiradi —
+      // natijada hisoblagich hech qachon nolga tushmay, sahifa scroll'i
+      // xonadan chiqqandan keyin ham abadiy qulflangan holicha qolib ketadi.
+      const wasHidden = roomPageEl.classList.contains('hidden');
       roomPageEl.classList.remove('hidden');
       roomPageEl.setAttribute('aria-hidden', 'false');
-      lockPageScroll();
+      if(wasHidden) lockPageScroll();
       startRoomParticles();
     }
     function closeRoomPage(){
