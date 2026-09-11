@@ -3348,6 +3348,34 @@
     font-weight:700;
     color:var(--ink);
   }
+  .ct-room-page-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .ct-finish-room-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:700;
+    padding:8px 13px 8px 11px;
+    border-radius:999px;
+    border:1px solid rgba(201,166,107,0.5);
+    background:linear-gradient(155deg, rgba(201,166,107,0.28), rgba(201,166,107,0.08));
+    color:var(--gold);
+    cursor:pointer;
+    overflow:hidden;
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+    box-shadow:0 4px 12px -4px rgba(201,166,107,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .ct-finish-room-btn-icon{width:15px; height:15px; flex:none;}
+  .ct-finish-room-btn:hover{
+    background:linear-gradient(155deg, rgba(201,166,107,0.4), rgba(201,166,107,0.12));
+    box-shadow:0 6px 16px -4px rgba(201,166,107,0.55), inset 0 1px 0 rgba(255,255,255,0.16);
+  }
+  .ct-finish-room-btn:active{transform:scale(0.95);}
   .ct-room-page-leave-btn{
     font-size:12.5px;
     font-weight:600;
@@ -3436,6 +3464,220 @@
     font-weight:700;
     color:var(--gold);
   }
+  /* ---------- MUSOBAQA NATIJALARI: tabriklash oynasi ---------- */
+  .ct-results-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10900;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,0.6);
+    -webkit-backdrop-filter:blur(var(--blur-2));
+    backdrop-filter:blur(var(--blur-2));
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .22s ease;
+  }
+  .ct-results-overlay.show{opacity:1; pointer-events:auto;}
+  .ct-results-confetti{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .ct-results-confetti-piece{
+    position:absolute;
+    top:-12px;
+    width:8px;
+    height:14px;
+    opacity:0.9;
+    border-radius:2px;
+    animation:ctConfettiFall linear infinite;
+  }
+  @keyframes ctConfettiFall{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:1; }
+    85%{ opacity:1; }
+    100%{ transform:translateY(115vh) translateX(var(--drift,0px)) rotate(540deg); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-results-confetti-piece{ animation:none; display:none; }
+  }
+  .ct-results-card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:320px;
+    max-height:82vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:30px 22px 22px;
+    border-radius:26px;
+    border:1px solid var(--glass-border);
+    background:linear-gradient(165deg, var(--glass-bg-strong) 0%, rgba(255,255,255,0.04) 100%);
+    -webkit-backdrop-filter:blur(var(--blur-3)) saturate(var(--sat-2));
+    backdrop-filter:blur(var(--blur-3)) saturate(var(--sat-2));
+    box-shadow:0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.16);
+    transform:scale(0.85) translateY(14px);
+    opacity:0;
+    transition:transform .32s cubic-bezier(.2,.8,.2,1), opacity .28s ease;
+  }
+  .ct-results-overlay.show .ct-results-card{transform:scale(1) translateY(0); opacity:1;}
+  .ct-results-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    border-radius:26px 26px 0 0;
+    background:linear-gradient(90deg, transparent, var(--gold), var(--accent), var(--gold), transparent);
+  }
+  .ct-results-close{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:rgba(255,255,255,0.08);
+    color:var(--ink-soft);
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .ct-results-close:active{transform:scale(0.9);}
+  .ct-results-trophy{
+    font-size:52px;
+    line-height:1.1;
+    margin-bottom:2px;
+    filter:drop-shadow(0 6px 16px rgba(201,166,107,0.45));
+    animation:ctTrophyBounce 1.6s ease-in-out infinite;
+  }
+  @keyframes ctTrophyBounce{
+    0%,100%{ transform:translateY(0) rotate(-4deg); }
+    50%{ transform:translateY(-6px) rotate(4deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-results-trophy{ animation:none; }
+  }
+  .ct-results-heading{
+    font-size:16px;
+    font-weight:800;
+    font-family:'Shippori Mincho', serif;
+    background:linear-gradient(100deg, var(--gold), #f2e4bf 50%, var(--gold));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:var(--gold);
+    margin-bottom:16px;
+  }
+  .ct-results-winner{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    margin-bottom:16px;
+    padding:16px 18px;
+    width:100%;
+    box-sizing:border-box;
+    border-radius:18px;
+    border:1px solid rgba(201,166,107,0.5);
+    background:linear-gradient(160deg, rgba(201,166,107,0.22), rgba(201,166,107,0.06));
+    box-shadow:0 8px 20px -8px rgba(201,166,107,0.5), inset 0 1px 0 rgba(255,255,255,0.14);
+  }
+  .ct-results-winner-crown{font-size:22px;}
+  .ct-results-winner-avatar{
+    width:54px;
+    height:54px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    font-weight:800;
+    color:var(--ink);
+    background:var(--bg-2);
+    border:2px solid var(--gold);
+    overflow:hidden;
+    box-shadow:0 4px 14px -4px rgba(201,166,107,0.6);
+  }
+  .ct-results-winner-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .ct-results-winner-name{font-size:14.5px; font-weight:800; color:var(--ink);}
+  .ct-results-winner-score{font-size:12.5px; font-weight:700; color:var(--gold);}
+  .ct-results-winner-empty{font-size:12.5px; color:var(--ink-soft); font-weight:600;}
+  .ct-results-list{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    width:100%;
+  }
+  .ct-results-row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:7px 10px;
+    border-radius:12px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--glass-border-soft);
+  }
+  .ct-results-row-self{background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.24);}
+  .ct-results-row-rank{
+    flex:none;
+    width:18px;
+    font-size:11.5px;
+    font-weight:800;
+    color:var(--ink-faint);
+    text-align:center;
+  }
+  .ct-results-row-avatar{
+    flex:none;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    font-weight:700;
+    color:var(--ink);
+    background:var(--bg-2);
+    border:1px solid var(--glass-border);
+    overflow:hidden;
+  }
+  .ct-results-row-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .ct-results-row-name{
+    flex:1;
+    min-width:0;
+    text-align:left;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ct-results-row-self .ct-results-row-name{color:var(--ink); font-weight:700;}
+  .ct-results-row-score{flex:none; font-size:12.5px; font-weight:700; color:var(--gold);}
+  .ct-results-continue{
+    width:100%;
+    margin-top:18px;
+    padding:12px;
+    border:1px solid rgba(255,255,255,0.22);
+    border-radius:13px;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff;
+    font-size:13.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    box-shadow:0 8px 18px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition:transform .16s ease, box-shadow .16s ease;
+  }
+  .ct-results-continue:hover{transform:translateY(-1px);}
+  .ct-results-continue:active{transform:scale(0.97) translateY(0);}
   .ct-table-seat{
     position:absolute;
     left:50%;
@@ -3796,93 +4038,182 @@
   .ct-day-picker-grid{
     display:grid;
     grid-template-columns:repeat(5, 1fr);
-    gap:6px;
+    gap:7px;
+    animation:ctPickerFadeIn .22s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes ctPickerFadeIn{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-day-picker-grid, .ct-kanji-picker-head, .ct-kanji-picker-grid{ animation:none !important; }
   }
   .ct-day-picker-btn{
-    padding:9px 0;
-    border-radius:10px;
+    position:relative;
+    padding:10px 0;
+    border-radius:12px;
     border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg-strong);
+    background:linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
     color:var(--ink);
     font-size:12px;
-    font-weight:700;
+    font-weight:800;
     font-family:inherit;
+    letter-spacing:0.01em;
     cursor:pointer;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition:transform .16s cubic-bezier(.2,.8,.2,1), box-shadow .16s ease, border-color .16s ease, background .16s ease;
   }
-  .ct-day-picker-btn:active{transform:scale(0.92);}
+  .ct-day-picker-btn::after{
+    /* nozik yorug'lik chizig'i — yuqori chetda */
+    content:"";
+    position:absolute;
+    top:0; left:8%; right:8%;
+    height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    opacity:0.8;
+  }
+  .ct-day-picker-btn:hover{
+    border-color:rgba(255,255,255,0.4);
+    background:linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    transform:translateY(-1px);
+  }
+  .ct-day-picker-btn:active{transform:scale(0.92) translateY(0);}
+  .ct-day-picker-btn.current{
+    border-color:rgba(201,166,107,0.65);
+    background:linear-gradient(160deg, rgba(201,166,107,0.32), rgba(201,166,107,0.1));
+    color:var(--gold);
+    box-shadow:0 2px 10px rgba(201,166,107,0.28), inset 0 1px 0 rgba(255,255,255,0.14);
+  }
   /* ---------- XONA ICHKARISI: kun tanlangach chiqadigan kanji tanlash paneli ---------- */
   .ct-kanji-picker-head{
     display:flex;
     align-items:center;
     justify-content:center;
     gap:8px;
-    margin-bottom:8px;
+    margin-bottom:10px;
+    padding-bottom:9px;
     position:relative;
+    border-bottom:1px solid var(--glass-border-soft);
+    animation:ctPickerFadeIn .22s cubic-bezier(.2,.8,.2,1);
   }
   .ct-kanji-picker-back{
     position:absolute;
     left:0;
     top:50%;
     transform:translateY(-50%);
-    padding:4px 8px;
-    border:none;
-    background:none;
+    display:flex;
+    align-items:center;
+    gap:3px;
+    padding:5px 10px 5px 7px;
+    border-radius:999px;
+    border:1px solid var(--glass-border-soft);
+    background:rgba(255,255,255,0.06);
     color:var(--accent-soft);
-    font-size:12px;
+    font-size:11.5px;
     font-weight:700;
     font-family:inherit;
     cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, transform .15s ease;
   }
+  .ct-kanji-picker-back:hover{background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28);}
+  .ct-kanji-picker-back:active{transform:translateY(-50%) scale(0.94);}
   .ct-kanji-picker-title{
-    font-size:12.5px;
+    font-size:13px;
     font-weight:800;
-    color:var(--ink);
-    letter-spacing:0.02em;
+    letter-spacing:0.03em;
+    background:linear-gradient(100deg, var(--gold), #f2e4bf 50%, var(--gold));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:var(--gold);
   }
   .ct-kanji-picker-grid{
     display:grid;
     grid-template-columns:repeat(4, 1fr);
-    gap:6px;
+    gap:7px;
     max-height:44vh;
     overflow-y:auto;
     padding:2px;
+    scrollbar-width:thin;
+    animation:ctPickerFadeIn .24s cubic-bezier(.2,.8,.2,1);
   }
   .ct-kanji-picker-btn{
+    position:relative;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:2px;
-    padding:8px 2px;
-    border-radius:10px;
+    justify-content:center;
+    gap:3px;
+    padding:10px 2px 8px;
+    border-radius:13px;
     border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg-strong);
+    background:linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
     color:var(--ink);
     font-family:'Shippori Mincho', serif;
     cursor:pointer;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.07);
+    transition:transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease, border-color .18s ease, background .18s ease;
+  }
+  .ct-kanji-picker-btn:hover{
+    border-color:rgba(255,255,255,0.35);
+    transform:translateY(-1px);
   }
   .ct-kanji-picker-btn.selected{
     border-color:var(--accent);
-    background:rgba(217,105,79,0.22);
-    box-shadow:0 0 0 2px rgba(217,105,79,0.35);
+    background:linear-gradient(160deg, rgba(217,105,79,0.35), rgba(217,105,79,0.1));
+    box-shadow:0 4px 14px -4px rgba(217,105,79,0.55), inset 0 0 0 1px rgba(217,105,79,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+    transform:translateY(-1px);
+  }
+  .ct-kanji-picker-btn.selected::before{
+    content:"✓";
+    position:absolute;
+    top:3px;
+    right:5px;
+    font-size:9px;
+    font-weight:900;
+    font-family:'Zen Maru Gothic', sans-serif;
+    color:#fff;
+    width:13px;
+    height:13px;
+    line-height:13px;
+    text-align:center;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 1px 4px rgba(0,0,0,0.35);
   }
   .ct-kanji-picker-btn:active{transform:scale(0.93);}
-  .ct-kanji-picker-char{font-size:19px; font-weight:700; line-height:1.1;}
-  .ct-kanji-picker-romaji{font-size:9.5px; color:var(--ink-soft); font-family:'Zen Maru Gothic', sans-serif;}
+  .ct-kanji-picker-char{font-size:20px; font-weight:700; line-height:1.1;}
+  .ct-kanji-picker-romaji{font-size:9.5px; color:var(--ink-soft); font-family:'Zen Maru Gothic', sans-serif; letter-spacing:0.01em;}
   .ct-kanji-picker-send{
+    position:relative;
     width:100%;
-    margin-top:10px;
-    padding:10px;
-    border:none;
-    border-radius:12px;
+    margin-top:12px;
+    padding:11px;
+    border:1px solid rgba(255,255,255,0.22);
+    border-radius:13px;
     background:linear-gradient(155deg, var(--accent), var(--accent-soft));
     color:#fff;
-    font-size:13px;
+    font-size:13.5px;
     font-weight:700;
     font-family:inherit;
+    letter-spacing:0.01em;
     cursor:pointer;
+    overflow:hidden;
+    box-shadow:0 8px 18px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
   }
-  .ct-kanji-picker-send:disabled{opacity:0.4; cursor:default;}
-  .ct-kanji-picker-send:not(:disabled):active{transform:scale(0.97);}
+  .ct-kanji-picker-send::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 58%);
+    pointer-events:none;
+  }
+  .ct-kanji-picker-send:disabled{opacity:0.35; cursor:default; box-shadow:none;}
+  .ct-kanji-picker-send:not(:disabled):hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(217,105,79,0.7), inset 0 1px 0 rgba(255,255,255,0.28);}
+  .ct-kanji-picker-send:not(:disabled):active{transform:scale(0.97) translateY(0);}
   /* ---------- XONA ICHKARISI: yuborilgan kartochka ko'rinishi ---------- */
   .ct-sent-card{
     display:flex;
@@ -5018,7 +5349,19 @@
   <canvas class="ct-room-particles" id="ctRoomParticles" aria-hidden="true"></canvas>
   <div class="ct-room-page-top">
     <span class="ct-room-page-title">Xona boshlandi</span>
-    <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
+    <div class="ct-room-page-actions">
+      <button class="ct-finish-room-btn" id="ctFinishRoomBtn" type="button">
+        <svg class="ct-finish-room-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 21h8"></path>
+          <path d="M12 17v4"></path>
+          <path d="M7 4h10v5a5 5 0 0 1-10 0z"></path>
+          <path d="M7 5H4a3 3 0 0 0 3 5"></path>
+          <path d="M17 5h3a3 3 0 0 1-3 5"></path>
+        </svg>
+        <span>Musobaqani tugatish</span>
+      </button>
+      <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
+    </div>
   </div>
   <!-- ---------- YON TARAFDAGI KICHIK OYNA: ishtirokchilar + ochkolar ----------
        Har bir ishtirokchining ismi, avatari va joriy ochkosi ko'proq ochko
@@ -5036,6 +5379,23 @@
   <div class="ct-table" id="ctTable">
     <div class="ct-table-center-hint" id="ctTableCenterHint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
     <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
+  </div>
+
+  <!-- ---------- MUSOBAQA NATIJALARI: g'olibni tabriklash oynasi ----------
+       "Musobaqani tugatish" tugmasi bosilganda ochiladi. Konfetti animatsiyasi
+       fonda, markazda g'olib (eng ko'p ochko to'plagan ishtirokchi) alohida
+       kattaroq ko'rinishda, undan pastda qolgan ishtirokchilar ro'yxati
+       ochko bo'yicha kamayish tartibida chiqadi. ---------- -->
+  <div class="ct-results-overlay" id="ctResultsOverlay" aria-hidden="true">
+    <div class="ct-results-confetti" id="ctResultsConfetti" aria-hidden="true"></div>
+    <div class="ct-results-card" id="ctResultsCard">
+      <button class="ct-results-close" id="ctResultsCloseBtn" type="button" aria-label="Yopish">&#10005;</button>
+      <div class="ct-results-trophy">🏆</div>
+      <div class="ct-results-heading">Musobaqa yakunlandi!</div>
+      <div class="ct-results-winner" id="ctResultsWinner"></div>
+      <div class="ct-results-list" id="ctResultsList"></div>
+      <button class="ct-results-continue" id="ctResultsContinueBtn" type="button">Davom etish</button>
+    </div>
   </div>
 </div>
 
@@ -8014,6 +8374,13 @@
     const waitingHintEl = document.getElementById('ctWaitingHint');
     const roomPageEl = document.getElementById('ctRoomPage');
     const roomPageLeaveBtn = document.getElementById('ctRoomPageLeaveBtn');
+    const finishRoomBtn = document.getElementById('ctFinishRoomBtn');
+    const resultsOverlay = document.getElementById('ctResultsOverlay');
+    const resultsConfettiEl = document.getElementById('ctResultsConfetti');
+    const resultsWinnerEl = document.getElementById('ctResultsWinner');
+    const resultsListEl = document.getElementById('ctResultsList');
+    const resultsCloseBtn = document.getElementById('ctResultsCloseBtn');
+    const resultsContinueBtn = document.getElementById('ctResultsContinueBtn');
     const chooseFlashcardBtn = document.getElementById('ctChooseFlashcardBtn');
     const centerHintEl = document.getElementById('ctTableCenterHint');
     const tableSeatsEl = document.getElementById('ctTableSeats');
@@ -8572,15 +8939,10 @@
       }
       renderScoreboard(data);
     }
-    // ---------- YON TARAFDAGI KICHIK OYNA: ismi/avatari + ochkosi bilan
-    // ishtirokchilar ro'yxati (renderTableSeats har chaqirilganda yangilanadi) ----------
-    function renderScoreboard(data){
-      const scoreboardEl = document.getElementById('ctScoreboard');
-      if(!scoreboardEl) return;
+    function buildParticipantRows(data){
       const {auth} = window.__kanjiFB;
       const user = auth.currentUser;
       const uids = data.participantUids || [];
-      if(!uids.length){ scoreboardEl.innerHTML = ''; return; }
       const rows = uids.map(uid => {
         const isHostSeat = uid === data.hostUid;
         const isSelf = !!(user && uid === user.uid);
@@ -8608,6 +8970,16 @@
       // bo'yicha kamayish tartibida saralanadi (teng ochkoda dastlabki
       // o'rindiq tartibi saqlanadi — Array.sort barqaror/stable saralaydi).
       rows.sort((a,b) => b.score - a.score);
+      return rows;
+    }
+    // ---------- YON TARAFDAGI KICHIK OYNA: ismi/avatari + ochkosi bilan
+    // ishtirokchilar ro'yxati (renderTableSeats har chaqirilganda yangilanadi) ----------
+    function renderScoreboard(data){
+      const scoreboardEl = document.getElementById('ctScoreboard');
+      if(!scoreboardEl) return;
+      const uids = data.participantUids || [];
+      if(!uids.length){ scoreboardEl.innerHTML = ''; return; }
+      const rows = buildParticipantRows(data);
       scoreboardEl.innerHTML = rows.map(r => `
         <div class="ct-scoreboard-row${r.isSelf ? ' ct-scoreboard-row-self' : ''}">
           <div class="ct-scoreboard-avatar">${r.avatarHTML}</div>
@@ -8616,6 +8988,68 @@
         </div>
       `).join('');
     }
+    // ---------- MUSOBAQA NATIJALARI: tabriklash oynasi ----------
+    const CT_CONFETTI_COLORS = ['var(--gold)','var(--accent)','var(--accent-soft)','var(--moss-soft)','var(--slate)','var(--plum)','#f2e4bf'];
+    function spawnResultsConfetti(){
+      if(!resultsConfettiEl) return;
+      resultsConfettiEl.innerHTML = '';
+      const count = 46;
+      let html = '';
+      for(let i=0;i<count;i++){
+        const left = Math.random()*100;
+        const delay = (Math.random()*1.4).toFixed(2);
+        const duration = (2.6 + Math.random()*1.8).toFixed(2);
+        const drift = Math.round((Math.random()*120)-60);
+        const color = CT_CONFETTI_COLORS[i % CT_CONFETTI_COLORS.length];
+        const rounded = Math.random() > 0.5 ? '50%' : '2px';
+        html += `<span class="ct-results-confetti-piece" style="left:${left}%; background:${color}; border-radius:${rounded}; animation-delay:${delay}s; animation-duration:${duration}s; --drift:${drift}px;"></span>`;
+      }
+      resultsConfettiEl.innerHTML = html;
+    }
+    function renderResults(data){
+      const rows = buildParticipantRows(data);
+      if(resultsWinnerEl){
+        if(rows.length && rows[0].score > 0){
+          const w = rows[0];
+          resultsWinnerEl.innerHTML = `
+            <span class="ct-results-winner-crown">👑</span>
+            <div class="ct-results-winner-avatar">${w.avatarHTML}</div>
+            <div class="ct-results-winner-name">${escapeCt(w.name)}</div>
+            <div class="ct-results-winner-score">${w.score} ochko</div>
+          `;
+        } else {
+          resultsWinnerEl.innerHTML = `<div class="ct-results-winner-empty">Hali hech kim ochko to'plamadi</div>`;
+        }
+      }
+      if(resultsListEl){
+        const rest = rows.length && rows[0].score > 0 ? rows.slice(1) : rows;
+        resultsListEl.innerHTML = rest.map((r, i) => `
+          <div class="ct-results-row${r.isSelf ? ' ct-results-row-self' : ''}">
+            <span class="ct-results-row-rank">${i+2}</span>
+            <div class="ct-results-row-avatar">${r.avatarHTML}</div>
+            <div class="ct-results-row-name">${escapeCt(r.name)}</div>
+            <div class="ct-results-row-score">${r.score}</div>
+          </div>
+        `).join('');
+      }
+    }
+    function openResultsOverlay(){
+      if(!resultsOverlay || !lastRoomData) return;
+      renderResults(lastRoomData);
+      spawnResultsConfetti();
+      resultsOverlay.classList.add('show');
+      resultsOverlay.setAttribute('aria-hidden', 'false');
+    }
+    function closeResultsOverlay(){
+      if(!resultsOverlay) return;
+      resultsOverlay.classList.remove('show');
+      resultsOverlay.setAttribute('aria-hidden', 'true');
+      if(resultsConfettiEl) resultsConfettiEl.innerHTML = '';
+    }
+    if(finishRoomBtn) finishRoomBtn.addEventListener('click', openResultsOverlay);
+    if(resultsCloseBtn) resultsCloseBtn.addEventListener('click', closeResultsOverlay);
+    if(resultsContinueBtn) resultsContinueBtn.addEventListener('click', closeResultsOverlay);
+    if(resultsOverlay) resultsOverlay.addEventListener('click', (e)=>{ if(e.target === resultsOverlay) closeResultsOverlay(); });
     function renderWaitingSeats(data){
       lastRoomData = data;
       if(!waitingSeatsEl) return;
@@ -8845,7 +9279,7 @@
       kanjiPickerOpen = false;
       centerHintEl.classList.add('picker-open');
       centerHintEl.innerHTML = '<div class="ct-day-picker-grid">' +
-        DAY_ORDER.map(d => `<button type="button" class="ct-day-picker-btn" data-day="${d}">${DAY_LABELS[d]}</button>`).join('') +
+        DAY_ORDER.map(d => `<button type="button" class="ct-day-picker-btn${d===kanjiPickerDay ? ' current' : ''}" data-day="${d}">${DAY_LABELS[d]}</button>`).join('') +
         '</div>';
     }
     function openKanjiPicker(day){
