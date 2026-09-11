@@ -1624,6 +1624,15 @@
     color:var(--ink);
     justify-content:space-between;
     background:linear-gradient(165deg, rgba(21,39,49,0.35), rgba(13,27,34,0.28)), var(--glass-bg);
+    /* ---------- ICHKI SCROLL: uzun matn (ko'p "boshqa o'qilishlar") kartochka
+       balandligidan oshib ketsa, endi pastga tortib qolgan qismini ko'rish
+       mumkin — avval bu joy overflow:hidden bo'lgani uchun ortiqcha matn
+       shunchaki kesilib qolar, tortib scroll qilib bo'lmas edi. */
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
   }
   .face.back > *{ position:relative; z-index:1; }
 
@@ -3938,11 +3947,10 @@
     background-clip:padding-box, text;
     -webkit-text-fill-color:transparent;
     color:transparent;
-    animation:centerHintShimmer 4.5s ease-in-out infinite;
+    animation:centerHintShimmer 2.6s ease-in-out infinite;
   }
   @keyframes centerHintShimmer{
     0%{ background-position:0 0, -40% 0; }
-    50%{ background-position:0 0, 140% 0; }
     100%{ background-position:0 0, 140% 0; }
   }
   @media (prefers-reduced-motion: reduce){
@@ -4319,7 +4327,7 @@
     overflow:hidden;
     transition:transform .2s ease, box-shadow .2s ease;
     box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
-    margin:0 0 14px;
+    margin:10px 0 14px;
     flex:none;
     animation:chooseFlashcardGlow 2.8s ease-in-out infinite;
   }
