@@ -1774,7 +1774,7 @@
     letter-spacing:0.06em;
     padding:6px 14px;
     border-radius:8px;
-    border:2px solid;
+    border:1.2px solid;
     opacity:0;
     z-index:5;
     transform:rotate(-8deg);
@@ -1826,14 +1826,14 @@
     box-shadow:0 6px 20px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.07);
   }
   /* nozik ikki rangli gradient ramka — chapda moss, o'ngda accent, ular
-     o'rtada bir-biriga tutashadi (mask orqali faqat 1px chekka ko'rinadi) */
+     o'rtada bir-biriga tutashadi (mask orqali faqat ingichka chekka ko'rinadi) */
   .swipe-hints::before{
     content:"";
     position:absolute;
     inset:0;
     border-radius:inherit;
-    padding:1px;
-    background:linear-gradient(90deg, rgba(124,154,107,0.6), rgba(255,255,255,0.14) 50%, rgba(217,105,79,0.6));
+    padding:0.4px;
+    background:linear-gradient(90deg, rgba(124,154,107,0.3), rgba(255,255,255,0.07) 50%, rgba(217,105,79,0.3));
     -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite:xor;
     mask-composite:exclude;
@@ -7234,6 +7234,13 @@
     const inner = card.querySelector('.card-inner');
     const tagLeft = card.querySelector('.swipe-tag.left');
     const tagRight = card.querySelector('.swipe-tag.right');
+    // orqa tomondagi (ma'no/tarjima) matn konteyneri — ba'zi mobil brauzerlar
+    // (ayniqsa iOS Safari) 3D aylantirilgan (rotateY) ota-element ichida
+    // native overflow-y:auto scrollni to'g'ri ishga tushira olmaydi, shu
+    // sababli pastda vertikal tortishni shu konteynerga QO'LDA (JS orqali)
+    // uzatamiz — bu barcha qurilmalarda ishonchli ishlaydi.
+    const backScroll = card.querySelector('.face-back-scroll');
+    let scrollStartTop = 0;
     // bitta AbortController orqali shu kartochkaga tegishli barcha listenerlar
     // (jumladan window'ga ulanganlari) bitta chaqiruv bilan bekor qilinadi
     const controller = new AbortController();
@@ -7248,6 +7255,7 @@
       dragging = true; moved = false; decided = null;
       const p = e.touches ? e.touches[0] : e;
       startX = p.clientX; startY = p.clientY; curX = 0;
+      scrollStartTop = backScroll ? backScroll.scrollTop : 0;
       inner.style.transition = 'none';
     }
     function applyTransform(dx){
@@ -7263,7 +7271,7 @@
       }
     }
     function pointerMove(e){
-      if(!dragging || decided === 'v') return;
+      if(!dragging) return;
       const p = e.touches ? e.touches[0] : e;
       const dx = p.clientX - startX;
       const dy = p.clientY - startY;
@@ -7277,10 +7285,25 @@
           // boshlanganda yoqiladi, oddiy tap yoki vertikal scroll uchun emas
           card.style.willChange = 'transform';
         } else {
-          decided = 'v'; // vertical/ambiguous intent — let the page scroll, don't touch the card
-          dragging = false;
-          return;
+          decided = 'v'; // vertical/ambiguous intent
+          if(!(backScroll && card.classList.contains('flipped'))){
+            // old tomon (kanji) ko'rsatilyapti yoki ichki scroll konteyneri
+            // yo'q — sahifaning o'zi odatdagidek vertikal scroll qilishi
+            // uchun kartochkani tortishni shu yerda to'xtatamiz.
+            dragging = false;
+            return;
+          }
+          // aks holda — orqa tomon ko'rsatilyapti: pastdagi qo'lda scroll
+          // shu harakatning davomida darhol ishga tushadi.
         }
+      }
+
+      if(decided === 'v'){
+        // Orqa tomon matnini QO'LDA aylantiramiz (native scroll o'rniga) —
+        // shu bilan barcha brauzer/qurilmalarda bir xilda ishonchli ishlaydi.
+        backScroll.scrollTop = scrollStartTop - dy;
+        e.preventDefault && e.cancelable && e.preventDefault();
+        return;
       }
 
       moved = true;
@@ -7331,6 +7354,12 @@
       // ta'minlaymiz (pastdagi transitionend'da .flipping olib tashlanadi)
       card.classList.add('flipping');
       card.classList.toggle('flipped');
+      // Old (kanji) tomonda brauzerning o'zi sahifani vertikal aylantirishi
+      // uchun touch-action:pan-y qoldiriladi; orqa (tarjima) tomonga
+      // o'tilganda esa uni 'none'ga o'tkazamiz — shunda brauzer native
+      // scrollni boshlab, yuqoridagi qo'lda scroll bilan "kurashib"
+      // qolmaydi, faqat bitta (bizning) scroll manbasi ishlaydi.
+      card.style.touchAction = showingBack ? 'none' : 'pan-y';
       // tovush faqat old tomondan orqa tomonga (tarjima/romaji ko'rinayotganda)
       // o'tilganda chiqadi — orqaga, ya'ni kanji tomoniga qaytilganda jim
       if(showingBack) playFlipSound();
