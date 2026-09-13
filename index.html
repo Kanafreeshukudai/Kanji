@@ -5556,9 +5556,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25];
-  const NEW_DAY_ID = 25; // tovlanib turadigan tugma — eng yangi kunga qo'yilgan
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -6103,6 +6102,31 @@
     {id:"kita25", day:25, group:"北", kanji:"北", romaji:"kita", type:"kun'yomi", reading:"北(kita) — yakka kanji", otherReadings:"kun: きた(kita) · on: ホク(hoku)", uz:"shimol"},
     {id:"kitaguchi25", day:25, group:"北", kanji:"北口", romaji:"kitaguchi", type:"kun + kun", reading:"北(kita) + 口(guchi)", uz:"shimoliy chiqish"},
     {id:"hokkaidou25", day:25, group:"北", kanji:"北海道", romaji:"hokkaidou", type:"on + on + on", reading:"北(hok) + 海(kai) + 道(dou)", uz:"Hokkaydo (hudud nomi)"},
+
+    // ---- 26-kun ----
+    {id:"migikanji26", day:26, group:"右", kanji:"右", romaji:"migi", type:"kun'yomi", reading:"右(migi) — yakka kanji", otherReadings:"on: ウ(u), ユウ(yuu) · kun: みぎ(migi)", uz:"o'ng, to'g'ri"},
+    {id:"migite26", day:26, group:"右", kanji:"右手", romaji:"migite", type:"kun + kun", reading:"右(migi) + 手(te)", uz:"o'ng qo'l"},
+
+    {id:"hidarikanji26", day:26, group:"左", kanji:"左", romaji:"hidari", type:"kun'yomi", reading:"左(hidari) — yakka kanji", otherReadings:"on: サ(sa) · kun: ひだり(hidari)", uz:"chap"},
+    {id:"hidarite26", day:26, group:"左", kanji:"左手", romaji:"hidarite", type:"kun + kun", reading:"左(hidari) + 手(te)", uz:"chap qo'l"},
+
+    {id:"maekanji26", day:26, group:"前", kanji:"前", romaji:"mae", type:"kun'yomi", reading:"前(mae) — yakka kanji", otherReadings:"on: ゼン(zen) · kun: まえ(mae)", uz:"oldin/old, oldida"},
+    {id:"gozen26", day:26, group:"前", kanji:"午前", romaji:"gozen", type:"on + on", reading:"午(go) + 前(zen)", uz:"A.M."},
+    {id:"gozenchuu26", day:26, group:"前", kanji:"午前中", romaji:"gozenchuu", type:"on + on + on", reading:"午(go) + 前(zen) + 中(chuu)", uz:"ertalabda"},
+    {id:"namae26", day:26, group:"前", kanji:"名前", romaji:"namae", type:"kun + kun", reading:"名(na) + 前(mae)", uz:"nomi"},
+    {id:"zenhan26", day:26, group:"前", kanji:"前半", romaji:"zenhan", type:"on + on", reading:"前(zen) + 半(han)", uz:"birinchi yarmi"},
+
+    {id:"atokanji26", day:26, group:"後", kanji:"後", romaji:"ato", type:"kun'yomi", reading:"後(ato) — yakka kanji", otherReadings:"on: ゴ(go), コウ(kou) · kun: あと(ato), うしろ(ushiro), のち(nochi), おく-れる(okureru)", uz:"keyin, orqaga, orqasida"},
+    {id:"ushiro26", day:26, group:"後", kanji:"後ろ", romaji:"ushiro", type:"kun'yomi", reading:"後ろ(ushiro)", uz:"orqaga / orqaga"},
+    {id:"atode26", day:26, group:"後", kanji:"後で", romaji:"atode", type:"kun'yomi", reading:"後で(atode)", uz:"keyinroq"},
+    {id:"gogo26", day:26, group:"後", kanji:"午後", romaji:"gogo", type:"on + on", reading:"午(go) + 後(go)", uz:"P.M."},
+    {id:"saigo26", day:26, group:"後", kanji:"最後", romaji:"saigo", type:"on + on", reading:"最(sai) + 後(go)", uz:"oxirgi"},
+    {id:"okureru26", day:26, group:"後", kanji:"後れる", romaji:"okureru", type:"kun'yomi", reading:"後れる(okureru)", uz:"orqada bo'lish"},
+
+    {id:"sotokanji26", day:26, group:"外", kanji:"外", romaji:"soto", type:"kun'yomi", reading:"外(soto) — yakka kanji", otherReadings:"on: ガイ(gai), ゲ(ge) · kun: そと(soto), ほか(hoka), はず-れる(hazureru)", uz:"tashqari, tashqarida, boshqa, xorijiy"},
+    {id:"gaikoku26", day:26, group:"外", kanji:"外国", romaji:"gaikoku", type:"on + on", reading:"外(gai) + 国(koku)", uz:"xorijiy davlat"},
+    {id:"kaigai26", day:26, group:"外", kanji:"海外", romaji:"kaigai", type:"on + on", reading:"海(kai) + 外(gai)", uz:"chet el"},
+    {id:"igaina26", day:26, group:"外", kanji:"意外な", romaji:"igaina", type:"on + on", reading:"意(i) + 外(gai)", uz:"kutilmagan"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -6308,7 +6332,7 @@
   function dayTabBtn(d, onSelect){
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'tab-btn' + (currentTab==='learn' && currentDay===d ? ' active' : '') + (d===NEW_DAY_ID ? ' new-day' : '');
+    btn.className = 'tab-btn' + (currentTab==='learn' && currentDay===d ? ' active' : '');
     btn.innerHTML = `${DAY_LABELS[d]} <span class="badge" id="dayCount-${d}">${queues[d].length}</span>`;
     btn.addEventListener('click', onSelect);
     return btn;
@@ -6367,7 +6391,12 @@
       const isOlderActive = currentTab==='learn' && olderDays.includes(currentDay);
       const kunlarBtn = document.createElement('button');
       kunlarBtn.type = 'button';
-      kunlarBtn.className = 'tab-btn kunlar-btn' + (isOlderActive ? ' active' : '') + (kunlarOpen ? ' open' : '');
+      // "yangi kun qo'shildi" porlash effekti endi muayyan kun tugmasiga emas,
+      // balki aynan shu "Kunlar" tugmasiga qo'yilgan — chunki eski kunlar
+      // ro'yxati ("Kunlar" ochiladigan menyu) ichida doim eng so'nggi
+      // qo'shilgan kunlar bor, va bu tugma har safar kod o'zgartirmasdan ham
+      // shu e'tibor tortuvchi effektni ko'rsatib turadi.
+      kunlarBtn.className = 'tab-btn kunlar-btn new-day' + (isOlderActive ? ' active' : '') + (kunlarOpen ? ' open' : '');
       // tanlangan kun "eski kunlar" ro'yxatidan bo'lsa, tugma ustida
       // "Kunlar" o'rniga o'sha kunning nomi ko'rsatiladi (masalan "12-kun"),
       // lekin tugma baribir bosiladigan bo'lib qoladi — qayta ochib,
