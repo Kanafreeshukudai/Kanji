@@ -1348,9 +1348,6 @@
     cursor:pointer;
     transition:background .2s ease, transform .2s ease;
   }
-  .tab-btn.tab-btn-custom .tab-btn-custom-close:hover{
-    background:rgba(0,0,0,0.32);
-  }
   .tab-btn.tab-btn-custom .tab-btn-custom-close:active{
     transform:translateY(-50%) scale(0.9);
   }
@@ -1814,27 +1811,98 @@
   .ctrl-btn.known{background:var(--moss); color:#0B0D10;}
 
   .swipe-hints{
+    position:relative;
     display:flex;
-    justify-content:space-between;
+    align-items:stretch;
     width:100%;
     max-width:340px;
-    margin-top:16px;
-    gap:12px;
+    margin:18px auto 0;
+    border-radius:16px;
+    overflow:hidden;
+    isolation:isolate;
+    background:linear-gradient(165deg, rgba(21,39,49,0.35), rgba(13,27,34,0.28)), var(--glass-bg);
+    backdrop-filter:blur(var(--blur-2)) saturate(var(--sat-2));
+    -webkit-backdrop-filter:blur(var(--blur-2)) saturate(var(--sat-2));
+    box-shadow:0 6px 20px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  /* nozik ikki rangli gradient ramka — chapda moss, o'ngda accent, ular
+     o'rtada bir-biriga tutashadi (mask orqali faqat 1px chekka ko'rinadi) */
+  .swipe-hints::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    padding:1px;
+    background:linear-gradient(90deg, rgba(124,154,107,0.6), rgba(255,255,255,0.14) 50%, rgba(217,105,79,0.6));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    pointer-events:none;
   }
   .swipe-hints .hint{
+    position:relative;
     flex:1;
     display:flex;
     align-items:center;
-    gap:8px;
-    font-size:11.5px;
-    color:var(--ink-faint);
-    line-height:1.35;
+    justify-content:center;
+    gap:7px;
+    min-width:0;
+    padding:12px 10px;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:0.01em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
-  .swipe-hints .hint.right{justify-content:flex-end; text-align:right;}
-  .swipe-hints .hint b{color:var(--ink-soft); font-weight:700;}
-  .swipe-hints .arrow{font-size:15px; flex-shrink:0;}
-  .swipe-hints .hint.left .arrow{color:var(--moss-soft);}
-  .swipe-hints .hint.right .arrow{color:var(--accent-soft);}
+  .swipe-hints .hint b{font-weight:800;}
+  .swipe-hints .hint.left{color:var(--moss-soft);}
+  .swipe-hints .hint.right{color:var(--accent-soft);}
+  /* har bir yarim orqasida sekin nafas oluvchi rangli nur — kartochkani
+     qaysi tomonga tashlash nima qilishini his qildiradi */
+  .swipe-hints .hint::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    animation:hintGlowBreathe 3.2s ease-in-out infinite;
+  }
+  .swipe-hints .hint.left::after{
+    background:radial-gradient(120% 140% at 0% 50%, rgba(124,154,107,0.32), transparent 65%);
+  }
+  .swipe-hints .hint.right::after{
+    background:radial-gradient(120% 140% at 100% 50%, rgba(217,105,79,0.32), transparent 65%);
+    animation-delay:1.6s;
+  }
+  @keyframes hintGlowBreathe{
+    0%,100%{opacity:0.5;}
+    50%{opacity:1;}
+  }
+  .swipe-hints .hint-divider{
+    width:1px;
+    flex-shrink:0;
+    background:linear-gradient(180deg, transparent, var(--glass-border), transparent);
+  }
+  .swipe-hints .arrow{
+    display:inline-block;
+    font-size:14px;
+    flex-shrink:0;
+  }
+  /* strelkalar yengil "turtki" bilan tebranadi — qaysi tomonga
+     siljitish kerakligini so'zsiz ham anglatadi */
+  @keyframes nudgeLeft{
+    0%,100%{transform:translateX(0); opacity:0.7;}
+    50%{transform:translateX(-4px); opacity:1;}
+  }
+  @keyframes nudgeRight{
+    0%,100%{transform:translateX(0); opacity:0.7;}
+    50%{transform:translateX(4px); opacity:1;}
+  }
+  .swipe-hints .hint.left .arrow{animation:nudgeLeft 1.8s ease-in-out infinite;}
+  .swipe-hints .hint.right .arrow{animation:nudgeRight 1.8s ease-in-out infinite; animation-delay:0.5s;}
+  @media (prefers-reduced-motion: reduce){
+    .swipe-hints .arrow, .swipe-hints .hint::after{animation:none !important;}
+  }
 
   .progress-note{
     text-align:center;
@@ -3404,10 +3472,6 @@
   }
   .ct-finish-room-btn-icon{width:15px; height:15px; flex:none;}
   .ct-finish-room-btn-label-short{display:none;}
-  .ct-finish-room-btn:hover{
-    background:linear-gradient(155deg, rgba(201,166,107,0.4), rgba(201,166,107,0.12));
-    box-shadow:0 6px 16px -4px rgba(201,166,107,0.55), inset 0 1px 0 rgba(255,255,255,0.16);
-  }
   .ct-finish-room-btn:active{transform:scale(0.95);}
   .ct-room-page-leave-btn{
     font-size:12.5px;
@@ -3725,7 +3789,6 @@
     box-shadow:0 8px 18px -8px rgba(217,105,79,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
     transition:transform .16s ease, box-shadow .16s ease;
   }
-  .ct-results-continue:hover{transform:translateY(-1px);}
   .ct-results-continue:active{transform:scale(0.97) translateY(0);}
   /* ---------- Natijalar oynasi: "Davom etish" tugmasi ostidagi ikkinchi
      darajali "Chiqish" tugmasi — bosilsa, faqat shu odamning stoldagi
@@ -3744,7 +3807,6 @@
     cursor:pointer;
     transition:transform .16s ease, background .16s ease, color .16s ease;
   }
-  .ct-results-leave:hover{color:var(--ink); background:var(--glass-bg-strong);}
   .ct-results-leave:active{transform:scale(0.97);}
   .ct-table-seat{
     position:absolute;
@@ -4152,11 +4214,6 @@
     background:linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
     opacity:0.8;
   }
-  .ct-day-picker-btn:hover{
-    border-color:rgba(255,255,255,0.4);
-    background:linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-    transform:translateY(-1px);
-  }
   .ct-day-picker-btn:active{transform:scale(0.92) translateY(0);}
   .ct-day-picker-btn.current{
     border-color:rgba(201,166,107,0.65);
@@ -4195,7 +4252,6 @@
     cursor:pointer;
     transition:background .15s ease, border-color .15s ease, transform .15s ease;
   }
-  .ct-kanji-picker-back:hover{background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28);}
   .ct-kanji-picker-back:active{transform:translateY(-50%) scale(0.94);}
   .ct-kanji-picker-title{
     font-size:13px;
@@ -4234,10 +4290,6 @@
     overflow:hidden;
     box-shadow:0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.07);
     transition:transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease, border-color .18s ease, background .18s ease;
-  }
-  .ct-kanji-picker-btn:hover{
-    border-color:rgba(255,255,255,0.35);
-    transform:translateY(-1px);
   }
   .ct-kanji-picker-btn.selected{
     border-color:var(--accent);
@@ -4291,7 +4343,6 @@
     pointer-events:none;
   }
   .ct-kanji-picker-send:disabled{opacity:0.35; cursor:default; box-shadow:none;}
-  .ct-kanji-picker-send:not(:disabled):hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(217,105,79,0.7), inset 0 1px 0 rgba(255,255,255,0.28);}
   .ct-kanji-picker-send:not(:disabled):active{transform:scale(0.97) translateY(0);}
   /* ---------- XONA ICHKARISI: yuborilgan kartochka ko'rinishi ---------- */
   .ct-sent-card{
@@ -5099,6 +5150,54 @@
     backdrop-filter:blur(10px);
   }
   @keyframes page2FadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+  /* ---------- MOBIL OPTIMIZATSIYA: :hover holatlari faqat sichqoncha bilan ----------
+     Tegishli qurilmalarda (haqiqiy hover + aniq kursor) qo'llaniladi. Aks holda
+     mobil/planshetda bosgandan keyin tugma "yopishib qolgan" hover holatida
+     ko'rinib qolar edi — bu qoida shu muammoning oldini oladi. */
+  @media (hover:hover) and (pointer:fine){
+    .tab-btn.tab-btn-custom .tab-btn-custom-close:hover{
+      background:rgba(0,0,0,0.32);
+    }
+    .ct-finish-room-btn:hover{
+      background:linear-gradient(155deg, rgba(201,166,107,0.4), rgba(201,166,107,0.12));
+      box-shadow:0 6px 16px -4px rgba(201,166,107,0.55), inset 0 1px 0 rgba(255,255,255,0.16);
+    }
+    .ct-results-continue:hover{transform:translateY(-1px);}
+    .ct-results-leave:hover{color:var(--ink); background:var(--glass-bg-strong);}
+    .ct-day-picker-btn:hover{
+      border-color:rgba(255,255,255,0.4);
+      background:linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+      transform:translateY(-1px);
+    }
+    .ct-kanji-picker-back:hover{background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28);}
+    .ct-kanji-picker-btn:hover{
+      border-color:rgba(255,255,255,0.35);
+      transform:translateY(-1px);
+    }
+    .ct-kanji-picker-send:not(:disabled):hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(217,105,79,0.7), inset 0 1px 0 rgba(255,255,255,0.28);}
+  }
+
+  /* ---------- MOBIL OPTIMIZATSIYA: bosish tezligi ----------
+     Barcha bosiladigan elementlarga qo'llaniladi — brauzerning 300ms
+     tap-delay va ikki marta bosishda tasodifiy zoom bo'lishining oldini
+     oladi, shu bilan tugmalar mobilda darhol javob beradi. */
+  button, .tab-btn, .known-banner, .ctrl-btn, .quiz-launch,
+  .ct-day-picker-btn, .ct-kanji-picker-btn, .ct-kanji-picker-back,
+  .ct-kanji-picker-send, .ct-results-continue, .ct-results-leave,
+  .ct-finish-room-btn, .ct-guess-check-btn, [role="button"]{
+    touch-action:manipulation;
+  }
+
+  /* ---------- MOBIL OPTIMIZATSIYA: kuchsiz qurilmalarda animatsiyalarni kamaytirish ----------
+     html.lite klassi (yuqorida, sahifa ochilishidan oldin aniqlanadi) yoqilganda,
+     doimiy ishlaydigan dekorativ animatsiyalar to'xtatiladi — shu bilan arzon
+     Android telefonlarda barcha tugmalar va o'tishlar silliq ishlashda davom etadi. */
+  html.lite .swipe-hints .arrow,
+  html.lite .swipe-hints .hint::after{
+    animation:none !important;
+  }
+  html.lite .hold-progress-fill.animate{ transition-duration:0s; transform:scaleX(1); }
 </style>
 </head>
 <script>
@@ -5269,10 +5368,9 @@
       <!-- cards injected here -->
     </div>
     <div class="swipe-hints">
-      <div class="hint left"><span class="arrow">←</span> Chapga siljitish: <b>&nbsp;Bilganlarim ro'yxatiga olish</b></div>
-    </div>
-    <div class="swipe-hints">
-      <div class="hint right">O'ngga siljitish: <b>&nbsp;Navbatda saqlash</b> <span class="arrow">→</span></div>
+      <div class="hint left"><span class="arrow">←</span><b>Bilganlarim</b></div>
+      <div class="hint-divider"></div>
+      <div class="hint right"><b>Navbatga</b><span class="arrow">→</span></div>
     </div>
     <div class="progress-note" id="progressNote"></div>
   </section>
@@ -5570,8 +5668,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -6212,6 +6310,140 @@
     {id:"iu29", day:29, group:"言", kanji:"言う", romaji:"iu", type:"kun'yomi", reading:"言う(iu)", uz:"aytmoq"},
     {id:"kotoba29", day:29, group:"言", kanji:"言葉", romaji:"kotoba", type:"kun + kun", reading:"言(koto) + 葉(ba)", uz:"so'z"},
     {id:"hougen29", day:29, group:"言", kanji:"方言", romaji:"hougen", type:"on + on", reading:"方(hou) + 言(gen)", uz:"dialekt"},
+
+    {id:"mirukanji30", day:30, group:"見", kanji:"見", romaji:"miru", type:"kun'yomi", reading:"見る(miru) — yakka kanji", otherReadings:"on: ケン(ken) · kun: み-る(miru)", uz:"qarang"},
+    {id:"miru30", day:30, group:"見", kanji:"見る", romaji:"miru", type:"kun'yomi", reading:"見る(miru)", uz:"qaramoq"},
+    {id:"hanami30", day:30, group:"見", kanji:"花見", romaji:"hanami", type:"kun + kun", reading:"花(hana) + 見(mi)", uz:"gullarni tomosha qilish"},
+    {id:"iken30", day:30, group:"見", kanji:"意見", romaji:"iken", type:"on + on", reading:"意(i) + 見(ken)", uz:"fikr"},
+    {id:"miseru30", day:30, group:"見", kanji:"見せる", romaji:"miseru", type:"kun'yomi", reading:"見せる(miseru)", uz:"ko'rsatmoq"},
+
+    {id:"majirukanji30", day:30, group:"交", kanji:"交", romaji:"majiru", type:"kun'yomi", reading:"交じる(majiru) — yakka kanji", otherReadings:"on: コウ(kou) · kun: ま-じる(majiru), ま-ざる(mazaru), まじ-わる(majiwaru)", uz:"xoch, o'zgartirish"},
+    {id:"koutsuu30", day:30, group:"交", kanji:"交通", romaji:"koutsuu", type:"on + on", reading:"交(kou) + 通(tsuu)", uz:"qatnov"},
+    {id:"gaikou30", day:30, group:"交", kanji:"外交", romaji:"gaikou", type:"on + on", reading:"外(gai) + 交(kou)", uz:"diplomatiya"},
+    {id:"kouban30", day:30, group:"交", kanji:"交番", romaji:"kouban", type:"on + on", reading:"交(kou) + 番(ban)", uz:"politsiya idorasi"},
+
+    {id:"terakanji30", day:30, group:"寺", kanji:"寺", romaji:"tera", type:"kun'yomi", reading:"寺(tera) — yakka kanji", otherReadings:"on: ジ(ji) · kun: てら(tera)", uz:"ma'bad"},
+    {id:"toudaiji30", day:30, group:"寺", kanji:"東大寺", romaji:"toudaiji", type:"on + on + on", reading:"東(tou) + 大(dai) + 寺(ji)", uz:"Todaiji ibodatxonasi"},
+
+    {id:"nanikanji30", day:30, group:"何", kanji:"何", romaji:"nani", type:"kun'yomi", reading:"何(nani) — yakka kanji", otherReadings:"on: カ(ka) · kun: なに(nani), なん(nan)", uz:"nima"},
+    {id:"nanika30", day:30, group:"何", kanji:"何か", romaji:"nanika", type:"kun'yomi", reading:"何(nani) + か", uz:"nimadir"},
+    {id:"nanji30", day:30, group:"何", kanji:"何時", romaji:"nanji", type:"kun + on", reading:"何(nan) + 時(ji)", uz:"qaysi vaqt"},
+    {id:"nandemo30", day:30, group:"何", kanji:"何でも", romaji:"nandemo", type:"kun'yomi", reading:"何(nan) + でも", uz:"har qanday narsa"},
+    {id:"kikagaku30", day:30, group:"何", kanji:"幾何学", romaji:"kikagaku", type:"on + on + on", reading:"幾(ki) + 何(ka) + 学(gaku)", uz:"geometriya"},
+
+    {id:"tomokanji31", day:31, group:"友", kanji:"友", romaji:"tomo", type:"kun'yomi", reading:"友(tomo) — yakka kanji", otherReadings:"on: ユウ(yuu) · kun: とも(tomo)", uz:"do'st"},
+    {id:"tomodachi31", day:31, group:"友", kanji:"友だち", romaji:"tomodachi", type:"kun'yomi", reading:"友(tomo) + だち", uz:"do'st"},
+    {id:"yuujin31", day:31, group:"友", kanji:"友人", romaji:"yuujin", type:"on + on", reading:"友(yuu) + 人(jin)", uz:"o'rtoq"},
+    {id:"shinyuu31", day:31, group:"友", kanji:"親友", romaji:"shinyuu", type:"on + on", reading:"親(shin) + 友(yuu)", uz:"eng yaqin do'st"},
+    {id:"yuujou31", day:31, group:"友", kanji:"友情", romaji:"yuujou", type:"on + on", reading:"友(yuu) + 情(jou)", uz:"do'stlik"},
+
+    {id:"gokanji31", day:31, group:"午", kanji:"午", romaji:"go", type:"on'yomi", reading:"午(go) — yakka kanji", otherReadings:"on: ゴ(go)", uz:"peshin"},
+    {id:"gozen31", day:31, group:"午", kanji:"午前", romaji:"gozen", type:"on + on", reading:"午(go) + 前(zen)", uz:"tushlikkacha bo'lgan vaqt"},
+    {id:"gogo31", day:31, group:"午", kanji:"午後", romaji:"gogo", type:"on + on", reading:"午(go) + 後(go)", uz:"tushdan keyin"},
+
+    {id:"shirokanji31", day:31, group:"白", kanji:"白", romaji:"shiro", type:"kun'yomi", reading:"白(shiro) — yakka kanji", otherReadings:"on: ハク(haku) · kun: しろ(shiro), しろ-い(shiroi)", uz:"oq, tan olmoq"},
+    {id:"shiroi31", day:31, group:"白", kanji:"白い", romaji:"shiroi", type:"kun'yomi", reading:"白い(shiroi)", uz:"oq"},
+    {id:"hakushi31", day:31, group:"白", kanji:"白紙", romaji:"hakushi", type:"on + on", reading:"白(haku) + 紙(shi)", uz:"bo'sh qog'oz"},
+    {id:"hakuchou31", day:31, group:"白", kanji:"白鳥", romaji:"hakuchou", type:"on + on", reading:"白(haku) + 鳥(chou)", uz:"oqqush"},
+    {id:"aojiroi31", day:31, group:"白", kanji:"青白い", romaji:"aojiroi", type:"kun + kun", reading:"青(ao) + 白い(jiroi)", uz:"ko'kimtir"},
+
+    {id:"mawarukanji31", day:31, group:"回", kanji:"回", romaji:"mawaru", type:"kun'yomi", reading:"回る(mawaru) — yakka kanji", otherReadings:"on: カイ(kai) · kun: まわ-る(mawaru), まわ-す(mawasu)", uz:"burilish, dumaloq"},
+    {id:"mawaru31", day:31, group:"回", kanji:"回る", romaji:"mawaru", type:"kun'yomi", reading:"回る(mawaru)", uz:"aylanmoq"},
+    {id:"mawasu31", day:31, group:"回", kanji:"回す", romaji:"mawasu", type:"kun'yomi", reading:"回す(mawasu)", uz:"aylantirmoq"},
+    {id:"ikkai31", day:31, group:"回", kanji:"一回", romaji:"ikkai", type:"on + on", reading:"一(ik) + 回(kai)", uz:"bir marta"},
+    {id:"kaisuuken31", day:31, group:"回", kanji:"回数券", romaji:"kaisuuken", type:"on + on + on", reading:"回(kai) + 数(suu) + 券(ken)", uz:"chiptalar kitobi"},
+
+    // ---- 32-kun ----
+    {id:"gakanji32", day:32, group:"画", kanji:"画", romaji:"ga", type:"on'yomi", reading:"画(ga) — yakka kanji", otherReadings:"on: ガ(ga), カク(kaku)", uz:"rasm, chizish"},
+    {id:"eiga32", day:32, group:"画", kanji:"映画", romaji:"eiga", type:"on + on", reading:"映(ei) + 画(ga)", uz:"kino"},
+    {id:"nihonga32", day:32, group:"画", kanji:"日本画", romaji:"nihonga", type:"on + on + on", reading:"日(ni) + 本(hon) + 画(ga)", uz:"yapon uslubidagi rasm"},
+    {id:"gamen32", day:32, group:"画", kanji:"画面", romaji:"gamen", type:"on + on", reading:"画(ga) + 面(men)", uz:"ekran"},
+    {id:"keikaku32", day:32, group:"画", kanji:"計画", romaji:"keikaku", type:"on + on", reading:"計(kei) + 画(kaku)", uz:"loyiha"},
+    {id:"kakusu32", day:32, group:"画", kanji:"画数", romaji:"kakusu", type:"on + on", reading:"画(kaku) + 数(suu)", uz:"zarbalar soni"},
+
+    {id:"ryoukanji32", day:32, group:"両", kanji:"両", romaji:"ryou", type:"on'yomi", reading:"両(ryou) — yakka kanji", otherReadings:"on: リョウ(ryou)", uz:"ikkalasi ham, pul"},
+    {id:"ryoushin32", day:32, group:"両", kanji:"両親", romaji:"ryoushin", type:"on + on", reading:"両(ryou) + 親(shin)", uz:"ota-ona"},
+    {id:"ryouhou32", day:32, group:"両", kanji:"両方", romaji:"ryouhou", type:"on + on", reading:"両(ryou) + 方(hou)", uz:"ikkalasi ham"},
+    {id:"ryouashi32", day:32, group:"両", kanji:"両足", romaji:"ryouashi", type:"on + kun", reading:"両(ryou) + 足(ashi)", uz:"ikkala oyoq"},
+    {id:"sharyou32", day:32, group:"両", kanji:"車両", romaji:"sharyou", type:"on + on", reading:"車(sha) + 両(ryou)", uz:"transport vositalari, avtomobillar"},
+    {id:"ryougae32", day:32, group:"両", kanji:"両替", romaji:"ryougae", type:"on + kun", reading:"両(ryou) + 替(gae)", uz:"pul almashinuvi"},
+
+    {id:"koukanji32", day:32, group:"校", kanji:"校", romaji:"kou", type:"on'yomi", reading:"校(kou) — yakka kanji", otherReadings:"on: コウ(kou)", uz:"maktab"},
+    {id:"gakkou32", day:32, group:"校", kanji:"学校", romaji:"gakkou", type:"on + on", reading:"学(gak) + 校(kou)", uz:"maktab"},
+    {id:"koukousei32", day:32, group:"校", kanji:"高校生", romaji:"koukousei", type:"on + on + on", reading:"高(kou) + 校(kou) + 生(sei)", uz:"litsey / yuqori maktab o'quvchisi"},
+
+    {id:"nomukanji32", day:32, group:"飲", kanji:"飲", romaji:"nomu", type:"kun'yomi", reading:"飲む(nomu) — yakka kanji", otherReadings:"on: イン(in) · kun: の-む(nomu)", uz:"ichish"},
+    {id:"nomu32", day:32, group:"飲", kanji:"飲む", romaji:"nomu", type:"kun'yomi", reading:"飲む(nomu)", uz:"ichmoq"},
+    {id:"nomimono32", day:32, group:"飲", kanji:"飲み物", romaji:"nomimono", type:"kun'yomi", reading:"飲み物(nomimono)", uz:"ichimlik"},
+    {id:"inshokuten32", day:32, group:"飲", kanji:"飲食店", romaji:"inshokuten", type:"on + on + on", reading:"飲(in) + 食(shoku) + 店(ten)", uz:"restoran, ovqat-ichimlik do'koni"},
+
+    // ---- 33-kun ----
+    {id:"kirukanji33", day:33, group:"切", kanji:"切", romaji:"kiru", type:"kun'yomi", reading:"切る(kiru) — yakka kanji", otherReadings:"on: セツ(setsu) · kun: き-る(kiru)", uz:"kesish"},
+    {id:"kiru33", day:33, group:"切", kanji:"切る", romaji:"kiru", type:"kun'yomi", reading:"切る(kiru)", uz:"kesmoq"},
+    {id:"kippu33", day:33, group:"切", kanji:"切符", romaji:"kippu", type:"on + on", reading:"切(kip) + 符(pu)", uz:"chipta"},
+    {id:"shinsetsuna33", day:33, group:"切", kanji:"親切な", romaji:"shinsetsu na", type:"on + on", reading:"親(shin) + 切(setsu)", uz:"mehribon"},
+    {id:"taisetsuna33", day:33, group:"切", kanji:"大切な", romaji:"taisetsu na", type:"on + on", reading:"大(tai) + 切(setsu)", uz:"muhim"},
+
+    {id:"atarashiikanji33", day:33, group:"新", kanji:"新", romaji:"atarashii", type:"kun'yomi", reading:"新しい(atarashii) — yakka kanji", otherReadings:"on: シン(shin) · kun: あたら-しい(atarashii), あら-た(arata), にい(nii)", uz:"yangi"},
+    {id:"atarashii33", day:33, group:"新", kanji:"新しい", romaji:"atarashii", type:"kun'yomi", reading:"新しい(atarashii)", uz:"yangi"},
+    {id:"shinbun33", day:33, group:"新", kanji:"新聞", romaji:"shinbun", type:"on + on", reading:"新(shin) + 聞(bun)", uz:"gazeta"},
+    {id:"shinkansen33", day:33, group:"新", kanji:"新幹線", romaji:"shinkansen", type:"on + on + on", reading:"新(shin) + 幹(kan) + 線(sen)", uz:"tez yuradigan poezd"},
+    {id:"niigata33", day:33, group:"新", kanji:"新潟", romaji:"Niigata", type:"kun + kun", reading:"新(nii) + 潟(gata)", uz:"Niigata (prefektura)"},
+
+    {id:"oyakanji33", day:33, group:"親", kanji:"親", romaji:"oya", type:"kun'yomi", reading:"親(oya) — yakka kanji", otherReadings:"on: シン(shin) · kun: おや(oya), した-しい(shitashii)", uz:"ota-ona, qarindoshlik"},
+    {id:"chichioya33", day:33, group:"親", kanji:"父親", romaji:"chichioya", type:"kun + kun", reading:"父(chichi) + 親(oya)", uz:"ota"},
+    {id:"hahaoya33", day:33, group:"親", kanji:"母親", romaji:"hahaoya", type:"kun + kun", reading:"母(haha) + 親(oya)", uz:"ona"},
+    {id:"ryoushin33", day:33, group:"親", kanji:"両親", romaji:"ryoushin", type:"on + on", reading:"両(ryou) + 親(shin)", uz:"ota-ona"},
+    {id:"shinsetsu33", day:33, group:"親", kanji:"親切", romaji:"shinsetsu", type:"on + on", reading:"親(shin) + 切(setsu)", uz:"mehribon"},
+    {id:"shitashii33", day:33, group:"親", kanji:"親しい", romaji:"shitashii", type:"kun'yomi", reading:"親しい(shitashii)", uz:"yaqin"},
+
+    {id:"hikukanji33", day:33, group:"引", kanji:"引", romaji:"hiku", type:"kun'yomi", reading:"引く(hiku) — yakka kanji", otherReadings:"on: イン(in) · kun: ひ-く(hiku)", uz:"tortish, chizish"},
+    {id:"hiku33", day:33, group:"引", kanji:"引く", romaji:"hiku", type:"kun'yomi", reading:"引く(hiku)", uz:"tortmoq"},
+    {id:"hikidashi33", day:33, group:"引", kanji:"引き出し", romaji:"hikidashi", type:"kun'yomi", reading:"引き出し(hikidashi)", uz:"tortma"},
+    {id:"hikkoshi33", day:33, group:"引", kanji:"引っ越し", romaji:"hikkoshi", type:"kun + kun", reading:"引っ(hik) + 越し(koshi)", uz:"ko'chish"},
+    {id:"waribiki33", day:33, group:"引", kanji:"割引", romaji:"waribiki", type:"kun + kun", reading:"割り(wari) + 引き(biki)", uz:"chegirma"},
+
+    // ---- 34-kun ----
+    {id:"tsuyoikanji34", day:34, group:"強", kanji:"強", romaji:"tsuyoi", type:"kun'yomi", reading:"強い(tsuyoi) — yakka kanji", otherReadings:"on: キョウ(kyou), ゴウ(gou) · kun: つよ-い(tsuyoi)", uz:"kuchli"},
+    {id:"tsuyoi34", day:34, group:"強", kanji:"強い", romaji:"tsuyoi", type:"kun'yomi", reading:"強い(tsuyoi)", uz:"kuchli"},
+    {id:"benkyousuru34", day:34, group:"強", kanji:"勉強する", romaji:"benkyou suru", type:"on + on", reading:"勉(ben) + 強(kyou)", uz:"o'qimoq, o'rganmoq"},
+
+    {id:"yowaikanji34", day:34, group:"弱", kanji:"弱", romaji:"yowai", type:"kun'yomi", reading:"弱い(yowai) — yakka kanji", otherReadings:"on: ジャク(jaku) · kun: よわ-い(yowai)", uz:"zaif"},
+    {id:"yowai34", day:34, group:"弱", kanji:"弱い", romaji:"yowai", type:"kun'yomi", reading:"弱い(yowai)", uz:"zaif"},
+    {id:"jakuten34", day:34, group:"弱", kanji:"弱点", romaji:"jakuten", type:"on + on", reading:"弱(jaku) + 点(ten)", uz:"zaiflik, kamchilik"},
+
+    {id:"naraukanji34", day:34, group:"習", kanji:"習", romaji:"narau", type:"kun'yomi", reading:"習う(narau) — yakka kanji", otherReadings:"on: シュウ(shuu) · kun: なら-う(narau)", uz:"o'rganish"},
+    {id:"narau34", day:34, group:"習", kanji:"習う", romaji:"narau", type:"kun'yomi", reading:"習う(narau)", uz:"o'rganmoq"},
+    {id:"gakushuusuru34", day:34, group:"習", kanji:"学習する", romaji:"gakushuu suru", type:"on + on", reading:"学(gaku) + 習(shuu)", uz:"o'rganmoq"},
+    {id:"shuukan34", day:34, group:"習", kanji:"習慣", romaji:"shuukan", type:"on + on", reading:"習(shuu) + 慣(kan)", uz:"odat"},
+    {id:"yoshuu34", day:34, group:"習", kanji:"予習", romaji:"yoshuu", type:"on + on", reading:"予(yo) + 習(shuu)", uz:"oldindan tayyorlanish"},
+    {id:"fukushuu34", day:34, group:"習", kanji:"復習", romaji:"fukushuu", type:"on + on", reading:"復(fuku) + 習(shuu)", uz:"takrorlash"},
+
+    {id:"otokanji34", day:34, group:"音", kanji:"音", romaji:"oto", type:"kun'yomi", reading:"音(oto) — yakka kanji", otherReadings:"on: オン(on), イン(in) · kun: おと(oto), ね(ne)", uz:"tovush, shovqin"},
+    {id:"ashioto34", day:34, group:"音", kanji:"足音", romaji:"ashioto", type:"kun + kun", reading:"足(ashi) + 音(oto)", uz:"qadam tovushi"},
+    {id:"onyomi34", day:34, group:"音", kanji:"音読み", romaji:"onyomi", type:"on + kun", reading:"音(on) + 読み(yomi)", uz:"\"ON\" o'qish"},
+    {id:"hatsuon34", day:34, group:"音", kanji:"発音", romaji:"hatsuon", type:"on + on", reading:"発(hatsu) + 音(on)", uz:"talaffuz"},
+    {id:"honne34", day:34, group:"音", kanji:"本音", romaji:"honne", type:"on + kun", reading:"本(hon) + 音(ne)", uz:"asl niyat"},
+
+    // ---- 35-kun ----
+    {id:"kuraikanji35", day:35, group:"暗", kanji:"暗", romaji:"kurai", type:"kun'yomi", reading:"暗い(kurai) — yakka kanji", otherReadings:"on: アン(an) · kun: くら-い(kurai)", uz:"qorong'i"},
+    {id:"kurai35", day:35, group:"暗", kanji:"暗い", romaji:"kurai", type:"kun'yomi", reading:"暗い(kurai)", uz:"qorong'i"},
+    {id:"makkura35", day:35, group:"暗", kanji:"真っ暗", romaji:"makkura", type:"kun + kun", reading:"真っ(ma) + 暗(kura)", uz:"to'liq zulmat"},
+    {id:"ankisuru35", day:35, group:"暗", kanji:"暗記する", romaji:"anki suru", type:"on + on", reading:"暗(an) + 記(ki)", uz:"yoddan o'rganmoq"},
+    {id:"anshoubangou35", day:35, group:"暗", kanji:"暗証番号", romaji:"anshou bangou", type:"on + on + on + on", reading:"暗(an) + 証(shou) + 番(ban) + 号(gou)", uz:"parol"},
+
+    {id:"kaukanji35", day:35, group:"買", kanji:"買", romaji:"kau", type:"kun'yomi", reading:"買う(kau) — yakka kanji", otherReadings:"on: バイ(bai) · kun: か-う(kau)", uz:"sotib olmoq"},
+    {id:"kau35", day:35, group:"買", kanji:"買う", romaji:"kau", type:"kun'yomi", reading:"買う(kau)", uz:"sotib olmoq"},
+    {id:"kaimono35", day:35, group:"買", kanji:"買い物", romaji:"kaimono", type:"kun + kun", reading:"買い(kai) + 物(mono)", uz:"xarid qilish"},
+
+    {id:"inkanji35", day:35, group:"員", kanji:"員", romaji:"in", type:"on'yomi", reading:"員(in) — yakka kanji", otherReadings:"on: イン(in)", uz:"a'zo"},
+    {id:"kaishain35", day:35, group:"員", kanji:"会社員", romaji:"kaishain", type:"on + on + on", reading:"会(kai) + 社(sha) + 員(in)", uz:"kompaniya xodimi"},
+    {id:"tenin35", day:35, group:"員", kanji:"店員", romaji:"ten'in", type:"on + on", reading:"店(ten) + 員(in)", uz:"do'kon sotuvchisi"},
+    {id:"teiin35", day:35, group:"員", kanji:"定員", romaji:"teiin", type:"on + on", reading:"定(tei) + 員(in)", uz:"qabul qilish chegarasi"},
+
+    {id:"shitsukanji35", day:35, group:"質", kanji:"質", romaji:"shitsu", type:"on'yomi", reading:"質(shitsu) — yakka kanji", otherReadings:"on: シツ(shitsu), シチ(shichi)", uz:"sifat"},
+    {id:"shitsumon35", day:35, group:"質", kanji:"質問", romaji:"shitsumon", type:"on + on", reading:"質(shitsu) + 問(mon)", uz:"savol"},
+    {id:"hinshitsu35", day:35, group:"質", kanji:"品質", romaji:"hinshitsu", type:"on + on", reading:"品(hin) + 質(shitsu)", uz:"mahsulot sifati"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
