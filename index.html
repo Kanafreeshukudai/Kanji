@@ -8044,6 +8044,23 @@
     }catch(e){}
   }
 
+  // ---------- XONAGA KIRISH TOVUSHI (Kartochka almashish, "Boshlash" bosilgach) ----------
+  // Barcha ishtirokchilarning ekranida bir vaqtda ishga tushadigan yumshoq,
+  // cho'ziluvchan ohang — vizual kirish animatsiyasi (0.7s) bilan bir xilda
+  // tugaydi. window'ga chiqarilgan, chunki xona kodi alohida
+  // <script type="module"> ichida ishlaydi va bu yerdagi funksiyalarga
+  // to'g'ridan-to'g'ri murojaat qila olmaydi.
+  function playRoomEnterSound(){
+    try{
+      const ctx = getAudioCtx();
+      if(!ctx) return;
+      playTone(392.00, 0,    0.55, 'sine', 0.10); // G4
+      playTone(523.25, 0.10, 0.60, 'sine', 0.11); // C5
+      playTone(659.25, 0.22, 0.62, 'sine', 0.09); // E5 — davomli, yumshoq yakun
+    }catch(e){}
+  }
+  window.playRoomEnterSound = playRoomEnterSound;
+
   function renderQuizResult(){
     const wrap = document.getElementById('quizWrap');
     const backLabel = quizReturnTab==='learn' ? 'Kartochkalarga qaytish' : quizReturnTab==='all' ? 'Hammasiga qaytish' : 'Bilganlarimga qaytish';
@@ -9255,10 +9272,12 @@
         // Xost "Boshlash" tugmasini bosgan payt — Firestore orqali bu
         // holat BARCHA ishtirokchilarning kliyentiga bir vaqtda yetadi,
         // shuning uchun xonaga kirish shu yerda, HAMMA foydalanuvchida
-        // bir xilda, yumshoq va uzunroq animatsiya bilan ijro etiladi.
+        // bir xilda, yumshoq va uzunroq animatsiya HAMDA ovoz effekti
+        // bilan ijro etiladi.
         roomPageEl.classList.remove('ct-room-enter');
         void roomPageEl.offsetWidth; // reflow — animatsiyani qaytadan boshlash uchun
         roomPageEl.classList.add('ct-room-enter');
+        if(typeof window.playRoomEnterSound === 'function') window.playRoomEnterSound();
       }
       startRoomParticles();
     }
