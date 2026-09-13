@@ -1817,27 +1817,6 @@
     width:100%;
     max-width:340px;
     margin:18px auto 0;
-    border-radius:16px;
-    overflow:hidden;
-    isolation:isolate;
-    background:linear-gradient(165deg, rgba(21,39,49,0.35), rgba(13,27,34,0.28)), var(--glass-bg);
-    backdrop-filter:blur(var(--blur-2)) saturate(var(--sat-2));
-    -webkit-backdrop-filter:blur(var(--blur-2)) saturate(var(--sat-2));
-    box-shadow:0 6px 20px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.07);
-  }
-  /* nozik ikki rangli gradient ramka — chapda moss, o'ngda accent, ular
-     o'rtada bir-biriga tutashadi (mask orqali faqat ingichka chekka ko'rinadi) */
-  .swipe-hints::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:inherit;
-    padding:0.4px;
-    background:linear-gradient(90deg, rgba(124,154,107,0.3), rgba(255,255,255,0.07) 50%, rgba(217,105,79,0.3));
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;
-    mask-composite:exclude;
-    pointer-events:none;
   }
   .swipe-hints .hint{
     position:relative;
@@ -1883,25 +1862,8 @@
     flex-shrink:0;
     background:linear-gradient(180deg, transparent, var(--glass-border), transparent);
   }
-  .swipe-hints .arrow{
-    display:inline-block;
-    font-size:14px;
-    flex-shrink:0;
-  }
-  /* strelkalar yengil "turtki" bilan tebranadi — qaysi tomonga
-     siljitish kerakligini so'zsiz ham anglatadi */
-  @keyframes nudgeLeft{
-    0%,100%{transform:translateX(0); opacity:0.7;}
-    50%{transform:translateX(-4px); opacity:1;}
-  }
-  @keyframes nudgeRight{
-    0%,100%{transform:translateX(0); opacity:0.7;}
-    50%{transform:translateX(4px); opacity:1;}
-  }
-  .swipe-hints .hint.left .arrow{animation:nudgeLeft 1.8s ease-in-out infinite;}
-  .swipe-hints .hint.right .arrow{animation:nudgeRight 1.8s ease-in-out infinite; animation-delay:0.5s;}
   @media (prefers-reduced-motion: reduce){
-    .swipe-hints .arrow, .swipe-hints .hint::after{animation:none !important;}
+    .swipe-hints .hint::after{animation:none !important;}
   }
 
   .progress-note{
@@ -3946,6 +3908,9 @@
   .ct-table-seat-card.guess-pending{cursor:default;}
   .ct-table-seat-card.guess-correct{border-color:rgba(124,154,107,0.55); background:rgba(124,154,107,0.16);}
   .ct-table-seat-card.guess-correct .ct-table-seat-card-sub{color:var(--moss-soft); font-weight:700;}
+  .ct-table-seat-card.guess-revealed-wrong{border-color:rgba(217,105,79,0.5); background:rgba(217,105,79,0.14);}
+  .ct-table-seat-card.guess-revealed-wrong .ct-table-seat-card-sub{color:var(--accent); font-weight:700;}
+  .ct-guess-wrong-mark{font-size:14px; font-weight:700; color:var(--accent);}
   .ct-guess-form{display:flex; align-items:center; gap:5px; margin-top:5px;}
   .ct-guess-input{
     width:76px;
@@ -5193,7 +5158,6 @@
      html.lite klassi (yuqorida, sahifa ochilishidan oldin aniqlanadi) yoqilganda,
      doimiy ishlaydigan dekorativ animatsiyalar to'xtatiladi — shu bilan arzon
      Android telefonlarda barcha tugmalar va o'tishlar silliq ishlashda davom etadi. */
-  html.lite .swipe-hints .arrow,
   html.lite .swipe-hints .hint::after{
     animation:none !important;
   }
@@ -5368,9 +5332,9 @@
       <!-- cards injected here -->
     </div>
     <div class="swipe-hints">
-      <div class="hint left"><span class="arrow">←</span><b>Bilganlarim</b></div>
+      <div class="hint left"><b>Bilganlarim</b></div>
       <div class="hint-divider"></div>
-      <div class="hint right"><b>Navbatga</b><span class="arrow">→</span></div>
+      <div class="hint right"><b>Navbatga</b></div>
     </div>
     <div class="progress-note" id="progressNote"></div>
   </section>
@@ -8895,7 +8859,11 @@
       const card = lastRoomData.cards && lastRoomData.cards[uid];
       if(!card) return;
       const existing = currentGuessRecord(uid);
-      if(existing && existing.correct) return;
+      // Bitta urinishdan keyin javob yakuniy hisoblanadi — to'g'ri yoki
+      // xato bo'lishidan qat'iy nazar, qayta yozib bo'lmaydi (xato bo'lsa
+      // to'g'ri javob darhol ochib ko'rsatiladi, qayta urinishni kutib
+      // o'tirilmaydi).
+      if(existing) return;
       const answer = (rawAnswer || '').toString().trim();
       if(!answer) return;
       const norm = s => (s || '').toString().trim().toLowerCase().replace(/\s+/g, '');
@@ -8915,11 +8883,11 @@
       };
       // To'g'ri topilsa — taxmin qilgan kishining umumiy ochkosiga +1
       // qo'shiladi. Xato bo'lsa ochko o'zgarmaydi (0 bilan qoladi) va
-      // ishtirokchi qayta urinib ko'rishi mumkin.
+      // javob yozish oynasi butunlay yopiladi (qayta urinish yo'q).
       if(isCorrect) updates[`scores.${user.uid}`] = increment(1);
       try{
         await updateDoc(waitingRoomRef, updates);
-        if(isCorrect) guessDrafts.delete(uid); else guessDrafts.set(uid, answer);
+        guessDrafts.delete(uid);
       }catch(e){
         console.error("Javobni tekshirishda xatolik:", e.message);
         showCardTransferToast("Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
@@ -9344,21 +9312,28 @@
                      <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
                      <span class="ct-table-seat-card-sub">${escapeCt(card.romaji || '')} <span class="ct-guess-correct-mark">&#10003;</span></span>
                    </div>`;
+              } else if(guess && guess.correct === false){
+                // Xato javob berildi — endi qayta urinishni kutib
+                // o'tirmasdan, darhol o'rindiqda to'g'ri javob (romaji)
+                // ochib ko'rsatiladi va javob yozish oynasi (markazdagi
+                // kartochka) butunlay yopiladi.
+                cardHTML = `<div class="ct-table-seat-card guess-revealed-wrong" data-card-uid="${escapeCt(uid)}">
+                     <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
+                     <span class="ct-table-seat-card-sub">${escapeCt(card.romaji || '')} <span class="ct-guess-wrong-mark">&#10007;</span></span>
+                   </div>`;
               } else {
                 // Bu kartochka endi o'rindiqda emas — oyna/stol markazidagi
                 // kattaroq kartochka sifatida ko'rsatiladi (pastda
                 // centerCardsHTML'ga qo'shiladi), shu sababli bu yerda
                 // o'rindiq ichida hech narsa chizilmaydi.
-                const wasWrong = !!(guess && guess.correct === false);
-                const draftVal = guessDrafts.has(uid) ? guessDrafts.get(uid) : (guess ? (guess.answer || '') : '');
+                const draftVal = guessDrafts.has(uid) ? guessDrafts.get(uid) : '';
                 centerCardsHTML.push(`<div class="ct-center-card guess-pending" data-card-uid="${escapeCt(uid)}">
                      <div class="ct-center-card-from">${escapeCt(name)}</div>
                      <span class="ct-table-seat-card-kanji ct-center-card-kanji">${escapeCt(card.kanji || '')}</span>
                      <div class="ct-guess-form ct-center-guess-form">
-                       <input type="text" class="ct-guess-input ct-center-guess-input${wasWrong ? ' wrong' : ''}" data-guess-uid="${escapeCt(uid)}" value="${escapeCt(draftVal)}" placeholder="romaji" autocomplete="off" autocorrect="off" spellcheck="false">
+                       <input type="text" class="ct-guess-input ct-center-guess-input" data-guess-uid="${escapeCt(uid)}" value="${escapeCt(draftVal)}" placeholder="romaji" autocomplete="off" autocorrect="off" spellcheck="false">
                        <button type="button" class="ct-guess-check-btn ct-center-guess-check-btn" data-guess-uid="${escapeCt(uid)}">&#10003;</button>
                      </div>
-                     ${wasWrong ? '<div class="ct-guess-wrong-hint ct-center-guess-wrong-hint">Noto\'g\'ri, qayta urining</div>' : ''}
                    </div>`);
               }
             }
