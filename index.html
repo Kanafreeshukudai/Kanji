@@ -1622,19 +1622,33 @@
     transform:translateZ(0) rotateY(180deg);
     -webkit-transform:translateZ(0) rotateY(180deg);
     color:var(--ink);
-    justify-content:space-between;
     background:linear-gradient(165deg, rgba(21,39,49,0.35), rgba(13,27,34,0.28)), var(--glass-bg);
-    /* ---------- ICHKI SCROLL: uzun matn (ko'p "boshqa o'qilishlar") kartochka
-       balandligidan oshib ketsa, endi pastga tortib qolgan qismini ko'rish
-       mumkin — avval bu joy overflow:hidden bo'lgani uchun ortiqcha matn
-       shunchaki kesilib qolar, tortib scroll qilib bo'lmas edi. */
+    /* endi overflow/scroll shu joyda emas — pastdagi .face-back-scroll'da
+       (3D-aylantirilgan (rotateY) element ustida to'g'ridan-to'g'ri
+       overflow-y:auto qo'yilsa, ba'zi mobil brauzerlarda (ayniqsa iOS
+       Safari) ichki scroll ishlamay qolishi mumkin — shu sababli scroll
+       konteyneri alohida, aylanmagan farzand elementga ko'chirildi). */
+  }
+  /* ---------- ICHKI SCROLL: uzun matn (ko'p "boshqa o'qilishlar") kartochka
+     balandligidan oshib ketsa, endi pastga tortib qolgan qismini ko'rish
+     mumkin — bu konteyner .face.back ichida joylashgan, lekin o'zi 3D
+     aylanishga ega emas, shu sababli teginish orqali tepa-pastga scroll
+     qilish barcha qurilmalarda (jumladan iOS'da) ishonchli ishlaydi. */
+  .face-back-scroll{
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior:contain;
     scrollbar-width:thin;
+    touch-action:pan-y;
   }
-  .face.back > *{ position:relative; z-index:1; }
 
   .face-top-row{
     display:flex;
@@ -5556,8 +5570,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -6146,6 +6160,58 @@
     {id:"kubikanji27", day:27, group:"首", kanji:"首", romaji:"kubi", type:"kun'yomi", reading:"首(kubi) — yakka kanji", otherReadings:"on: シュ(shu) · kun: くび(kubi)", uz:"bo'yin, bosh"},
     {id:"tekubi27", day:27, group:"首", kanji:"手首", romaji:"tekubi", type:"kun + kun", reading:"手(te) + 首(kubi)", uz:"bilak"},
     {id:"shushou27", day:27, group:"首", kanji:"首相", romaji:"shushou", type:"on + on", reading:"首(shu) + 相(shou)", uz:"Bosh Vazir"},
+
+    // ---- 28-kun ----
+    {id:"kokorokanji28", day:28, group:"心", kanji:"心", romaji:"kokoro", type:"kun'yomi", reading:"心(kokoro) — yakka kanji", otherReadings:"on: シン(shin) · kun: こころ(kokoro)", uz:"yurak"},
+    {id:"chuushin28", day:28, group:"心", kanji:"中心", romaji:"chuushin", type:"on + on", reading:"中(chuu) + 心(shin)", uz:"markaz, o'rta"},
+    {id:"kanshin28", day:28, group:"心", kanji:"関心", romaji:"kanshin", type:"on + on", reading:"関(kan) + 心(shin)", uz:"qiziqish"},
+    {id:"kanshinsuru28", day:28, group:"心", kanji:"感心する", romaji:"kanshin suru", type:"on + on", reading:"感(kan) + 心(shin)", uz:"juda ta'sirlanish"},
+    {id:"shinpaisuru28", day:28, group:"心", kanji:"心配する", romaji:"shinpai suru", type:"on + on", reading:"心(shin) + 配(pai)", uz:"tashvishlanish"},
+
+    {id:"taberukanji28", day:28, group:"食", kanji:"食", romaji:"taberu", type:"kun'yomi", reading:"食べる(taberu) — yakka kanji", otherReadings:"on: ショク(shoku) · kun: た-べる(taberu)", uz:"ovqatlanish, ovqat"},
+    {id:"taberu28", day:28, group:"食", kanji:"食べる", romaji:"taberu", type:"kun'yomi", reading:"食べる(taberu)", uz:"ovqatlanmoq"},
+    {id:"tabemono28", day:28, group:"食", kanji:"食べ物", romaji:"tabemono", type:"kun + kun", reading:"食べ(tabe) + 物(mono)", uz:"oziq-ovqat"},
+    {id:"shokudou28", day:28, group:"食", kanji:"食堂", romaji:"shokudou", type:"on + on", reading:"食(shoku) + 堂(dou)", uz:"kafeteriya"},
+    {id:"shokuji28", day:28, group:"食", kanji:"食事", romaji:"shokuji", type:"on + on", reading:"食(shoku) + 事(ji)", uz:"ovqat"},
+
+    {id:"kurukanji28", day:28, group:"来", kanji:"来", romaji:"kuru", type:"kun'yomi", reading:"来る(kuru) — yakka kanji", otherReadings:"on: ライ(rai) · kun: く-る(kuru), き-たる(kitaru), こ-ない(konai), き-ます(kimasu)", uz:"kel, keyingisi"},
+    {id:"kuru28", day:28, group:"来", kanji:"来る", romaji:"kuru", type:"kun'yomi", reading:"来る(kuru)", uz:"kelmoq"},
+    {id:"kimasu28", day:28, group:"来", kanji:"来ます", romaji:"kimasu", type:"kun'yomi", reading:"来ます(kimasu)", uz:"kelmoq"},
+    {id:"konai28", day:28, group:"来", kanji:"来ない", romaji:"konai", type:"kun'yomi", reading:"来ない(konai)", uz:"kelmaslik"},
+    {id:"rainen28", day:28, group:"来", kanji:"来年", romaji:"rainen", type:"on + on", reading:"来(rai) + 年(nen)", uz:"keyingi yil"},
+    {id:"raishuu28", day:28, group:"来", kanji:"来週", romaji:"raishuu", type:"on + on", reading:"来(rai) + 週(shuu)", uz:"keyingi hafta"},
+
+    {id:"ikukanji28", day:28, group:"行", kanji:"行", romaji:"iku", type:"kun'yomi", reading:"行く(iku) — yakka kanji", otherReadings:"on: コウ(kou), ギョウ(gyou), アン(an) · kun: い-く(iku), ゆ-く(yuku), おこな-う(okonau)", uz:"ket, amalga oshirish"},
+    {id:"iku28", day:28, group:"行", kanji:"行く", romaji:"iku", type:"kun'yomi", reading:"行く(iku)", uz:"ketmoq"},
+    {id:"ginkou28", day:28, group:"行", kanji:"銀行", romaji:"ginkou", type:"on + on", reading:"銀(gin) + 行(kou)", uz:"bank"},
+    {id:"ryokou28", day:28, group:"行", kanji:"旅行", romaji:"ryokou", type:"on + on", reading:"旅(ryo) + 行(kou)", uz:"sayohat"},
+    {id:"hikouki28", day:28, group:"行", kanji:"飛行機", romaji:"hikouki", type:"on + on + on", reading:"飛(hi) + 行(kou) + 機(ki)", uz:"samolyot"},
+
+    // ---- 29-kun ----
+    {id:"hairukanji29", day:29, group:"入", kanji:"入", romaji:"hairu", type:"kun'yomi", reading:"入る(hairu) — yakka kanji", otherReadings:"on: ニュウ(nyuu) · kun: はい-る(hairu), い-る(iru), い-れる(ireru)", uz:"kiriting, kiritish, qo'ying"},
+    {id:"hairu29", day:29, group:"入", kanji:"入る", romaji:"hairu", type:"kun'yomi", reading:"入る(hairu)", uz:"kirmoq"},
+    {id:"ireru29", day:29, group:"入", kanji:"入れる", romaji:"ireru", type:"kun'yomi", reading:"入れる(ireru)", uz:"kirgizmoq"},
+    {id:"iriguchi29", day:29, group:"入", kanji:"入口", romaji:"iriguchi", type:"kun + kun", reading:"入り(iri) + 口(guchi)", uz:"kirish joyi"},
+    {id:"nyuugakusuru29", day:29, group:"入", kanji:"入学する", romaji:"nyuugaku suru", type:"on + on", reading:"入(nyuu) + 学(gaku)", uz:"o'qishga kirmoq"},
+    {id:"nyuuinsuru29", day:29, group:"入", kanji:"入院する", romaji:"nyuuin suru", type:"on + on", reading:"入(nyuu) + 院(in)", uz:"kasalxonaga yotmoq"},
+
+    {id:"derukanji29", day:29, group:"出", kanji:"出", romaji:"deru", type:"kun'yomi", reading:"出る(deru) — yakka kanji", otherReadings:"on: シュツ(shutsu), スイ(sui) · kun: で-る(deru), だ-す(dasu)", uz:"chiqish, tark eting"},
+    {id:"deru29", day:29, group:"出", kanji:"出る", romaji:"deru", type:"kun'yomi", reading:"出る(deru)", uz:"chiqmoq"},
+    {id:"dekakeru29", day:29, group:"出", kanji:"出かける", romaji:"dekakeru", type:"kun'yomi", reading:"出かける(dekakeru)", uz:"tashqariga chiqmoq"},
+    {id:"dasu29", day:29, group:"出", kanji:"出す", romaji:"dasu", type:"kun'yomi", reading:"出す(dasu)", uz:"biror narsani chiqarmoq"},
+    {id:"shucchou29", day:29, group:"出", kanji:"出張", romaji:"shucchou", type:"on + on", reading:"出(shu) + 張(chou)", uz:"ish safari"},
+    {id:"shusshin29", day:29, group:"出", kanji:"出身", romaji:"shusshin", type:"on + on", reading:"出(shu) + 身(shin)", uz:"tug'ilgan joyi"},
+
+    {id:"kakukanji29", day:29, group:"書", kanji:"書", romaji:"kaku", type:"kun'yomi", reading:"書く(kaku) — yakka kanji", otherReadings:"on: ショ(sho) · kun: か-く(kaku), が-き(gaki)", uz:"yozish"},
+    {id:"kaku29", day:29, group:"書", kanji:"書く", romaji:"kaku", type:"kun'yomi", reading:"書く(kaku)", uz:"yozmoq"},
+    {id:"toshokan29", day:29, group:"書", kanji:"図書館", romaji:"toshokan", type:"on + on + on", reading:"図(to) + 書(sho) + 館(kan)", uz:"kutubxona"},
+    {id:"hagaki29", day:29, group:"書", kanji:"葉書", romaji:"hagaki", type:"kun + kun", reading:"葉(ha) + 書(gaki)", uz:"otkritka"},
+    {id:"jisho29", day:29, group:"書", kanji:"辞書", romaji:"jisho", type:"on + on", reading:"辞(ji) + 書(sho)", uz:"lug'at"},
+
+    {id:"iukanji29", day:29, group:"言", kanji:"言", romaji:"iu", type:"kun'yomi", reading:"言う(iu) — yakka kanji", otherReadings:"on: ゲン(gen), ゴン(gon) · kun: い-う(iu), こと(koto)", uz:"ayt, so'z"},
+    {id:"iu29", day:29, group:"言", kanji:"言う", romaji:"iu", type:"kun'yomi", reading:"言う(iu)", uz:"aytmoq"},
+    {id:"kotoba29", day:29, group:"言", kanji:"言葉", romaji:"kotoba", type:"kun + kun", reading:"言(koto) + 葉(ba)", uz:"so'z"},
+    {id:"hougen29", day:29, group:"言", kanji:"方言", romaji:"hougen", type:"on + on", reading:"方(hou) + 言(gen)", uz:"dialekt"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -6692,19 +6758,21 @@
           <div class="kanji-display">${word.kanji}</div>
         </div>
         <div class="face back">
-          <div class="face-top-row">
-            <span class="type-badge">o'zbekcha</span>
-            <div class="hanko">${hanko(word.id)}</div>
-          </div>
-          <div class="back-center">
-            <div class="translation">${word.uz}</div>
-          </div>
-          <div class="back-bottom">
-            <div class="divider"></div>
-            <div class="reading-label">Kun'yomi / On'yomi</div>
-            <div class="back-reading"><span class="rk">${word.reading}</span></div>
-            <div class="back-reading-full">${word.romaji}</div>
-            ${word.otherReadings ? `<div class="other-readings-label">Kanjining boshqa o'qilishlari</div><div class="other-readings">${word.otherReadings}</div>` : ''}
+          <div class="face-back-scroll">
+            <div class="face-top-row">
+              <span class="type-badge">o'zbekcha</span>
+              <div class="hanko">${hanko(word.id)}</div>
+            </div>
+            <div class="back-center">
+              <div class="translation">${word.uz}</div>
+            </div>
+            <div class="back-bottom">
+              <div class="divider"></div>
+              <div class="reading-label">Kun'yomi / On'yomi</div>
+              <div class="back-reading"><span class="rk">${word.reading}</span></div>
+              <div class="back-reading-full">${word.romaji}</div>
+              ${word.otherReadings ? `<div class="other-readings-label">Kanjining boshqa o'qilishlari</div><div class="other-readings">${word.otherReadings}</div>` : ''}
+            </div>
           </div>
         </div>
       </div>
