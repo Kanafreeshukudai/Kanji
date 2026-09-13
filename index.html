@@ -1835,35 +1835,36 @@
     text-overflow:ellipsis;
   }
   .swipe-hints .hint b{font-weight:800;}
-  .swipe-hints .hint.left{color:var(--moss-soft);}
-  .swipe-hints .hint.right{color:var(--accent-soft);}
-  /* har bir yarim orqasida sekin nafas oluvchi rangli nur — kartochkani
-     qaysi tomonga tashlash nima qilishini his qildiradi */
-  .swipe-hints .hint::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    z-index:-1;
-    animation:hintGlowBreathe 3.2s ease-in-out infinite;
+  .swipe-hints .hint{color:var(--ink-soft);}
+  .swipe-hints .hint-arrow{
+    display:inline-block;
+    font-size:13px;
+    line-height:1;
+    font-weight:800;
   }
-  .swipe-hints .hint.left::after{
-    background:radial-gradient(120% 140% at 0% 50%, rgba(124,154,107,0.32), transparent 65%);
+  .swipe-hints .hint.left .hint-arrow{
+    color:var(--moss-soft);
+    animation:hintArrowBreatheLeft 1.6s ease-in-out infinite;
   }
-  .swipe-hints .hint.right::after{
-    background:radial-gradient(120% 140% at 100% 50%, rgba(217,105,79,0.32), transparent 65%);
-    animation-delay:1.6s;
+  .swipe-hints .hint.right .hint-arrow{
+    color:var(--accent-soft);
+    animation:hintArrowBreatheRight 1.6s ease-in-out infinite;
   }
-  @keyframes hintGlowBreathe{
-    0%,100%{opacity:0.5;}
-    50%{opacity:1;}
+  @keyframes hintArrowBreatheLeft{
+    0%,100%{transform:translateX(0); opacity:0.6;}
+    50%{transform:translateX(-4px); opacity:1;}
+  }
+  @keyframes hintArrowBreatheRight{
+    0%,100%{transform:translateX(0); opacity:0.6;}
+    50%{transform:translateX(4px); opacity:1;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .swipe-hints .hint-arrow{animation:none !important;}
   }
   .swipe-hints .hint-divider{
     width:1px;
     flex-shrink:0;
     background:linear-gradient(180deg, transparent, var(--glass-border), transparent);
-  }
-  @media (prefers-reduced-motion: reduce){
-    .swipe-hints .hint::after{animation:none !important;}
   }
 
   .progress-note{
@@ -2540,6 +2541,22 @@
   }
   .view-enter{
     animation:viewFadeIn .32s cubic-bezier(.2,.8,.2,1);
+  }
+
+  /* ---------- Xona ICHKARISIGA kirish (ctRoomPage) ----------
+     "Boshlash" tugmasi bosilib xona holati o'zgarganda, Firestore orqali
+     bu barcha ishtirokchilarning kliyentiga bir vaqtda yetadi va har
+     birida xonaga kirish shu animatsiya bilan bo'ladi — lite-mode va
+     prefers-reduced-motion sozlamalaridan qat'i nazar, hamma
+     foydalanuvchida bir xilda ijro etilishi kerak, chunki bu shunchaki
+     bezak emas, aynan "xonaga kirdim" degan muhim lahzani bildiradi. */
+  @keyframes ctRoomEnterFade{
+    0%{ opacity:0; transform:translateY(18px) scale(0.965); filter:blur(2px); }
+    55%{ opacity:1; transform:translateY(-2px) scale(1.008); filter:blur(0); }
+    100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+  }
+  .ct-room-enter{
+    animation:ctRoomEnterFade .7s cubic-bezier(.22,.61,.36,1) !important;
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -5158,9 +5175,7 @@
      html.lite klassi (yuqorida, sahifa ochilishidan oldin aniqlanadi) yoqilganda,
      doimiy ishlaydigan dekorativ animatsiyalar to'xtatiladi — shu bilan arzon
      Android telefonlarda barcha tugmalar va o'tishlar silliq ishlashda davom etadi. */
-  html.lite .swipe-hints .hint::after{
-    animation:none !important;
-  }
+  html.lite .swipe-hints .hint-arrow{ animation:none !important; }
   html.lite .hold-progress-fill.animate{ transition-duration:0s; transform:scaleX(1); }
 </style>
 </head>
@@ -5332,9 +5347,9 @@
       <!-- cards injected here -->
     </div>
     <div class="swipe-hints">
-      <div class="hint left"><b>Bilganlarim</b></div>
+      <div class="hint left"><span class="hint-arrow">←</span> <b>Bilganlarim</b></div>
       <div class="hint-divider"></div>
-      <div class="hint right"><b>Navbatga</b></div>
+      <div class="hint right"><b>Navbatga</b> <span class="hint-arrow">→</span></div>
     </div>
     <div class="progress-note" id="progressNote"></div>
   </section>
@@ -9235,7 +9250,16 @@
       const wasHidden = roomPageEl.classList.contains('hidden');
       roomPageEl.classList.remove('hidden');
       roomPageEl.setAttribute('aria-hidden', 'false');
-      if(wasHidden) lockPageScroll();
+      if(wasHidden){
+        lockPageScroll();
+        // Xost "Boshlash" tugmasini bosgan payt — Firestore orqali bu
+        // holat BARCHA ishtirokchilarning kliyentiga bir vaqtda yetadi,
+        // shuning uchun xonaga kirish shu yerda, HAMMA foydalanuvchida
+        // bir xilda, yumshoq va uzunroq animatsiya bilan ijro etiladi.
+        roomPageEl.classList.remove('ct-room-enter');
+        void roomPageEl.offsetWidth; // reflow — animatsiyani qaytadan boshlash uchun
+        roomPageEl.classList.add('ct-room-enter');
+      }
       startRoomParticles();
     }
     function closeRoomPage(){
