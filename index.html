@@ -5556,8 +5556,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -6111,7 +6111,7 @@
     {id:"hidarite26", day:26, group:"左", kanji:"左手", romaji:"hidarite", type:"kun + kun", reading:"左(hidari) + 手(te)", uz:"chap qo'l"},
 
     {id:"maekanji26", day:26, group:"前", kanji:"前", romaji:"mae", type:"kun'yomi", reading:"前(mae) — yakka kanji", otherReadings:"on: ゼン(zen) · kun: まえ(mae)", uz:"oldin/old, oldida"},
-    {id:"gozen26", day:26, group:"前", kanji:"午前", romaji:"gozen", type:"on + on", reading:"午(go) + 前(zen)", uz:"A.M."},
+    {id:"gozen26", day:26, group:"前", kanji:"午前", romaji:"gozen", type:"on + on", reading:"午(go) + 前(zen)", uz:"tushdan oldin"},
     {id:"gozenchuu26", day:26, group:"前", kanji:"午前中", romaji:"gozenchuu", type:"on + on + on", reading:"午(go) + 前(zen) + 中(chuu)", uz:"ertalabda"},
     {id:"namae26", day:26, group:"前", kanji:"名前", romaji:"namae", type:"kun + kun", reading:"名(na) + 前(mae)", uz:"nomi"},
     {id:"zenhan26", day:26, group:"前", kanji:"前半", romaji:"zenhan", type:"on + on", reading:"前(zen) + 半(han)", uz:"birinchi yarmi"},
@@ -6127,6 +6127,25 @@
     {id:"gaikoku26", day:26, group:"外", kanji:"外国", romaji:"gaikoku", type:"on + on", reading:"外(gai) + 国(koku)", uz:"xorijiy davlat"},
     {id:"kaigai26", day:26, group:"外", kanji:"海外", romaji:"kaigai", type:"on + on", reading:"海(kai) + 外(gai)", uz:"chet el"},
     {id:"igaina26", day:26, group:"外", kanji:"意外な", romaji:"igaina", type:"on + on", reading:"意(i) + 外(gai)", uz:"kutilmagan"},
+
+    // ---- 27-kun ----
+    {id:"tenkanji27", day:27, group:"天", kanji:"天", romaji:"ama", type:"kun'yomi", reading:"天(ama) — yakka kanji", otherReadings:"on: テン(ten) · kun: あま(ama), あめ(ame)", uz:"jannat"},
+    {id:"tenki27", day:27, group:"天", kanji:"天気", romaji:"tenki", type:"on + on", reading:"天(ten) + 気(ki)", uz:"ob-havo"},
+    {id:"tengoku27", day:27, group:"天", kanji:"天国", romaji:"tengoku", type:"on + on", reading:"天(ten) + 国(goku)", uz:"jannat"},
+    {id:"amanogawa27", day:27, group:"天", kanji:"天の川", romaji:"amanogawa", type:"kun + kun", reading:"天(ama) + 川(gawa)", uz:"Somon yo'li"},
+
+    {id:"ottokanji27", day:27, group:"夫", kanji:"夫", romaji:"otto", type:"kun'yomi", reading:"夫(otto) — yakka kanji", otherReadings:"on: フ(fu), フウ(fuu) · kun: おっと(otto)", uz:"erim"},
+    {id:"fuufu27", day:27, group:"夫", kanji:"夫婦", romaji:"fuufu", type:"on + on", reading:"夫(fu) + 婦(fu)", uz:"er-xotin"},
+    {id:"fujin27", day:27, group:"夫", kanji:"~夫人", romaji:"fujin", type:"on + on", reading:"夫(fu) + 人(jin)", uz:"Xonim.~, Xonim~"},
+    {id:"kufuu27", day:27, group:"夫", kanji:"*工夫", romaji:"kufuu", type:"on + on", reading:"工(ku) + 夫(fuu)", uz:"ishlab chiqish (reja) o'ylab topish"},
+
+    {id:"tatsukanji27", day:27, group:"立", kanji:"立", romaji:"tatsu", type:"kun'yomi", reading:"立つ(tatsu) — yakka kanji", otherReadings:"on: リツ(ritsu), リュウ(ryuu) · kun: た-つ(tatsu), た-てる(tateru)", uz:"turish, o'rnatish"},
+    {id:"tatsu27", day:27, group:"立", kanji:"立つ", romaji:"tatsu", type:"kun'yomi", reading:"立つ(tatsu)", uz:"turmoq"},
+    {id:"yakunitatsu27", day:27, group:"立", kanji:"役に立つ", romaji:"yaku ni tatsu", type:"on + kun", reading:"役(yaku) + 立つ(tatsu)", uz:"foydali"},
+
+    {id:"kubikanji27", day:27, group:"首", kanji:"首", romaji:"kubi", type:"kun'yomi", reading:"首(kubi) — yakka kanji", otherReadings:"on: シュ(shu) · kun: くび(kubi)", uz:"bo'yin, bosh"},
+    {id:"tekubi27", day:27, group:"首", kanji:"手首", romaji:"tekubi", type:"kun + kun", reading:"手(te) + 首(kubi)", uz:"bilak"},
+    {id:"shushou27", day:27, group:"首", kanji:"首相", romaji:"shushou", type:"on + on", reading:"首(shu) + 相(shou)", uz:"Bosh Vazir"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
