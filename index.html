@@ -8129,12 +8129,13 @@
 
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLite = document.documentElement.classList.contains('lite');
-    const COUNT = reduceMotion ? 0 : (isLite ? 14 : 26);
+    const COUNT = reduceMotion ? 0 : (isLite ? 22 : 44);
     // ichki render piksel zichligi — CSS o'lchami o'zgarmaydi, faqat
     // canvas'ning haqiqiy piksel "orqa qatlami" pastroq zichlikda chiziladi
     const RENDER_SCALE = isLite ? 0.55 : 0.75;
-    // palitra :root o'zgaruvchilaridan olingan rgb qiymatlar — accent, gold, moss, ink
-    const COLORS = ['217,105,79', '201,166,107', '124,154,107', '236,231,220'];
+    // rangsiz — faqat sof oq. Chuqurlik (yaqin/uzoq) rang bilan emas,
+    // o'lcham, yorqinlik va tezlik bilan beriladi.
+    const COLORS = ['255,255,255'];
     const sprites = []; // har rang uchun oldindan tayyorlangan aura sprite'i
 
     function buildSprites(){
@@ -8157,8 +8158,15 @@
       });
     }
 
+    // Mobil brauzerda scroll paytida manzil paneli yashirinib/chiqib,
+    // innerHeight o'zgaradi. Shu sababli canvas balandligi faqat OSHADI
+    // (kamaymaydi) — nuqtalar holati va masshtabi scroll'da o'zgarmaydi.
+    // Kenglik o'zgarsa (ekran burilsa) — to'liq qayta o'lchanadi.
     function resize(){
-      W = window.innerWidth; H = window.innerHeight;
+      const newW = window.innerWidth, newH = window.innerHeight;
+      if(W && newW === W && newH <= H) return;
+      if(W && newW !== W) H = 0;
+      W = newW; H = Math.max(H, newH);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       scale = dpr * RENDER_SCALE;
       canvas.width = Math.max(1, Math.round(W*scale));
@@ -8169,24 +8177,30 @@
     }
 
     function makeParticle(seedAnywhere){
-      const r = 0.7 + Math.random()*1.3;    // kichikroq nuqta — orqa fonda his qilinishi uchun
-      const startY = seedAnywhere ? Math.random()*H : H + r + Math.random()*60;
-      const reach = 60 + Math.random()*50; // ekran tepasidan qanchalik "oshib" ko'tarilib g'oyib bo'lishi
-      const colorIdx = (Math.random()*COLORS.length)|0;
+      // z: 0 = juda uzoq, 1 = juda yaqin. Kvadrat ko'rsatkich uzoq
+      // nuqtalarni ko'proq qiladi — tabiiy chuqurlik hissi beradi.
+      const z = Math.pow(Math.random(), 1.4);
+      const r = 0.45 + z*1.9;                         // uzoq — mayda, yaqin — yirik
+      const startY = seedAnywhere ? Math.random()*H : H + r*6 + Math.random()*60;
+      const reach = 60 + Math.random()*50;
+      // tezlik: chuqurlikka bog'liq (parallaks) + har bir nuqtaga tasodifiy koeffitsiyent
+      const speed = (4 + z*34) * (0.6 + Math.random()*0.8);
       return {
         x: Math.random()*W,
         y: startY,
         startY: startY,
         endY: -reach,
+        z: z,
         r: r,
-        auraR: (r*4.5) + Math.random()*2.5,  // aura kichikroq va yumshoqroq
-        speed: 9 + Math.random()*13,         // sekinroq — uzoqda, orqa fonda suzayotgandek tuyuladi
-        drift: (Math.random()-0.5)*6,
+        auraR: r*(3.2 + z*2.2),                       // yaqin nuqta yumshoqroq, kattaroq nur bilan
+        auraA: 0.25 + z*0.3,
+        speed: speed,
+        drift: (Math.random()-0.5)*(3 + z*9),
         swayPhase: Math.random()*Math.PI*2,
         swayFreq: 0.3 + Math.random()*0.4,
-        colorIdx: colorIdx,
-        color: COLORS[colorIdx],
-        maxAlpha: 0.12 + Math.random()*0.16,
+        colorIdx: 0,
+        color: COLORS[0],
+        maxAlpha: 0.14 + z*0.6 + Math.random()*0.08,  // uzoq — xira, yaqin — yorqin
       };
     }
 
@@ -8226,14 +8240,14 @@
         const a = envelope(p) * p.maxAlpha;
         if(a <= 0.004) continue;
         // aura — oldindan tayyorlangan sprite, arzon drawImage
-        ctx.globalAlpha = a;
+        ctx.globalAlpha = a*p.auraA;
         const s = p.auraR*2;
         ctx.drawImage(sprites[p.colorIdx], p.x-s/2, p.y-s/2, s, s);
         // yorqin markaz — nuqtaning o'zi biroz aniqroq ko'rinishi uchun
         ctx.globalAlpha = Math.min(1, a*1.3);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${p.color},1)`;
-        ctx.arc(p.x, p.y, p.r*0.55, 0, Math.PI*2);
+        ctx.arc(p.x, p.y, p.r*0.6, 0, Math.PI*2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
