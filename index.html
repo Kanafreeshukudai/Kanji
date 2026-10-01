@@ -529,6 +529,141 @@
     transform:translateX(-50%) translateY(0);
   }
 
+  /* ---------- "Bilganlarim" / "Navbatga" bosilganda: surish haqida ko'rsatma oynasi ---------- */
+  .swipe-hints .hint{ cursor:pointer; -webkit-tap-highlight-color:transparent; transition:opacity .15s ease; }
+  .swipe-hints .hint:active{ opacity:.7; }
+  .swipe-hints .hint:focus-visible{ outline:2px solid var(--glass-border); outline-offset:-4px; border-radius:14px; }
+
+  .swipe-tip-overlay{
+    position:fixed; inset:0; z-index:10600;
+    display:flex; align-items:center; justify-content:center;
+    padding:22px;
+    background:rgba(6,7,9,0.62);
+    backdrop-filter:blur(10px) saturate(140%);
+    -webkit-backdrop-filter:blur(10px) saturate(140%);
+    opacity:0; pointer-events:none;
+    transition:opacity .3s ease;
+  }
+  .swipe-tip-overlay.show{ opacity:1; pointer-events:auto; }
+  .swipe-tip-modal{
+    position:relative;
+    width:100%; max-width:380px;
+    border-radius:26px;
+    padding:26px 22px 22px;
+    text-align:center;
+    background:var(--bg-1);
+    border:1px solid var(--glass-border-soft);
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06);
+    transform:translateY(14px) scale(0.96);
+    transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    overflow:hidden;
+  }
+  .swipe-tip-overlay.show .swipe-tip-modal{ transform:translateY(0) scale(1); }
+  /* yumshoq rangli yorug'lik — chap (yashil) va o'ng (marjon) */
+  .swipe-tip-modal::before,
+  .swipe-tip-modal::after{
+    content:""; position:absolute; top:-70px; width:190px; height:190px;
+    border-radius:50%; filter:blur(48px); opacity:.22; pointer-events:none;
+  }
+  .swipe-tip-modal::before{ left:-80px; background:var(--moss); }
+  .swipe-tip-modal::after{ right:-80px; background:var(--accent); }
+  .swipe-tip-modal > *{ position:relative; z-index:1; }
+
+  .swipe-tip-close{
+    position:absolute !important; top:14px; right:14px;
+    width:30px; height:30px; border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg); color:var(--ink-soft);
+    font-size:15px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .swipe-tip-close:active{ transform:scale(0.9); }
+
+  /* --- surish animatsiyasi (demo) --- */
+  .swipe-demo{
+    position:relative; height:104px; margin:2px auto 12px;
+  }
+  .swipe-demo-card{
+    position:absolute; left:50%; top:12px;
+    width:62px; height:84px; margin-left:-31px;
+    border-radius:12px;
+    background:linear-gradient(165deg, var(--panel-2), var(--panel-1));
+    border:1px solid var(--glass-border);
+    box-shadow:0 10px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Shippori Mincho', serif; font-size:30px; font-weight:700;
+    color:var(--gold);
+    animation:swipeDemoCard 5.2s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  .swipe-demo-tag{
+    position:absolute; top:40px;
+    padding:5px 10px; border-radius:10px;
+    font-size:10.5px; font-weight:900; letter-spacing:.06em;
+    border:2px solid; background:rgba(20,22,25,0.85);
+    opacity:0;
+  }
+  .swipe-demo-tag.left{ left:6px; color:var(--moss-soft); border-color:var(--moss-soft); transform:rotate(-10deg); animation:swipeDemoTagL 5.2s ease infinite; }
+  .swipe-demo-tag.right{ right:6px; color:var(--accent-soft); border-color:var(--accent-soft); transform:rotate(10deg); animation:swipeDemoTagR 5.2s ease infinite; }
+  @keyframes swipeDemoCard{
+    0%,8%{ transform:translateX(0) rotate(0); }
+    26%,34%{ transform:translateX(-92px) rotate(-14deg); border-color:var(--moss-soft); box-shadow:0 10px 24px rgba(0,0,0,0.55), 0 0 22px rgba(147,177,127,0.45); }
+    46%,58%{ transform:translateX(0) rotate(0); }
+    76%,84%{ transform:translateX(92px) rotate(14deg); border-color:var(--accent-soft); box-shadow:0 10px 24px rgba(0,0,0,0.55), 0 0 22px rgba(229,135,111,0.45); }
+    96%,100%{ transform:translateX(0) rotate(0); }
+  }
+  @keyframes swipeDemoTagL{ 0%,14%{opacity:0;} 24%,36%{opacity:1;} 44%,100%{opacity:0;} }
+  @keyframes swipeDemoTagR{ 0%,64%{opacity:0;} 74%,86%{opacity:1;} 94%,100%{opacity:0;} }
+
+  .swipe-tip-title{
+    font-family:'Shippori Mincho', serif;
+    font-size:21px; font-weight:800; margin:0 0 4px; color:var(--ink);
+  }
+  .swipe-tip-sub{
+    font-size:12.5px; font-weight:700; color:var(--gold);
+    letter-spacing:.02em; margin:0 0 16px;
+  }
+  .swipe-tip-row{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 12px; border-radius:16px; text-align:left;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border-soft);
+    opacity:.62;
+    transition:opacity .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .swipe-tip-row + .swipe-tip-row{ margin-top:8px; }
+  .swipe-tip-row .arr{
+    flex-shrink:0; width:38px; height:38px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; font-weight:900; line-height:1;
+  }
+  .swipe-tip-row.left .arr{ color:var(--moss-soft); background:rgba(124,154,107,0.16); border:1px solid rgba(147,177,127,0.4); }
+  .swipe-tip-row.right .arr{ color:var(--accent-soft); background:rgba(217,105,79,0.16); border:1px solid rgba(229,135,111,0.4); }
+  .swipe-tip-row b{ display:block; font-size:13.5px; font-weight:800; color:var(--ink); line-height:1.3; }
+  .swipe-tip-row b em{ font-style:normal; }
+  .swipe-tip-row.left b em{ color:var(--moss-soft); }
+  .swipe-tip-row.right b em{ color:var(--accent-soft); }
+  .swipe-tip-row small{ display:block; margin-top:2px; font-size:11.5px; font-weight:500; line-height:1.45; color:var(--ink-soft); }
+  .swipe-tip-row.active{ opacity:1; background:var(--glass-bg-strong); }
+  .swipe-tip-row.left.active{ border-color:rgba(147,177,127,0.7); box-shadow:0 0 18px -6px rgba(147,177,127,0.55); }
+  .swipe-tip-row.right.active{ border-color:rgba(229,135,111,0.7); box-shadow:0 0 18px -6px rgba(229,135,111,0.55); }
+  .swipe-tip-note{
+    margin:14px 0 14px; font-size:11.5px; font-weight:500; color:var(--ink-faint); line-height:1.5;
+  }
+  .swipe-tip-ok{
+    width:100%; padding:13px; border:none; border-radius:14px;
+    background:linear-gradient(155deg, var(--accent), var(--accent-soft));
+    color:#fff; font-size:14.5px; font-weight:700; font-family:inherit; cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(217,105,79,0.55);
+    transition:transform .2s ease;
+  }
+  .swipe-tip-ok:active{ transform:scale(0.97); }
+  @media (prefers-reduced-motion: reduce){
+    .swipe-demo-card, .swipe-demo-tag{ animation:none; }
+    .swipe-demo-tag.left, .swipe-demo-tag.right{ opacity:1; }
+  }
+  html.lite .swipe-tip-modal::before, html.lite .swipe-tip-modal::after{ display:none; }
+
   /* ---------- AI YORDAMCHI tugmasi — akkaunt belgisining chap tarafida ---------- */
   .ai-assist-btn{
     display:flex;
@@ -1873,6 +2008,33 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+  }
+  .swipe-hints .hint{
+    flex-direction:column;
+    gap:5px;
+  }
+  .swipe-hints .hint-label{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    max-width:100%;
+  }
+  .swipe-hints .hint-count{
+    min-width:30px;
+    padding:0 6px;
+    font-size:17px;
+    font-weight:800;
+    line-height:1.3;
+    text-align:center;
+    font-variant-numeric:tabular-nums;
+    background:none;
+    border:none;
+  }
+  .swipe-hints .hint.left .hint-count{
+    color:var(--moss-soft);
+    text-shadow:0 0 8px rgba(147,177,127,0.55), 0 0 18px rgba(147,177,127,0.3);
+  }
+  .swipe-hints .hint.right .hint-count{
+    color:var(--accent-soft);
+    text-shadow:0 0 8px rgba(229,135,111,0.55), 0 0 18px rgba(229,135,111,0.3);
   }
   .swipe-hints .hint b{font-weight:800;}
   .swipe-hints .hint{color:var(--ink-soft);}
@@ -4047,6 +4209,18 @@
   @media (prefers-reduced-motion: reduce){
     .ct-table-seat-avatar-slot::before{ animation:none !important; }
   }
+  /* ---------- NAVBAT (kartochkani ketma-ket uzatish) ---------- */
+  .ct-choose-flashcard-btn.ct-turn-locked{ opacity:.45; filter:saturate(.5); animation:none; }
+  .ct-table-seat-turn .ct-table-seat-avatar{
+    box-shadow:0 0 0 2px var(--gold), 0 0 18px rgba(201,166,107,0.6);
+  }
+  .ct-turn-badge{
+    margin-top:3px; padding:1px 7px; border-radius:999px;
+    font-size:9px; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
+    color:#1a1407; background:linear-gradient(155deg, var(--gold), #e2c98f);
+  }
+  .ct-turn-badge.me{ background:linear-gradient(155deg, var(--moss), var(--moss-soft)); color:#0B0D10; }
+  .ct-table-seat-card-to{ font-size:9px; font-weight:700; color:var(--gold); }
   .ct-table-seat-label{
     font-size:12.5px;
     color:var(--ink-soft);
@@ -5529,11 +5703,17 @@
       <!-- cards injected here -->
     </div>
     <div class="swipe-hints">
-      <div class="hint left"><span class="hint-arrow">←</span> <b>Bilganlarim</b></div>
+      <div class="hint left">
+        <div class="hint-label"><span class="hint-arrow">←</span> <b>Bilganlarim</b></div>
+        <div class="hint-count" id="hintCountKnown">0</div>
+      </div>
       <div class="hint-divider"></div>
-      <div class="hint right"><b>Navbatga</b> <span class="hint-arrow">→</span></div>
+      <div class="hint right">
+        <div class="hint-label"><b>Navbatga</b> <span class="hint-arrow">→</span></div>
+        <div class="hint-count" id="hintCountQueue">0</div>
+      </div>
     </div>
-    <div class="progress-note" id="progressNote"></div>
+    <div class="progress-note" id="progressNote" hidden></div>
   </section>
 
   <!-- KNOWN VIEW -->
@@ -6916,6 +7096,7 @@
   knownBanner.addEventListener('click', ()=>showTab('known'));
   function renderKnownBanner(){
     knownBannerBadge.textContent = known.length;
+    if(typeof updateHintCounts === 'function') updateHintCounts();
     knownBanner.classList.toggle('active', currentTab==='known' || (currentTab==='quiz' && quizReturnTab==='known'));
   }
 
@@ -7177,7 +7358,7 @@
     `;
     stage.appendChild(card);
     attachCardEvents(card);
-    progressNote.innerHTML = `Navbatda: <b>${queue.length}</b> ta so'z &nbsp;·&nbsp; Bilganlar: <b>${known.length}</b> ta`;
+    updateHintCounts();
   }
 
   function updateCounts(){
@@ -7188,6 +7369,15 @@
     const customEl = document.getElementById(`dayCount-${CUSTOM_DAY_ID}`);
     if(customEl) customEl.textContent = queues[CUSTOM_DAY_ID].length;
     renderKnownBanner();
+    updateHintCounts();
+  }
+
+  // Kartochka tagidagi "Bilganlarim" va "Navbatga" yozuvlari ostidagi sonlar
+  function updateHintCounts(){
+    const k = document.getElementById('hintCountKnown');
+    const q = document.getElementById('hintCountQueue');
+    if(k) k.textContent = known.length;
+    if(q) q.textContent = (queues[currentDay] || []).length;
   }
 
   // ---------- SWIPE / DRAG ----------
@@ -9109,6 +9299,7 @@
       if(!user || !waitingRoomRef || !lastRoomData) return;
       const card = lastRoomData.cards && lastRoomData.cards[uid];
       if(!card) return;
+      if(card.toUid && card.toUid !== user.uid) return; // boshqaga yo'llangan kartochka
       const existing = currentGuessRecord(uid);
       // Bitta urinishdan keyin javob yakuniy hisoblanadi — to'g'ri yoki
       // xato bo'lishidan qat'iy nazar, qayta yozib bo'lmaydi (xato bo'lsa
@@ -9507,6 +9698,48 @@
       unlockPageScroll();
       stopRoomParticles();
     }
+    // ---------- NAVBAT: kartochka ketma-ket uzatiladi ----------
+    // Tartib — `participantUids` ro'yxati bo'yicha: 1-ishtirokchi kartochka
+    // tanlab KEYINGISIGA uzatadi, keyingisi uni topib javob beradi, so'ng
+    // o'zi tanlab undan keyingisiga uzatadi va hokazo (oxirgisidan keyin
+    // yana birinchiga qaytadi). Javob berilmaguncha kartochka tanlab
+    // bo'lmaydi — shu tufayli javob oynasi va tanlash oynasi hech qachon
+    // bir vaqtda kerak bo'lmaydi.
+    function nameOfUid(data, uid){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(user && uid === user.uid) return 'Siz';
+      const profile = (data.participants && data.participants[uid]) || null;
+      if(profile && profile.name) return profile.name;
+      if(uid === data.hostUid && data.hostName) return data.hostName;
+      return 'Ishtirokchi';
+    }
+    function getTurnState(data){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      const uids = (data && data.participantUids) || [];
+      const myUid = user ? user.uid : null;
+      const turnUid = (data && data.turnUid && uids.includes(data.turnUid)) ? data.turnUid : (uids[0] || null);
+      const idx = uids.indexOf(turnUid);
+      const nextUid = uids.length > 1 ? uids[(idx + 1) % uids.length] : null;
+      // Navbat egasiga yo'llangan va hali javob berilmagan kartochka
+      let pendingFromUid = null;
+      if(turnUid && data && data.cards){
+        for(const senderUid of Object.keys(data.cards)){
+          const c = data.cards[senderUid];
+          if(!c || senderUid === turnUid || c.toUid !== turnUid) continue;
+          const g = data.guesses && data.guesses[`${turnUid}_${senderUid}`];
+          if(!g){ pendingFromUid = senderUid; break; }
+        }
+      }
+      return {
+        turnUid, nextUid, pendingFromUid,
+        isMyTurn: !!myUid && myUid === turnUid,
+        mustAnswerFirst: !!myUid && myUid === turnUid && !!pendingFromUid,
+        canSend: !!myUid && myUid === turnUid && !pendingFromUid && !!nextUid
+      };
+    }
+
     // Ishtirokchilarni stol atrofiga bir xilda taqsimlaydi: har doim
     // "o'zim" pastki markazda (180°) turadi, qolganlari shu nuqtadan
     // teng burchaklarda aylana bo'ylab joylashadi.
@@ -9523,6 +9756,7 @@
       // shu bilan barcha qabul qilingan kartochkalar bitta joyda, markazda
       // turadi, har birining o'z o'rindig'ida emas.
       let centerCardsHTML = [];
+      const turn = getTurnState(data);
       for(let i=0;i<size;i++){
         const angleDeg = 180 + i * (360/size);
         const angleRad = angleDeg * Math.PI/180;
@@ -9569,6 +9803,10 @@
               // (ko'rinadi), romanjisi va tarjimasi berkitiladi. Uni topib
               // yozish kerak, sayt to'g'ri/xato ekanini tekshiradi.
               const guess = currentGuessRecordSync(data, uid);
+              // Kartochka aniq bir ishtirokchiga yo'llangan bo'lsa (navbat
+              // tizimi), javob oynasi FAQAT o'shaning ekranida chiqadi.
+              // Boshqalar kartochkani kanji ko'rinishida kuzatib turadi.
+              const addressedToOther = !!(card.toUid && user && card.toUid !== user.uid);
               if(guess && guess.correct){
                 cardHTML = `<div class="ct-table-seat-card guess-correct" data-card-uid="${escapeCt(uid)}">
                      <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
@@ -9582,6 +9820,11 @@
                 cardHTML = `<div class="ct-table-seat-card guess-revealed-wrong" data-card-uid="${escapeCt(uid)}">
                      <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
                      <span class="ct-table-seat-card-sub">${escapeCt(card.romaji || '')} <span class="ct-guess-wrong-mark">&#10007;</span></span>
+                   </div>`;
+              } else if(addressedToOther){
+                cardHTML = `<div class="ct-table-seat-card" data-card-uid="${escapeCt(uid)}">
+                     <span class="ct-table-seat-card-kanji">${escapeCt(card.kanji || '')}</span>
+                     <span class="ct-table-seat-card-to">&rarr; ${escapeCt(nameOfUid(data, card.toUid))}</span>
                    </div>`;
               } else {
                 // Bu kartochka endi o'rindiqda emas — oyna/stol markazidagi
@@ -9607,11 +9850,14 @@
           // (avatarAuraActive Firestore orqali translyatsiya qilingan holatdan to'ldiriladi).
           const aura = avatarAuraActive.get(uid);
           const auraClass = aura ? (aura.type === 'correct' ? ' avatar-aura-correct' : ' avatar-aura-wrong') : '';
-          html += `<div class="ct-table-seat${isSelf ? ' ct-table-seat-self' : ''}" style="${style}">
+          const isTurnSeat = uid === turn.turnUid;
+          const turnBadge = isTurnSeat ? `<div class="ct-turn-badge${isSelf ? ' me' : ''}">${isSelf ? 'Sizning navbat' : 'Navbat'}</div>` : '';
+          html += `<div class="ct-table-seat${isSelf ? ' ct-table-seat-self' : ''}${isTurnSeat ? ' ct-table-seat-turn' : ''}" style="${style}">
               <div class="ct-table-seat-avatar-slot${auraClass}">
                 <div class="ct-table-seat-avatar">${avatarHTML}</div>
               </div>
               <div class="ct-table-seat-label">${escapeCt(name)}</div>
+              ${turnBadge}
               ${scoreHTML}
               ${cardHTML}
             </div>`;
@@ -9836,6 +10082,11 @@
         closeCardTransferModal();
         openRoomPage();
         processAvatarAuraFlashes(data);
+        // Navbat boshqaga o'tgan yoki avval javob berish kerak bo'lsa —
+        // ochiq turgan kartochka tanlash oynasi yopiladi.
+        if((dayPickerOpen || kanjiPickerOpen) && !getTurnState(data).canSend){
+          dayPickerOpen = false; kanjiPickerOpen = false; selectedKanjiId = null;
+        }
         renderTableSeats(data);
         updateCenterHint(data);
       } else {
@@ -9847,7 +10098,10 @@
       if(!waitingRoomRef || !waitingRoomIsHost || !startRoomBtn) return;
       startRoomBtn.disabled = true;
       try{
-        await updateDoc(waitingRoomRef, { status: 'started', startedAt: serverTimestamp() });
+        const firstUid = (lastRoomData && lastRoomData.participantUids && lastRoomData.participantUids[0]) || null;
+        const startUpdates = { status: 'started', startedAt: serverTimestamp() };
+        if(firstUid) startUpdates.turnUid = firstUid; // birinchi bo'lib kartochka uzatadigan ishtirokchi
+        await updateDoc(waitingRoomRef, startUpdates);
       }catch(e){
         console.error("Xonani boshlashda xatolik:", e.message);
         showCardTransferToast("Xonani boshlab bo'lmadi. Qayta urinib ko'ring.");
@@ -9974,7 +10228,14 @@
             } else {
               // Chiqqan odamning o'rni bo'shaydi, xona (va boshqa
               // ishtirokchilar) davom etaveradi — xost bo'lsa ham xuddi shu.
-              await updateDoc(ref, { participantUids: remaining, lastActivity: serverTimestamp() });
+              const leaveUpdates = { participantUids: remaining, lastActivity: serverTimestamp() };
+              const oldUids = data.participantUids || [];
+              if(data.turnUid === user.uid){
+                // Navbat egasi chiqib ketdi — navbat undan keyingi ishtirokchiga o'tadi
+                const at = oldUids.indexOf(user.uid);
+                leaveUpdates.turnUid = remaining[(at < 0 ? 0 : at) % remaining.length];
+              }
+              await updateDoc(ref, leaveUpdates);
             }
           }
         }
@@ -10018,7 +10279,19 @@
     function updateCenterHint(data){
       if(dayPickerOpen || kanjiPickerOpen || !centerHintEl) return;
       centerHintEl.classList.remove('picker-open');
-      centerHintEl.textContent = "Har kim o'z kartochkasini tanlashi uchun \"Flashcard tanlash\"ni bosing — u stol atrofidagi o'rningizda barchaga ko'rinadi.";
+      const t = getTurnState(data || {});
+      if(chooseFlashcardBtn) chooseFlashcardBtn.classList.toggle('ct-turn-locked', !t.canSend);
+      if(!t.turnUid){ centerHintEl.textContent = ''; return; }
+      const nextName = t.nextUid ? nameOfUid(data, t.nextUid) : '';
+      if(t.canSend){
+        centerHintEl.textContent = `Sizning navbatingiz! «Flashcard tanlash»ni bosing va kartochkani ${nextName}ga uzating.`;
+      } else if(t.mustAnswerFirst){
+        centerHintEl.textContent = `Avval ${nameOfUid(data, t.pendingFromUid)} yuborgan kartochkaga javob bering — shundan so'ng o'zingiz kartochka tanlab uzatasiz.`;
+      } else if(t.pendingFromUid){
+        centerHintEl.textContent = `${nameOfUid(data, t.turnUid)} kartochkaga javob bermoqda. Navbat keyin unga o'tadi.`;
+      } else {
+        centerHintEl.textContent = `Navbat: ${nameOfUid(data, t.turnUid)} — u kartochka tanlab ${nameOfUid(data, t.nextUid)}ga uzatadi.`;
+      }
     }
     function openDayPicker(){
       if(!centerHintEl) return;
@@ -10061,11 +10334,19 @@
       const {updateDoc, serverTimestamp, auth, deleteField} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user) return;
+      const turn = getTurnState(lastRoomData || {});
+      if(!turn.canSend){
+        showCardTransferToast("Hozir sizning navbatingiz emas");
+        return;
+      }
       dayPickerOpen = false;
       kanjiPickerOpen = false;
       updateCenterHint(lastRoomData);
       const updates = {
+        // Kartochka navbatdagi KEYINGI ishtirokchiga uzatiladi va navbat unga o'tadi
+        turnUid: turn.nextUid,
         [`cards.${user.uid}`]: {
+          toUid: turn.nextUid,
           wordId: word.id,
           day: kanjiPickerDay,
           kanji: word.kanji,
@@ -10088,6 +10369,12 @@
       }
     }
     if(chooseFlashcardBtn) chooseFlashcardBtn.addEventListener('click', () => {
+      const t = getTurnState(lastRoomData || {});
+      if(!t.canSend){
+        if(t.mustAnswerFirst) showCardTransferToast("Avval kelgan kartochkaga javob bering");
+        else showCardTransferToast(`Hozir ${nameOfUid(lastRoomData || {}, t.turnUid)}ning navbati`);
+        return;
+      }
       if(dayPickerOpen || kanjiPickerOpen){ dayPickerOpen = false; kanjiPickerOpen = false; updateCenterHint(lastRoomData); }
       else openDayPicker();
     });
@@ -10152,6 +10439,66 @@
     requestAnimationFrame(()=>{ cardTransferToastEl.classList.add('show'); });
     cardTransferToastTimer = setTimeout(()=>{ cardTransferToastEl.classList.remove('show'); }, 2200);
   }
+  // ---------- "Bilganlarim" / "Navbatga" bosilganda: kartochkani surish kerakligi haqida ko'rsatma oynasi ----------
+  (function initSwipeHintTip(){
+    const hints = document.querySelectorAll('.swipe-hints .hint');
+    if(!hints.length) return;
+    let overlay = null;
+    function build(){
+      overlay = document.createElement('div');
+      overlay.className = 'swipe-tip-overlay';
+      overlay.setAttribute('aria-hidden','true');
+      overlay.innerHTML =
+        '<div class="swipe-tip-modal" role="dialog" aria-modal="true" aria-label="Kartochkani surish">'+
+          '<button type="button" class="swipe-tip-close" aria-label="Yopish">✕</button>'+
+          '<div class="swipe-demo" aria-hidden="true">'+
+            '<div class="swipe-demo-tag left">BILAMAN ✓</div>'+
+            '<div class="swipe-demo-card">漢</div>'+
+            '<div class="swipe-demo-tag right">NAVBATDA ↺</div>'+
+          '</div>'+
+          '<h2 class="swipe-tip-title">Kartochkani suring</h2>'+
+          '<p class="swipe-tip-sub">Tugma bosish shart emas</p>'+
+          '<div class="swipe-tip-row left" data-side="left"><span class="arr">←</span>'+
+            '<span><b><em>Chapga</em> surish — «Bilganlarim»ga o\'tadi</b>'+
+            '<small>Bu so\'zni bilsangiz, kartochkani chapga suring.</small></span></div>'+
+          '<div class="swipe-tip-row right" data-side="right"><span class="arr">→</span>'+
+            '<span><b><em>O\'ngga</em> surish — «Navbatga» qo\'shiladi</b>'+
+            '<small>Bu so\'zni hali bilmasangiz, o\'ngga suring — keyinroq yana chiqadi.</small></span></div>'+
+          '<p class="swipe-tip-note">Telefonda barmoq bilan, kompyuterda sichqoncha bilan suring.</p>'+
+          '<button type="button" class="swipe-tip-ok">Tushundim</button>'+
+        '</div>';
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', (e)=>{ if(e.target === overlay) hide(); });
+      overlay.querySelector('.swipe-tip-close').addEventListener('click', hide);
+      overlay.querySelector('.swipe-tip-ok').addEventListener('click', hide);
+    }
+    function show(side){
+      if(!overlay) build();
+      overlay.querySelectorAll('.swipe-tip-row').forEach(r=>{
+        r.classList.toggle('active', r.dataset.side === side);
+      });
+      overlay.setAttribute('aria-hidden','false');
+      requestAnimationFrame(()=>{ overlay.classList.add('show'); });
+      if(typeof lockPageScroll === 'function') lockPageScroll();
+    }
+    function hide(){
+      if(!overlay || !overlay.classList.contains('show')) return;
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+      if(typeof unlockPageScroll === 'function') unlockPageScroll();
+    }
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hide(); });
+    hints.forEach(h=>{
+      const side = h.classList.contains('left') ? 'left' : 'right';
+      h.setAttribute('role','button');
+      h.setAttribute('tabindex','0');
+      h.addEventListener('click', ()=> show(side));
+      h.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); show(side); }
+      });
+    });
+  })();
+
   (function initChatWidget(){
     const fab = document.getElementById('chatToggleBtn');
     const closeBtn = document.getElementById('chatCloseBtn');
