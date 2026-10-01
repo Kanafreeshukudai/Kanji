@@ -327,7 +327,39 @@
     border-color:var(--accent);
     color:var(--accent-soft);
   }
-  .search-toggle-btn svg{width:17px; height:17px; display:block;}
+  .search-toggle-btn svg{
+    width:17px; height:17px; display:block;
+    overflow:visible;
+  }
+  /* Lupa BUTUN bir jism sifatida (linza + unga mahkam ulangan dastak)
+     linza markazidan o'tuvchi vertikal o'q atrofida o'giriladi — xuddi
+     kartochkaning old/orqa tomonga flip bo'lishi kabi. Dastak linza bilan
+     birga buriladi: avval vertikal chiziqqa qadar "yig'iladi", so'ng
+     qarama-qarshi (chap-past) tomonga ochiladi. Orqa tomonda lupa
+     ko'zgudagidek aksi bilan ko'rinadi. */
+  .search-toggle-btn svg .lupa-flip{
+    transform-box:view-box;
+    transform-origin:11px 11px;   /* linza markazi (viewBox birliklarida) */
+    animation:searchLensFlip 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  /* Chiziq qalinligi burilish paytida ingichkalashib yo'qolib ketmasin —
+     haqiqiy jismning qirrasi ham ko'rinib turadi (qalinlik ekranda doimiy,
+     17px/24 masshtabda 2.2 birlik ~ 1.56px). */
+  .search-toggle-btn svg .lupa-flip circle,
+  .search-toggle-btn svg .lupa-flip line{
+    vector-effect:non-scaling-stroke;
+    stroke-width:1.56px;
+  }
+  /* kartochka almashish tugmasi (ctCardOne/ctCardTwo) bilan bir xil ritm:
+     0-6% old tomon, 6-46% orqaga o'giriladi, 46-54% pauza, 54-94% yana oldinga */
+  @keyframes searchLensFlip{
+    0%, 6%{ transform:scaleX(1); }
+    46%,54%{ transform:scaleX(-1); }
+    94%,100%{ transform:scaleX(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .search-toggle-btn svg .lupa-flip{ animation:none; }
+  }
 
   /* Chat tugmasi — endi header'da emas, akkaunt (profil) menyusi ichida,
      "Qaydlar"/"Chiqish" tugmalari bilan bir qatorda joylashgan */
@@ -1642,7 +1674,7 @@
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
+    overscroll-behavior:auto;
     scrollbar-width:thin;
     touch-action:pan-y;
   }
@@ -5443,7 +5475,7 @@
     <h1 id="flashcardTitleHold">Kanji Flashcard<span class="hold-progress-track" id="holdProgressTrack" aria-hidden="true"><span class="hold-progress-fill" id="holdProgressFill"></span></span></h1>
   </div>
   <button class="search-toggle-btn" id="searchToggleBtn" type="button" aria-label="Qidiruv">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><g class="lupa-flip"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></g></svg>
   </button>
 </header>
 
@@ -7366,7 +7398,7 @@
     // sababli pastda vertikal tortishni shu konteynerga QO'LDA (JS orqali)
     // uzatamiz — bu barcha qurilmalarda ishonchli ishlaydi.
     const backScroll = card.querySelector('.face-back-scroll');
-    let scrollStartTop = 0;
+    let lastY = 0, scrolledManually = false;
     // bitta AbortController orqali shu kartochkaga tegishli barcha listenerlar
     // (jumladan window'ga ulanganlari) bitta chaqiruv bilan bekor qilinadi
     const controller = new AbortController();
@@ -7381,7 +7413,7 @@
       dragging = true; moved = false; decided = null;
       const p = e.touches ? e.touches[0] : e;
       startX = p.clientX; startY = p.clientY; curX = 0;
-      scrollStartTop = backScroll ? backScroll.scrollTop : 0;
+      lastY = startY; scrolledManually = false;
       inner.style.transition = 'none';
     }
     function applyTransform(dx){
@@ -7412,22 +7444,28 @@
           card.style.willChange = 'transform';
         } else {
           decided = 'v'; // vertical/ambiguous intent
-          if(!(backScroll && card.classList.contains('flipped'))){
-            // old tomon (kanji) ko'rsatilyapti yoki ichki scroll konteyneri
-            // yo'q — sahifaning o'zi odatdagidek vertikal scroll qilishi
-            // uchun kartochkani tortishni shu yerda to'xtatamiz.
+          // Ichki matn konteyneri (orqa tomon) kartochka balandligidan oshib
+          // ketganda — uni qo'lda aylantiramiz; oshmasa (yoki old tomonda) —
+          // brauzerning o'zi sahifani momentum bilan scroll qilsin.
+          const innerScrollable = backScroll && card.classList.contains('flipped') &&
+                                  backScroll.scrollHeight > backScroll.clientHeight + 1;
+          if(!innerScrollable){
             dragging = false;
             return;
           }
-          // aks holda — orqa tomon ko'rsatilyapti: pastdagi qo'lda scroll
-          // shu harakatning davomida darhol ishga tushadi.
         }
       }
 
       if(decided === 'v'){
-        // Orqa tomon matnini QO'LDA aylantiramiz (native scroll o'rniga) —
-        // shu bilan barcha brauzer/qurilmalarda bir xilda ishonchli ishlaydi.
-        backScroll.scrollTop = scrollStartTop - dy;
+        // Orqa tomon: avval ichki matn scroll bo'ladi, chegaraga yetgach
+        // qolgan masofa SAHIFAning o'ziga uzatiladi (scroll chaining).
+        const delta = lastY - p.clientY;
+        lastY = p.clientY;
+        const before = backScroll.scrollTop;
+        backScroll.scrollTop = before + delta;
+        const leftover = delta - (backScroll.scrollTop - before);
+        if(Math.abs(leftover) > 0.5) window.scrollBy(0, leftover);
+        scrolledManually = true;
         e.preventDefault && e.cancelable && e.preventDefault();
         return;
       }
@@ -7471,7 +7509,7 @@
       setTimeout(()=>{ card.style.willChange=''; cb(); }, 220);
     }
     function click(){
-      if(moved) return; // was a drag, not a tap
+      if(moved || scrolledManually) return; // was a drag/scroll, not a tap
       const showingBack = !card.classList.contains('flipped');
       // lazy will-change: 3D aylanish transitioni boshlanishidan oldin GPU qatlami
       // faqat card-inner uchun yoqiladi, transitionend'da avtomatik o'chadi (pastda)
@@ -7480,14 +7518,10 @@
       // ta'minlaymiz (pastdagi transitionend'da .flipping olib tashlanadi)
       card.classList.add('flipping');
       card.classList.toggle('flipped');
-      // Old (kanji) tomonda brauzerning o'zi sahifani vertikal aylantirishi
-      // uchun touch-action:pan-y qoldiriladi; orqa (tarjima) tomonga
-      // o'tilganda esa uni 'none'ga o'tkazamiz — shunda brauzer native
-      // scrollni boshlab, yuqoridagi qo'lda scroll bilan "kurashib"
-      // qolmaydi, faqat bitta (bizning) scroll manbasi ishlaydi.
-      card.style.touchAction = showingBack ? 'none' : 'pan-y';
-      // tovush faqat old tomondan orqa tomonga (tarjima/romaji ko'rinayotganda)
-      // o'tilganda chiqadi — orqaga, ya'ni kanji tomoniga qaytilganda jim
+      // MUHIM: touch-action har ikki tomonda ham 'pan-y' bo'lib qoladi —
+      // 'none' qo'yilsa, orqa tomonda sahifani scroll qilib bo'lmay qoladi.
+      card.style.touchAction = 'pan-y';
+      // tovush faqat old tomondan orqa tomonga o'tilganda chiqadi
       if(showingBack) playFlipSound();
     }
 
@@ -11064,8 +11098,20 @@
         online: data.online !== false && fresh
       };
     });
+    // Saralash: avval hozir online bo'lganlar, undan keyin oxirgi marta
+    // kirganlar (lastSeen) bo'yicha — eng yangisi tepada, eng eskisi pastda.
+    // Online guruh ichida lastSeen har heartbeat'da o'zgargani uchun ro'yxat
+    // "sakrab" ketmasligi uchun ularni nick bo'yicha tartiblaymiz.
+    // lastSeen hali serverga yozilmagan (null/pending) bo'lsa — "hozirgina" deb olinadi.
+    const seenMs = (it) => (it.lastSeen && typeof it.lastSeen.toMillis === "function")
+      ? it.lastSeen.toMillis()
+      : (it.lastSeen ? 0 : Date.now());
     items.sort((a, b) => {
       if (a.online !== b.online) return a.online ? -1 : 1;
+      if (!a.online) {
+        const diff = seenMs(b) - seenMs(a);
+        if (diff !== 0) return diff;
+      }
       return a.nick.localeCompare(b.nick);
     });
 
