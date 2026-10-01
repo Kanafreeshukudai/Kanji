@@ -2156,6 +2156,137 @@
     background:rgba(255,255,255,0.12); color:var(--ink-faint); border-color:var(--glass-border-soft); box-shadow:none;
   }
 
+  /* ---------- HAMMASI: pastki panel (doim ko'rinib turadi) ----------
+     Tuzilma:  [ tanlov chipi ]        <- panel ustida suzib turadi (joy egallamaydi)
+              ┌──────────────────────┐
+              │ Tarjima | Romaji | Vaqt │   <- 3 ta teng quiz tugmasi
+              │ Flashcardga ayl. | Aralash. │ <- bo'lingan (split) tugma
+              └──────────────────────┘
+     Panel `position:fixed` — sahifa scroll qilinganda ham ekranning pastida
+     turadi. Bo'lim yopilganda (.hidden) panel ham o'zi yo'qoladi. */
+  #view-all{
+    /* ro'yxat oxiri panel va chip ostida qolib ketmasligi uchun */
+    padding-bottom:calc(184px + env(safe-area-inset-bottom, 0px));
+  }
+  #view-all #allList{ margin-top:14px; }
+
+  #view-all .all-bottom-bar{
+    position:fixed;
+    left:0; right:0;
+    bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+    margin:0 auto;
+    width:min(480px, calc(100% - 24px));
+    z-index:40;
+    isolation:isolate;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px;
+    background:var(--bg-1);
+    border:1px solid var(--glass-border-soft);
+    border-radius:22px;
+    box-shadow:0 -10px 30px rgba(0,0,0,0.75);
+  }
+
+  /* --- tanlov chipi: panel ustida, o'rtada suzib turadi --- */
+  #view-all .all-bar-info{
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 8px);
+    transform:translateX(-50%);
+    max-width:100%;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 6px 5px 14px;
+    background:rgba(22,24,28,0.97);
+    border:1px solid var(--glass-border-soft);
+    border-radius:999px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.65);
+    white-space:nowrap;
+  }
+  #view-all .all-bar-info.is-empty{ padding:6px 14px; }
+  #view-all .all-bar-info .all-selected-note{
+    margin:0;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  #view-all .all-bar-info .all-selected-note b{
+    color:var(--accent-soft, var(--accent));
+    font-weight:900;
+  }
+  #view-all .all-bar-info.is-empty .all-selected-note{
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  #view-all .all-bar-info .all-clear-btn{
+    flex:none;
+    margin:0;
+    padding:6px 12px;
+  }
+  /* chipda joy zaxiralanmaydi — tanlov bo'sh bo'lsa tugma butunlay yo'qoladi */
+  #view-all .all-bar-info .all-clear-btn.slot-empty{ display:none; }
+
+  /* --- quiz tugmalari: bitta qatorda, teng enda --- */
+  #view-all .all-bottom-bar .quiz-launch-row{
+    width:100%;
+    max-width:none;
+    margin:0;
+    flex-wrap:nowrap;
+    gap:8px;
+  }
+  #view-all .all-bottom-bar .quiz-launch,
+  #view-all .all-bottom-bar .quiz-launch-timed{
+    flex:1 1 0;
+    min-width:0;
+    padding:12px 4px;
+    border-radius:12px;
+    font-size:clamp(11.5px, 3.3vw, 13px);
+    white-space:nowrap;
+  }
+  /* panel ichida yorug'lik (glow) yumshoqroq — qo'shni tugmalar aralashib ketmasin */
+  #view-all .all-bottom-bar .quiz-launch:not(:disabled){
+    border-color:rgba(var(--glow-rgb),0.8);
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.3), 0 0 9px 0 rgba(var(--glow-rgb),0.28);
+  }
+
+  /* --- flashcard: bo'lingan tugma (chap: ketma-ket, o'ng: aralashtirish) --- */
+  #view-all .all-bottom-bar .flashcard-convert-btn{
+    width:100%;
+    max-width:none;
+    margin:0;
+    gap:8px;
+    padding:4px 4px 4px 14px;
+    border-radius:14px;
+    font-size:13px;
+  }
+  #view-all .all-bottom-bar .flashcard-convert-btn:not(.disabled){
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.3), 0 0 9px 0 rgba(var(--glow-rgb),0.28);
+    border-color:rgba(var(--glow-rgb),0.8);
+  }
+  #view-all .all-bottom-bar .flashcard-convert-label{
+    white-space:nowrap;
+    text-align:left;
+  }
+  #view-all .all-bottom-bar .flashcard-shuffle-btn{
+    flex:none;
+    max-width:none;
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:13px;
+    white-space:nowrap;
+  }
+  #view-all .all-bottom-bar .flashcard-shuffle-btn:not(:disabled){
+    box-shadow:0 0 0 1px rgba(var(--glow-rgb),0.35), 0 0 8px 0 rgba(var(--glow-rgb),0.3);
+  }
+
+  /* .view-enter ichidagi translateY — `fixed` elementga o'z konteyneri
+     sifatida ta'sir qilib, panelni animatsiya paytida bo'lim pastiga
+     "yopishtirib" qo'yardi. Shu bo'lim uchun faqat opacity animatsiyasi. */
+  @keyframes viewFadeOnly{ from{ opacity:0; } to{ opacity:1; } }
+  #view-all.view-enter{ animation:viewFadeOnly .32s ease; }
+
   /* barmoq tekkan nuqtadan yoyiluvchi to'lqin (material ripple) — bosilganda
      JS orqali .btn-ripple <span> qo'shiladi, animatsiya tugagach o'chiriladi */
   .btn-ripple{
@@ -5009,7 +5140,18 @@
   @keyframes appShellReveal{
     0%{opacity:0; transform:translateY(10px) scale(0.9); filter:blur(10px);}
     62%{opacity:1; filter:blur(0px);}
-    100%{opacity:1; transform:translateY(0) scale(1); filter:blur(0px);}
+    /* MUHIM: oxirgi holat `none` bo'lishi shart. `translateY(0) scale(1)` yoki
+       `blur(0px)` ham "none" emas hisoblanadi va `forwards` tufayli doimiy
+       qolib, ichidagi barcha `position:fixed` elementlarni (masalan Hammasi
+       bo'limining pastki paneli) ekranga emas, shu elementga bog'lab qo'yadi. */
+    100%{opacity:1; transform:none; filter:none;}
+  }
+  /* animatsiya tugagach JS shu klassni qo'yadi va animatsiya klassini olib
+     tashlaydi — shunda elementda hech qanday transform/filter qolmaydi */
+  .app-shell.app-shell-ready{
+    opacity:1;
+    transform:none;
+    filter:none;
   }
 
   /* warm light-flare that "explodes" outward from the exact point the user tapped Boshlash,
@@ -5371,17 +5513,21 @@
 
   <!-- ALL KANJI VIEW -->
   <section id="view-all" class="hidden">
-    <div class="quiz-launch-row">
-      <button class="quiz-launch" id="btnAllQuizTranslate" disabled>Tarjima quiz</button>
-      <button class="quiz-launch quiz-launch-romaji" id="btnAllQuizRomaji" disabled>Romaji quiz</button>
-      <button class="quiz-launch quiz-launch-timed" id="btnAllQuizTimed" disabled>Vaqt sinovi</button>
+    <div class="all-bottom-bar" id="allBottomBar">
+      <div class="all-bar-info is-empty">
+        <div class="all-selected-note" id="allSelectedNote"></div>
+        <button class="all-clear-btn slot-empty" id="btnAllClear" type="button">Tozalash</button>
+      </div>
+      <div class="quiz-launch-row">
+        <button class="quiz-launch" id="btnAllQuizTranslate" disabled>Tarjima quiz</button>
+        <button class="quiz-launch quiz-launch-romaji" id="btnAllQuizRomaji" disabled>Romaji quiz</button>
+        <button class="quiz-launch quiz-launch-timed" id="btnAllQuizTimed" disabled>Vaqt sinovi</button>
+      </div>
+      <div class="flashcard-convert-btn disabled" id="btnAllToFlashcard" role="button" tabindex="0" aria-disabled="true">
+        <span class="flashcard-convert-label">Flashcardga aylantirish</span>
+        <button class="flashcard-shuffle-btn" id="btnAllToFlashcardShuffle" disabled type="button">Aralashtirish</button>
+      </div>
     </div>
-    <div class="flashcard-convert-btn disabled" id="btnAllToFlashcard" role="button" tabindex="0" aria-disabled="true">
-      <span class="flashcard-convert-label">Flashcardga aylantirish</span>
-      <button class="flashcard-shuffle-btn" id="btnAllToFlashcardShuffle" disabled type="button">Aralashtirish</button>
-    </div>
-    <div class="all-selected-note" id="allSelectedNote"></div>
-    <button class="all-clear-btn slot-empty" id="btnAllClear" type="button">Tanlovni tozalash</button>
     <div id="allList"></div>
   </section>
 
@@ -6866,9 +7012,10 @@
     btnAllToFlashcard.setAttribute('aria-disabled', n === 0 ? 'true' : 'false');
     btnAllToFlashcardShuffle.disabled = n === 0;
     btnAllClear.classList.toggle('slot-empty', n === 0);
-    allSelectedNote.textContent = n === 0
-      ? "Viktorina yoki kartochka uchun kanjilarni tanlang"
-      : `${n} ta kanji tanlandi`;
+    // chip: tanlov bo'sh bo'lsa — xira maslahat, bo'lmasa — son (<b>) + tozalash tugmasi
+    if(allSelectedNote.parentElement) allSelectedNote.parentElement.classList.toggle('is-empty', n === 0);
+    if(n === 0) allSelectedNote.textContent = "Quiz yoki flashcard uchun kanji tanlang";
+    else allSelectedNote.innerHTML = `<b>${n}</b> ta kanji tanlandi`;
   }
 
   btnAllClear.addEventListener('click', ()=>{
@@ -8521,7 +8668,17 @@
       ripple.classList.add('play');
       setTimeout(()=>ripple.classList.remove('play'), 950);
     }
-    if(shell) shell.classList.add('app-shell-reveal');
+    if(shell){
+      shell.classList.add('app-shell-reveal');
+      // animationend ichidagi elementlardan ham ko'tarilib keladi (bubbling),
+      // shuning uchun faqat shell'ning o'zi tugatganini tekshiramiz
+      shell.addEventListener('animationend', function onShellRevealEnd(e){
+        if(e.target !== shell || e.animationName !== 'appShellReveal') return;
+        shell.removeEventListener('animationend', onShellRevealEnd);
+        shell.classList.remove('app-shell-reveal');
+        shell.classList.add('app-shell-ready');
+      });
+    }
     if(flare){
       flare.classList.add('play');
       tryPlayIntroTing();
