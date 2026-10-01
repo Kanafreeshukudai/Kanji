@@ -90,11 +90,18 @@
   html.lite .bg-scene .blob.b4{ display:none; }
   html.lite .card.flipped .face.back{ animation:none !important; }
   *{box-sizing:border-box;}
-  html,body{height:100%;}
-  html{scrollbar-gutter:stable; overscroll-behavior-y:none;}
+  html,body{height:100%; max-width:100%;}
+  /* Kartochka ekran chetidan tashqariga chiqqanda sahifa kengayib ketmasligi uchun.
+     'clip' scroll-konteyner yaratmaydi (window.scrollBy ishlashda davom etadi). */
+  html,body{overflow-x:hidden;}
+  @supports (overflow:clip){
+    html,body{overflow-x:clip;}
+  }
+  html{scrollbar-gutter:stable; overscroll-behavior-y:none; overscroll-behavior-x:none;}
   body{
     margin:0;
     min-height:100vh;
+    min-height:100dvh;
     background:var(--bg-1);
     color:var(--ink);
     font-family:'Zen Maru Gothic', sans-serif;
@@ -1431,6 +1438,7 @@
 
   main{
     width:100%;
+    min-width:0;
     max-width:var(--content-max);
     flex:1;
     display:flex;
@@ -7431,8 +7439,11 @@
     function pointerMove(e){
       if(!dragging) return;
       const p = e.touches ? e.touches[0] : e;
-      const dx = p.clientX - startX;
+      let dx = p.clientX - startX;
       const dy = p.clientY - startY;
+      // kartochka ekrandan juda uzoqqa chiqib sahifani kengaytirib yubormasin
+      const maxDx = (document.documentElement.clientWidth || window.innerWidth) * 0.9;
+      if(dx > maxDx) dx = maxDx; else if(dx < -maxDx) dx = -maxDx;
 
       if(decided === null){
         const adx = Math.abs(dx), ady = Math.abs(dy);
@@ -7531,6 +7542,9 @@
     card.addEventListener('touchstart', pointerDown, {passive:true, signal});
     card.addEventListener('touchmove', pointerMove, {passive:false, signal});
     card.addEventListener('touchend', pointerUp, {signal});
+    // brauzer touch'ni o'ziga olib qo'ysa (touchcancel) kartochka yarim yo'lda qotib qolmasin
+    card.addEventListener('touchcancel', pointerUp, {signal});
+    window.addEventListener('blur', pointerUp, {signal});
     card.addEventListener('click', click, {signal});
     // aylanish (rotateY) animatsiyasi tugagach GPU qatlamini bo'shatamiz —
     // cardGlow va boshqa vizual effektlarga umuman tegmaydi, faqat
