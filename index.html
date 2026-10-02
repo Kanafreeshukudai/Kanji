@@ -5031,6 +5031,19 @@
     border-radius:999px;
     box-shadow:0 0 8px rgba(201,166,107,0.45);
   }
+  .presence-admin-badge{
+    flex:none;
+    align-self:center;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:#fff;
+    background:linear-gradient(135deg,#F472B6 0%,#A855F7 100%);
+    padding:4px 10px;
+    border-radius:999px;
+    box-shadow:0 0 8px rgba(217,100,200,0.55);
+  }
 
   .chat-messages{
     flex:1;
@@ -11820,6 +11833,15 @@
         ownerBadge.className = "presence-owner-badge";
         ownerBadge.textContent = "Owner";
         row.appendChild(ownerBadge);
+      }
+
+      // Admin (qiz bola) uchun pushti-binafsha "Admin" yozuvi
+      const isGirlAdmin = !!item.email && item.email.toLowerCase() === "gulchiroyjumayeva018@gmail.com";
+      if (isGirlAdmin) {
+        const adminBadge = document.createElement("span");
+        adminBadge.className = "presence-admin-badge";
+        adminBadge.textContent = "Admin";
+        row.appendChild(adminBadge);
       }
 
       listEl.appendChild(row);
