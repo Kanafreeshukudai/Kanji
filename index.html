@@ -529,6 +529,51 @@
     transform:translateX(-50%) translateY(0);
   }
 
+  /* ---------- BANNER VIDEO SAHIFASI: markazda kichik video + xatolik haqida murojaat ---------- */
+  .banner-page{
+    position:fixed; inset:0; z-index:10700;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px; padding:max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    background:rgba(6,7,9,0.94);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    opacity:0; pointer-events:none;
+    transition:opacity .3s ease;
+    overflow-y:auto;
+  }
+  .banner-page.show{opacity:1; pointer-events:auto;}
+  .banner-page-close{
+    position:absolute; top:max(14px, env(safe-area-inset-top)); right:14px;
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--glass-border-soft); background:var(--glass-bg);
+    color:var(--ink-soft); font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .banner-page-close:active{transform:scale(0.9);}
+  .banner-page-video{
+    width:min(70vw, 300px); max-height:46vh;
+    object-fit:contain; display:block;
+    border-radius:18px;
+    border:1px solid var(--glass-border-soft);
+    background:#000;
+    box-shadow:0 20px 50px -18px rgba(0,0,0,0.7);
+  }
+  .banner-bug-card{
+    width:100%; max-width:340px; box-sizing:border-box;
+    padding:16px; border-radius:18px; text-align:center;
+    background:linear-gradient(165deg, var(--panel-2), var(--panel-1));
+    border:1px solid var(--glass-border-soft);
+  }
+  .banner-bug-card h3{margin:0 0 6px; font-size:15px; color:var(--ink);}
+  .banner-bug-card p{margin:0 0 14px; font-size:12.5px; line-height:1.55; color:var(--ink-soft);}
+  .banner-bug-link{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 16px; border-radius:13px; text-decoration:none;
+    background:linear-gradient(135deg, #2aa3e0, #229ed9);
+    color:#fff; font-size:14px; font-weight:800;
+    box-shadow:0 8px 20px -8px rgba(34,158,217,0.6);
+  }
+  .banner-bug-link:active{transform:scale(0.97);}
+
   /* ---------- "Bilganlarim" / "Navbatga" bosilganda: surish haqida ko'rsatma oynasi ---------- */
   .swipe-hints .hint{ cursor:pointer; -webkit-tap-highlight-color:transparent; transition:opacity .15s ease; }
   .swipe-hints .hint:active{ opacity:.7; }
@@ -5924,6 +5969,17 @@
 
 </div>
 
+<!-- ---------- BANNER VIDEO SAHIFASI ---------- -->
+<div class="banner-page" id="bannerPage" aria-hidden="true">
+  <button class="banner-page-close" id="bannerPageClose" type="button" aria-label="Yopish">✕</button>
+  <video class="banner-page-video" id="bannerPageVideo" muted loop playsinline preload="none" disablepictureinpicture controlslist="nodownload noremoteplayback"></video>
+  <div class="banner-bug-card">
+    <h3>🐞 Bug yoki xatolik topdingizmi?</h3>
+    <p>Ilovada kamchilik yoki xatolik uchrasa, iltimos, uning <b>skrinshotini</b> olib Telegram orqali yuboring — tez orada tuzatamiz.</p>
+    <a class="banner-bug-link" id="bannerBugLink" href="https://t.me/MrToshmatoff" target="_blank" rel="noopener noreferrer">✈️ Telegramda yozish</a>
+  </div>
+</div>
+
 <!-- ---------- NICKNAME MODAL ---------- -->
 <div class="nickname-overlay" id="nicknameOverlay" aria-hidden="true">
   <div class="nickname-card">
@@ -11114,24 +11170,34 @@
     setInterval(()=>{ applyChatBlock(); renderBans(); }, 15000);
   })();
 
-  // ---------- Banner video bosilganda "tez kunda yangi funksiya" bildirishnomasi ----------
-  (function initBannerSoonToast(){
-    const video = document.getElementById('authBannerVideo');
-    if(!video) return;
-    let toastEl = null;
-    let hideTimer = null;
-    function showToast(){
-      if(!toastEl){
-        toastEl = document.createElement('div');
-        toastEl.className = 'banner-soon-toast';
-        toastEl.textContent = "Tez kunda yangi funksiya qo'shiladi";
-        document.body.appendChild(toastEl);
-      }
-      clearTimeout(hideTimer);
-      requestAnimationFrame(()=>{ toastEl.classList.add('show'); });
-      hideTimer = setTimeout(()=>{ toastEl.classList.remove('show'); }, 2200);
+  // ---------- Banner bosilganda: to'liq video (ovozsiz) alohida sahifada, markazda ----------
+  (function initBannerPage(){
+    const banner = document.getElementById('authBannerVideo');
+    const page = document.getElementById('bannerPage');
+    const vid = document.getElementById('bannerPageVideo');
+    const closeBtn = document.getElementById('bannerPageClose');
+    if(!banner || !page || !vid) return;
+    function openPage(){
+      if(page.classList.contains('show')) return;
+      if(!vid.getAttribute('src')) vid.src = banner.currentSrc || banner.getAttribute('src') || 'banner.mp4';
+      vid.muted = true; vid.volume = 0;
+      page.classList.add('show');
+      page.setAttribute('aria-hidden','false');
+      lockPageScroll();
+      try{ vid.currentTime = 0; }catch(e){}
+      const pr = vid.play(); if(pr && pr.catch) pr.catch(()=>{});
     }
-    video.addEventListener('click', showToast);
+    function closePage(){
+      if(!page.classList.contains('show')) return;
+      page.classList.remove('show');
+      page.setAttribute('aria-hidden','true');
+      try{ vid.pause(); }catch(e){}
+      unlockPageScroll();
+    }
+    banner.addEventListener('click', openPage);
+    if(closeBtn) closeBtn.addEventListener('click', closePage);
+    page.addEventListener('click', (e)=>{ if(e.target === page) closePage(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closePage(); });
   })();
 
   // ---------- AI YORDAMCHI — Groq API orqali, faqat yapon tili (kanji/so'z/grammatika) mavzusida ----------
