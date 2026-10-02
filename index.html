@@ -12408,7 +12408,44 @@
   window.__kanjiIsAdminEmail = isAdminEmail;
   const chatRefresh = () => { if (typeof window.__kanjiChatRefresh === "function") window.__kanjiChatRefresh(); };
 
+  // ---------- Avatarlar: xabardagi rasm -> shu foydalanuvchining boshqa xabarlari -> chatProfiles/{uid} ----------
+  const photoCache = new Map();   // uid -> rasm URL
+  const photoTried = new Set();   // chatProfiles'dan so'ralgan uid'lar
+  let lastRawMsgs = [];
+  function applyPhotos(msgs) {
+    msgs.forEach((m) => { if (m.uid && m.photo) photoCache.set(m.uid, m.photo); });
+    const me = auth.currentUser;
+    if (me && me.photoURL) photoCache.set(me.uid, me.photoURL);
+    msgs.forEach((m) => { if (!m.photo && m.uid && photoCache.has(m.uid)) m.photo = photoCache.get(m.uid); });
+    return msgs;
+  }
+  function deliverMsgs(msgs) {
+    lastRawMsgs = msgs;
+    applyPhotos(msgs);
+    if (typeof window.__kanjiChatOnMessages === "function") window.__kanjiChatOnMessages(msgs);
+    const missing = [...new Set(msgs.filter((m) => !m.photo && m.uid && !photoTried.has(m.uid)).map((m) => m.uid))];
+    if (!missing.length) return;
+    missing.forEach((u) => photoTried.add(u));
+    Promise.all(missing.map((u) =>
+      getDoc(doc(db, "chatProfiles", u)).then((d) => {
+        if (d.exists() && d.data().photo) photoCache.set(u, d.data().photo);
+      }).catch(() => {})
+    )).then(() => {
+      applyPhotos(lastRawMsgs);
+      if (typeof window.__kanjiChatOnMessages === "function") window.__kanjiChatOnMessages(lastRawMsgs);
+    });
+  }
+
   onAuthStateChanged(auth, (user) => {
+    // Har kirishda o'z profilimni (nick + Google rasm) umumiy chatProfiles'ga yozib qo'yaman
+    if (user) {
+      setDoc(doc(db, "chatProfiles", user.uid), {
+        uid: user.uid,
+        photo: user.photoURL || "",
+        nick: (user.displayName || user.email || "").toString().slice(0, 60),
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
     if (chatUnsub) { chatUnsub(); chatUnsub = null; }
     if (myBlockUnsub) { myBlockUnsub(); myBlockUnsub = null; }
     if (bansUnsub) { bansUnsub(); bansUnsub = null; }
@@ -12435,7 +12472,7 @@
             time: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : Date.now()
           };
         });
-        if (typeof window.__kanjiChatOnMessages === "function") window.__kanjiChatOnMessages(msgs);
+        deliverMsgs(msgs);
       },
       (err) => { console.error("Chatni o'qishda xatolik:", err.message); }
     );
