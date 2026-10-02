@@ -4843,6 +4843,19 @@
   }
   .chat-panel.open{transform:translate(-50%, 0);}
 
+  .chat-admin-bar{display:flex; gap:8px; padding:8px 16px 0; flex:none;}
+  .chat-admin-bar button{flex:1; border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink-soft); border-radius:10px; padding:7px 8px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;}
+  .chat-bans-list{flex:none; margin:8px 16px 0; max-height:130px; overflow-y:auto; font-size:12px; color:var(--ink-soft);}
+  .chat-ban-row{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--glass-border-soft);}
+  .chat-ban-row span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chat-ban-row button{flex:none; border:none; border-radius:8px; padding:4px 10px; background:var(--moss); color:#0B0D10; font-family:inherit; font-size:11px; font-weight:800; cursor:pointer;}
+  .chat-msg-actions{display:flex; gap:4px; margin-top:2px;}
+  .chat-act{border:none; background:rgba(255,255,255,0.08); color:inherit; border-radius:8px; padding:2px 8px; font-size:12px; cursor:pointer;}
+  .chat-mod-overlay{position:fixed; inset:0; z-index:10600; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,7,9,0.62);}
+  .chat-mod-card{width:100%; max-width:300px; border-radius:18px; padding:18px; background:var(--panel-1); border:1px solid var(--glass-border-soft); display:flex; flex-direction:column; gap:8px;}
+  .chat-mod-card h4{margin:0 0 4px; font-size:14px; color:var(--ink); text-align:center;}
+  .chat-mod-card button{border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink); border-radius:11px; padding:10px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;}
+  .chat-mod-card button.danger{background:rgba(163,35,35,0.3); border-color:#a32323; color:#f5e2df;}
   .chat-panel-header{
     flex:none;
     display:flex;
@@ -6042,6 +6055,11 @@
     </div>
     <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Yopish">✕</button>
   </div>
+  <div class="chat-admin-bar" id="chatAdminBar" style="display:none">
+    <button id="chatClearBtn" type="button">🧹 Chatni tozalash</button>
+    <button id="chatBansBtn" type="button">🚫 Bloklanganlar <span id="chatBansCount"></span></button>
+  </div>
+  <div class="chat-bans-list" id="chatBansList" style="display:none"></div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-bar">
     <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
@@ -9303,17 +9321,90 @@
       wrap.innerHTML = '<div class="chat-empty"><span class="big-em">💬</span>Hali xabar yo\'q.<br>Birinchi bo\'lib yozing!</div>';
       return;
     }
-    wrap.innerHTML = msgs.map(m=>{
+    const iAmAdmin = typeof window.__kanjiIsAdmin === 'function' && window.__kanjiIsAdmin();
+    const esc = (v)=>String(v||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    wrap.innerHTML = msgs.map((m,i)=>{
       const mine = !!myUid && m.uid === myUid;
-      const safeNick = String(m.nick||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
-      const safeText = String(m.text||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+      let acts = '';
+      if(iAmAdmin){
+        acts = `<button class="chat-act" data-act="edit" data-i="${i}" title="Tahrirlash">✏️</button><button class="chat-act" data-act="del" data-i="${i}" title="O'chirish">🗑</button>`;
+        if(!mine && !(typeof window.__kanjiIsAdminEmail === 'function' && window.__kanjiIsAdminEmail(m.email))){
+          acts += `<button class="chat-act" data-act="mod" data-i="${i}" title="Mute / Ban">🔇</button>`;
+        }
+      } else if(mine){
+        acts = `<button class="chat-act" data-act="del" data-i="${i}" title="O'chirish">🗑</button>`;
+      }
       return `<div class="chat-msg ${mine?'mine':'theirs'}">
-        <div class="chat-msg-nick">${safeNick}</div>
-        <div class="chat-bubble">${safeText}</div>
-        <div class="chat-msg-time">${formatChatTime(m.time)}</div>
+        <div class="chat-msg-nick">${esc(m.nick)}</div>
+        <div class="chat-bubble">${esc(m.text)}</div>
+        <div class="chat-msg-time">${formatChatTime(m.time)}${m.edited?' · tahrirlangan':''}</div>
+        ${acts ? `<div class="chat-msg-actions">${acts}</div>` : ''}
       </div>`;
     }).join('');
     wrap.scrollTop = wrap.scrollHeight;
+  }
+  // ---------- MODERATSIYA UI (admin) va mute/ban holati ----------
+  function myBlockActive(){
+    const b = window.__kanjiMyBlock;
+    return !!b && (b.type === 'ban' || (b.until && b.until > Date.now()));
+  }
+  function applyChatBlock(){
+    const input = document.getElementById('chatInput');
+    const btn = document.getElementById('chatSendBtn');
+    if(!input || !btn) return;
+    const blocked = myBlockActive();
+    input.disabled = blocked; btn.disabled = blocked;
+    if(blocked){
+      const b = window.__kanjiMyBlock;
+      input.placeholder = b.type === 'ban' ? 'Siz chatdan bloklangansiz' : ('Mute: ' + new Date(b.until).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'}) + ' gacha yoza olmaysiz');
+    } else { input.placeholder = 'Xabar yozing...'; }
+  }
+  function renderBans(){
+    const isAdm = typeof window.__kanjiIsAdmin === 'function' && window.__kanjiIsAdmin();
+    const bar = document.getElementById('chatAdminBar');
+    const list = document.getElementById('chatBansList');
+    const cnt = document.getElementById('chatBansCount');
+    if(bar) bar.style.display = isAdm ? 'flex' : 'none';
+    if(!isAdm){ if(list) list.style.display = 'none'; return; }
+    const bans = (window.__kanjiBans || []).filter(b=>b.type === 'ban' || (b.until && b.until > Date.now()));
+    if(cnt) cnt.textContent = bans.length ? '(' + bans.length + ')' : '';
+    if(!list) return;
+    list.innerHTML = bans.length ? bans.map((b,i)=>`<div class="chat-ban-row"><span>${String(b.email).replace(/[<>&]/g,'')} — ${b.type === 'ban' ? 'ban' : 'mute'}</span><button data-unblock="${i}">Ochish</button></div>`).join('') : '<div class="chat-ban-row"><span>Bloklanganlar yo\'q</span></div>';
+    list._bans = bans;
+  }
+  window.__kanjiChatRefresh = function(){ renderChatMessages(); renderBans(); applyChatBlock(); };
+  function openModMenu(m){
+    const ov = document.createElement('div');
+    ov.className = 'chat-mod-overlay';
+    const opts = [['10 daqiqa mute',10],['1 soat mute',60],['1 kun mute',1440],['Ban (doimiy)',0]];
+    ov.innerHTML = '<div class="chat-mod-card"><h4></h4>' + opts.map((o,i)=>`<button class="${o[1]===0?'danger':''}" data-m="${i}">${o[0]}</button>`).join('') + '<button data-m="x">Bekor qilish</button></div>';
+    ov.querySelector('h4').textContent = m.nick || 'Foydalanuvchi';
+    ov.addEventListener('click', (e)=>{
+      if(e.target === ov){ ov.remove(); return; }
+      const b = e.target.closest('button[data-m]');
+      if(!b) return;
+      ov.remove();
+      if(b.dataset.m === 'x') return;
+      const minutes = opts[+b.dataset.m][1];
+      window.__kanjiChatBlock(m, minutes).catch((err)=>{
+        alert(err && err.message === 'no-email' ? "Bu foydalanuvchining emailini aniqlab bo'lmadi." : "Bajarib bo'lmadi. Qoidalar yoki internetni tekshiring.");
+      });
+    });
+    document.body.appendChild(ov);
+  }
+  function onChatListClick(e){
+    const b = e.target.closest('.chat-act');
+    if(!b) return;
+    const m = lastChatMsgs[+b.dataset.i];
+    if(!m || !m.id) return;
+    if(b.dataset.act === 'edit'){
+      const t = prompt('Xabarni tahrirlang:', m.text);
+      if(t !== null && t.trim() && t.trim() !== m.text) window.__kanjiChatEdit(m.id, t.trim()).catch(()=>alert("Tahrirlab bo'lmadi."));
+    } else if(b.dataset.act === 'del'){
+      if(confirm("Xabar o'chirilsinmi?")) window.__kanjiChatDelete(m.id).catch(()=>alert("O'chirib bo'lmadi."));
+    } else if(b.dataset.act === 'mod'){
+      openModMenu(m);
+    }
   }
   function sendChatMessage(){
     const input = document.getElementById('chatInput');
@@ -9329,7 +9420,7 @@
     input.disabled = true;
     Promise.resolve(window.__kanjiSendChatMessage(text, customNick || null))
       .catch(()=>{ alert("Xabar yuborilmadi. Internet aloqasini tekshiring yoki hisobingizga qaytadan kiring."); })
-      .then(()=>{ input.disabled = false; input.focus(); });
+      .then(()=>{ input.disabled = false; input.focus(); applyChatBlock(); });
   }
   // ---------- SAHIFA SCROLL QULFI ----------
   // Chat yoki AI yordamchi oynasi ochiq bo'lganda orqadagi sahifa scroll
@@ -10816,6 +10907,22 @@
     // chat sarlavhasidagi nickname bosilsa — zamonaviy oyna orqali tahrirlanadi
     if(nickLabel) nickLabel.addEventListener('click', openNicknameModal);
     if(nickLabel) nickLabel.style.cursor = 'pointer';
+    const msgsWrap = document.getElementById('chatMessages');
+    if(msgsWrap) msgsWrap.addEventListener('click', onChatListClick);
+    const clearBtn = document.getElementById('chatClearBtn');
+    if(clearBtn) clearBtn.addEventListener('click', ()=>{
+      if(confirm("Chatdagi BARCHA xabarlar o'chiriladi. Davom etasizmi?")) window.__kanjiChatClear().catch(()=>alert("Tozalab bo'lmadi."));
+    });
+    const bansBtn = document.getElementById('chatBansBtn');
+    const bansList = document.getElementById('chatBansList');
+    if(bansBtn && bansList) bansBtn.addEventListener('click', ()=>{ bansList.style.display = bansList.style.display === 'none' ? 'block' : 'none'; });
+    if(bansList) bansList.addEventListener('click', (e)=>{
+      const b = e.target.closest('button[data-unblock]');
+      if(!b || !bansList._bans) return;
+      const ban = bansList._bans[+b.dataset.unblock];
+      if(ban) window.__kanjiChatUnblock(ban.email).catch(()=>alert("Ochib bo'lmadi."));
+    });
+    setInterval(()=>{ applyChatBlock(); renderBans(); }, 15000);
   })();
 
   // ---------- Banner video bosilganda "tez kunda yangi funksiya" bildirishnomasi ----------
@@ -12105,26 +12212,92 @@
   const chatCol = collection(db, "chatMessages");
   const chatQuery = query(chatCol, orderBy("createdAt", "asc"), limit(200));
 
-  onSnapshot(
-    chatQuery,
-    (snap) => {
-      const msgs = snap.docs.map((d) => {
-        const data = d.data();
-        return {
-          uid: data.uid || "",
-          nick: data.nick || "Foydalanuvchi",
-          text: data.text || "",
-          time: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : Date.now()
-        };
-      });
-      if (typeof window.__kanjiChatOnMessages === "function") {
-        window.__kanjiChatOnMessages(msgs);
-      }
-    },
-    (err) => {
-      console.error("Chatni o'qishda xatolik:", err.message);
+  // Chat tinglovchisi login holatiga bog'langan: kirgach ulanadi, chiqqach uziladi.
+  let chatUnsub = null, myBlockUnsub = null, bansUnsub = null;
+  const isAdminEmail = (e) => !!e && PRESENCE_ADMIN_EMAILS.some((a) => a.toLowerCase() === String(e).toLowerCase());
+  window.__kanjiIsAdmin = () => !!auth.currentUser && isAdminEmail(auth.currentUser.email);
+  window.__kanjiIsAdminEmail = isAdminEmail;
+  const chatRefresh = () => { if (typeof window.__kanjiChatRefresh === "function") window.__kanjiChatRefresh(); };
+
+  onAuthStateChanged(auth, (user) => {
+    if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+    if (myBlockUnsub) { myBlockUnsub(); myBlockUnsub = null; }
+    if (bansUnsub) { bansUnsub(); bansUnsub = null; }
+    window.__kanjiMyBlock = null;
+    window.__kanjiBans = [];
+    if (!user) {
+      if (typeof window.__kanjiChatOnMessages === "function") window.__kanjiChatOnMessages([]);
+      chatRefresh();
+      return;
     }
-  );
+    chatUnsub = onSnapshot(
+      chatQuery,
+      (snap) => {
+        const msgs = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            uid: data.uid || "",
+            nick: data.nick || "Foydalanuvchi",
+            email: data.email || "",
+            text: data.text || "",
+            edited: !!data.editedAt,
+            time: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : Date.now()
+          };
+        });
+        if (typeof window.__kanjiChatOnMessages === "function") window.__kanjiChatOnMessages(msgs);
+      },
+      (err) => { console.error("Chatni o'qishda xatolik:", err.message); }
+    );
+    const mail = (user.email || "").toLowerCase();
+    if (mail) {
+      myBlockUnsub = onSnapshot(doc(db, "chatBans", mail), (s2) => {
+        const d = s2.exists() ? s2.data() : null;
+        window.__kanjiMyBlock = d ? { type: d.type, until: d.until && d.until.toMillis ? d.until.toMillis() : null } : null;
+        chatRefresh();
+      }, () => {});
+    }
+    if (isAdminEmail(user.email)) {
+      bansUnsub = onSnapshot(collection(db, "chatBans"), (s2) => {
+        window.__kanjiBans = s2.docs.map((d) => {
+          const x = d.data();
+          return { email: d.id, type: x.type, until: x.until && x.until.toMillis ? x.until.toMillis() : null };
+        });
+        chatRefresh();
+      }, () => {});
+    }
+    chatRefresh();
+  });
+
+  // ---------- Moderatsiya amallari (qoidalar baribir faqat adminga ruxsat beradi) ----------
+  window.__kanjiChatEdit = (id, text) =>
+    updateDoc(doc(db, "chatMessages", id), { text: String(text).slice(0, 500), editedAt: serverTimestamp() });
+  window.__kanjiChatDelete = (id) => deleteDoc(doc(db, "chatMessages", id));
+  window.__kanjiChatClear = async () => {
+    for (;;) {
+      const s2 = await getDocs(query(chatCol, limit(300)));
+      if (s2.empty) break;
+      await Promise.all(s2.docs.map((d) => deleteDoc(d.ref)));
+    }
+  };
+  // minutes > 0 -> mute, minutes == 0 -> doimiy ban. Email yo'q (eski) xabarlarda presence'dan olinadi.
+  window.__kanjiChatBlock = async (m, minutes) => {
+    let email = (m.email || "").toLowerCase();
+    if (!email && m.uid) {
+      const pd = await getDoc(doc(db, "presence", m.uid));
+      email = pd.exists() ? String(pd.data().email || "").toLowerCase() : "";
+    }
+    if (!email) throw new Error("no-email");
+    if (isAdminEmail(email)) throw new Error("admin");
+    return setDoc(doc(db, "chatBans", email), {
+      email: email,
+      type: minutes ? "mute" : "ban",
+      until: minutes ? new Date(Date.now() + minutes * 60000) : null,
+      by: (auth.currentUser.email || "").toLowerCase(),
+      createdAt: serverTimestamp()
+    });
+  };
+  window.__kanjiChatUnblock = (email) => deleteDoc(doc(db, "chatBans", email));
 
   // Asosiy (module bo'lmagan) skriptdagi chat UI shu funksiyalarni chaqiradi.
   window.__kanjiSendChatMessage = function (text, customNick) {
@@ -12134,6 +12307,7 @@
     return addDoc(chatCol, {
       uid: user.uid,
       nick: nick,
+      email: (user.email || "").toLowerCase(),
       text: String(text).slice(0, 500),
       createdAt: serverTimestamp()
     });
