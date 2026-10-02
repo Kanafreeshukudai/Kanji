@@ -2666,19 +2666,25 @@
   .quiz-kanji.klen-56{ font-size:clamp(19px, 6vw, 32px); }
   .quiz-kanji.klen-7p{ font-size:clamp(15px, 4.6vw, 25px); }
   .quiz-romaji{color:var(--ink-soft); font-size:14px; margin-top:6px;}
-  .quiz-options{display:flex; flex-direction:column; gap:10px;}
+  /* 2x2 to'r: 4 ta variant ikki qatorda, ikki ustunda */
+  .quiz-options{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; align-items:stretch;}
   .quiz-opt{
+    min-width:0;
+    min-height:64px;
+    display:flex; align-items:center; justify-content:center;
+    overflow-wrap:anywhere; word-break:break-word;
+    line-height:1.25;
     background:var(--glass-bg);
     backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     border:2px solid var(--glass-border-soft);
     color:var(--ink);
     border-radius:12px;
-    padding:14px 16px;
+    padding:12px 10px;
     font-family:'Zen Maru Gothic',sans-serif;
-    font-size:15px;
+    font-size:14px;
     font-weight:600;
-    text-align:left;
+    text-align:center;
     cursor:pointer;
     transition:background-color .15s ease,border-color .15s ease,color .15s ease,opacity .15s ease,transform .15s ease,box-shadow .15s ease,filter .15s ease;
   }
@@ -11298,6 +11304,41 @@
     const messages = document.getElementById('aiAssistMessages');
     if(!btn || !panel) return;
 
+    // ---------- AQLLI AVTO-SCROLL ----------
+    // Javob yozilayotganda sahifa faqat foydalanuvchi eng pastda bo'lsa
+    // pastga ergashadi. Foydalanuvchi yuqoriga scroll qilsa yoki ekranga
+    // barmoq tekkizsa — joyida qoladi va javobni o'zi mustaqil o'qiydi.
+    // Pastga qaytib kelsa — avto-ergashish yana yoqiladi.
+    let stickToBottom = true;
+    let userTouching = false;
+    const STICK_THRESHOLD = 60; // px
+    function distFromBottom(){
+      return messages.scrollHeight - messages.scrollTop - messages.clientHeight;
+    }
+    function followBottom(force){
+      if(force){ stickToBottom = true; }
+      if(!stickToBottom || userTouching) return;
+      messages.scrollTop = messages.scrollHeight;
+    }
+    messages.addEventListener('scroll', ()=>{
+      if(!userTouching) stickToBottom = distFromBottom() < STICK_THRESHOLD;
+      else if(distFromBottom() >= STICK_THRESHOLD) stickToBottom = false;
+    }, {passive:true});
+    messages.addEventListener('touchstart', ()=>{ userTouching = true; }, {passive:true});
+    const __endTouch = ()=>{
+      userTouching = false;
+      stickToBottom = distFromBottom() < STICK_THRESHOLD;
+    };
+    messages.addEventListener('touchend', __endTouch, {passive:true});
+    messages.addEventListener('touchcancel', __endTouch, {passive:true});
+    messages.addEventListener('wheel', (e)=>{
+      if(e.deltaY < 0) stickToBottom = false; // yuqoriga aylantirsa — ergashmaymiz
+    }, {passive:true});
+    messages.addEventListener('mousedown', ()=>{ userTouching = true; });
+    window.addEventListener('mouseup', ()=>{
+      if(userTouching){ userTouching = false; stickToBottom = distFromBottom() < STICK_THRESHOLD; }
+    });
+
     // Endi Groq API kaliti bu yerda saqlanmaydi — barcha so'rovlar
     // Cloudflare Worker proxy orqali yuboriladi, kalit serverda
     // (Worker Secret sifatida) yashiringan. Shu bilan kalit hech qachon
@@ -11328,7 +11369,7 @@
       bubble.textContent = text;
       row.appendChild(bubble);
       messages.appendChild(row);
-      messages.scrollTop = messages.scrollHeight;
+      followBottom(who === 'user'); // foydalanuvchi o'z xabarini yuborganda — pastga
       return row;
     }
 
@@ -11340,7 +11381,7 @@
       bubble.className = 'ai-assist-bubble';
       row.appendChild(bubble);
       messages.appendChild(row);
-      messages.scrollTop = messages.scrollHeight;
+      followBottom(false);
 
       return new Promise((resolve)=>{
         let i = 0;
@@ -11352,7 +11393,7 @@
           const step = total > 400 ? 3 : 1;
           i = Math.min(i + step, total);
           bubble.textContent = text.slice(0, i);
-          messages.scrollTop = messages.scrollHeight;
+          followBottom(false);
           if(i < total){
             setTimeout(tick, perCharDelay);
           } else {
@@ -11374,7 +11415,7 @@
       bubble.appendChild(dots);
       row.appendChild(bubble);
       messages.appendChild(row);
-      messages.scrollTop = messages.scrollHeight;
+      followBottom(false);
       return row;
     }
 
