@@ -1355,6 +1355,10 @@
   .tabs-wrap.tabs-hidden{
     display:none;
   }
+  .tabs-wrap.tabs-ghost{
+    visibility:hidden;
+    pointer-events:none;
+  }
   nav.tabs{
     display:flex;
     flex-wrap:wrap;
@@ -1570,6 +1574,36 @@
     flex:0 1 auto;
     min-width:74px;
   }
+
+  /* ---------- ORTGA TUGMASI (Bilganlarim / Hammasi ekranlarida) ----------
+     Kartochkalar bo'limiga, to'xtagan joyidan davom ettirib qaytaradi */
+  .view-back-row{
+    width:100%;
+    display:flex;
+    justify-content:flex-start;
+    margin:0 0 12px;
+  }
+  .view-back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 16px 9px 12px;
+    border-radius:999px;
+    border:1px solid var(--glass-border);
+    background:var(--glass-bg-strong);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.14);
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease, background .2s ease;
+  }
+  .view-back-btn:active{ transform:scale(0.95); background:var(--glass-bg); }
+  .view-back-arrow{ font-size:17px; line-height:1; color:var(--accent-soft); }
 
   main{
     width:100%;
@@ -3308,8 +3342,9 @@
     padding:34px 26px 28px;
     text-align:center;
     background:var(--bg-1);
-    border:1px solid var(--glass-border-soft);
-    box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);
+    /* ingichka rangli chet — qora fonda oyna chegarasi yaxshi ko'rinishi uchun */
+    border:1px solid rgba(217,105,79,0.7);
+    box-shadow:0 0 0 1px rgba(217,105,79,0.12), 0 0 18px -4px rgba(217,105,79,0.35), 0 24px 60px -20px rgba(0,0,0,0.6);
     transform:translateY(14px) scale(0.96);
     transition:transform .32s cubic-bezier(.2,.8,.2,1);
   }
@@ -5718,6 +5753,9 @@
 
   <!-- KNOWN VIEW -->
   <section id="view-known" class="hidden">
+    <div class="view-back-row">
+      <button class="view-back-btn" id="btnBackFromKnown" type="button" aria-label="Kartochkalarga qaytish"><span class="view-back-arrow">←</span> Ortga</button>
+    </div>
     <div class="known-summary" id="knownSummary"></div>
     <div id="knownEmpty" class="empty-state hidden">
       <div class="big-em">🍃</div>
@@ -5733,6 +5771,9 @@
 
   <!-- ALL KANJI VIEW -->
   <section id="view-all" class="hidden">
+    <div class="view-back-row">
+      <button class="view-back-btn" id="btnBackFromAll" type="button" aria-label="Kartochkalarga qaytish"><span class="view-back-arrow">←</span> Ortga</button>
+    </div>
     <div class="all-bottom-bar" id="allBottomBar">
       <div class="all-bar-info is-empty">
         <div class="all-selected-note" id="allSelectedNote"></div>
@@ -6013,8 +6054,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -6789,6 +6830,219 @@
     {id:"shitsukanji35", day:35, group:"質", kanji:"質", romaji:"shitsu", type:"on'yomi", reading:"質(shitsu) — yakka kanji", otherReadings:"on: シツ(shitsu), シチ(shichi)", uz:"sifat"},
     {id:"shitsumon35", day:35, group:"質", kanji:"質問", romaji:"shitsumon", type:"on + on", reading:"質(shitsu) + 問(mon)", uz:"savol"},
     {id:"hinshitsu35", day:35, group:"質", kanji:"品質", romaji:"hinshitsu", type:"on + on", reading:"品(hin) + 質(shitsu)", uz:"mahsulot sifati"},
+
+    // ---- 36-kun ----
+    {id:"kasukanji36", day:36, group:"貸", kanji:"貸", romaji:"kasu", type:"kun'yomi", reading:"貸す(kasu) — yakka kanji", otherReadings:"on: タイ(tai) · kun: か-す(kasu)", uz:"qarz berish"},
+    {id:"kasu36", day:36, group:"貸", kanji:"貸す", romaji:"kasu", type:"kun'yomi", reading:"貸す(kasu)", uz:"qarz bermoq"},
+
+    {id:"mijikaikanji36", day:36, group:"短", kanji:"短", romaji:"mijikai", type:"kun'yomi", reading:"短い(mijikai) — yakka kanji", otherReadings:"on: タン(tan) · kun: みじか-い(mijikai)", uz:"qisqa"},
+    {id:"mijikai36", day:36, group:"短", kanji:"短い", romaji:"mijikai", type:"kun'yomi", reading:"短い(mijikai)", uz:"qisqa"},
+    {id:"tankidaigaku36", day:36, group:"短", kanji:"短期大学", romaji:"tanki daigaku", type:"on + on + on + on", reading:"短(tan) + 期(ki) + 大(dai) + 学(gaku)", uz:"qisqa muddatli universitet / kollej darajasidagi oliy o'quv yurti"},
+
+    {id:"shirukanji36", day:36, group:"知", kanji:"知", romaji:"shiru", type:"kun'yomi", reading:"知る(shiru) — yakka kanji", otherReadings:"on: チ(chi) · kun: し-る(shiru)", uz:"bilish"},
+    {id:"shiru36", day:36, group:"知", kanji:"知る", romaji:"shiru", type:"kun'yomi", reading:"知る(shiru)", uz:"bilmoq"},
+    {id:"shiraseru36", day:36, group:"知", kanji:"知らせる", romaji:"shiraseru", type:"kun'yomi", reading:"知らせる(shiraseru)", uz:"xabar qilmoq"},
+    {id:"shiriai36", day:36, group:"知", kanji:"知り合い", romaji:"shiriai", type:"kun + kun", reading:"知り(shiri) + 合い(ai)", uz:"tanish"},
+    {id:"chishiki36", day:36, group:"知", kanji:"知識", romaji:"chishiki", type:"on + on", reading:"知(chi) + 識(shiki)", uz:"bilim"},
+
+    {id:"utakanji36", day:36, group:"歌", kanji:"歌", romaji:"uta", type:"kun'yomi", reading:"歌(uta) — yakka kanji", otherReadings:"on: カ(ka) · kun: うた(uta), うた-う(utau)", uz:"qo'shiq"},
+    {id:"utau36", day:36, group:"歌", kanji:"歌う", romaji:"utau", type:"kun'yomi", reading:"歌う(utau)", uz:"kuylamoq"},
+    {id:"kashu36", day:36, group:"歌", kanji:"歌手", romaji:"kashu", type:"on + on", reading:"歌(ka) + 手(shu)", uz:"qo'shiqchi"},
+    {id:"kokka36", day:36, group:"歌", kanji:"国歌", romaji:"kokka", type:"on + on", reading:"国(kok) + 歌(ka)", uz:"milliy madhiya"},
+
+    // ---- 37-kun ----
+    {id:"aokanji37", day:37, group:"青", kanji:"青", romaji:"ao", type:"kun'yomi", reading:"青(ao) — yakka kanji", otherReadings:"on: セイ(sei) · kun: あお(ao), あお-い(aoi)", uz:"ko'k rang"},
+    {id:"aoi37", day:37, group:"青", kanji:"青い", romaji:"aoi", type:"kun'yomi", reading:"青い(aoi)", uz:"ko'k"},
+    {id:"aoshingou37", day:37, group:"青", kanji:"青信号", romaji:"ao shingou", type:"kun + on + on", reading:"青(ao) + 信(shin) + 号(gou)", uz:"yashil chiroq / svetofor"},
+    {id:"massaona37", day:37, group:"青", kanji:"真っ青な", romaji:"massao na", type:"kun + kun", reading:"真っ(ma) + 青(sao)", uz:"rangi oqargan / holati yomon"},
+    {id:"seishounen37", day:37, group:"青", kanji:"青少年", romaji:"seishounen", type:"on + on + on", reading:"青(sei) + 少(shou) + 年(nen)", uz:"yoshlar, o'smirlar"},
+
+    {id:"akakanji37", day:37, group:"赤", kanji:"赤", romaji:"aka", type:"kun'yomi", reading:"赤(aka) — yakka kanji", otherReadings:"on: セキ(seki) · kun: あか(aka), あか-い(akai)", uz:"qizil rang"},
+    {id:"akai37", day:37, group:"赤", kanji:"赤い", romaji:"akai", type:"kun'yomi", reading:"赤い(akai)", uz:"qizil"},
+    {id:"akachan37", day:37, group:"赤", kanji:"赤ちゃん", romaji:"akachan", type:"kun + kun", reading:"赤(aka) + ちゃん(chan)", uz:"chaqaloq"},
+    {id:"sekigaisen37", day:37, group:"赤", kanji:"赤外線", romaji:"sekigaisen", type:"on + on + on", reading:"赤(seki) + 外(gai) + 線(sen)", uz:"infraqizil nur"},
+    {id:"makkana37", day:37, group:"赤", kanji:"真っ赤な", romaji:"makka na", type:"kun + kun", reading:"真っ(ma) + 赤(ka)", uz:"qip-qizil"},
+
+    {id:"kikanji37", day:37, group:"気", kanji:"気", romaji:"ki", type:"on'yomi", reading:"気(ki) — yakka kanji", otherReadings:"on: キ(ki), ケ(ke)", uz:"tuyg'u"},
+    {id:"tenki37", day:37, group:"気", kanji:"天気", romaji:"tenki", type:"on + on", reading:"天(ten) + 気(ki)", uz:"ob-havo"},
+    {id:"kimochi37", day:37, group:"気", kanji:"気持ち", romaji:"kimochi", type:"on + kun", reading:"気(ki) + 持ち(mochi)", uz:"tuyg'u"},
+    {id:"byouki37", day:37, group:"気", kanji:"病気", romaji:"byouki", type:"on + on", reading:"病(byou) + 気(ki)", uz:"kasallik"},
+    {id:"genki37", day:37, group:"気", kanji:"元気", romaji:"genki", type:"on + on", reading:"元(gen) + 気(ki)", uz:"salomatlik"},
+    {id:"kuuki37", day:37, group:"気", kanji:"空気", romaji:"kuuki", type:"on + on", reading:"空(kuu) + 気(ki)", uz:"havo"},
+
+    // ---- 38-kun ----
+    {id:"hanashikanji38", day:38, group:"話", kanji:"話", romaji:"hanashi", type:"kun'yomi", reading:"話(hanashi) — yakka kanji", otherReadings:"on: ワ(wa) · kun: はな-す(hanasu), はなし(hanashi)", uz:"gap, hikoya"},
+    {id:"hanasu38", day:38, group:"話", kanji:"話す", romaji:"hanasu", type:"kun'yomi", reading:"話す(hanasu)", uz:"gapirish"},
+    {id:"kaiwa38", day:38, group:"話", kanji:"会話", romaji:"kaiwa", type:"on + on", reading:"会(kai) + 話(wa)", uz:"suhbat"},
+    {id:"denwa38", day:38, group:"話", kanji:"電話", romaji:"denwa", type:"on + on", reading:"電(den) + 話(wa)", uz:"telefon"},
+    {id:"hanashiau38", day:38, group:"話", kanji:"話し合う", romaji:"hanashiau", type:"kun + kun", reading:"話し(hanashi) + 合う(au)", uz:"muhokama qilish"},
+
+    {id:"yomukanji38", day:38, group:"読", kanji:"読", romaji:"yomu", type:"kun'yomi", reading:"読む(yomu) — yakka kanji", otherReadings:"on: ドク(doku), トク(toku), トウ(tou) · kun: よ-む(yomu), よみ(yomi)", uz:"o'qish"},
+    {id:"yomu38", day:38, group:"読", kanji:"読む", romaji:"yomu", type:"kun'yomi", reading:"読む(yomu)", uz:"o'qimoq"},
+    {id:"dokusho38", day:38, group:"読", kanji:"読書", romaji:"dokusho", type:"on + on", reading:"読(doku) + 書(sho)", uz:"o'qish, mutolaa"},
+
+    {id:"gokanji38", day:38, group:"語", kanji:"語", romaji:"go", type:"on'yomi", reading:"語(go) — yakka kanji", otherReadings:"on: ゴ(go) · kun: かた-る(kataru)", uz:"til, so'z"},
+    {id:"nihongo38", day:38, group:"語", kanji:"日本語", romaji:"nihongo", type:"on + on + on", reading:"日(ni) + 本(hon) + 語(go)", uz:"yapon tili"},
+    {id:"gaikokugo38", day:38, group:"語", kanji:"外国語", romaji:"gaikokugo", type:"on + on + on", reading:"外(gai) + 国(koku) + 語(go)", uz:"chet tili"},
+    {id:"tango38", day:38, group:"語", kanji:"単語", romaji:"tango", type:"on + on", reading:"単(tan) + 語(go)", uz:"so'z"},
+    {id:"shugo38", day:38, group:"語", kanji:"主語", romaji:"shugo", type:"on + on", reading:"主(shu) + 語(go)", uz:"gap egasi, subyekt"},
+
+    {id:"motsukanji38", day:38, group:"持", kanji:"持", romaji:"motsu", type:"kun'yomi", reading:"持つ(motsu) — yakka kanji", otherReadings:"on: ジ(ji) · kun: も-つ(motsu)", uz:"ushlab turish, bor"},
+    {id:"motsu38", day:38, group:"持", kanji:"持つ", romaji:"motsu", type:"kun'yomi", reading:"持つ(motsu)", uz:"ushlab turmoq"},
+    {id:"okanemochi38", day:38, group:"持", kanji:"お金持ち", romaji:"okanemochi", type:"kun + kun", reading:"お金(okane) + 持ち(mochi)", uz:"boy odam"},
+    {id:"kimochi38", day:38, group:"持", kanji:"気持ち", romaji:"kimochi", type:"on + kun", reading:"気(ki) + 持ち(mochi)", uz:"tuyg'u / hissiyot"},
+    {id:"omochikaeri38", day:38, group:"持", kanji:"お持ち帰り", romaji:"omochikaeri", type:"kun + kun", reading:"お持ち(omochi) + 帰り(kaeri)", uz:"olib ketish"},
+
+    // ---- 39-kun ----
+    {id:"matsukanji39", day:39, group:"待", kanji:"待", romaji:"matsu", type:"kun'yomi", reading:"待つ(matsu) — yakka kanji", otherReadings:"on: タイ(tai) · kun: ま-つ(matsu)", uz:"kutish"},
+    {id:"matsu39", day:39, group:"待", kanji:"待つ", romaji:"matsu", type:"kun'yomi", reading:"待つ(matsu)", uz:"kutmoq"},
+    {id:"shoutai39", day:39, group:"待", kanji:"招待する", romaji:"shoutai suru", type:"on + on + —", reading:"招(shou) + 待(tai) + する", uz:"taklif qilmoq"},
+    {id:"kitai39", day:39, group:"待", kanji:"期待する", romaji:"kitai suru", type:"on + on + —", reading:"期(ki) + 待(tai) + する", uz:"kutmoq, umid qilmoq"},
+
+    {id:"tokikanji39", day:39, group:"時", kanji:"時", romaji:"ji", type:"on'yomi", reading:"時(ji) — yakka kanji", otherReadings:"on: ジ(ji) · kun: とき(toki), -どき(doki)", uz:"vaqt, soat"},
+    {id:"ichiji39", day:39, group:"時", kanji:"一時", romaji:"ichiji", type:"on + on", reading:"一(ichi) + 時(ji)", uz:"soat bir"},
+    {id:"tokidoki39", day:39, group:"時", kanji:"時々", romaji:"tokidoki", type:"kun + kun", reading:"時(toki) + 時(doki)", uz:"ba'zan"},
+    {id:"jikan39", day:39, group:"時", kanji:"時間", romaji:"jikan", type:"on + on", reading:"時(ji) + 間(kan)", uz:"vaqt"},
+    {id:"tokei39", day:39, group:"時", kanji:"時計", romaji:"tokei", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"soat"},
+    {id:"jidai39", day:39, group:"時", kanji:"時代", romaji:"jidai", type:"on + on", reading:"時(ji) + 代(dai)", uz:"davr"},
+
+    {id:"kusakanji39", day:39, group:"草", kanji:"草", romaji:"kusa", type:"kun'yomi", reading:"草(kusa) — yakka kanji", otherReadings:"on: ソウ(sou) · kun: くさ(kusa), -ぐさ(gusa)", uz:"o't, begona o'tlar"},
+    {id:"sougen39", day:39, group:"草", kanji:"草原", romaji:"sougen", type:"on + on", reading:"草(sou) + 原(gen)", uz:"o'tloqli tekislik"},
+
+    {id:"hanakanji39", day:39, group:"花", kanji:"花", romaji:"hana", type:"kun'yomi", reading:"花(hana) — yakka kanji", otherReadings:"on: カ(ka) · kun: はな(hana), -ばな(bana)", uz:"gul"},
+    {id:"hanami39", day:39, group:"花", kanji:"花見", romaji:"hanami", type:"kun + kun", reading:"花(hana) + 見(mi)", uz:"gullarni tomosha qilish"},
+    {id:"hanabi39", day:39, group:"花", kanji:"花火", romaji:"hanabi", type:"kun + kun", reading:"花(hana) + 火(bi)", uz:"otashinlar"},
+    {id:"kafunshou39", day:39, group:"花", kanji:"花粉症", romaji:"kafunshou", type:"on + on + on", reading:"花(ka) + 粉(fun) + 症(shou)", uz:"gul changiga allergiya"},
+
+    // ---- 40-kun ----
+    {id:"chakanji40", day:40, group:"茶", kanji:"茶", romaji:"cha", type:"on'yomi", reading:"茶(cha) — yakka kanji", otherReadings:"on: チャ(cha), サ(sa)", uz:"choy"},
+    {id:"ocha40", day:40, group:"茶", kanji:"お茶", romaji:"ocha", type:"— + on", reading:"お + 茶(cha)", uz:"choy, yapon choyi"},
+    {id:"koucha40", day:40, group:"茶", kanji:"紅茶", romaji:"koucha", type:"on + on", reading:"紅(kou) + 茶(cha)", uz:"qora choy"},
+    {id:"chawan40", day:40, group:"茶", kanji:"茶碗", romaji:"chawan", type:"on + on", reading:"茶(cha) + 碗(wan)", uz:"(guruch) piyola, choy piyola"},
+    {id:"chairo40", day:40, group:"茶", kanji:"茶色", romaji:"chairo", type:"on + kun", reading:"茶(cha) + 色(iro)", uz:"jigarrang"},
+    {id:"sadou40", day:40, group:"茶", kanji:"茶道", romaji:"sadou", type:"on + on", reading:"茶(sa) + 道(dou)", uz:"choy marosimi san'ati"},
+
+    {id:"kusurikanji40", day:40, group:"薬", kanji:"薬", romaji:"kusuri", type:"kun'yomi", reading:"薬(kusuri) — yakka kanji", otherReadings:"on: ヤク(yaku) · kun: くすり(kusuri)", uz:"dori"},
+    {id:"kusuriya40", day:40, group:"薬", kanji:"薬屋", romaji:"kusuriya", type:"kun + kun", reading:"薬(kusuri) + 屋(ya)", uz:"dorixona"},
+    {id:"megusuri40", day:40, group:"薬", kanji:"目薬", romaji:"megusuri", type:"kun + kun", reading:"目(me) + 薬(gusuri)", uz:"ko'z uchun dori"},
+    {id:"yakkyoku40", day:40, group:"薬", kanji:"薬局", romaji:"yakkyoku", type:"on + on", reading:"薬(yak) + 局(kyoku)", uz:"dorixona"},
+
+    {id:"saikanji40", day:40, group:"菜", kanji:"菜", romaji:"sai", type:"on'yomi", reading:"菜(sai) — yakka kanji", otherReadings:"on: サイ(sai) · kun: な(na)", uz:"ko'katlar"},
+    {id:"yasai40", day:40, group:"菜", kanji:"野菜", romaji:"yasai", type:"on + on", reading:"野(ya) + 菜(sai)", uz:"sabzavot"},
+    {id:"sansai40", day:40, group:"菜", kanji:"山菜", romaji:"sansai", type:"on + on", reading:"山(san) + 菜(sai)", uz:"yovvoyi sabzavotlar"},
+    {id:"saien40", day:40, group:"菜", kanji:"菜園", romaji:"saien", type:"on + on", reading:"菜(sai) + 園(en)", uz:"sabzavot bog'i"},
+    {id:"nanohana40", day:40, group:"菜", kanji:"菜の花", romaji:"na no hana", type:"kun + — + kun", reading:"菜(na) + の + 花(hana)", uz:"sariq dalagullari"},
+
+    {id:"arau40kanji", day:40, group:"洗", kanji:"洗", romaji:"arau", type:"kun'yomi", reading:"洗う(arau) — yakka kanji", otherReadings:"on: セン(sen) · kun: あら-う(arau)", uz:"yuvish"},
+    {id:"arau40", day:40, group:"洗", kanji:"洗う", romaji:"arau", type:"kun'yomi", reading:"洗う(arau)", uz:"yuvmoq"},
+    {id:"otearai40", day:40, group:"洗", kanji:"お手洗い", romaji:"otearai", type:"— + kun + kun", reading:"お + 手(te) + 洗い(arai)", uz:"hojatxona"},
+    {id:"sentaku40", day:40, group:"洗", kanji:"洗濯する", romaji:"sentaku suru", type:"on + on + —", reading:"洗(sen) + 濯(taku) + する", uz:"kir yuvmoq"},
+
+    // ---- 41-kun ----
+    {id:"chuukanji41", day:41, group:"注", kanji:"注", romaji:"chuu", type:"on'yomi", reading:"注(chuu) — yakka kanji", otherReadings:"on: チュウ(chuu) · kun: そそ-ぐ(sosogu)", uz:"quyish, sug'orish, ichiga oqadi"},
+    {id:"chuui41", day:41, group:"注", kanji:"注意する", romaji:"chuui suru", type:"on + on + —", reading:"注(chuu) + 意(i) + する", uz:"ogohlantirmoq"},
+    {id:"chuumon41", day:41, group:"注", kanji:"注文する", romaji:"chuumon suru", type:"on + on + —", reading:"注(chuu) + 文(mon) + する", uz:"buyurtma bermoq"},
+
+    {id:"nakukanji41", day:41, group:"泣", kanji:"泣", romaji:"naku", type:"kun'yomi", reading:"泣く(naku) — yakka kanji", otherReadings:"on: キュウ(kyuu) · kun: な-く(naku)", uz:"yig'lash"},
+    {id:"naku41", day:41, group:"泣", kanji:"泣く", romaji:"naku", type:"kun'yomi", reading:"泣く(naku)", uz:"yig'lamoq"},
+
+    {id:"abirukanji41", day:41, group:"浴", kanji:"浴", romaji:"abiru", type:"kun'yomi", reading:"浴びる(abiru) — yakka kanji", otherReadings:"on: ヨク(yoku) · kun: あ-びる(abiru), あ-びせる(abiseru)", uz:"hammom"},
+    {id:"abiru41", day:41, group:"浴", kanji:"浴びる", romaji:"abiru", type:"kun'yomi", reading:"浴びる(abiru)", uz:"dush qabul qilmoq"},
+    {id:"nyuuyoku41", day:41, group:"浴", kanji:"入浴", romaji:"nyuuyoku", type:"on + on", reading:"入(nyuu) + 浴(yoku)", uz:"vanna qabul qilish"},
+    {id:"yokushitsu41", day:41, group:"浴", kanji:"浴室", romaji:"yokushitsu", type:"on + on", reading:"浴(yoku) + 室(shitsu)", uz:"hammom"},
+    {id:"nikkouyoku41", day:41, group:"浴", kanji:"日光浴", romaji:"nikkouyoku", type:"on + on + on", reading:"日(nik) + 光(kou) + 浴(yoku)", uz:"quyoshda toblanish"},
+    {id:"yukata41", day:41, group:"浴", kanji:"浴衣", romaji:"yukata", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"yoz uchun paxta kimono"},
+
+    {id:"youkanji41", day:41, group:"洋", kanji:"洋", romaji:"you", type:"on'yomi", reading:"洋(you) — yakka kanji", otherReadings:"on: ヨウ(you)", uz:"okean"},
+    {id:"taiheiyou41", day:41, group:"洋", kanji:"太平洋", romaji:"taiheiyou", type:"on + on + on", reading:"太(tai) + 平(hei) + 洋(you)", uz:"Tinch okeani"},
+    {id:"taiseiyou41", day:41, group:"洋", kanji:"大西洋", romaji:"taiseiyou", type:"on + on + on", reading:"大(tai) + 西(sei) + 洋(you)", uz:"Atlantika okeani"},
+    {id:"touyou41", day:41, group:"洋", kanji:"東洋", romaji:"touyou", type:"on + on", reading:"東(tou) + 洋(you)", uz:"Sharq"},
+    {id:"seiyou41", day:41, group:"洋", kanji:"西洋", romaji:"seiyou", type:"on + on", reading:"西(sei) + 洋(you)", uz:"G'arb"},
+    {id:"yousho41", day:41, group:"洋", kanji:"洋書", romaji:"yousho", type:"on + on", reading:"洋(you) + 書(sho)", uz:"xorijiy / G'arb kitobi"},
+
+    // ---- 42-kun ----
+    {id:"ikekanji42", day:42, group:"池", kanji:"池", romaji:"ike", type:"kun'yomi", reading:"池(ike) — yakka kanji", otherReadings:"kun: いけ(ike) · on: チ(chi)", uz:"hovuz"},
+    {id:"ikeda42", day:42, group:"池", kanji:"池田", romaji:"ikeda", type:"kun + kun", reading:"池(ike) + 田(da)", uz:"Ikeda (Yapon ismi)"},
+    {id:"denchi42", day:42, group:"池", kanji:"電池", romaji:"denchi", type:"on + on", reading:"電(den) + 池(chi)", uz:"batareya"},
+
+    {id:"chikanji42", day:42, group:"地", kanji:"地", romaji:"chi", type:"on'yomi", reading:"地(chi) — yakka kanji", otherReadings:"on: ジ(ji), チ(chi)", uz:"zamin, asos"},
+    {id:"chika42", day:42, group:"地", kanji:"地下", romaji:"chika", type:"on + on", reading:"地(chi) + 下(ka)", uz:"yer osti"},
+    {id:"chizu42", day:42, group:"地", kanji:"地図", romaji:"chizu", type:"on + on", reading:"地(chi) + 図(zu)", uz:"xarita"},
+    {id:"tochi42", day:42, group:"地", kanji:"土地", romaji:"tochi", type:"on + on", reading:"土(to) + 地(chi)", uz:"yer"},
+    {id:"chihou42", day:42, group:"地", kanji:"地方", romaji:"chihou", type:"on + on", reading:"地(chi) + 方(hou)", uz:"bir tuman, mahalla"},
+    {id:"jishin42", day:42, group:"地", kanji:"地震", romaji:"jishin", type:"on + on", reading:"地(ji) + 震(shin)", uz:"zilzila"},
+
+    {id:"anekanji42", day:42, group:"姉", kanji:"姉", romaji:"ane", type:"kun'yomi", reading:"姉(ane) — yakka kanji", otherReadings:"kun: あね(ane) · on: シ(shi)", uz:"opa, opam"},
+    {id:"shimai42a", day:42, group:"姉", kanji:"姉妹", romaji:"shimai", type:"on + on", reading:"姉(shi) + 妹(mai)", uz:"opa-singil"},
+    {id:"oneesan42", day:42, group:"姉", kanji:"お姉さん", romaji:"oneesan", type:"— + kun", reading:"お + 姉さん(neesan)", uz:"opangiz"},
+
+    {id:"imoutokanji42", day:42, group:"妹", kanji:"妹", romaji:"imouto", type:"kun'yomi", reading:"妹(imouto) — yakka kanji", otherReadings:"kun: いもうと(imouto) · on: マイ(mai)", uz:"singil, singlim"},
+    {id:"shimai42b", day:42, group:"妹", kanji:"姉妹", romaji:"shimai", type:"on + on", reading:"姉(shi) + 妹(mai)", uz:"opa-singil"},
+
+    // ---- 43-kun ----
+    {id:"tomarukanji43", day:43, group:"止", kanji:"止", romaji:"tomaru", type:"kun'yomi", reading:"止まる(tomaru) — yakka kanji", otherReadings:"kun: と-まる(tomaru), と-める(tomeru) · on: シ(shi)", uz:"STOP, qoladi, qoling"},
+    {id:"tomeru43", day:43, group:"止", kanji:"止める", romaji:"tomeru", type:"kun'yomi", reading:"止める(tomeru)", uz:"to'xtatmoq"},
+    {id:"yamu43", day:43, group:"止", kanji:"止む", romaji:"yamu", type:"kun'yomi", reading:"止む(yamu)", uz:"to'xtamoq"},
+    {id:"kinshi43", day:43, group:"止", kanji:"禁止", romaji:"kinshi", type:"on + on", reading:"禁(kin) + 止(shi)", uz:"taqiqlangan"},
+
+    {id:"arukukanji43", day:43, group:"歩", kanji:"歩", romaji:"aruku", type:"kun'yomi", reading:"歩く(aruku) — yakka kanji", otherReadings:"kun: ある-く(aruku), あゆ-む(ayumu) · on: ホ(ho), ブ(bu)", uz:"yurish"},
+    {id:"aruku43", day:43, group:"歩", kanji:"歩く", romaji:"aruku", type:"kun'yomi", reading:"歩く(aruku)", uz:"yurmoq"},
+    {id:"sanpo43", day:43, group:"歩", kanji:"散歩する", romaji:"sanpo suru", type:"on + on + —", reading:"散(san) + 歩(po) + する", uz:"sayr qilmoq"},
+
+    {id:"hashirukanji43", day:43, group:"走", kanji:"走", romaji:"hashiru", type:"kun'yomi", reading:"走る(hashiru) — yakka kanji", otherReadings:"kun: はし-る(hashiru) · on: ソウ(sou)", uz:"yugur"},
+    {id:"hashiru43", day:43, group:"走", kanji:"走る", romaji:"hashiru", type:"kun'yomi", reading:"走る(hashiru)", uz:"yugurmoq"},
+
+    {id:"okirukanji43", day:43, group:"起", kanji:"起", romaji:"okiru", type:"kun'yomi", reading:"起きる(okiru) — yakka kanji", otherReadings:"kun: お-きる(okiru) · on: キ(ki)", uz:"uyg'otmoq, o'rnidan turish, ko'tarilish"},
+    {id:"okiru43", day:43, group:"起", kanji:"起きる", romaji:"okiru", type:"kun'yomi", reading:"起きる(okiru)", uz:"uyg'onmoq"},
+    {id:"okoru43", day:43, group:"起", kanji:"起こる", romaji:"okoru", type:"kun'yomi", reading:"起こる(okoru)", uz:"sodir bo'lmoq"},
+    {id:"kiritsu43", day:43, group:"起", kanji:"起立", romaji:"kiritsu", type:"on + on", reading:"起(ki) + 立(ritsu)", uz:"o'rnidan turish"},
+
+    // ---- 44-kun ----
+    {id:"ugokukanji44", day:44, group:"動", kanji:"動", romaji:"ugoku", type:"kun'yomi", reading:"動く(ugoku) — yakka kanji", otherReadings:"kun: うご-く(ugoku), うご-かす(ugokasu) · on: ドウ(dou)", uz:"harakat"},
+    {id:"ugokasu44", day:44, group:"動", kanji:"動かす", romaji:"ugokasu", type:"kun'yomi", reading:"動かす(ugokasu)", uz:"harakatlantirmoq"},
+    {id:"jidousha44", day:44, group:"動", kanji:"自動車", romaji:"jidousha", type:"on + on + on", reading:"自(ji) + 動(dou) + 車(sha)", uz:"mashina"},
+    {id:"doubutsu44", day:44, group:"動", kanji:"動物", romaji:"doubutsu", type:"on + on", reading:"動(dou) + 物(butsu)", uz:"hayvon"},
+    {id:"koudou44", day:44, group:"動", kanji:"行動", romaji:"koudou", type:"on + on", reading:"行(kou) + 動(dou)", uz:"harakat, xatti-harakat"},
+
+    {id:"hatarakukanji44", day:44, group:"働", kanji:"働", romaji:"hataraku", type:"kun'yomi", reading:"働く(hataraku) — yakka kanji", otherReadings:"kun: はたら-く(hataraku) · on: ドウ(dou)", uz:"ish"},
+    {id:"hataraku44", day:44, group:"働", kanji:"働く", romaji:"hataraku", type:"kun'yomi", reading:"働く(hataraku)", uz:"ishlamoq"},
+    {id:"roudou44", day:44, group:"働", kanji:"労働", romaji:"roudou", type:"on + on", reading:"労(rou) + 働(dou)", uz:"mehnat"},
+    {id:"roudousha44", day:44, group:"働", kanji:"労働者", romaji:"roudousha", type:"on + on + on", reading:"労(rou) + 働(dou) + 者(sha)", uz:"ishchi"},
+    {id:"juuroudou44", day:44, group:"働", kanji:"重労働", romaji:"juuroudou", type:"on + on + on", reading:"重(juu) + 労(rou) + 働(dou)", uz:"mashaqqatli mehnat"},
+
+    {id:"isogukanji44", day:44, group:"急", kanji:"急", romaji:"isogu", type:"kun'yomi", reading:"急ぐ(isogu) — yakka kanji", otherReadings:"kun: いそ-ぐ(isogu) · on: キュウ(kyuu)", uz:"shoshiling, shoshilinch, favqulodda"},
+    {id:"kyuuni44", day:44, group:"急", kanji:"急に", romaji:"kyuu ni", type:"on + —", reading:"急(kyuu) + に", uz:"birdan"},
+    {id:"isogu44", day:44, group:"急", kanji:"急ぐ", romaji:"isogu", type:"kun'yomi", reading:"急ぐ(isogu)", uz:"shoshilmoq"},
+    {id:"kyuukou44", day:44, group:"急", kanji:"急行", romaji:"kyuukou", type:"on + on", reading:"急(kyuu) + 行(kou)", uz:"express"},
+    {id:"kyuukyuusha44", day:44, group:"急", kanji:"救急車", romaji:"kyuukyuusha", type:"on + on + on", reading:"救(kyuu) + 急(kyuu) + 車(sha)", uz:"tez yordam mashinasi"},
+
+    {id:"omoukanji44", day:44, group:"思", kanji:"思", romaji:"omou", type:"kun'yomi", reading:"思う(omou) — yakka kanji", otherReadings:"kun: おも-う(omou) · on: シ(shi)", uz:"o'ylamoq"},
+    {id:"omou44", day:44, group:"思", kanji:"思う", romaji:"omou", type:"kun'yomi", reading:"思う(omou)", uz:"o'ylab ko'rmoq"},
+    {id:"omoidasu44", day:44, group:"思", kanji:"思い出す", romaji:"omoidasu", type:"kun + kun", reading:"思い(omoi) + 出す(dasu)", uz:"eslamoq"},
+    {id:"omoide44", day:44, group:"思", kanji:"思い出", romaji:"omoide", type:"kun + kun", reading:"思い(omoi) + 出(de)", uz:"xotira"},
+
+    // ---- 45-kun ----
+    {id:"atsumerukanji45", day:45, group:"集", kanji:"集", romaji:"atsumeru", type:"kun'yomi", reading:"集める(atsumeru) — yakka kanji", otherReadings:"kun: あつ-まる(atsumaru), あつ-める(atsumeru), つど-う(tsudou) · on: シュウ(shuu)", uz:"yig'ish, birlashtirmoq"},
+    {id:"atsumeru45", day:45, group:"集", kanji:"集める", romaji:"atsumeru", type:"kun'yomi", reading:"集める(atsumeru)", uz:"yig'moq"},
+    {id:"atsumaru45", day:45, group:"集", kanji:"集まる", romaji:"atsumaru", type:"kun'yomi", reading:"集まる(atsumaru)", uz:"to'planmoq, yig'ilmoq"},
+    {id:"shuuchuu45", day:45, group:"集", kanji:"集中する", romaji:"shuuchuu suru", type:"on + on + —", reading:"集(shuu) + 中(chuu) + する", uz:"konsentratsiya qilmoq, fikrni bir joyga jamlamoq"},
+    {id:"boshuu45", day:45, group:"集", kanji:"募集する", romaji:"boshuu suru", type:"on + on + —", reading:"募(bo) + 集(shuu) + する", uz:"odam yig'moq, qabul qilish"},
+
+    {id:"susumukanji45", day:45, group:"進", kanji:"進", romaji:"susumu", type:"kun'yomi", reading:"進む(susumu) — yakka kanji", otherReadings:"kun: すす-む(susumu) · on: シン(shin)", uz:"avans, davom eting, taraqqiyot"},
+    {id:"susumu45", day:45, group:"進", kanji:"進む", romaji:"susumu", type:"kun'yomi", reading:"進む(susumu)", uz:"davom ettirmoq"},
+    {id:"senshinkoku45", day:45, group:"進", kanji:"先進国", romaji:"senshinkoku", type:"on + on + on", reading:"先(sen) + 進(shin) + 国(koku)", uz:"rivojlangan davlat"},
+
+    {id:"hakobukanji45", day:45, group:"運", kanji:"運", romaji:"hakobu", type:"kun'yomi", reading:"運ぶ(hakobu) — yakka kanji", otherReadings:"kun: はこ-ぶ(hakobu) · on: ウン(un)", uz:"olib yurish, taqdir"},
+    {id:"hakobu45", day:45, group:"運", kanji:"運ぶ", romaji:"hakobu", type:"kun'yomi", reading:"運ぶ(hakobu)", uz:"olib yurmoq"},
+    {id:"undou45", day:45, group:"運", kanji:"運動", romaji:"undou", type:"on + on", reading:"運(un) + 動(dou)", uz:"jismoniy mashqlar, sport"},
+    {id:"un45", day:45, group:"運", kanji:"運", romaji:"un", type:"on'yomi", reading:"運(un)", uz:"omad, boylik"},
+    {id:"unsou45", day:45, group:"運", kanji:"運送", romaji:"unsou", type:"on + on", reading:"運(un) + 送(sou)", uz:"tashish"},
+
+    {id:"tookanji45", day:45, group:"通", kanji:"通", romaji:"tooru", type:"kun'yomi", reading:"通る(tooru) — yakka kanji", otherReadings:"kun: とお-る(tooru), とお-す(toosu), かよ-う(kayou) · on: ツウ(tsuu)", uz:"o'tish, qatnov"},
+    {id:"tooru45", day:45, group:"通", kanji:"通る", romaji:"tooru", type:"kun'yomi", reading:"通る(tooru)", uz:"o'tmoq"},
+    {id:"kayou45", day:45, group:"通", kanji:"通う", romaji:"kayou", type:"kun'yomi", reading:"通う(kayou)", uz:"qatnamoq"},
+    {id:"tsuugaku45", day:45, group:"通", kanji:"通学", romaji:"tsuugaku", type:"on + on", reading:"通(tsuu) + 学(gaku)", uz:"maktabga borish"},
+    {id:"tsuukin45", day:45, group:"通", kanji:"通勤", romaji:"tsuukin", type:"on + on", reading:"通(tsuu) + 勤(kin)", uz:"ishga borish"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -7940,6 +8194,8 @@
       }
     });
     tabsWrap.classList.toggle('tabs-hidden', tab==='all');
+    // Bilganlarim: kunlar qatori ko'rinmaydi, lekin joyi saqlanadi — sahifa va tugmalar o'rnidan siljimaydi
+    tabsWrap.classList.toggle('tabs-ghost', tab==='known');
     if(tab!=='learn') kunlarOpen = false;
     if(tab!=='quiz' && timedRevealTimeout){ clearTimeout(timedRevealTimeout); timedRevealTimeout = null; }
     if(tab!=='quiz' && timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
@@ -7949,6 +8205,14 @@
     if(tab==='known') renderKnown();
     if(tab==='all') renderAll();
   }
+
+  // "Ortga" tugmalari (Bilganlarim / Hammasi): kartochkalar bo'limiga qaytadi.
+  // Kun navbatini qayta tuzmaydi (resetDayQueue chaqirilmaydi), shuning uchun
+  // kartochkalar to'xtagan joyidan davom etadi.
+  ['btnBackFromKnown','btnBackFromAll'].forEach(id=>{
+    const b = document.getElementById(id);
+    if(b) b.addEventListener('click', ()=>showTab('learn'));
+  });
 
   // ---------- QUIZ ----------
   let quizItems = [], quizIdx = 0, quizScore = 0, quizReturnTab = 'known', quizPool = [], quizType = 'translate';
