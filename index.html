@@ -1578,16 +1578,20 @@
   /* ---------- ORTGA TUGMASI (Bilganlarim / Hammasi ekranlarida) ----------
      Kartochkalar bo'limiga, to'xtagan joyidan davom ettirib qaytaradi */
   .view-back-row{
-    width:100%;
+    /* Bilganlarim/Hammasi qatori bilan bir xil eni va bir xil ustunda,
+       aynan shu tugmalar tagida turadi */
     display:flex;
-    justify-content:flex-start;
-    margin:0 0 12px;
+    margin:10px auto 0;
+    max-width:480px;
+    width:calc(100% - 40px);
   }
   .view-back-btn{
-    display:inline-flex;
+    display:flex;
     align-items:center;
+    justify-content:center;
     gap:8px;
-    padding:9px 16px 9px 12px;
+    width:100%;
+    padding:11px 16px;
     border-radius:999px;
     border:1px solid var(--glass-border);
     background:var(--glass-bg-strong);
@@ -1602,7 +1606,7 @@
     -webkit-tap-highlight-color:transparent;
     transition:transform .15s ease, background .2s ease;
   }
-  .view-back-btn:active{ transform:scale(0.95); background:var(--glass-bg); }
+  .view-back-btn:active{ transform:scale(0.98); background:var(--glass-bg); }
   .view-back-arrow{ font-size:17px; line-height:1; color:var(--accent-soft); }
 
   main{
@@ -1614,6 +1618,15 @@
     flex-direction:column;
     align-items:center;
     padding:24px 16px 40px;
+  }
+  /* Bo'limlar (kartochka / Bilganlarim / Hammasi / viktorina) main ichida
+     align-items:center tufayli o'z tarkibi kengligiga qisilib qolardi —
+     shu sabab Bilganlarim ochilganda sahifa va tugmalar yonga kichrayardi.
+     Endi har bir bo'lim doim to'liq kenglikda turadi, shuning uchun hech
+     qaysi tugma bosilganda o'lcham o'zgarmaydi. */
+  main > section{
+    width:100%;
+    min-width:0;
   }
 
   /* ---------- KATTA EKRANLAR: kontent kengligi asta-sekin o'sadi ----------
@@ -5382,6 +5395,14 @@
     opacity:0;
     transform:translateY(10px) scale(0.9);
     filter:blur(10px);
+    /* ASOSIY SABAB: app-shell body (flex, align-items:center) ichida o'z
+       tarkibi kengligiga qisilib qolardi, shu sabab Bilganlarim/Hammasi
+       ochilganda ichidagi tarkib kengligi o'zgarib, butun sahifa va
+       tugmalar kichrayib ketardi. Endi doim to'liq kenglikda turadi. */
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
   }
   .app-shell.app-shell-reveal{
     animation:appShellReveal 1.05s cubic-bezier(.16,.9,.25,1) forwards;
@@ -5720,6 +5741,10 @@
   </button>
 </div>
 
+<div class="view-back-row hidden" id="viewBackRow">
+  <button class="view-back-btn" id="btnBack" type="button" aria-label="Kartochkalarga qaytish"><span class="view-back-arrow">←</span> Ortga</button>
+</div>
+
 <div class="tabs-wrap" id="tabsWrap">
   <nav class="tabs" id="tabsNav"></nav>
   <div class="tabs-older-collapse" id="tabsOlderCollapse">
@@ -5753,9 +5778,6 @@
 
   <!-- KNOWN VIEW -->
   <section id="view-known" class="hidden">
-    <div class="view-back-row">
-      <button class="view-back-btn" id="btnBackFromKnown" type="button" aria-label="Kartochkalarga qaytish"><span class="view-back-arrow">←</span> Ortga</button>
-    </div>
     <div class="known-summary" id="knownSummary"></div>
     <div id="knownEmpty" class="empty-state hidden">
       <div class="big-em">🍃</div>
@@ -5771,9 +5793,6 @@
 
   <!-- ALL KANJI VIEW -->
   <section id="view-all" class="hidden">
-    <div class="view-back-row">
-      <button class="view-back-btn" id="btnBackFromAll" type="button" aria-label="Kartochkalarga qaytish"><span class="view-back-arrow">←</span> Ortga</button>
-    </div>
     <div class="all-bottom-bar" id="allBottomBar">
       <div class="all-bar-info is-empty">
         <div class="all-selected-note" id="allSelectedNote"></div>
@@ -8193,9 +8212,11 @@
         el.classList.add('view-enter');
       }
     });
-    tabsWrap.classList.toggle('tabs-hidden', tab==='all');
-    // Bilganlarim: kunlar qatori ko'rinmaydi, lekin joyi saqlanadi — sahifa va tugmalar o'rnidan siljimaydi
-    tabsWrap.classList.toggle('tabs-ghost', tab==='known');
+    // Bilganlarim va Hammasi: kunlar qatori o'rnida "Ortga" tugmasi turadi
+    tabsWrap.classList.toggle('tabs-hidden', tab==='all' || tab==='known');
+    tabsWrap.classList.remove('tabs-ghost');
+    const backRow = document.getElementById('viewBackRow');
+    if(backRow) backRow.classList.toggle('hidden', !(tab==='all' || tab==='known'));
     if(tab!=='learn') kunlarOpen = false;
     if(tab!=='quiz' && timedRevealTimeout){ clearTimeout(timedRevealTimeout); timedRevealTimeout = null; }
     if(tab!=='quiz' && timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
@@ -8209,10 +8230,10 @@
   // "Ortga" tugmalari (Bilganlarim / Hammasi): kartochkalar bo'limiga qaytadi.
   // Kun navbatini qayta tuzmaydi (resetDayQueue chaqirilmaydi), shuning uchun
   // kartochkalar to'xtagan joyidan davom etadi.
-  ['btnBackFromKnown','btnBackFromAll'].forEach(id=>{
-    const b = document.getElementById(id);
+  (function(){
+    const b = document.getElementById('btnBack');
     if(b) b.addEventListener('click', ()=>showTab('learn'));
-  });
+  })();
 
   // ---------- QUIZ ----------
   let quizItems = [], quizIdx = 0, quizScore = 0, quizReturnTab = 'known', quizPool = [], quizType = 'translate';
