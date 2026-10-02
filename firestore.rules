@@ -1,0 +1,139 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Yordamchi funksiyalar ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // Adminlar: faqat tasdiqlangan Google email bilan kirganlar.
+    // Yangi admin qo'shsangiz, index.html dagi PRESENCE_ADMIN_EMAILS ga
+    // va pastdagi chatBans qoidasiga ham qo'shing.
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && myEmail() in [
+          'doniyorbektoshmatov7@gmail.com',
+          'gulchiroyjumayeva018@gmail.com'
+        ];
+    }
+
+    // Foydalanuvchi mute yoki ban qilinganmi (email bo'yicha)?
+    // until == null -> doimiy (ban); until kelajakda -> mute hali amal qilmoqda.
+    function isBlocked() {
+      let p = /databases/$(database)/documents/chatBans/$(myEmail());
+      return exists(p)
+        && (get(p).data.get('until', null) == null
+            || get(p).data.get('until', null) > request.time);
+    }
+
+    // ---------- userNotes/{uid}/items/{noteId} ----------
+    match /userNotes/{uid}/items/{noteId} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ---------- chatMessages ----------
+    match /chatMessages/{msgId} {
+      allow read: if isSignedIn();
+
+      // Yozish: mute/ban qilinmagan bo'lsa, faqat o'z nomidan
+      allow create: if isSignedIn()
+        && !isBlocked()
+        && request.resource.data.keys().hasOnly(['uid', 'nick', 'email', 'text', 'createdAt'])
+        && request.resource.data.keys().hasAll(['uid', 'nick', 'text', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.nick is string
+        && request.resource.data.nick.size() <= 60
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.createdAt == request.time
+        && (!('email' in request.resource.data)
+            || request.resource.data.email.lower() == myEmail());
+
+      // Tahrirlash: faqat admin, faqat matn (va editedAt) o'zgaradi
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'editedAt'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500;
+
+      // O'chirish: admin istalganini, oddiy foydalanuvchi faqat o'zinikini
+      allow delete: if isAdmin()
+        || (isSignedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    // ---------- chatBans/{email} (mute / ban) ----------
+    match /chatBans/{emailId} {
+      // Foydalanuvchi faqat o'z holatini ko'radi, admin hammasini
+      allow get: if isAdmin() || (isSignedIn() && emailId == myEmail());
+      allow list: if isAdmin();
+
+      // Faqat admin belgilaydi; adminlarning o'zini mute/ban qilib bo'lmaydi
+      allow create, update: if isAdmin()
+        && !(emailId in [
+          'doniyorbektoshmatov7@gmail.com',
+          'gulchiroyjumayeva018@gmail.com'
+        ])
+        && request.resource.data.keys().hasOnly(['email', 'type', 'until', 'reason', 'by', 'createdAt'])
+        && request.resource.data.keys().hasAll(['email', 'type', 'until'])
+        && request.resource.data.email == emailId
+        && request.resource.data.type in ['mute', 'ban'];
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- presence/{uid} ----------
+    match /presence/{uid} {
+      // Ro'yxatni faqat adminlar o'qiydi (emaillar boshqalarga ko'rinmaydi)
+      allow read: if isAdmin();
+
+      // Har kim faqat o'z hujjatini yozadi
+      allow create, update: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['uid', 'nick', 'email', 'photoURL', 'online', 'lastSeen'])
+        && request.resource.data.uid == uid
+        && request.resource.data.email.lower() == myEmail();
+
+      // Eski/dublikat hujjatlarni admin o'chira oladi
+      allow delete: if isAdmin();
+    }
+
+    // ---------- cardRooms/{roomId} (o'zgartirilmagan) ----------
+    match /cardRooms/{roomId} {
+      function isParticipant() {
+        return isSignedIn() &&
+          request.auth.uid in resource.data.participantUids;
+      }
+      function isJoining() {
+        return isSignedIn()
+          && resource.data.status == 'waiting'
+          && resource.data.participantUids.size() < resource.data.size
+          && request.resource.data.participantUids ==
+             resource.data.participantUids.concat([request.auth.uid])
+          && !(request.auth.uid in resource.data.participantUids);
+      }
+      allow read: if resource.data.visibility == 'public' || isParticipant();
+      allow create: if isSignedIn()
+        && request.resource.data.hostUid == request.auth.uid
+        && request.resource.data.participantUids == [request.auth.uid]
+        && request.resource.data.status == 'waiting'
+        && request.resource.data.size in [2, 3, 4];
+      allow update: if isJoining() || isParticipant();
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.hostUid;
+
+      match /rounds/{roundId} {
+        allow read: if get(/databases/$(database)/documents/cardRooms/$(roomId)).data.visibility == 'public'
+          || (isSignedIn() && request.auth.uid in
+              get(/databases/$(database)/documents/cardRooms/$(roomId)).data.participantUids);
+        allow create, update: if isSignedIn() && request.auth.uid in
+          get(/databases/$(database)/documents/cardRooms/$(roomId)).data.participantUids;
+      }
+    }
+  }
+}

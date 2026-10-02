@@ -3265,6 +3265,15 @@
   }
   .nickname-overlay.show .nickname-card{transform:translateY(0) scale(1);}
   .nickname-emoji{font-size:34px; margin-bottom:6px;}
+  .nickname-avatar{
+    width:64px; height:64px; margin:0 auto 10px;
+    border-radius:50%; overflow:hidden;
+    border:2px solid var(--glass-border);
+    background:var(--glass-bg-strong);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px; font-weight:800; color:var(--ink);
+  }
+  .nickname-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .nickname-card h2{
     font-family:'Shippori Mincho',serif;
     font-size:19px;
@@ -4879,6 +4888,24 @@
     font-size:11.5px;
     color:var(--ink-faint);
   }
+  .chat-panel-left{display:flex; align-items:center; gap:10px; min-width:0;}
+  .chat-header-avatar{width:34px; height:34px; flex:none;}
+  .chat-admin-open-btn{
+    display:none; align-items:center; gap:5px;
+    height:30px; padding:0 11px; border-radius:15px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg); color:var(--ink-soft);
+    font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .chat-admin-open-btn:active{transform:scale(0.94);}
+  .chat-admin-overlay{position:fixed; inset:0; z-index:10600; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(6,7,9,0.62);}
+  .chat-admin-overlay.show{display:flex;}
+  .chat-admin-card{width:100%; max-width:340px; border-radius:20px; padding:16px; background:var(--panel-1); border:1px solid var(--glass-border-soft); display:flex; flex-direction:column; gap:10px;}
+  .chat-admin-card h4{margin:0; font-size:15px; color:var(--ink); text-align:center;}
+  .chat-admin-card .chat-admin-clear{border:1px solid #a32323; background:rgba(163,35,35,0.22); color:#f5e2df; border-radius:12px; padding:11px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer;}
+  .chat-admin-card .chat-admin-close{border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink); border-radius:12px; padding:10px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;}
+  .chat-admin-section-title{font-size:12px; font-weight:700; color:var(--ink-soft); margin-top:2px;}
+  .chat-admin-card .chat-bans-list{margin:0; max-height:200px; padding-right:2px;}
   .chat-header-actions{display:flex; align-items:center; gap:8px; flex:none;}
   .chat-nick-edit-btn{
     display:flex; align-items:center; gap:5px;
@@ -5901,7 +5928,7 @@
 <div class="nickname-overlay" id="nicknameOverlay" aria-hidden="true">
   <div class="nickname-card">
     <button class="nickname-close-btn" id="nicknameCloseBtn" type="button" aria-label="Yopish">✕</button>
-    <div class="nickname-emoji">✏️</div>
+    <div class="nickname-avatar" id="nicknameAvatar"></div>
     <h2>Nickname'ni tahrirlash</h2>
     <p>Bu ism chatda boshqalarga shu nom bilan ko'rinadi.</p>
     <div class="nickname-notice" role="note">⚠️ Iltimos, nickname o'rniga o'z ismingizni yozing — chatda hamma bir-birini tanishi uchun.</div>
@@ -6101,26 +6128,36 @@
 <div class="chat-overlay" id="chatOverlay" aria-hidden="true"></div>
 <div class="chat-panel" id="chatPanel" aria-hidden="true">
   <div class="chat-panel-header">
-    <div class="chat-panel-title">
-      <h3>Chat</h3>
-      <span id="chatNickLabel">Mehmon sifatida</span>
+    <div class="chat-panel-left">
+      <div id="chatHeaderAvatar"></div>
+      <div class="chat-panel-title">
+        <h3>Chat</h3>
+        <span id="chatNickLabel">Mehmon sifatida</span>
+      </div>
     </div>
     <div class="chat-header-actions">
+      <button class="chat-admin-open-btn" id="chatAdminOpenBtn" type="button">🛡 Admin</button>
       <button class="chat-nick-edit-btn" id="chatNickEditBtn" type="button" aria-label="Nickname'ni tahrirlash">✏️ Nickname</button>
       <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Yopish">✕</button>
     </div>
   </div>
-  <div class="chat-admin-bar" id="chatAdminBar" style="display:none">
-    <button id="chatClearBtn" type="button">🧹 Chatni tozalash</button>
-    <button id="chatBansBtn" type="button">🚫 Bloklanganlar <span id="chatBansCount"></span></button>
-  </div>
-  <div class="chat-bans-list" id="chatBansList" style="display:none"></div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-bar">
     <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
     <button class="chat-send-btn" id="chatSendBtn" type="button" aria-label="Yuborish">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
     </button>
+  </div>
+</div>
+
+<!-- ---------- CHAT ADMIN OYNASI (faqat admin/owner) ---------- -->
+<div class="chat-admin-overlay" id="chatAdminOverlay" aria-hidden="true">
+  <div class="chat-admin-card">
+    <h4>🛡 Chat boshqaruvi</h4>
+    <button class="chat-admin-clear" id="chatClearBtn" type="button">🧹 Chatni tozalash</button>
+    <div class="chat-admin-section-title">🚫 Bloklanganlar <span id="chatBansCount"></span></div>
+    <div class="chat-bans-list" id="chatBansList"></div>
+    <button class="chat-admin-close" id="chatAdminCloseBtn" type="button">Yopish</button>
   </div>
 </div>
 
@@ -9354,7 +9391,28 @@
     lastChatMsgs = Array.isArray(msgs) ? msgs : [];
     renderChatMessages();
   };
+  // Google avatar elementi (rasm yuklanmasa — ism bosh harfi)
+  function fillAvatar(box, extraClass){
+    if(!box) return;
+    const photo = (typeof window.__kanjiCurrentPhoto === 'function') ? window.__kanjiCurrentPhoto() : '';
+    const name = getNickname() || ((typeof window.__kanjiCurrentUserName === 'function') ? window.__kanjiCurrentUserName() : '') || '?';
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    const fallback = ()=>{
+      const d = document.createElement('div');
+      d.className = 'chat-avatar chat-avatar-fallback ' + (extraClass||'');
+      d.textContent = initial; return d;
+    };
+    box.innerHTML = '';
+    if(!photo){ box.appendChild(fallback()); return; }
+    const img = document.createElement('img');
+    img.className = 'chat-avatar ' + (extraClass||'');
+    img.referrerPolicy = 'no-referrer'; img.alt = ''; img.draggable = false;
+    img.onerror = ()=>{ img.replaceWith(fallback()); };
+    img.src = photo;
+    box.appendChild(img);
+  }
   function updateChatNickLabel(){
+    fillAvatar(document.getElementById('chatHeaderAvatar'), 'chat-header-avatar');
     const label = document.getElementById('chatNickLabel');
     if(!label) return;
     const custom = getNickname();
@@ -9416,11 +9474,11 @@
   }
   function renderBans(){
     const isAdm = typeof window.__kanjiIsAdmin === 'function' && window.__kanjiIsAdmin();
-    const bar = document.getElementById('chatAdminBar');
+    const adminBtn = document.getElementById('chatAdminOpenBtn');
     const list = document.getElementById('chatBansList');
     const cnt = document.getElementById('chatBansCount');
-    if(bar) bar.style.display = isAdm ? 'flex' : 'none';
-    if(!isAdm){ if(list) list.style.display = 'none'; return; }
+    if(adminBtn) adminBtn.style.display = isAdm ? 'flex' : 'none';
+    if(!isAdm){ const ov = document.getElementById('chatAdminOverlay'); if(ov) ov.classList.remove('show'); return; }
     const bans = (window.__kanjiBans || []).filter(b=>b.type === 'ban' || (b.until && b.until > Date.now()));
     if(cnt) cnt.textContent = bans.length ? '(' + bans.length + ')' : '';
     if(!list) return;
@@ -9592,6 +9650,13 @@
     const input = document.getElementById('nicknameInput');
     const confirmBtn = document.getElementById('nicknameConfirmBtn');
     if(!overlay || !input || !confirmBtn) return;
+    (function(){
+      const box = document.getElementById('nicknameAvatar');
+      if(!box) return;
+      fillAvatar(box, '');
+      const el = box.firstElementChild;
+      if(el){ el.style.width='100%'; el.style.height='100%'; el.style.border='none'; el.style.borderRadius='0'; el.style.fontSize='26px'; }
+    })();
     input.value = getNickname();
     confirmBtn.disabled = input.value.trim().length === 0;
     overlay.classList.add('show');
@@ -11030,11 +11095,16 @@
     if(msgsWrap) msgsWrap.addEventListener('click', onChatListClick);
     const clearBtn = document.getElementById('chatClearBtn');
     if(clearBtn) clearBtn.addEventListener('click', ()=>{
-      if(confirm("Chatdagi BARCHA xabarlar o'chiriladi. Davom etasizmi?")) window.__kanjiChatClear().catch(()=>alert("Tozalab bo'lmadi."));
+      if(confirm("Chatdagi BARCHA xabarlar o'chiriladi. Davom etasizmi?")) window.__kanjiChatClear().then(()=>{ const o=document.getElementById('chatAdminOverlay'); if(o) o.classList.remove('show'); }).catch(()=>alert("Tozalab bo'lmadi."));
     });
-    const bansBtn = document.getElementById('chatBansBtn');
     const bansList = document.getElementById('chatBansList');
-    if(bansBtn && bansList) bansBtn.addEventListener('click', ()=>{ bansList.style.display = bansList.style.display === 'none' ? 'block' : 'none'; });
+    const adminOv = document.getElementById('chatAdminOverlay');
+    const adminOpenBtn = document.getElementById('chatAdminOpenBtn');
+    const adminCloseBtn = document.getElementById('chatAdminCloseBtn');
+    if(adminOpenBtn && adminOv) adminOpenBtn.addEventListener('click', ()=>{ renderBans(); adminOv.classList.add('show'); adminOv.setAttribute('aria-hidden','false'); });
+    const closeAdmin = ()=>{ if(adminOv){ adminOv.classList.remove('show'); adminOv.setAttribute('aria-hidden','true'); } };
+    if(adminCloseBtn) adminCloseBtn.addEventListener('click', closeAdmin);
+    if(adminOv) adminOv.addEventListener('click', (e)=>{ if(e.target === adminOv) closeAdmin(); });
     if(bansList) bansList.addEventListener('click', (e)=>{
       const b = e.target.closest('button[data-unblock]');
       if(!b || !bansList._bans) return;
