@@ -11559,7 +11559,13 @@
   }
 
   function logout() {
-    signOut(auth).finally(() => {
+    // Chiqishdan oldin presence'ni darrov offline qilamiz (ko'pi bilan 1.5 soniya
+    // kutamiz), shunda ro'yxatda "online" bo'lib qolib ketmaydi.
+    const u = auth.currentUser;
+    const offlineDone = u
+      ? Promise.race([presenceBeat(u, false), new Promise((r) => setTimeout(r, 1500))])
+      : Promise.resolve();
+    offlineDone.then(() => signOut(auth)).catch(() => {}).finally(() => {
       // Chiqishdan so'ng sahifani qayta yuklaymiz — shu orqali ilova
       // to'liq boshlang'ich holatga (splash ekran, o'chiq "Boshlash"
       // tugmasi) qaytadi va keyingi safar kirish uchun foydalanuvchi
@@ -11757,6 +11763,25 @@
         online: data.online !== false && fresh
       };
     });
+    // DUBLIKATLARNI BIRLASHTIRISH: bir xil email bilan bir nechta hujjat bo'lsa
+    // (masalan, akkaunt o'chirilib qayta kirilganda yangi uid berilgan, eski
+    // hujjat esa bazada qolgan), ularni bitta qator qilamiz: avval online
+    // bo'lgani, bo'lmasa eng so'nggi ko'ringani qoldiriladi.
+    const seenOf = (it) => (it.lastSeen && typeof it.lastSeen.toMillis === "function")
+      ? it.lastSeen.toMillis()
+      : (it.lastSeen ? 0 : Date.now());
+    const uniqueMap = new Map();
+    items.forEach((it) => {
+      const key = it.email ? it.email.trim().toLowerCase() : ("uid:" + it.uid);
+      const prev = uniqueMap.get(key);
+      if (!prev) { uniqueMap.set(key, it); return; }
+      const better = (it.online !== prev.online)
+        ? it.online
+        : seenOf(it) > seenOf(prev);
+      if (better) uniqueMap.set(key, it);
+    });
+    items.length = 0;
+    uniqueMap.forEach((it) => items.push(it));
     // Saralash: avval hozir online bo'lganlar, undan keyin oxirgi marta
     // kirganlar (lastSeen) bo'yicha — eng yangisi tepada, eng eskisi pastda.
     // Online guruh ichida lastSeen har heartbeat'da o'zgargani uchun ro'yxat
