@@ -89,7 +89,15 @@
   html.lite .bg-scene .blob.b3,
   html.lite .bg-scene .blob.b4{ display:none; }
   html.lite .card.flipped .face.back{ animation:none !important; }
+  html.lite .card::after{ display:none; }
   *{box-sizing:border-box;}
+  /* Barcha tugma va sahifalar uchun: 300ms tap kechikishi va ikki marta bosishdagi zoom yo'q */
+  button,[role="button"],a,summary,label,select,input[type="checkbox"],input[type="radio"]{ touch-action:manipulation; }
+  button{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  /* Sensorli qurilmada blur radiusi kamroq (ko'rinishi deyarli bir xil, GPU yuki ancha kam) */
+  @media (hover:none) and (pointer:coarse){
+    :root{ --blur-1:10px; --blur-2:13px; --blur-3:14px; --blur-4:16px; --blob-blur:50px; }
+  }
   html,body{height:100%; max-width:100%;}
   /* Kartochka ekran chetidan tashqariga chiqqanda sahifa kengayib ketmasligi uchun.
      'clip' scroll-konteyner yaratmaydi (window.scrollBy ishlashda davom etadi). */
@@ -254,7 +262,7 @@
     -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     color:var(--ink-soft);
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
     position:relative;
     overflow:hidden;
   }
@@ -326,7 +334,7 @@
     -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     color:var(--ink-soft);
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .search-toggle-btn:active{transform:scale(0.92);}
   .search-toggle-btn.active{
@@ -384,7 +392,7 @@
     font-weight:600;
     font-family:inherit;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .chat-toggle-btn:active{transform:scale(0.96);}
   .chat-toggle-btn svg{width:16px; height:16px; flex:none; display:block;}
@@ -449,7 +457,7 @@
     font-weight:600;
     font-family:inherit;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
     white-space:nowrap;
   }
   .auth-login-btn:active{transform:scale(0.94);}
@@ -478,7 +486,7 @@
     color:var(--ink);
     font-size:14px;
     font-weight:700;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .auth-avatar-btn:active{transform:scale(0.92);}
   .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; background:var(--bg-2);}
@@ -729,7 +737,7 @@
     font-weight:700;
     white-space:nowrap;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .ai-assist-btn:active{transform:scale(0.94);}
   .ai-assist-btn svg{width:16px; height:16px; flex-shrink:0; display:block;}
@@ -758,7 +766,7 @@
     color:var(--moss-soft);
     cursor:pointer;
     position:relative;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .presence-toggle-btn:active{transform:scale(0.92);}
   .presence-toggle-btn svg{width:17px; height:17px; display:block;}
@@ -1160,7 +1168,7 @@
     padding:11px 14px;
     border-radius:16px;
     cursor:pointer;
-    transition:all .25s ease;
+    transition:background-color .25s ease,border-color .25s ease,color .25s ease,opacity .25s ease,transform .25s ease,box-shadow .25s ease,filter .25s ease;
   }
   .known-banner:active{transform:scale(0.98);}
   .known-banner.active{
@@ -1306,7 +1314,7 @@
     padding:4px 10px;
     border-radius:999px;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .all-day-select-btn:active{transform:scale(0.94);}
   .all-day-select-btn.all-selected{
@@ -1426,7 +1434,7 @@
     padding:9px 6px;
     border-radius:999px;
     cursor:pointer;
-    transition:all .25s ease;
+    transition:background-color .25s ease,border-color .25s ease,color .25s ease,opacity .25s ease,transform .25s ease,box-shadow .25s ease,filter .25s ease;
   }
   .tab-btn.active{
     background:rgba(236,231,220,0.92);
@@ -1785,9 +1793,16 @@
     100%{ transform:scale(var(--ripple-scale, 22)); opacity:0; }
   }
 
-  .card.flipped .face.back{
-    animation:cardGlow 2.2s ease-in-out infinite;
+  /* Yorug' halqa endi box-shadow'ni har kadrda qayta chizmaydi: alohida qatlamning
+     faqat opacity'si o'zgaradi (GPU/kompozitor), shuning uchun aylangandan keyin ham silliq. */
+  .card::after{
+    content:"";position:absolute;inset:0;border-radius:22px;
+    border:1px solid var(--gold);
+    box-shadow:0 0 26px 6px rgba(201,166,107,0.55);
+    opacity:0;pointer-events:none;z-index:-1;
   }
+  .card.flipped:not(.flipping)::after{ animation:cardGlowPulse 2.2s ease-in-out infinite; }
+  @keyframes cardGlowPulse{ 0%,100%{opacity:0;} 50%{opacity:1;} }
   @keyframes cardGlow{
     0%,100%{
       border-color:var(--glass-border-soft);
@@ -2268,7 +2283,7 @@
     letter-spacing:0.005em;
     cursor:pointer;
     box-shadow:0 8px 18px -8px rgba(217,105,79,0.5);
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
     white-space:normal;
     line-height:1.2;
     text-align:center;
@@ -2665,7 +2680,7 @@
     font-weight:600;
     text-align:left;
     cursor:pointer;
-    transition:all .15s ease;
+    transition:background-color .15s ease,border-color .15s ease,color .15s ease,opacity .15s ease,transform .15s ease,box-shadow .15s ease,filter .15s ease;
   }
   .quiz-opt:active{transform:scale(0.98);}
   .quiz-opt.correct{background:var(--moss); border-color:var(--moss); color:#0B0D10;}
@@ -2988,6 +3003,7 @@
   @media (prefers-reduced-motion: reduce){
     .card-inner, .ctrl-btn, .quiz-bar-fill{transition:none !important;}
     .card.flipped .face.back{animation:none !important;}
+    .card::after{ display:none; }
   }
 
   /* ---------- SPLASH / INTRO ---------- */
@@ -3597,7 +3613,7 @@
     padding:6px 13px;
     border-radius:999px;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
     white-space:nowrap;
   }
   .ct-segment-btn.active{
@@ -3618,7 +3634,7 @@
     font-weight:700;
     font-family:inherit;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
     box-shadow:0 6px 18px -6px rgba(217,105,79,0.55);
   }
   .ct-create-room-btn:active{transform:scale(0.97);}
@@ -3697,7 +3713,7 @@
     cursor:pointer;
     background:linear-gradient(155deg, var(--accent), var(--accent-soft));
     color:#fff;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .ct-room-join-btn:active{transform:scale(0.94);}
   .ct-room-join-btn:disabled{
@@ -3805,7 +3821,7 @@
     font-weight:700;
     font-family:inherit;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
     box-shadow:0 6px 18px -6px rgba(124,154,107,0.55);
     margin-bottom:10px;
   }
@@ -5753,7 +5769,8 @@
                    (nav.deviceMemory && nav.deviceMemory <= 4);
       var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var saveData = nav.connection && nav.connection.saveData;
-      if(weakHW || reduceMotion || saveData){
+      var savedLite = false; try{ savedLite = localStorage.getItem('kanji-lite') === '1'; }catch(e){}
+      if(weakHW || reduceMotion || saveData || savedLite){
         document.documentElement.classList.add('lite');
       }
     }catch(e){}
@@ -8060,12 +8077,17 @@
     // swipe still feels immediate.
     const INTENT_PX = 14;
 
+    let lastTouchAt = 0, downAt = 0, lastFlipAt = 0, flipTimer = null;
+    const dots = (m)=>{ try{ DotsFX[m](); }catch(_){} };
     function pointerDown(e){
-      dragging = true; moved = false; decided = null;
+      if(e.touches) lastTouchAt = Date.now();
+      else if(Date.now() - lastTouchAt < 700) return; // teginishdan keyingi sun'iy mouse hodisalari
+      dragging = true; moved = false; decided = null; downAt = Date.now();
       const p = e.touches ? e.touches[0] : e;
       startX = p.clientX; startY = p.clientY; curX = 0;
       lastY = startY; scrolledManually = false;
       inner.style.transition = 'none';
+      inner.style.willChange = 'transform'; // qatlam aylanishdan OLDIN tayyor bo'ladi
     }
     function applyTransform(dx){
       const rot = dx / 18;
@@ -8096,6 +8118,7 @@
           // lazy will-change: GPU qatlami faqat haqiqiy gorizontal tortish
           // boshlanganda yoqiladi, oddiy tap yoki vertikal scroll uchun emas
           card.style.willChange = 'transform';
+          dots('pause');
         } else {
           decided = 'v'; // vertical/ambiguous intent
           // Ichki matn konteyneri (orqa tomon) kartochka balandligidan oshib
@@ -8105,6 +8128,8 @@
                                   backScroll.scrollHeight > backScroll.clientHeight + 1;
           if(!innerScrollable){
             dragging = false;
+            inner.style.transition = '';
+            if(!card.classList.contains('flipping')) inner.style.willChange = '';
             return;
           }
         }
@@ -8132,11 +8157,21 @@
       }
       e.preventDefault && e.cancelable && e.preventDefault();
     }
-    function pointerUp(){
+    function pointerUp(e){
       if(rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
       if(!dragging){ return; }
       dragging = false;
       inner.style.transition = '';
+      // TAP'ni o'zimiz aniqlaymiz: brauzer ozgina siljishni scroll deb hisoblab 'click'ni
+      // yubormay qo'yishi mumkin edi — shu sabab ba'zan bir bosishda aylanmasdi
+      const t = e && e.type;
+      if((t === 'touchend' || t === 'mouseup') && !moved && decided === null && !scrolledManually && Date.now() - downAt < 700){
+        if(t === 'touchend' && e.cancelable) e.preventDefault(); // takroriy click/mouse hodisasi bo'lmasin
+        flip();
+        return;
+      }
+      if(!card.classList.contains('flipping')) inner.style.willChange = '';
+      setTimeout(()=>dots('resume'), 450);
       const threshold = 90;
       if(curX <= -threshold){
         flyOut(-1, markKnown);
@@ -8162,21 +8197,46 @@
       edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
       setTimeout(()=>{ card.style.willChange=''; cb(); }, 220);
     }
-    function click(){
-      if(moved || scrolledManually) return; // was a drag/scroll, not a tap
+    function flip(){
+      lastFlipAt = Date.now();
       const showingBack = !card.classList.contains('flipped');
-      // lazy will-change: 3D aylanish transitioni boshlanishidan oldin GPU qatlami
-      // faqat card-inner uchun yoqiladi, transitionend'da avtomatik o'chadi (pastda)
       inner.style.willChange = 'transform';
-      // aylanish paytida backdrop-filter'ni vaqtincha o'chirib, silliq aylanishni
-      // ta'minlaymiz (pastdagi transitionend'da .flipping olib tashlanadi)
       card.classList.add('flipping');
       card.classList.toggle('flipped');
-      // MUHIM: touch-action har ikki tomonda ham 'pan-y' bo'lib qoladi —
-      // 'none' qo'yilsa, orqa tomonda sahifani scroll qilib bo'lmay qoladi.
-      card.style.touchAction = 'pan-y';
-      // tovush faqat old tomondan orqa tomonga o'tilganda chiqadi
+      card.style.touchAction = 'pan-y'; // MUHIM: orqa tomonda sahifa scrolli ishlashi uchun
+      dots('pause');
+      clearTimeout(flipTimer);
+      flipTimer = setTimeout(finishFlip, 650); // transitionend kelmasa ham holat albatta tozalanadi
+      sampleFlipJank();
       if(showingBack) playFlipSound();
+    }
+    function finishFlip(){
+      clearTimeout(flipTimer);
+      card.classList.remove('flipping');
+      inner.style.willChange = '';
+      dots('resume');
+    }
+    // Aylanish paytida kadrlar tez-tez qotsa, qurilma zaif deb hisoblanib 'lite' rejim yoqiladi va eslab qolinadi
+    function sampleFlipJank(){
+      const root = document.documentElement;
+      if(root.classList.contains('lite')) return;
+      const s = (window.__kjJank = window.__kjJank || {slow:0, flips:0});
+      let last = performance.now(), slow = 0; const end = last + 600;
+      (function f(now){
+        const d = now - last; last = now;
+        if(d > 42 && d < 400) slow++;
+        if(now < end){ requestAnimationFrame(f); return; }
+        s.slow += slow; s.flips++;
+        if(s.flips >= 3 && s.slow >= 6){
+          root.classList.add('lite');
+          try{ localStorage.setItem('kanji-lite','1'); }catch(_){}
+        }
+      })(last);
+    }
+    function click(){
+      if(Date.now() - lastFlipAt < 450) return; // pointerUp allaqachon aylantirgan
+      if(moved || scrolledManually) return;
+      flip();
     }
 
     card.addEventListener('mousedown', pointerDown, {signal});
@@ -8193,10 +8253,7 @@
     // cardGlow va boshqa vizual effektlarga umuman tegmaydi, faqat
     // will-change'ning bekorga doimiy yonib turishining oldini oladi
     inner.addEventListener('transitionend', (e)=>{
-      if(e.propertyName === 'transform'){
-        inner.style.willChange = '';
-        card.classList.remove('flipping');
-      }
+      if(e.target === inner && e.propertyName === 'transform') finishFlip();
     }, {signal});
 
     // renderStage() har safar yangi kartochka chiqarganda shu funksiyani chaqirib,
@@ -9072,9 +9129,11 @@
       return 1;
     }
 
+    let paused = false;
     function step(ts){
       if(!running) return;
       if(lastT === null) lastT = ts;
+      if(ts - lastT < 30){ rafId = requestAnimationFrame(step); return; } // 30fps yetarli (nuqtalar juda sekin)
       let dt = (ts - lastT)/1000;
       lastT = ts;
       if(dt > 0.12) dt = 0.12; // fon rejimidan qaytganda katta sakrashning oldini olamiz
@@ -9132,14 +9191,26 @@
       if(document.hidden){
         running = false;
         if(rafId) cancelAnimationFrame(rafId);
-      } else if(!running){
+      } else if(!running && !paused){
         running = true;
         lastT = null;            // vaqt hisobini qayta boshlaymiz, nuqtalar holati saqlanib qoladi
         rafId = requestAnimationFrame(step);
       }
     });
 
-    return { start };
+    function pause(){
+      if(!started || COUNT===0 || paused) return;
+      paused = true; running = false;
+      if(rafId) cancelAnimationFrame(rafId);
+    }
+    function resume(){
+      if(!paused) return;
+      paused = false;
+      if(document.hidden || !started) return;
+      running = true; lastT = null;
+      rafId = requestAnimationFrame(step);
+    }
+    return { start, pause, resume };
   })();
 
   // ---------- SPLASH: SUZUVCHI CHIZIQLAR ----------
