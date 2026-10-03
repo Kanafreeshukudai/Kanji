@@ -214,7 +214,11 @@
 
   header{
     width:100%;
-    max-width:var(--content-max);
+    /* Desktopda ham mobildagidek: tugmalar (kartochka almashish / qidiruv) sarlavhaga
+       yaqin turishi uchun header kengligi 480px bilan cheklanadi (markazda) */
+    max-width:min(480px, 100%);
+    margin-left:auto;
+    margin-right:auto;
     padding:26px 20px 8px;
     display:flex;
     align-items:center;
@@ -5461,6 +5465,77 @@
   }
   @media (prefers-reduced-motion: reduce){
     .ai-assist-typing-dots span{ animation:none; opacity:0.8; }
+  }
+
+
+  /* ---------- AI "O'YLAYAPMAN" ANIMATSIYASI (zamonaviy) ----------
+     Aylanuvchi gradient halqa + nur taratadigan chegara + matn bo'ylab
+     o'tuvchi yaltirash (shimmer). Faqat transform/opacity/background-position
+     animatsiya qilinadi — telefonlarda yengil ishlaydi. */
+  .ai-assist-typing .ai-assist-bubble{
+    position:relative;
+    overflow:hidden;
+    padding:10px 14px 10px 12px;
+    animation:aiThinkGlow 2.4s ease-in-out infinite;
+  }
+  .ai-assist-typing .ai-assist-bubble::after{
+    content:"";
+    position:absolute; top:0; bottom:0; left:-60%;
+    width:50%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.10), transparent);
+    transform:skewX(-18deg);
+    animation:aiThinkSweep 2.2s ease-in-out infinite;
+    pointer-events:none;
+  }
+  .ai-think{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    position:relative; z-index:1;
+  }
+  .ai-think-orb{
+    flex:none;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, #8b7cf6, #e5876f, #C9A66B, #5C82A6, #8b7cf6);
+    -webkit-mask:radial-gradient(farthest-side, transparent 52%, #000 56%);
+    mask:radial-gradient(farthest-side, transparent 52%, #000 56%);
+    animation:aiThinkSpin 1.1s linear infinite;
+    filter:drop-shadow(0 0 5px rgba(139,124,246,0.65));
+  }
+  .ai-think-text{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    background:linear-gradient(100deg, rgba(236,231,220,0.45) 20%, #ffffff 45%, rgba(236,231,220,0.45) 70%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    animation:aiThinkShimmer 1.8s linear infinite;
+    transition:opacity .25s ease;
+  }
+  .ai-think-text.swap{ opacity:0; }
+  .ai-think-dots{ display:inline-flex; gap:3px; margin-left:-4px; }
+  .ai-think-dots i{
+    width:4px; height:4px; border-radius:50%;
+    background:#b9aefc;
+    animation:aiThinkDot 1.2s ease-in-out infinite;
+  }
+  .ai-think-dots i:nth-child(2){ animation-delay:.15s; }
+  .ai-think-dots i:nth-child(3){ animation-delay:.3s; }
+  @keyframes aiThinkSpin{ to{ transform:rotate(360deg); } }
+  @keyframes aiThinkShimmer{ 0%{ background-position:120% 0; } 100%{ background-position:-120% 0; } }
+  @keyframes aiThinkSweep{ 0%{ left:-60%; } 60%,100%{ left:130%; } }
+  @keyframes aiThinkDot{ 0%,70%,100%{ transform:translateY(0); opacity:.35; } 35%{ transform:translateY(-3px); opacity:1; } }
+  @keyframes aiThinkGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(139,124,246,0); border-color:rgba(139,124,246,0.35); }
+    50%{ box-shadow:0 0 16px 1px rgba(139,124,246,0.28); border-color:rgba(139,124,246,0.6); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ai-think-orb, .ai-think-dots i, .ai-assist-typing .ai-assist-bubble, .ai-assist-typing .ai-assist-bubble::after{ animation:none; }
+    .ai-think-text{ animation:none; -webkit-text-fill-color:currentColor; color:var(--ink-soft); background:none; }
   }
 
   .ai-assist-input-bar{
@@ -11436,7 +11511,8 @@
       bubble.className = 'ai-assist-bubble';
       row.appendChild(bubble);
       messages.appendChild(row);
-      followBottom(false);
+      // Bot javobi yozilayotganda avto-scroll YO'Q: panel qolgan joyida turadi,
+      // foydalanuvchi o'zi scroll qilib o'qiydi.
 
       return new Promise((resolve)=>{
         let i = 0;
@@ -11448,7 +11524,6 @@
           const step = total > 400 ? 3 : 1;
           i = Math.min(i + step, total);
           bubble.textContent = text.slice(0, i);
-          followBottom(false);
           if(i < total){
             setTimeout(tick, perCharDelay);
           } else {
@@ -11464,13 +11539,22 @@
       row.className = 'ai-assist-msg bot ai-assist-typing';
       const bubble = document.createElement('div');
       bubble.className = 'ai-assist-bubble';
-      const dots = document.createElement('span');
-      dots.className = 'ai-assist-typing-dots';
-      dots.innerHTML = '<span></span><span></span><span></span>';
-      bubble.appendChild(dots);
+      const think = document.createElement('span');
+      think.className = 'ai-think';
+      think.innerHTML = '<span class="ai-think-orb"></span><span class="ai-think-text">O\'ylayapman</span><span class="ai-think-dots"><i></i><i></i><i></i></span>';
+      bubble.appendChild(think);
       row.appendChild(bubble);
       messages.appendChild(row);
       followBottom(false);
+      // matn vaqti-vaqti bilan almashib turadi (javob kelganda qator o'chadi — interval to'xtaydi)
+      const phrases = ["O'ylayapman", "Tahlil qilyapman", "Javob tayyorlayapman"];
+      const txt = think.querySelector('.ai-think-text');
+      let pi = 0;
+      const timer = setInterval(()=>{
+        if(!row.isConnected){ clearInterval(timer); return; }
+        txt.classList.add('swap');
+        setTimeout(()=>{ pi = (pi + 1) % phrases.length; txt.textContent = phrases[pi]; txt.classList.remove('swap'); }, 250);
+      }, 2600);
       return row;
     }
 
