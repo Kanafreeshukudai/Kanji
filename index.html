@@ -5081,8 +5081,8 @@
   .chat-ban-row button{flex:none; border:none; border-radius:8px; padding:4px 10px; background:var(--moss); color:#0B0D10; font-family:inherit; font-size:11px; font-weight:800; cursor:pointer;}
   .chat-msg-actions{display:flex; gap:4px; margin-top:2px;}
   .chat-act{border:none; background:rgba(255,255,255,0.08); color:inherit; border-radius:8px; padding:2px 8px; font-size:12px; cursor:pointer;}
-  .chat-mod-overlay{position:fixed; inset:0; z-index:10600; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(12,7,5,0.66);}
-  .chat-mod-card{width:100%; max-width:300px; border-radius:18px; padding:18px; background:linear-gradient(180deg, #33231f, #1f1613); border:1px solid rgba(229,135,111,0.45); box-shadow:0 18px 44px -14px rgba(0,0,0,0.7), 0 0 26px -12px rgba(229,135,111,0.35); display:flex; flex-direction:column; gap:8px;}
+  .chat-mod-overlay{position:fixed; inset:0; z-index:10600; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,0.72);}
+  .chat-mod-card{width:100%; max-width:300px; border-radius:18px; padding:18px; background:linear-gradient(180deg, #0d0e10, #050506); border:1px solid rgba(255,255,255,0.34); box-shadow:0 18px 44px -14px rgba(0,0,0,0.7), 0 0 26px -12px rgba(255,255,255,0.26); display:flex; flex-direction:column; gap:8px;}
   .chat-mod-card h4{margin:0 0 4px; font-size:14px; color:var(--ink); text-align:center;}
   .chat-panel-header{
     flex:none;
@@ -5144,8 +5144,8 @@
     height:30px; min-width:34px;
     padding:0 9px;
     border-radius:15px;
-    border:1px solid rgba(229,135,111,0.35);
-    background:rgba(217,105,79,0.14);
+    border:1px solid rgba(255,255,255,0.26);
+    background:rgba(255,255,255,0.06);
     color:var(--ink-soft);
     font-family:'Zen Maru Gothic', sans-serif;
     font-size:13px; font-weight:700; line-height:1;
@@ -5157,8 +5157,8 @@
   .chat-font-btn small{font-size:10px; margin-left:1px;}
   .chat-font-btn:active{transform:scale(0.93);}
   .chat-font-btn.active{
-    background:rgba(217,105,79,0.30);
-    border-color:var(--accent-soft);
+    background:rgba(255,255,255,0.14);
+    border-color:#e8eaed;
     color:#fff;
   }
   .chat-font-pop{
@@ -5168,8 +5168,8 @@
     width:min(264px, calc(100% - 24px));
     padding:12px 14px;
     border-radius:16px;
-    background:#33231f;
-    border:1px solid rgba(229,135,111,0.55);
+    background:#0d0e10;
+    border:1px solid rgba(255,255,255,0.41);
     box-shadow:0 14px 34px -10px rgba(0,0,0,0.7);
     opacity:0;
     transform:translateY(-6px) scale(0.97);
@@ -5193,8 +5193,8 @@
     flex:none;
     width:32px; height:32px;
     border-radius:50%;
-    border:1px solid rgba(229,135,111,0.45);
-    background:rgba(217,105,79,0.18);
+    border:1px solid rgba(255,255,255,0.34);
+    background:rgba(255,255,255,0.08);
     color:var(--ink);
     font-family:inherit; font-weight:800;
     cursor:pointer;
@@ -5206,7 +5206,7 @@
   .chat-font-step:disabled{opacity:0.35; cursor:default;}
   #chatFontRange{
     flex:1; min-width:0;
-    accent-color:var(--accent);
+    accent-color:#e8eaed;
     height:28px; margin:0;
     touch-action:pan-y;
   }
@@ -5225,7 +5225,7 @@
     margin:10px auto 0;
     padding:5px 12px;
     border-radius:999px;
-    border:1px solid rgba(229,135,111,0.40);
+    border:1px solid rgba(255,255,255,0.30);
     background:transparent;
     color:var(--ink-soft);
     font-family:inherit; font-size:11.5px; font-weight:700;
@@ -5236,55 +5236,60 @@
   /* sarlavha qismi torayganda (ayniqsa admin tugmasi ko'ringanda) tugmalar sig'sin */
   .chat-panel-title{min-width:0;}
   .chat-panel-title span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  /* ---------- Chat oynasi: iliq coral rang sxemasi ----------
-     Kulrang o'rniga saytdagi --accent / --accent-soft / --gold ranglari ishlatiladi
-     (chatdagi to'q sariq nur bilan uyg'un). */
+  /* ---------- Chat oynasi: qora rang sxemasi ----------
+     Qora fon, oq ajralib turuvchi chetlar va xabarlar orqasida oq rangdagi
+     qo'lda chizilgandek tasodifiy chiziqlar (doodle) naqshi. */
   .chat-panel{
     background:
-      radial-gradient(120% 55% at 50% 0%, rgba(229,135,111,0.14), rgba(229,135,111,0) 62%),
-      linear-gradient(180deg, #33231f, #1f1613 70%);
-    border-color:rgba(229,135,111,0.45);
-    box-shadow:0 -20px 50px -18px rgba(170,75,48,0.45);
+      radial-gradient(120% 50% at 50% 0%, rgba(255,255,255,0.07), rgba(255,255,255,0) 62%),
+      linear-gradient(180deg, #0e0f11, #000 72%);
+    border-color:rgba(255,255,255,0.38);
+    box-shadow:0 -18px 46px -16px rgba(0,0,0,0.9), 0 -2px 26px -6px rgba(255,255,255,0.12);
   }
-  .chat-panel .chat-panel-header{border-bottom-color:rgba(229,135,111,0.22);}
-  .chat-panel .chat-panel-title span{color:#e0b3a4;}
+  .chat-panel .chat-panel-header{border-bottom-color:rgba(255,255,255,0.18);}
+  .chat-panel .chat-panel-title span{color:#9BA1A6;}
   .chat-panel .chat-nick-edit-btn,
   .chat-panel .chat-admin-open-btn,
   .chat-panel .chat-close-btn{
-    border-color:rgba(229,135,111,0.35);
-    background:rgba(217,105,79,0.14);
+    border-color:rgba(255,255,255,0.26);
+    background:rgba(255,255,255,0.06);
   }
-  .chat-panel .chat-empty{color:#b58f83;}
+  .chat-panel .chat-messages{
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='432'%20height='432'%20viewBox='0%200%20432%20432'%3E%3Cg%20fill='none'%20stroke='white'%20stroke-opacity='0.14'%20stroke-width='1.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M0%200%20a2%202%200%200%201%204%200%20a5%205%200%200%201%20-10%200%20a9%209%200%200%201%2018%200%20a13%2013%200%200%201%20-26%200'%20transform='translate%2840%2041%29%20rotate%2837%29%20scale%281.02%29'/%3E%3Cpath%20d='M-24%200%20q24%20-17%2048%200'%20transform='translate%2899%2040%29%20rotate%2819%29%20scale%281.02%29'%20stroke-dasharray='3%204'/%3E%3Cpath%20d='M-14%200%20h0.1%20M-5%20-4%20h0.1%20M5%203%20h0.1%20M14%20-2%20h0.1'%20transform='translate%28183%2040%29%20rotate%283%29%20scale%281.08%29'/%3E%3Cpath%20d='M-28%208%20C-14%20-32%2014%2032%2028%20-8'%20transform='translate%28251%2048%29%20rotate%28-12%29%20scale%280.92%29'/%3E%3Cpath%20d='M-11%209%20L0%20-11%20L11%209%20z'%20transform='translate%28315%2044%29%20rotate%28-38%29%20scale%280.94%29'/%3E%3Cpath%20d='M0%20-13%20Q2%20-2%2013%200%20Q2%202%200%2013%20Q-2%202%20-13%200%20Q-2%20-2%200%20-13z'%20transform='translate%28392%2040%29%20rotate%28162%29%20scale%281.03%29'/%3E%3Cpath%20d='M0.0%20-13.0%20L3.2%20-4.4%20L12.4%20-4.0%20L5.2%201.7%20L7.6%2010.5%20L0.0%205.5%20L-7.6%2010.5%20L-5.2%201.7%20L-12.4%20-4.0%20L-3.2%20-4.4z'%20transform='translate%2840%20108%29%20rotate%2859%29%20scale%280.95%29'/%3E%3Cpath%20d='M-26%204%20q26%20-28%2050%200%20M16%20-6%20l9%2010%20l-12%203'%20transform='translate%28120%20106%29%20rotate%2842%29%20scale%280.87%29'/%3E%3Cpath%20d='M-22%206%20l8%20-12%20l8%2012%20l8%20-12%20l8%2012%20l8%20-12'%20transform='translate%28182%20116%29%20rotate%2829%29%20scale%280.95%29'/%3E%3Cpath%20d='M-24%200%20q6%20-12%2012%200%20t12%200%20t12%200%20t12%200'%20transform='translate%28248%20108%29%20rotate%2827%29%20scale%280.87%29'/%3E%3Cpath%20d='M-28%200%20c8%20-15%2015%2015%2028%200%20s20%20-15%2028%200'%20transform='translate%28313%20102%29%20rotate%2818%29%20scale%280.87%29'/%3E%3Cpath%20d='M0%20-9%20v18%20M-9%200%20h18'%20transform='translate%28392%20103%29%20rotate%28208%29%20scale%281.05%29'/%3E%3Cpath%20d='M-11%200%20a11%2011%200%201%200%2022%200%20a11%2011%200%201%200%20-22%200'%20transform='translate%2840%20186%29%20rotate%28319%29%20scale%280.95%29'/%3E%3Cpath%20d='M-8%20-8%20l16%2016%20M8%20-8%20l-16%2016'%20transform='translate%28120%20176%29%20rotate%28220%29%20scale%281.00%29'/%3E%3Cpath%20d='M-28%200%20c8%20-15%2015%2015%2028%200%20s20%20-15%2028%200'%20transform='translate%28172%20174%29%20rotate%2821%29%20scale%280.97%29'/%3E%3Cpath%20d='M-8%20-8%20l16%2016%20M8%20-8%20l-16%2016'%20transform='translate%28264%20180%29%20rotate%2860%29%20scale%280.97%29'/%3E%3Cpath%20d='M-11%200%20a11%2011%200%201%200%2022%200%20a11%2011%200%201%200%20-22%200'%20transform='translate%28318%20170%29%20rotate%28155%29%20scale%281.02%29'/%3E%3Cpath%20d='M-11%209%20L0%20-11%20L11%209%20z'%20transform='translate%28392%20194%29%20rotate%2816%29%20scale%280.96%29'/%3E%3Cpath%20d='M-28%208%20C-14%20-32%2014%2032%2028%20-8'%20transform='translate%2840%20240%29%20rotate%28-31%29%20scale%281.05%29'/%3E%3Cpath%20d='M0%20-13%20Q2%20-2%2013%200%20Q2%202%200%2013%20Q-2%202%20-13%200%20Q-2%20-2%200%20-13z'%20transform='translate%2894%20261%29%20rotate%2866%29%20scale%280.93%29'/%3E%3Cpath%20d='M-24%200%20q6%20-12%2012%200%20t12%200%20t12%200%20t12%200'%20transform='translate%28170%20253%29%20rotate%2810%29%20scale%280.95%29'/%3E%3Cpath%20d='M0.0%20-13.0%20L3.2%20-4.4%20L12.4%20-4.0%20L5.2%201.7%20L7.6%2010.5%20L0.0%205.5%20L-7.6%2010.5%20L-5.2%201.7%20L-12.4%20-4.0%20L-3.2%20-4.4z'%20transform='translate%28242%20262%29%20rotate%28342%29%20scale%281.05%29'/%3E%3Cpath%20d='M-26%204%20q26%20-28%2050%200%20M16%20-6%20l9%2010%20l-12%203'%20transform='translate%28331%20251%29%20rotate%2833%29%20scale%281.14%29'/%3E%3Cpath%20d='M-24%200%20q24%20-17%2048%200'%20transform='translate%28392%20254%29%20rotate%28-9%29%20scale%280.97%29'%20stroke-dasharray='3%204'/%3E%3Cpath%20d='M0%200%20a2%202%200%200%201%204%200%20a5%205%200%200%201%20-10%200%20a9%209%200%200%201%2018%200%20a13%2013%200%200%201%20-26%200'%20transform='translate%2840%20321%29%20rotate%2869%29%20scale%281.15%29'/%3E%3Cpath%20d='M-22%206%20l8%20-12%20l8%2012%20l8%20-12%20l8%2012%20l8%20-12'%20transform='translate%28106%20313%29%20rotate%289%29%20scale%280.88%29'/%3E%3Cpath%20d='M-14%200%20h0.1%20M-5%20-4%20h0.1%20M5%203%20h0.1%20M14%20-2%20h0.1'%20transform='translate%28182%20325%29%20rotate%2840%29%20scale%281.03%29'/%3E%3Cpath%20d='M0%20-9%20v18%20M-9%200%20h18'%20transform='translate%28240%20316%29%20rotate%28135%29%20scale%281.04%29'/%3E%3Cpath%20d='M-8%20-8%20l16%2016%20M8%20-8%20l-16%2016'%20transform='translate%28337%20327%29%20rotate%28171%29%20scale%280.88%29'/%3E%3Cpath%20d='M0%20-13%20Q2%20-2%2013%200%20Q2%202%200%2013%20Q-2%202%20-13%200%20Q-2%20-2%200%20-13z'%20transform='translate%28392%20337%29%20rotate%28173%29%20scale%280.94%29'/%3E%3Cpath%20d='M-24%200%20q24%20-17%2048%200'%20transform='translate%2840%20392%29%20rotate%2822%29%20scale%280.99%29'%20stroke-dasharray='3%204'/%3E%3Cpath%20d='M-26%204%20q26%20-28%2050%200%20M16%20-6%20l9%2010%20l-12%203'%20transform='translate%28113%20392%29%20rotate%28-27%29%20scale%281.14%29'/%3E%3Cpath%20d='M-22%206%20l8%20-12%20l8%2012%20l8%20-12%20l8%2012%20l8%20-12'%20transform='translate%28176%20392%29%20rotate%2837%29%20scale%281.08%29'/%3E%3Cpath%20d='M0.0%20-13.0%20L3.2%20-4.4%20L12.4%20-4.0%20L5.2%201.7%20L7.6%2010.5%20L0.0%205.5%20L-7.6%2010.5%20L-5.2%201.7%20L-12.4%20-4.0%20L-3.2%20-4.4z'%20transform='translate%28246%20392%29%20rotate%2833%29%20scale%281.10%29'/%3E%3Cpath%20d='M-28%208%20C-14%20-32%2014%2032%2028%20-8'%20transform='translate%28325%20392%29%20rotate%28-13%29%20scale%280.92%29'/%3E%3Cpath%20d='M-11%200%20a11%2011%200%201%200%2022%200%20a11%2011%200%201%200%20-22%200'%20transform='translate%28392%20392%29%20rotate%28229%29%20scale%281.03%29'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:432px 432px;
+    background-repeat:repeat;
+  }
+  .chat-panel .chat-empty{color:#80868b;}
   .chat-panel .chat-avatar{
-    border-color:rgba(229,135,111,0.45);
-    background:rgba(217,105,79,0.22);
+    border-color:rgba(255,255,255,0.35);
+    background:#15171a;
   }
-  .chat-panel .chat-msg-nick{color:#b58f83;}
+  .chat-panel .chat-msg-nick{color:#9BA1A6;}
   .chat-panel .chat-msg.mine .chat-msg-nick{color:var(--accent-soft);}
-  .chat-panel .chat-msg-time{color:rgba(235,200,185,0.55);}
+  .chat-panel .chat-msg-time{color:rgba(255,255,255,0.42);}
   .chat-panel .chat-msg.theirs .chat-bubble{
-    background:rgba(217,105,79,0.16);
-    border:1px solid rgba(229,135,111,0.32);
+    background:linear-gradient(150deg, #1b1d21, #101113);
+    border:1px solid rgba(255,255,255,0.26);
     color:var(--ink);
   }
   .chat-panel .chat-msg.mine .chat-bubble{
     background:linear-gradient(150deg, var(--accent), var(--accent-soft));
-    border:1px solid rgba(255,190,165,0.30);
+    border:1px solid rgba(255,255,255,0.18);
     color:#fff8ef;
   }
   .chat-panel .chat-input-bar{
-    border-top-color:rgba(229,135,111,0.22);
-    background:rgba(22,10,7,0.30);
+    border-top-color:rgba(255,255,255,0.22);
+    background:#000;
   }
   .chat-panel .chat-input-bar input{
-    background:rgba(217,105,79,0.12);
-    border-color:rgba(229,135,111,0.35);
+    background:#101113;
+    border-color:rgba(255,255,255,0.28);
   }
   .chat-panel .chat-input-bar input:focus{
-    border-color:var(--accent-soft);
-    background:rgba(217,105,79,0.18);
+    border-color:rgba(255,255,255,0.65);
+    background:#15161a;
   }
-  .chat-panel .chat-input-bar input::placeholder{color:#a07d72;}
+  .chat-panel .chat-input-bar input::placeholder{color:#6b7075;}
   .chat-panel .chat-send-btn{
     background:linear-gradient(135deg, var(--accent), var(--gold));
     color:#fff8ef;
@@ -5559,17 +5564,17 @@
     display:flex; align-items:center; justify-content:center;
     font-size:13px; font-weight:800; color:var(--ink);
   }
-  .chat-menu-overlay{position:fixed; inset:0; z-index:10600; display:flex; align-items:flex-end; justify-content:center; padding:16px; background:rgba(12,7,5,0.66);}
-  .chat-menu-card{width:100%; max-width:340px; border-radius:20px; padding:14px; background:linear-gradient(180deg, #33231f, #1f1613); border:1px solid rgba(229,135,111,0.45); box-shadow:0 18px 44px -14px rgba(0,0,0,0.7), 0 0 26px -12px rgba(229,135,111,0.35); display:flex; flex-direction:column; gap:8px; margin-bottom:env(safe-area-inset-bottom);}
-  .chat-menu-head{display:flex; align-items:center; gap:10px; padding:2px 2px 8px; border-bottom:1px solid rgba(229,135,111,0.22);}
+  .chat-menu-overlay{position:fixed; inset:0; z-index:10600; display:flex; align-items:flex-end; justify-content:center; padding:16px; background:rgba(0,0,0,0.72);}
+  .chat-menu-card{width:100%; max-width:340px; border-radius:20px; padding:14px; background:linear-gradient(180deg, #0d0e10, #050506); border:1px solid rgba(255,255,255,0.34); box-shadow:0 18px 44px -14px rgba(0,0,0,0.7), 0 0 26px -12px rgba(255,255,255,0.26); display:flex; flex-direction:column; gap:8px; margin-bottom:env(safe-area-inset-bottom);}
+  .chat-menu-head{display:flex; align-items:center; gap:10px; padding:2px 2px 8px; border-bottom:1px solid rgba(255,255,255,0.17);}
   .chat-menu-head .chat-avatar{width:34px; height:34px;}
   .chat-menu-head-text{min-width:0; display:flex; flex-direction:column;}
   .chat-menu-head-text b{font-size:13.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .chat-menu-head-text span{font-size:11.5px; color:#e0b3a4; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chat-menu-head-text span{font-size:11.5px; color:#9BA1A6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .chat-menu-card button,
-  .chat-mod-card button{display:flex; align-items:center; justify-content:flex-start; gap:10px; text-align:left; border:1px solid rgba(229,135,111,0.35); background:rgba(217,105,79,0.14); color:var(--ink); border-radius:12px; padding:11px 13px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; transition:background-color .15s ease, transform .15s ease;}
+  .chat-mod-card button{display:flex; align-items:center; justify-content:flex-start; gap:10px; text-align:left; border:1px solid rgba(255,255,255,0.26); background:rgba(255,255,255,0.06); color:var(--ink); border-radius:12px; padding:11px 13px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; transition:background-color .15s ease, transform .15s ease;}
   .chat-menu-card button:active,
-  .chat-mod-card button:active{transform:scale(0.98); background:rgba(217,105,79,0.26);}
+  .chat-mod-card button:active{transform:scale(0.98); background:rgba(255,255,255,0.12);}
   .chat-menu-card button.danger,
   .chat-mod-card button.danger{background:rgba(163,35,35,0.28); border-color:#a32323; color:#f5e2df;}
   .chat-menu-card button[data-a="x"],
@@ -5577,7 +5582,7 @@
   .chat-menu-card .chat-menu-ico,
   .chat-mod-card .chat-menu-ico{width:18px; height:18px; flex:none; display:block; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
   .chat-menu-card button:not(.danger):not([data-a="x"]) .chat-menu-ico,
-  .chat-mod-card button:not(.danger):not([data-m="x"]) .chat-menu-ico{color:var(--accent-soft);}
+  .chat-mod-card button:not(.danger):not([data-m="x"]) .chat-menu-ico{color:#e8eaed;}
   .chat-msg-nick{
     font-size:calc(var(--chat-fs, 13.5px) * 0.815);
     font-weight:700;
