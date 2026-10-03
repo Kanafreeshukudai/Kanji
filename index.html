@@ -906,11 +906,12 @@
     min-height:36px;
     display:flex; align-items:center; justify-content:center;
     margin:0;
+    gap:7px;
     padding:8px 12px;
     border-radius:12px;
-    border:1px solid rgba(124,154,107,0.60);
-    background:linear-gradient(150deg, #0c110a, #000);
-    color:var(--ink);
+    border:1px solid rgba(255,255,255,0.72);
+    background:linear-gradient(150deg, #0d0d0d, #000);
+    color:#fff;
     box-shadow:0 8px 18px -8px rgba(0,0,0,0.9);
     transform-origin:calc(100% - 18px) 50%;             /* avatar markazi */
     opacity:0;
@@ -934,19 +935,23 @@
     font-family:'Shippori Mincho',serif;
     font-size:13px;
     font-weight:600;
-    color:var(--ink);
+    color:#fff;
   }
   .auth-dropdown .chat-toggle-btn,
   .auth-dropdown .auth-notes-btn{
-    background:linear-gradient(150deg, #0c110a, #000);
-    border-color:rgba(124,154,107,0.60);
-    color:var(--ink);
+    background:linear-gradient(150deg, #0d0d0d, #000);
+    border-color:rgba(255,255,255,0.72);
+    color:#fff;
   }
-  .auth-dropdown .chat-toggle-btn svg{ color:var(--moss-soft); }
+  .auth-dropdown .chat-toggle-btn svg,
+  .auth-dropdown .auth-notes-btn svg{ width:16px; height:16px; flex:none; display:block; color:#fff; }
+  /* Chiqish: shaffof qizil */
   .auth-dropdown .auth-logout-btn{
-    background:linear-gradient(150deg, rgba(124,154,107,0.34), rgba(124,154,107,0.14));
-    border-color:var(--moss);
-    color:#dcebd2;
+    background:rgba(220,53,53,0.22);
+    border-color:rgba(239,68,68,0.72);
+    color:#ffd6d3;
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
   }
   .auth-dropdown .chat-toggle-btn:active,
   .auth-dropdown .auth-notes-btn:active,
@@ -954,6 +959,92 @@
   @media (prefers-reduced-motion: reduce){
     .auth-dropdown > *,
     .auth-dropdown.open > *{ transform:none; transition:opacity .2s ease; }
+  }
+
+  /* ---------- CHIQISHNI TASDIQLASH oynasi (qora + moss) ---------- */
+  .logout-confirm-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(0,0,0,0.76);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .2s ease, visibility 0s linear .2s;
+  }
+  .logout-confirm-overlay.open{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transition:opacity .2s ease, visibility 0s;
+  }
+  .logout-confirm-card{
+    width:100%;
+    max-width:320px;
+    box-sizing:border-box;
+    padding:22px 18px 18px;
+    border-radius:20px;
+    border:1px solid rgba(124,154,107,0.70);
+    background:linear-gradient(160deg, #0b100a, #000 55%);
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.95);
+    text-align:center;
+    transform:translateY(14px) scale(0.94);
+    transition:transform .32s cubic-bezier(.2,.9,.25,1.1);
+  }
+  .logout-confirm-overlay.open .logout-confirm-card{ transform:none; }
+  .logout-confirm-icon{
+    width:46px; height:46px;
+    margin:0 auto 12px;
+    border-radius:50%;
+    border:1px solid rgba(124,154,107,0.70);
+    background:#000;
+    color:var(--moss-soft);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logout-confirm-icon svg{ width:21px; height:21px; display:block; }
+  .logout-confirm-card h4{
+    margin:0 0 6px;
+    font-family:'Shippori Mincho',serif;
+    font-size:17px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .logout-confirm-card p{
+    margin:0 0 18px;
+    font-size:12.5px;
+    line-height:1.55;
+    color:#b5c9a8;
+  }
+  .logout-confirm-actions{ display:flex; gap:10px; }
+  .logout-confirm-actions button{
+    flex:1 1 0;
+    min-width:0;
+    padding:11px 8px;
+    border-radius:12px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .logout-confirm-actions button:active{ transform:scale(0.96); }
+  .logout-confirm-actions button:disabled{ opacity:0.6; cursor:default; }
+  .logout-cancel-btn{
+    border:1px solid rgba(124,154,107,0.70);
+    background:#000;
+    color:var(--ink);
+  }
+  .logout-ok-btn{
+    border:1px solid var(--moss);
+    background:linear-gradient(150deg, var(--moss-soft), var(--moss));
+    color:#0B0D10;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logout-confirm-overlay, .logout-confirm-card{ transition:opacity .15s ease; transform:none; }
   }
 
   /* ---------- SHAXSIY QAYDLAR (Google akkauntga bog'liq, Firestore'da saqlanadi) ---------- */
@@ -6710,7 +6801,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
         <span>Chat</span>
       </button>
-      <button id="notes-btn" class="auth-notes-btn" type="button">📝 Qaydlar</button>
+      <button id="notes-btn" class="auth-notes-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+        <span>Qaydlar</span>
+      </button>
       <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
     </div>
   </div>
@@ -7087,6 +7181,19 @@
 </div>
 
 <!-- ---------- SHAXSIY QAYDLAR: har bir akkaunt uchun alohida, Google akkaunt (uid) bo'yicha Firestore'da saqlanadi ---------- -->
+<div class="logout-confirm-overlay" id="logoutConfirmOverlay" aria-hidden="true">
+  <div class="logout-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmText">
+    <div class="logout-confirm-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+    </div>
+    <h4 id="logoutConfirmTitle">Chiqishni tasdiqlaysizmi?</h4>
+    <p id="logoutConfirmText">Akkauntingizdan chiqasiz. Qayta kirish uchun Google hisobingizni yana tanlashingiz kerak bo'ladi.</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-btn" id="logoutCancelBtn">Bekor qilish</button>
+      <button type="button" class="logout-ok-btn" id="logoutOkBtn">Chiqish</button>
+    </div>
+  </div>
+</div>
 <div class="notes-overlay" id="notesOverlay" aria-hidden="true"></div>
 <div class="notes-panel" id="notesPanel" aria-hidden="true">
   <div class="notes-panel-header">
@@ -13383,8 +13490,39 @@
   const splashStartHint = document.getElementById("splashStartHint");
 
   if (loginBtn) loginBtn.addEventListener("click", loginWithGoogle);
+  // Chiqishdan oldin tasdiqlash oynasi: "Bekor qilish" yoki "Chiqish"
+  const logoutConfirmOverlay = document.getElementById("logoutConfirmOverlay");
+  const logoutCancelBtn = document.getElementById("logoutCancelBtn");
+  const logoutOkBtn = document.getElementById("logoutOkBtn");
+  function openLogoutConfirm() {
+    if (!logoutConfirmOverlay) { logout(); return; }
+    logoutConfirmOverlay.classList.add("open");
+    logoutConfirmOverlay.setAttribute("aria-hidden", "false");
+    // tasodifan chiqib ketmaslik uchun fokus "Bekor qilish"da
+    if (logoutCancelBtn) setTimeout(() => logoutCancelBtn.focus(), 60);
+  }
+  function closeLogoutConfirm() {
+    if (!logoutConfirmOverlay) return;
+    logoutConfirmOverlay.classList.remove("open");
+    logoutConfirmOverlay.setAttribute("aria-hidden", "true");
+  }
   if (logoutBtn) logoutBtn.addEventListener("click", () => {
     authDropdown.classList.remove("open");
+    openLogoutConfirm();
+  });
+  if (logoutCancelBtn) logoutCancelBtn.addEventListener("click", closeLogoutConfirm);
+  if (logoutConfirmOverlay) logoutConfirmOverlay.addEventListener("click", (e) => {
+    if (e.target === logoutConfirmOverlay) closeLogoutConfirm();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && logoutConfirmOverlay && logoutConfirmOverlay.classList.contains("open")) {
+      closeLogoutConfirm();
+    }
+  });
+  if (logoutOkBtn) logoutOkBtn.addEventListener("click", () => {
+    logoutOkBtn.disabled = true;
+    if (logoutCancelBtn) logoutCancelBtn.disabled = true;
+    logoutOkBtn.textContent = "Chiqilmoqda…";
     logout();
   });
   if (avatarBtn) avatarBtn.addEventListener("click", () => {
