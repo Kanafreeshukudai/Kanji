@@ -340,44 +340,63 @@
     cursor:pointer;
     transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
-  .search-toggle-btn:active{transform:scale(0.92);}
+  .search-toggle-btn{ position:relative; }
+  /* Zamonaviy mikro-interaksiya: lupa doim aylanib turmaydi (tinch holat),
+     faqat foydalanuvchi harakat qilganda javob beradi:
+     - hover: yengil kattalashadi, nur sochadi, lupa biroz qiyshayadi
+     - bosish: "bosilgan" effekt (spring bilan qaytadi)
+     - ochilganda: lupa buralib ✕ ga aylanadi, atrofida bir martalik to'lqin */
+  .search-toggle-btn:active{
+    transform:scale(0.88);
+    transition-duration:.08s;
+  }
   .search-toggle-btn.active{
     background:linear-gradient(165deg, rgba(217,105,79,0.5), rgba(217,105,79,0.28));
     border-color:var(--accent);
-    color:var(--accent-soft);
+    color:#fff;
+    box-shadow:0 0 0 3px rgba(217,105,79,0.14), 0 6px 18px -6px rgba(217,105,79,0.65);
   }
   .search-toggle-btn svg{
     width:17px; height:17px; display:block;
     overflow:visible;
   }
-  /* Lupa BUTUN bir jism sifatida (linza + unga mahkam ulangan dastak)
-     linza markazidan o'tuvchi vertikal o'q atrofida o'giriladi — xuddi
-     kartochkaning old/orqa tomonga flip bo'lishi kabi. Dastak linza bilan
-     birga buriladi: avval vertikal chiziqqa qadar "yig'iladi", so'ng
-     qarama-qarshi (chap-past) tomonga ochiladi. Orqa tomonda lupa
-     ko'zgudagidek aksi bilan ko'rinadi. */
-  .search-toggle-btn svg .lupa-flip{
+  .search-toggle-btn svg g{
     transform-box:view-box;
-    transform-origin:11px 11px;   /* linza markazi (viewBox birliklarida) */
-    animation:searchLensFlip 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+    transform-origin:12px 12px;
+    transition:transform .46s cubic-bezier(.34,1.56,.64,1), opacity .22s ease;
   }
-  /* Chiziq qalinligi burilish paytida ingichkalashib yo'qolib ketmasin —
-     haqiqiy jismning qirrasi ham ko'rinib turadi (qalinlik ekranda doimiy,
-     17px/24 masshtabda 2.2 birlik ~ 1.56px). */
-  .search-toggle-btn svg .lupa-flip circle,
-  .search-toggle-btn svg .lupa-flip line{
-    vector-effect:non-scaling-stroke;
-    stroke-width:1.56px;
+  .search-toggle-btn svg .si-x{ opacity:0; transform:rotate(-90deg) scale(.4); }
+  .search-toggle-btn.active svg .si-lupa{ opacity:0; transform:rotate(90deg) scale(.4); }
+  .search-toggle-btn.active svg .si-x{ opacity:1; transform:none; }
+  @media (hover:hover) and (pointer:fine){
+    .search-toggle-btn:not(.active):hover{
+      transform:translateY(-1px) scale(1.08);
+      border-color:rgba(255,255,255,0.4);
+      background:var(--glass-bg-strong);
+      color:var(--ink);
+      box-shadow:0 6px 16px -6px rgba(255,255,255,0.28);
+    }
+    .search-toggle-btn:not(.active):hover svg .si-lupa{ transform:rotate(-14deg) scale(1.06); }
+    .search-toggle-btn.active:hover svg .si-x{ transform:rotate(90deg); }
   }
-  /* kartochka almashish tugmasi (ctCardOne/ctCardTwo) bilan bir xil ritm:
-     0-6% old tomon, 6-46% orqaga o'giriladi, 46-54% pauza, 54-94% yana oldinga */
-  @keyframes searchLensFlip{
-    0%, 6%{ transform:scaleX(1); }
-    46%,54%{ transform:scaleX(-1); }
-    94%,100%{ transform:scaleX(1); }
+  /* ochilish paytida bir martalik to'lqin (halqa) */
+  .search-toggle-btn::after{
+    content:"";
+    position:absolute; inset:-1px;
+    border-radius:50%;
+    border:1.5px solid var(--accent-soft);
+    opacity:0;
+    pointer-events:none;
   }
+  .search-toggle-btn.active::after{ animation:searchRing .55s cubic-bezier(.2,.7,.3,1) 1; }
+  @keyframes searchRing{
+    0%  { opacity:.75; transform:scale(1); }
+    100%{ opacity:0;   transform:scale(1.9); }
+  }
+  .search-toggle-btn:focus-visible{ outline:2px solid var(--accent-soft); outline-offset:3px; }
   @media (prefers-reduced-motion: reduce){
-    .search-toggle-btn svg .lupa-flip{ animation:none; }
+    .search-toggle-btn svg g{ transition:none; }
+    .search-toggle-btn.active::after{ animation:none; }
   }
 
   /* ---------- BITTA UMUMIY "DIRIJYOR" (flashcard almashish + qidiruv lupasi) ----------
@@ -407,10 +426,6 @@
     animation:none;
     transform:translateX(calc(-12px * var(--ct-k, 0))) rotate(calc(-10deg * var(--ct-k, 0)));
     z-index:calc(1 + var(--ct-z, 0));
-  }
-  html.ct-sync .search-toggle-btn svg .lupa-flip{
-    animation:none;
-    transform:scaleX(calc(1 - 2 * var(--ct-k, 0)));
   }
   @media (prefers-reduced-motion: reduce){
     html.ct-sync header{ animation:none; }
@@ -5433,6 +5448,63 @@
     box-shadow:0 0 14px rgba(139,124,246,0.55);
   }
   .ai-assist-glow-icon svg{width:18px; height:18px;}
+  /* ---------- AI logotipi: katta va kichik yulduz o'rin almashadi ----------
+     Kichik yulduz oldinga chiqib kattalashadi, katta yulduz esa orqaga o'tib
+     kichrayadi (ikkalasi qarama-qarshi yoylar bo'ylab, urilmasdan). Bir zum
+     turgach — xuddi shu tarzda joylariga qaytadi. Faqat oyna ochiq turganda
+     ishlaydi; faqat transform/opacity — yengil. */
+  .ai-assist-glow-icon{ position:relative; }
+  .ai-assist-glow-icon .ai-star-svg{
+    position:absolute;
+    left:50%; top:50%;
+    width:18px; height:18px;
+    margin:-9px 0 0 -9px;
+    overflow:visible;
+  }
+  .ai-star-big-svg{ z-index:2; }
+  .ai-star-small-svg{ z-index:1; }
+  .ai-assist-glow-icon .ai-star{
+    transform-box:view-box;
+    vector-effect:non-scaling-stroke;   /* kattalashganda ham chiziq qalinligi o'zgarmasin */
+    stroke-width:1.5px;
+  }
+  .ai-star-big{ transform-origin:12px 9.5px; }
+  .ai-star-small{ transform-origin:19px 18px; }
+  .ai-assist-panel.open .ai-star-big-svg{ animation:aiStarBigZ 5.2s linear infinite; }
+  .ai-assist-panel.open .ai-star-small-svg{ animation:aiStarSmallZ 5.2s linear infinite; }
+  .ai-assist-panel.open .ai-star-big{ animation:aiStarBig 5.2s cubic-bezier(.45,0,.2,1) infinite; }
+  .ai-assist-panel.open .ai-star-small{ animation:aiStarSmall 5.2s cubic-bezier(.45,0,.2,1) infinite; }
+  @keyframes aiStarBig{
+    0%,8%   { transform:translate(0,0) scale(1); opacity:1; }
+    16%     { transform:translate(6.97px,1.4px) scale(.72); opacity:.85; }
+    24%,56% { transform:translate(7px,8.5px) scale(.46); opacity:.7; }
+    64%     { transform:translate(.03px,7.1px) scale(.72); opacity:.85; }
+    72%,100%{ transform:translate(0,0) scale(1); opacity:1; }
+  }
+  @keyframes aiStarSmall{
+    0%,8%   { transform:translate(0,0) scale(1); }
+    16%     { transform:translate(-6.97px,-1.4px) scale(1.6); }
+    24%,56% { transform:translate(-7px,-8.5px) scale(2.17); }
+    64%     { transform:translate(-.03px,-7.1px) scale(1.6); }
+    72%,100%{ transform:translate(0,0) scale(1); }
+  }
+  /* qatlam (oldi/orqa) almashuvi — yulduzlar yo'l o'rtasida bir-birini kesib o'tgan paytda */
+  @keyframes aiStarBigZ{
+    0%,15.9% { z-index:2; }
+    16%,63.9%{ z-index:1; }
+    64%,100% { z-index:2; }
+  }
+  @keyframes aiStarSmallZ{
+    0%,15.9% { z-index:1; }
+    16%,63.9%{ z-index:2; }
+    64%,100% { z-index:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ai-assist-panel.open .ai-star-big-svg,
+    .ai-assist-panel.open .ai-star-small-svg,
+    .ai-assist-panel.open .ai-star-big,
+    .ai-assist-panel.open .ai-star-small{ animation:none; }
+  }
   .ai-assist-panel-title h3{
     margin:0;
     font-family:'Shippori Mincho',serif;
@@ -5557,6 +5629,80 @@
   .ai-font-reset:disabled{ opacity:0.4; cursor:default; }
   @media (prefers-reduced-motion: reduce){
     .ai-font-pop, .ai-font-pop.open{ transition:none; }
+  }
+
+  /* ---------- ZAMONAVIY SCROLL USTUNI (AI yordamchi va foydalanuvchilar chati) ----------
+     Brauzerning oq, qalin, o'qchali standart scrollbari o'rniga: ingichka, shaffof
+     trek, yumaloq gradient "ushlagich" (thumb). Yo'l chetidan bir oz ichkarida
+     "suzib" turadi, hover/sudrash paytida yorqinlashadi. Rang oynaning
+     o'z rangiga mos: AI — binafsha, chat — pushti-binafsha. */
+  .ai-assist-messages,
+  .chat-messages,
+  .presence-list,
+  .chat-bans-list{
+    --sb-1:139,124,246;   /* thumb boshlanish rangi (RGB) */
+    --sb-2:111,92,230;    /* thumb tugash rangi (RGB) */
+  }
+  .chat-messages,
+  .presence-list,
+  .chat-bans-list{
+    --sb-1:244,114,182;
+    --sb-2:168,85,247;
+  }
+  .ai-assist-messages::-webkit-scrollbar,
+  .chat-messages::-webkit-scrollbar,
+  .presence-list::-webkit-scrollbar,
+  .chat-bans-list::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+    background:transparent;
+  }
+  .ai-assist-messages::-webkit-scrollbar-track,
+  .chat-messages::-webkit-scrollbar-track,
+  .presence-list::-webkit-scrollbar-track,
+  .chat-bans-list::-webkit-scrollbar-track{
+    background:transparent;
+    margin:6px 0;
+  }
+  .ai-assist-messages::-webkit-scrollbar-thumb,
+  .chat-messages::-webkit-scrollbar-thumb,
+  .presence-list::-webkit-scrollbar-thumb,
+  .chat-bans-list::-webkit-scrollbar-thumb{
+    min-height:44px;
+    border-radius:999px;
+    border:3px solid transparent;           /* thumb trek ichida suzib turadi */
+    background:linear-gradient(180deg, rgba(var(--sb-1),.45), rgba(var(--sb-2),.45)) padding-box;
+    transition:background .2s ease;
+  }
+  .ai-assist-messages::-webkit-scrollbar-thumb:hover,
+  .chat-messages::-webkit-scrollbar-thumb:hover,
+  .presence-list::-webkit-scrollbar-thumb:hover,
+  .chat-bans-list::-webkit-scrollbar-thumb:hover{
+    background:linear-gradient(180deg, rgba(var(--sb-1),.85), rgba(var(--sb-2),.85)) padding-box;
+  }
+  .ai-assist-messages::-webkit-scrollbar-thumb:active,
+  .chat-messages::-webkit-scrollbar-thumb:active,
+  .presence-list::-webkit-scrollbar-thumb:active,
+  .chat-bans-list::-webkit-scrollbar-thumb:active{
+    background:linear-gradient(180deg, rgb(var(--sb-1)), rgb(var(--sb-2))) padding-box;
+  }
+  .ai-assist-messages::-webkit-scrollbar-button,
+  .chat-messages::-webkit-scrollbar-button,
+  .presence-list::-webkit-scrollbar-button,
+  .chat-bans-list::-webkit-scrollbar-button{ display:none; width:0; height:0; }
+  .ai-assist-messages::-webkit-scrollbar-corner,
+  .chat-messages::-webkit-scrollbar-corner,
+  .presence-list::-webkit-scrollbar-corner,
+  .chat-bans-list::-webkit-scrollbar-corner{ background:transparent; }
+  /* Firefox (::-webkit-scrollbar ni qo'llamaydi): ingichka + rangli thumb */
+  @supports not selector(::-webkit-scrollbar){
+    .ai-assist-messages,
+    .chat-messages,
+    .presence-list,
+    .chat-bans-list{
+      scrollbar-width:thin;
+      scrollbar-color:rgba(var(--sb-1),.55) transparent;
+    }
   }
 
   .ai-assist-dev-notice{
@@ -6196,7 +6342,7 @@
     <h1 id="flashcardTitleHold">Kanji Flashcard<span class="hold-progress-track" id="holdProgressTrack" aria-hidden="true"><span class="hold-progress-fill" id="holdProgressFill"></span></span></h1>
   </div>
   <button class="search-toggle-btn" id="searchToggleBtn" type="button" aria-label="Qidiruv">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><g class="lupa-flip"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></g></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><g class="si-lupa"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.2" y2="16.2"></line></g><g class="si-x"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></g></svg>
   </button>
 </header>
 
@@ -6557,7 +6703,8 @@
   <div class="ai-assist-panel-header">
     <div class="ai-assist-panel-title">
       <span class="ai-assist-glow-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
+        <svg class="ai-star-svg ai-star-big-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ai-star ai-star-big" d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path></svg>
+        <svg class="ai-star-svg ai-star-small-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ai-star ai-star-small" d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
       </span>
       <div>
         <h3>AI Yordamchi</h3>
