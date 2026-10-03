@@ -5761,6 +5761,31 @@
      Android telefonlarda barcha tugmalar va o'tishlar silliq ishlashda davom etadi. */
   html.lite .swipe-hints .hint-arrow{ animation:none !important; }
   html.lite .hold-progress-fill.animate{ transition-duration:0s; transform:scaleX(1); }
+
+  /* ---------- iOS (Safari / PWA) RENDER FIX ----------
+     Muammo: iOS WebKit'da fixed fon qatlamlari (contain:strict + will-change +
+     translateZ) va doimiy animatsiyalangan canvas tufayli oddiy (o'z qatlami
+     yo'q) matn va tugmalar chizilmay qolardi — joyi saqlanadi, lekin ko'rinmaydi
+     (masalan "Hammasi"dagi kun nomlari va "Hammasini tanlash" tugmalari).
+     Faqat iOS'ga tegishli (-webkit-touch-callout faqat iOS'da bor), Android/desktop o'zgarmaydi. */
+  @supports (-webkit-touch-callout:none){
+    /* 1) fon qatlamlari: kontent bo'yalishiga xalaqit beruvchi contain/will-change olib tashlanadi */
+    .bg-scene, .dots-canvas{ contain:none; will-change:auto; -webkit-backface-visibility:visible; backface-visibility:visible; }
+    .swipe-edge-glow{ will-change:auto; }
+    /* 2) "Hammasi" kun sarlavhasi: har bir matn/tugma o'z qatlamida bo'yaladi */
+    .all-day-heading{ position:relative; z-index:2; -webkit-user-select:none; }
+    .all-day-heading-label,
+    .all-day-heading-count,
+    .all-day-select-btn{
+      position:relative; z-index:1;
+      -webkit-transform:translateZ(0); transform:translateZ(0);
+      -webkit-font-smoothing:antialiased;
+    }
+    .all-day-select-btn{ -webkit-appearance:none; appearance:none; -webkit-text-fill-color:currentColor; }
+    /* 3) boshqa sahifalardagi umumiy tugma va matnlar uchun ham xuddi shu himoya */
+    main button, main .tab-btn, main label{ -webkit-text-fill-color:currentColor; }
+    main button{ -webkit-transform:translateZ(0); transform:translateZ(0); }
+  }
 </style>
 </head>
 <script>
@@ -8468,7 +8493,37 @@
     if(tab==='learn') renderStage();
     if(tab==='known') renderKnown();
     if(tab==='all') renderAll();
+    if(window.__iosRepaint){ setTimeout(window.__iosRepaint, 60); setTimeout(window.__iosRepaint, 400); }
   }
+
+  // ---------- iOS: chizilmay qolgan matn/tugmalarni qayta bo'yash ----------
+  // iOS WebKit ba'zan scroll yoki bo'lim almashgach oddiy qatlamlarni qayta chizmaydi.
+  // main'ning opacity'sini bir kadrga o'zgartirish butun daraxtni majburan qayta chizadi
+  // (opacity fixed elementlarning joylashuviga ta'sir qilmaydi).
+  (function(){
+    const isIOS = !!(window.CSS && CSS.supports && CSS.supports('-webkit-touch-callout','none'));
+    if(!isIOS) return;
+    const mainEl = document.querySelector('main');
+    if(!mainEl) return;
+    let busy = false;
+    function nudge(){
+      if(busy) return;
+      busy = true;
+      mainEl.style.opacity = '0.999';
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{ mainEl.style.opacity = ''; busy = false; });
+      });
+    }
+    window.__iosRepaint = nudge;
+    let t = null;
+    window.addEventListener('scroll', ()=>{ clearTimeout(t); t = setTimeout(nudge, 160); }, {passive:true});
+    window.addEventListener('pageshow', nudge);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) nudge(); });
+    window.addEventListener('orientationchange', ()=> setTimeout(nudge, 250));
+    document.addEventListener('click', (e)=>{
+      if(e.target.closest && e.target.closest('.all-day-heading, .tab-btn, #btnBack')) setTimeout(nudge, 340);
+    }, true);
+  })();
 
   // "Ortga" tugmalari (Bilganlarim / Hammasi): kartochkalar bo'limiga qaytadi.
   // Kun navbatini qayta tuzmaydi (resetDayQueue chaqirilmaydi), shuning uchun
