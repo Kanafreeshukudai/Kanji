@@ -5138,6 +5138,111 @@
     cursor:pointer;
   }
   .chat-nick-edit-btn:active{transform:scale(0.94);}
+
+  /* ---------- Chat oynasi: shrift o'lchamini sozlash (AI yordamchidagi kabi) ---------- */
+  .chat-font-btn{
+    height:30px; min-width:34px;
+    padding:0 9px;
+    border-radius:15px;
+    border:1px solid var(--glass-border-soft);
+    background:var(--glass-bg);
+    color:var(--ink-soft);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:13px; font-weight:700; line-height:1;
+    letter-spacing:.2px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex:none;
+  }
+  .chat-font-btn small{font-size:10px; margin-left:1px;}
+  .chat-font-btn:active{transform:scale(0.93);}
+  .chat-font-btn.active{
+    background:rgba(217,105,79,0.24);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .chat-font-pop{
+    position:absolute;
+    top:60px; right:12px;
+    z-index:6;
+    width:min(264px, calc(100% - 24px));
+    padding:12px 14px;
+    border-radius:16px;
+    background:var(--panel-2);
+    border:1px solid rgba(217,105,79,0.55);
+    box-shadow:0 14px 34px -10px rgba(0,0,0,0.7);
+    opacity:0;
+    transform:translateY(-6px) scale(0.97);
+    transform-origin:top right;
+    pointer-events:none;
+    visibility:hidden;
+    transition:opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
+  }
+  .chat-font-pop.open{
+    opacity:1; transform:none; pointer-events:auto; visibility:visible;
+    transition:opacity .18s ease, transform .18s ease, visibility 0s;
+  }
+  .chat-font-pop-top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px;
+    font-size:12px; color:var(--ink-soft); font-weight:700;
+  }
+  .chat-font-val{color:var(--ink); font-variant-numeric:tabular-nums;}
+  .chat-font-row{display:flex; align-items:center; gap:10px;}
+  .chat-font-step{
+    flex:none;
+    width:32px; height:32px;
+    border-radius:50%;
+    border:1px solid rgba(217,105,79,0.45);
+    background:rgba(217,105,79,0.16);
+    color:var(--ink);
+    font-family:inherit; font-weight:800;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chat-font-step.minus{font-size:12px;}
+  .chat-font-step.plus{font-size:17px;}
+  .chat-font-step:active{transform:scale(0.9);}
+  .chat-font-step:disabled{opacity:0.35; cursor:default;}
+  #chatFontRange{
+    flex:1; min-width:0;
+    accent-color:var(--accent);
+    height:28px; margin:0;
+    touch-action:pan-y;
+  }
+  .chat-font-preview{
+    margin-top:10px;
+    padding:8px 10px;
+    border-radius:10px;
+    background:rgba(0,0,0,0.22);
+    color:var(--ink);
+    font-size:var(--chat-fs, 13.5px);
+    line-height:1.5;
+    text-align:center;
+  }
+  .chat-font-reset{
+    display:block;
+    margin:10px auto 0;
+    padding:5px 12px;
+    border-radius:999px;
+    border:1px solid rgba(217,105,79,0.4);
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:inherit; font-size:11.5px; font-weight:700;
+    cursor:pointer;
+  }
+  .chat-font-reset:active{transform:scale(0.95);}
+  .chat-font-reset:disabled{opacity:0.4; cursor:default;}
+  /* sarlavha qismi torayganda (ayniqsa admin tugmasi ko'ringanda) tugmalar sig'sin */
+  .chat-panel-title{min-width:0;}
+  .chat-panel-title span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  @media (max-width:430px){
+    .chat-header-actions{gap:6px;}
+    .chat-admin-open-btn, .chat-nick-edit-btn{padding:0 9px; font-size:11.5px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .chat-font-pop, .chat-font-pop.open{transition:none;}
+  }
   .nickname-notice{
     margin:0 0 12px;
     padding:9px 12px;
@@ -5211,6 +5316,31 @@
     overscroll-behavior:contain;
   }
   .presence-panel.open{transform:translate(-50%, 0);}
+
+  /* Faol foydalanuvchilar oynasi — o'ziga xos zumrad-yashil rang va shu rangdagi
+     yuguruvchi nur (chatdagi bilan bir xil animatsiya: chapdan fade bilan chiqadi,
+     o'ngda fade bilan so'nadi). Yashil = "online" ma'nosiga mos. */
+  .presence-panel{
+    border-color:rgba(52,211,153,0.30);
+    box-shadow:0 -20px 50px -18px rgba(0,0,0,0.6), 0 -6px 28px -14px rgba(52,211,153,0.35);
+  }
+  .presence-panel::after{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    z-index:5;
+    pointer-events:none;
+    opacity:0;
+    background:radial-gradient(ellipse closest-side,
+      #c8ffe6 0%, #5eead4 28%, #10d98a 68%, rgba(16,217,138,0) 100%)
+      -220px 0 / 220px 3px no-repeat;
+    filter:drop-shadow(0 0 4px rgba(52,211,153,.85));
+  }
+  .presence-panel.open::after{animation:chatEdgeGlow 3.8s linear .5s infinite;}
+  @media (prefers-reduced-motion: reduce){
+    .presence-panel.open::after{animation:none;}
+  }
   .presence-panel-header{
     flex:none;
     display:flex;
@@ -5349,7 +5479,7 @@
   }
   .chat-empty .big-em{font-size:30px; display:block; margin-bottom:8px;}
   .chat-msg{
-    max-width:86%;
+    max-width:var(--chat-msg-w, 86%);
     display:flex;
     flex-direction:row;
     align-items:flex-end;
@@ -5385,7 +5515,7 @@
   .chat-menu-card button{border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink); border-radius:12px; padding:11px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer;}
   .chat-menu-card button.danger{background:rgba(163,35,35,0.3); border-color:#a32323; color:#f5e2df;}
   .chat-msg-nick{
-    font-size:11px;
+    font-size:calc(var(--chat-fs, 13.5px) * 0.815);
     font-weight:700;
     color:var(--ink-faint);
     padding:0 4px;
@@ -5394,7 +5524,7 @@
   .chat-bubble{
     padding:9px 13px;
     border-radius:16px;
-    font-size:13.5px;
+    font-size:var(--chat-fs, 13.5px);
     line-height:1.4;
     word-break:break-word;
     white-space:pre-wrap;
@@ -5411,7 +5541,7 @@
     border-bottom-right-radius:4px;
   }
   .chat-msg-time{
-    font-size:10px;
+    font-size:calc(var(--chat-fs, 13.5px) * 0.74);
     color:var(--ink-faint);
     padding:0 4px;
   }
@@ -5488,6 +5618,27 @@
     overscroll-behavior:contain;
   }
   .ai-assist-panel.open{transform:translate(-50%, 0);}
+
+  /* AI yordamchi oynasi chetida yuguruvchi violet nur (chat va faol
+     foydalanuvchilar oynalaridagi bilan bir xil animatsiya: chapdan fade bilan
+     chiqadi, o'ngda fade bilan so'nadi; uchlari ingichka, o'rtasi qalinroq). */
+  .ai-assist-panel::after{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    z-index:5;
+    pointer-events:none;
+    opacity:0;
+    background:radial-gradient(ellipse closest-side,
+      #e4defe 0%, #b4a8ff 28%, #8b7cf6 68%, rgba(139,124,246,0) 100%)
+      -220px 0 / 220px 3px no-repeat;
+    filter:drop-shadow(0 0 4px rgba(139,124,246,.9));
+  }
+  .ai-assist-panel.open::after{animation:chatEdgeGlow 3.8s linear .5s infinite;}
+  @media (prefers-reduced-motion: reduce){
+    .ai-assist-panel.open::after{animation:none;}
+  }
 
   .ai-assist-panel-header{
     flex:none;
@@ -6817,8 +6968,19 @@
     <div class="chat-header-actions">
       <button class="chat-admin-open-btn" id="chatAdminOpenBtn" type="button">🛡 Admin</button>
       <button class="chat-nick-edit-btn" id="chatNickEditBtn" type="button" aria-label="Nickname'ni tahrirlash">✏️ Nickname</button>
+      <button class="chat-font-btn" id="chatFontBtn" type="button" aria-label="Shrift o'lchamini sozlash" aria-expanded="false" aria-controls="chatFontPop">A<small>A</small></button>
       <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Yopish">✕</button>
     </div>
+  </div>
+  <div class="chat-font-pop" id="chatFontPop" role="dialog" aria-label="Shrift o'lchami">
+    <div class="chat-font-pop-top"><span>Shrift o'lchami</span><span class="chat-font-val" id="chatFontVal">100%</span></div>
+    <div class="chat-font-row">
+      <button class="chat-font-step minus" id="chatFontMinus" type="button" aria-label="Kichraytirish">A</button>
+      <input type="range" id="chatFontRange" min="12" max="24" step="0.5" value="13.5" aria-label="Shrift o'lchami">
+      <button class="chat-font-step plus" id="chatFontPlus" type="button" aria-label="Kattalashtirish">A</button>
+    </div>
+    <div class="chat-font-preview">Salom! Kanji 漢字 — かんじ</div>
+    <button class="chat-font-reset" id="chatFontReset" type="button">Asl holiga qaytarish</button>
   </div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-bar">
@@ -6932,6 +7094,57 @@
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && pop.classList.contains('open')) setOpen(false); });
   var closeBtn=document.getElementById('aiAssistCloseBtn');
   if(closeBtn) closeBtn.addEventListener('click', function(){ setOpen(false); });
+})();
+</script>
+
+<script>
+(function(){
+  // Foydalanuvchilar chati: shrift o'lchamini foydalanuvchi o'zi sozlaydi (qurilmada saqlanadi)
+  var KEY='kanji-chat-font', DEF=13.5, MIN=12, MAX=24, STEP=0.5;
+  var panel=document.getElementById('chatPanel');
+  var btn=document.getElementById('chatFontBtn');
+  var pop=document.getElementById('chatFontPop');
+  var range=document.getElementById('chatFontRange');
+  var minus=document.getElementById('chatFontMinus');
+  var plus=document.getElementById('chatFontPlus');
+  var reset=document.getElementById('chatFontReset');
+  var val=document.getElementById('chatFontVal');
+  if(!panel||!btn||!pop||!range) return;
+
+  function clamp(v){ v=parseFloat(v); if(isNaN(v)) v=DEF; return Math.min(MAX, Math.max(MIN, Math.round(v/STEP)*STEP)); }
+  function apply(v, save){
+    v=clamp(v);
+    panel.style.setProperty('--chat-fs', v+'px');
+    // katta shriftda xabar pufagi kengroq bo'lsin, matn juda tor ustunga siqilmasin
+    panel.style.setProperty('--chat-msg-w', v>=17 ? '94%' : (v>=15 ? '90%' : '86%'));
+    range.value=v;
+    val.textContent=Math.round(v/DEF*100)+'%';
+    minus.disabled=(v<=MIN);
+    plus.disabled=(v>=MAX);
+    reset.disabled=(v===DEF);
+    if(save){ try{ if(v===DEF) localStorage.removeItem(KEY); else localStorage.setItem(KEY, String(v)); }catch(e){} }
+  }
+  var saved=DEF;
+  try{ var r=localStorage.getItem(KEY); if(r!==null) saved=clamp(r); }catch(e){}
+  apply(saved,false);
+
+  function setOpen(o){
+    pop.classList.toggle('open', o);
+    btn.classList.toggle('active', o);
+    btn.setAttribute('aria-expanded', o?'true':'false');
+  }
+  btn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!pop.classList.contains('open')); });
+  pop.addEventListener('click', function(e){ e.stopPropagation(); });
+  range.addEventListener('input', function(){ apply(range.value,true); });
+  minus.addEventListener('click', function(){ apply(parseFloat(range.value)-STEP*2,true); });
+  plus.addEventListener('click', function(){ apply(parseFloat(range.value)+STEP*2,true); });
+  reset.addEventListener('click', function(){ apply(DEF,true); });
+  // oyna tashqarisiga bosilganda yoki Escape bosilganda yopiladi
+  document.addEventListener('click', function(){ if(pop.classList.contains('open')) setOpen(false); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && pop.classList.contains('open')) setOpen(false); });
+  // chat oynasi yopilganda sozlash oynasi ham yopilsin
+  new MutationObserver(function(){ if(!panel.classList.contains('open')) setOpen(false); })
+    .observe(panel,{attributes:true, attributeFilter:['class']});
 })();
 </script>
 
