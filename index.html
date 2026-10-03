@@ -5677,11 +5677,21 @@
     transition:transform .34s cubic-bezier(.2,.8,.2,1);
     display:flex;
     flex-direction:column;
-    background:linear-gradient(180deg, #262138, #1a1726 70%);
-    border:1px solid rgba(139,124,246,0.45);
+    /* Qora asos ustiga turli burchaklardan binafsha / indigo / magenta nurlar */
+    background:
+      radial-gradient(120% 62% at 0% 0%,    rgba(124,92,255,0.42) 0%, rgba(124,92,255,0) 58%),
+      radial-gradient(95% 55%  at 100% 6%,  rgba(217,70,239,0.24) 0%, rgba(217,70,239,0) 60%),
+      radial-gradient(120% 65% at 100% 100%, rgba(79,70,229,0.40) 0%, rgba(79,70,229,0) 58%),
+      radial-gradient(90% 50%  at 0% 96%,   rgba(168,85,247,0.24) 0%, rgba(168,85,247,0) 62%),
+      linear-gradient(160deg, #0b0713 0%, #040308 48%, #09051a 100%);
+    border:1.5px solid rgba(167,139,250,0.80);
     border-bottom:none;
     border-radius:24px 24px 0 0;
-    box-shadow:0 -20px 50px -18px rgba(76,58,196,0.45);
+    box-shadow:
+      0 -20px 54px -16px rgba(124,92,255,0.65),
+      0 0 0 1px rgba(76,58,196,0.35),
+      inset 0 1px 0 rgba(221,214,254,0.40),
+      inset 0 0 38px -14px rgba(139,124,246,0.45);
     padding-bottom:env(safe-area-inset-bottom);
     overflow:hidden;
     overscroll-behavior:contain;
@@ -5715,7 +5725,9 @@
     align-items:center;
     justify-content:space-between;
     padding:16px 18px 12px;
-    border-bottom:1px solid rgba(139,124,246,0.25);
+    background:linear-gradient(90deg, rgba(0,0,0,0.62), rgba(20,10,48,0.55));
+    border-bottom:1.5px solid rgba(167,139,250,0.60);
+    box-shadow:0 6px 18px -12px rgba(139,124,246,0.7);
   }
   .ai-assist-panel-title{
     display:flex;
@@ -5729,9 +5741,10 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    background:linear-gradient(150deg, #8b7cf6, #6f5ce6);
+    background:linear-gradient(150deg, #a898ff, #6f5ce6 60%, #4b34c9);
     color:#fff;
-    box-shadow:0 0 14px rgba(139,124,246,0.55);
+    border:1px solid rgba(221,214,254,0.55);
+    box-shadow:0 0 16px rgba(139,124,246,0.75);
   }
   .ai-assist-glow-icon svg{width:18px; height:18px;}
   /* ---------- AI logotipi: ikki yulduz BITTA uzluksiz orbita bo'ylab o'rin almashadi ----------
@@ -5878,9 +5891,9 @@
   .ai-assist-close-btn{
     width:30px; height:30px;
     border-radius:50%;
-    border:1px solid rgba(139,124,246,0.35);
-    background:rgba(139,124,246,0.12);
-    color:var(--ink-soft);
+    border:1.5px solid rgba(167,139,250,0.70);
+    background:rgba(0,0,0,0.65);
+    color:#e4defe;
     font-size:15px;
     line-height:1;
     cursor:pointer;
@@ -5896,9 +5909,9 @@
     height:30px; min-width:34px;
     padding:0 9px;
     border-radius:15px;
-    border:1px solid rgba(139,124,246,0.35);
-    background:rgba(139,124,246,0.12);
-    color:var(--ink-soft);
+    border:1.5px solid rgba(167,139,250,0.70);
+    background:rgba(0,0,0,0.65);
+    color:#e4defe;
     font-family:'Zen Maru Gothic', sans-serif;
     font-size:13px;
     font-weight:700;
@@ -5910,8 +5923,8 @@
   .ai-assist-font-btn small{ font-size:10px; margin-left:1px; }
   .ai-assist-font-btn:active{ transform:scale(0.93); }
   .ai-assist-font-btn.active{
-    background:rgba(139,124,246,0.32);
-    border-color:rgba(139,124,246,0.75);
+    background:rgba(124,92,255,0.45);
+    border-color:#c4b5fd;
     color:#fff;
   }
   .ai-font-pop{
@@ -5921,9 +5934,9 @@
     width:min(264px, calc(100% - 24px));
     padding:12px 14px 12px;
     border-radius:16px;
-    background:#2a2442;
-    border:1px solid rgba(139,124,246,0.55);
-    box-shadow:0 14px 34px -10px rgba(0,0,0,0.7);
+    background:linear-gradient(145deg, #0c0818, #030207 60%, #0a0620);
+    border:1.5px solid rgba(167,139,250,0.80);
+    box-shadow:0 14px 34px -10px rgba(0,0,0,0.85), 0 0 22px -8px rgba(124,92,255,0.6);
     opacity:0;
     transform:translateY(-6px) scale(0.97);
     transform-origin:top right;
@@ -5946,9 +5959,9 @@
     flex:none;
     width:32px; height:32px;
     border-radius:50%;
-    border:1px solid rgba(139,124,246,0.4);
-    background:rgba(139,124,246,0.16);
-    color:var(--ink);
+    border:1.5px solid rgba(167,139,250,0.70);
+    background:rgba(0,0,0,0.6);
+    color:#efeaff;
     font-family:inherit; font-weight:800;
     cursor:pointer;
     display:flex; align-items:center; justify-content:center;
@@ -5968,7 +5981,8 @@
     margin-top:10px;
     padding:8px 10px;
     border-radius:10px;
-    background:rgba(0,0,0,0.22);
+    background:rgba(0,0,0,0.7);
+    border:1px solid rgba(167,139,250,0.45);
     color:var(--ink);
     font-size:var(--ai-fs, 13.5px);
     line-height:1.5;
@@ -5979,9 +5993,9 @@
     margin:10px auto 0;
     padding:5px 12px;
     border-radius:999px;
-    border:1px solid rgba(139,124,246,0.35);
-    background:transparent;
-    color:#b3a9e8;
+    border:1.5px solid rgba(167,139,250,0.65);
+    background:rgba(0,0,0,0.5);
+    color:#cfc5ff;
     font-family:inherit; font-size:11.5px; font-weight:700;
     cursor:pointer;
   }
@@ -6070,9 +6084,9 @@
     margin:12px 16px 0;
     padding:9px 12px;
     border-radius:12px;
-    background:rgba(139,124,246,0.14);
-    border:1px solid rgba(139,124,246,0.4);
-    color:#cabffb;
+    background:rgba(0,0,0,0.62);
+    border:1.5px solid rgba(167,139,250,0.60);
+    color:#dcd3ff;
     font-size:11.5px;
     line-height:1.5;
     text-align:center;
@@ -6106,13 +6120,16 @@
     white-space:pre-wrap;
   }
   .ai-assist-msg.bot .ai-assist-bubble{
-    background:rgba(139,124,246,0.16);
-    border:1px solid rgba(139,124,246,0.35);
+    background:rgba(0,0,0,0.74);
+    border:1.5px solid rgba(167,139,250,0.70);
+    box-shadow:0 4px 16px -6px rgba(124,92,255,0.60), inset 0 1px 0 rgba(221,214,254,0.10);
     color:var(--ink);
     border-bottom-left-radius:4px;
   }
   .ai-assist-msg.user .ai-assist-bubble{
-    background:linear-gradient(150deg, #8b7cf6, #6f5ce6);
+    background:linear-gradient(150deg, #a898ff 0%, #7a5cf0 55%, #5238d6 100%);
+    border:1.5px solid rgba(221,214,254,0.65);
+    box-shadow:0 4px 16px -6px rgba(124,92,255,0.85);
     color:#fff;
     border-bottom-right-radius:4px;
   }
@@ -6260,28 +6277,36 @@
     align-items:center;
     gap:8px;
     padding:10px 14px;
-    border-top:1px solid rgba(139,124,246,0.25);
-    background:rgba(0,0,0,0.15);
+    border-top:1.5px solid rgba(167,139,250,0.60);
+    background:linear-gradient(90deg, rgba(0,0,0,0.72), rgba(16,8,40,0.60));
+    box-shadow:0 -6px 18px -12px rgba(139,124,246,0.7);
   }
   .ai-assist-input-bar input{
     flex:1;
     min-width:0;
-    background:rgba(139,124,246,0.1);
-    border:1px solid rgba(139,124,246,0.35);
+    background:rgba(0,0,0,0.78);
+    border:1.5px solid rgba(167,139,250,0.65);
     border-radius:20px;
     padding:11px 15px;
+    transition:border-color .18s ease, box-shadow .18s ease;
     color:var(--ink);
     font-family:'Zen Maru Gothic', sans-serif;
     font-size:14px;
     outline:none;
   }
-  .ai-assist-input-bar input::placeholder{color:var(--ink-faint);}
+  .ai-assist-input-bar input::placeholder{color:#8f84c9;}
+  .ai-assist-input-bar input:focus{
+    border-color:#c4b5fd;
+    box-shadow:0 0 0 3px rgba(139,124,246,0.28), 0 0 16px -4px rgba(139,124,246,0.7);
+  }
   .ai-assist-send-btn{
     flex:none;
     width:40px; height:40px;
     border-radius:50%;
     border:none;
-    background:linear-gradient(135deg, #8b7cf6, #6f5ce6);
+    background:linear-gradient(135deg, #a898ff, #6f5ce6 60%, #4b34c9);
+    border:1.5px solid rgba(221,214,254,0.60);
+    box-shadow:0 0 14px -2px rgba(139,124,246,0.75);
     color:#fff;
     display:flex;
     align-items:center;
@@ -6294,9 +6319,9 @@
     flex:none;
     width:40px; height:40px;
     border-radius:50%;
-    border:1px solid rgba(139,124,246,0.35);
-    background:rgba(139,124,246,0.1);
-    color:var(--ink);
+    border:1.5px solid rgba(167,139,250,0.70);
+    background:rgba(0,0,0,0.75);
+    color:#e4defe;
     display:flex;
     align-items:center;
     justify-content:center;
