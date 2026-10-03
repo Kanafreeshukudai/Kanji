@@ -1046,7 +1046,10 @@
 
   .search-panel{
     width:100%;
-    max-width:var(--content-max);
+    /* Katta ekranda ham tugmalar/kartochka ustuni bilan bir xil tor kenglikda
+       qolsin (--content-max kompyuterda 760-1180px gacha o'sadi, qidiruv
+       maydoni esa shunga ergashib haddan tashqari cho'zilib ketardi) */
+    max-width:min(var(--content-max), 480px);
     padding:0 20px;
     display:grid;
     grid-template-rows:0fr;
@@ -2508,7 +2511,10 @@
     /* ro'yxat oxiri panel va chip ostida qolib ketmasligi uchun */
     padding-bottom:calc(184px + env(safe-area-inset-bottom, 0px));
   }
-  #view-all #allList{ margin-top:14px; }
+  /* Katta ekranda ro'yxat ham tugmalar qatori (480px) bilan bir xil tor ustunda
+     turadi — aks holda kun sarlavhalari va "Hammasini tanlash" tugmalari
+     sahifa chetlarigacha cho'zilib ketardi. */
+  #view-all #allList{ margin-top:14px; max-width:480px; margin-left:auto; margin-right:auto; }
 
   #view-all .all-bottom-bar{
     position:fixed;
@@ -6479,8 +6485,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -7581,6 +7587,52 @@
     {id:"tokubetsuna50b", day:50, group:"別", kanji:"特別な", romaji:"tokubetsu na", type:"on + on", reading:"特(toku) + 別(betsu) + な", uz:"maxsus"},
     {id:"betsuno50", day:50, group:"別", kanji:"別の", romaji:"betsu no", type:"on'yomi", reading:"別(betsu) + の", uz:"boshqa"},
     {id:"betsubetsuni50", day:50, group:"別", kanji:"別々に", romaji:"betsubetsu ni", type:"on'yomi", reading:"別々(betsubetsu) + に", uz:"alohida"},
+
+    // ---- 51-kun ----
+    {id:"arukanji51", day:51, group:"有", kanji:"有", romaji:"aru", type:"kun'yomi", reading:"有る(aru) — yakka kanji", otherReadings:"kun: あ-る(aru) · on: ユウ(yuu), ウ(u)", uz:"bor, egalik qilish, mavjud"},
+    {id:"yuumeina51", day:51, group:"有", kanji:"有名な", romaji:"yuumei na", type:"on + on", reading:"有(yuu) + 名(mei) + な", uz:"mashhur"},
+    {id:"kyouyuusuru51", day:51, group:"有", kanji:"共有する", romaji:"kyouyuu suru", type:"on + on", reading:"共(kyou) + 有(yuu) + する", uz:"ulashmoq"},
+
+    {id:"benkanji51", day:51, group:"便", kanji:"便", romaji:"ben", type:"on'yomi", reading:"便(ben) — yakka kanji", otherReadings:"on: ベン(ben), ビン(bin) · kun: たよ-り(tayori)", uz:"qulaylik, foydali"},
+    {id:"benrina51", day:51, group:"便", kanji:"便利な", romaji:"benri na", type:"on + on", reading:"便(ben) + 利(ri) + な", uz:"qulay"},
+    {id:"fubenna51", day:51, group:"便", kanji:"不便な", romaji:"fuben na", type:"on + on", reading:"不(fu) + 便(ben) + な", uz:"noqulay"},
+    {id:"yuubinkyoku51", day:51, group:"便", kanji:"郵便局", romaji:"yuubinkyoku", type:"on + on + on", reading:"郵(yuu) + 便(bin) + 局(kyoku)", uz:"pochta"},
+    {id:"benjo51", day:51, group:"便", kanji:"便所", romaji:"benjo", type:"on + on", reading:"便(ben) + 所(jo)", uz:"hojatxona"},
+
+    {id:"rikanji51", day:51, group:"利", kanji:"利", romaji:"ri", type:"on'yomi", reading:"利(ri) — yakka kanji", otherReadings:"on: リ(ri) · kun: き-く(kiku)", uz:"foyda, afzallik"},
+    {id:"benrina51b", day:51, group:"利", kanji:"便利な", romaji:"benri na", type:"on + on", reading:"便(ben) + 利(ri) + な", uz:"qulay"},
+    {id:"riyousuru51", day:51, group:"利", kanji:"利用する", romaji:"riyou suru", type:"on + on", reading:"利(ri) + 用(you) + する", uz:"foydalanish"},
+    {id:"kenri51", day:51, group:"利", kanji:"権利", romaji:"kenri", type:"on + on", reading:"権(ken) + 利(ri)", uz:"huquq"},
+
+    {id:"hikuikanji51", day:51, group:"低", kanji:"低", romaji:"hikui", type:"kun'yomi", reading:"低い(hikui) — yakka kanji", otherReadings:"kun: ひく-い(hikui) · on: テイ(tei)", uz:"past"},
+    {id:"hikui51", day:51, group:"低", kanji:"低い", romaji:"hikui", type:"kun'yomi", reading:"低い(hikui)", uz:"past"},
+    {id:"teion51", day:51, group:"低", kanji:"低温", romaji:"teion", type:"on + on", reading:"低(tei) + 温(on)", uz:"past harorat"},
+    {id:"teika51", day:51, group:"低", kanji:"低下", romaji:"teika", type:"on + on", reading:"低(tei) + 下(ka)", uz:"tushish, pastga tushish"},
+
+    // ---- 52-kun ----
+    {id:"hiroikanji52", day:52, group:"広", kanji:"広", romaji:"hiroi", type:"kun'yomi", reading:"広い(hiroi) — yakka kanji", otherReadings:"kun: ひろ-い(hiroi) · on: コウ(kou)", uz:"keng"},
+    {id:"hiroi52", day:52, group:"広", kanji:"広い", romaji:"hiroi", type:"kun'yomi", reading:"広い(hiroi)", uz:"keng"},
+    {id:"hirosa52", day:52, group:"広", kanji:"広さ", romaji:"hirosa", type:"kun'yomi", reading:"広さ(hirosa)", uz:"kengligi"},
+    {id:"hiroshima52", day:52, group:"広", kanji:"広島", romaji:"hiroshima", type:"kun + kun", reading:"広(hiro) + 島(shima)", uz:"Hiroshima (hudud nomi)"},
+    {id:"koukoku52", day:52, group:"広", kanji:"広告", romaji:"koukoku", type:"on + on", reading:"広(kou) + 告(koku)", uz:"reklama"},
+
+    {id:"yoikanji52", day:52, group:"良", kanji:"良", romaji:"yoi", type:"kun'yomi", reading:"良い(yoi) — yakka kanji", otherReadings:"kun: よ-い(yoi) · on: リョウ(ryou)", uz:"yaxshi"},
+    {id:"yoi52", day:52, group:"良", kanji:"良い", romaji:"yoi", type:"kun'yomi", reading:"良い(yoi)", uz:"yaxshi"},
+    {id:"furyouhin52", day:52, group:"良", kanji:"不良品", romaji:"furyouhin", type:"on + on + on", reading:"不(fu) + 良(ryou) + 品(hin)", uz:"nuqsonli mahsulot"},
+    {id:"shoukafuryou52", day:52, group:"良", kanji:"消化不良", romaji:"shouka furyou", type:"on + on + on + on", reading:"消(shou) + 化(ka) + 不(fu) + 良(ryou)", uz:"ovqat hazm qilish buzilishi"},
+    {id:"sairyou52", day:52, group:"良", kanji:"最良", romaji:"sairyou", type:"on + on", reading:"最(sai) + 良(ryou)", uz:"eng zo'r"},
+
+    {id:"warukanji52", day:52, group:"悪", kanji:"悪", romaji:"warui", type:"kun'yomi", reading:"悪い(warui) — yakka kanji", otherReadings:"kun: わる-い(warui) · on: アク(aku)", uz:"yomon, kasal"},
+    {id:"warui52", day:52, group:"悪", kanji:"悪い", romaji:"warui", type:"kun'yomi", reading:"悪い(warui)", uz:"yomon"},
+    {id:"warukuchi52", day:52, group:"悪", kanji:"悪口", romaji:"warukuchi", type:"kun + kun", reading:"悪(waru) + 口(kuchi)", uz:"haqida yomon gapirish"},
+    {id:"akusei52", day:52, group:"悪", kanji:"悪性", romaji:"akusei", type:"on + on", reading:"悪(aku) + 性(sei)", uz:"yomon xulqli, yomon tabiatli"},
+    {id:"akkasuru52", day:52, group:"悪", kanji:"悪化する", romaji:"akka suru", type:"on + on", reading:"悪(ak) + 化(ka) + する", uz:"yomon tomonga o'zgarmoq"},
+
+    {id:"kawarukanji52", day:52, group:"変", kanji:"変", romaji:"kawaru", type:"kun'yomi", reading:"変わる(kawaru) — yakka kanji", otherReadings:"kun: か-わる(kawaru), か-える(kaeru) · on: ヘン(hen)", uz:"o'zgartirish"},
+    {id:"kawaru52", day:52, group:"変", kanji:"変わる", romaji:"kawaru", type:"kun'yomi", reading:"変わる(kawaru)", uz:"o'zgarmoq"},
+    {id:"kaeru52", day:52, group:"変", kanji:"変える", romaji:"kaeru", type:"kun'yomi", reading:"変える(kaeru)", uz:"o'zgartirmoq (bir narsani)"},
+    {id:"henna52", day:52, group:"変", kanji:"変な", romaji:"hen na", type:"on'yomi", reading:"変(hen) + な", uz:"g'alati"},
+    {id:"henka52", day:52, group:"変", kanji:"変化する", romaji:"henka suru", type:"on + on", reading:"変(hen) + 化(ka) + する", uz:"o'zgarmoq, o'zgarib turmoq"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
