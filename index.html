@@ -5448,11 +5448,15 @@
     box-shadow:0 0 14px rgba(139,124,246,0.55);
   }
   .ai-assist-glow-icon svg{width:18px; height:18px;}
-  /* ---------- AI logotipi: katta va kichik yulduz o'rin almashadi ----------
-     Kichik yulduz oldinga chiqib kattalashadi, katta yulduz esa orqaga o'tib
-     kichrayadi (ikkalasi qarama-qarshi yoylar bo'ylab, urilmasdan). Bir zum
-     turgach — xuddi shu tarzda joylariga qaytadi. Faqat oyna ochiq turganda
-     ishlaydi; faqat transform/opacity — yengil. */
+  /* ---------- AI logotipi: ikki yulduz BITTA uzluksiz orbita bo'ylab o'rin almashadi ----------
+     Oldingi variantda yo'l alohida bo'laklarga bo'lingan edi, shu sabab o'rtada
+     "tutilib" qolardi. Endi ikkala yulduz umumiy markaz atrofida aylanadi
+     (ular har doim bir-biriga qarama-qarshi nuqtada) — harakat bitta yumshoq
+     yoy bo'lib, tezlanib-sekinlashib (ease-in-out) o'tadi. Aylanish paytida:
+       - kichik yulduz oldinga chiqib kattalashadi, katta yulduz orqaga o'tib kichrayadi va xiralashadi;
+       - har bir yulduz 90° "burilib" o'tadi (shakli 4 qirrali, shuning uchun tugagach xuddi o'zidek);
+       - o'rtada qatlamlar almashadi, logotip nuri bir zum yorqinlashadi.
+     Bir davr: o'rin almashish → pauza → qaytish → pauza. Faqat transform/opacity. */
   .ai-assist-glow-icon{ position:relative; }
   .ai-assist-glow-icon .ai-star-svg{
     position:absolute;
@@ -5463,47 +5467,66 @@
   }
   .ai-star-big-svg{ z-index:2; }
   .ai-star-small-svg{ z-index:1; }
+  .ai-assist-glow-icon .ai-orbit{
+    transform-box:view-box;
+    transform-origin:15.5px 13.75px;     /* ikki yulduz markazlarining o'rtasi */
+  }
   .ai-assist-glow-icon .ai-star{
     transform-box:view-box;
-    vector-effect:non-scaling-stroke;   /* kattalashganda ham chiziq qalinligi o'zgarmasin */
+    vector-effect:non-scaling-stroke;    /* masshtab o'zgarganda ham chiziq qalinligi bir xil */
     stroke-width:1.5px;
+    fill:rgba(255,255,255,.14);
   }
   .ai-star-big{ transform-origin:12px 9.5px; }
   .ai-star-small{ transform-origin:19px 18px; }
-  .ai-assist-panel.open .ai-star-big-svg{ animation:aiStarBigZ 5.2s linear infinite; }
-  .ai-assist-panel.open .ai-star-small-svg{ animation:aiStarSmallZ 5.2s linear infinite; }
-  .ai-assist-panel.open .ai-star-big{ animation:aiStarBig 5.2s cubic-bezier(.45,0,.2,1) infinite; }
-  .ai-assist-panel.open .ai-star-small{ animation:aiStarSmall 5.2s cubic-bezier(.45,0,.2,1) infinite; }
+
+  .ai-assist-panel.open .ai-assist-glow-icon{ animation:aiLogoGlow 5.4s ease-in-out infinite; }
+  .ai-assist-panel.open .ai-orbit{
+    animation:aiOrbit 5.4s cubic-bezier(.65,0,.3,1) infinite;
+    will-change:transform;
+  }
+  .ai-assist-panel.open .ai-star-big{ animation:aiStarBig 5.4s cubic-bezier(.65,0,.3,1) infinite; will-change:transform,opacity; }
+  .ai-assist-panel.open .ai-star-small{ animation:aiStarSmall 5.4s cubic-bezier(.65,0,.3,1) infinite; will-change:transform; }
+  .ai-assist-panel.open .ai-star-big-svg{ animation:aiStarBigZ 5.4s step-end infinite; }
+  .ai-assist-panel.open .ai-star-small-svg{ animation:aiStarSmallZ 5.4s step-end infinite; }
+
+  @keyframes aiOrbit{
+    0%,8%    { transform:rotate(0deg); }
+    38%,58%  { transform:rotate(180deg); }
+    88%,100% { transform:rotate(360deg); }
+  }
   @keyframes aiStarBig{
-    0%,8%   { transform:translate(0,0) scale(1); opacity:1; }
-    16%     { transform:translate(6.97px,1.4px) scale(.72); opacity:.85; }
-    24%,56% { transform:translate(7px,8.5px) scale(.46); opacity:.7; }
-    64%     { transform:translate(.03px,7.1px) scale(.72); opacity:.85; }
-    72%,100%{ transform:translate(0,0) scale(1); opacity:1; }
+    0%,8%    { transform:rotate(0deg)    scale(1);   opacity:1; }
+    38%,58%  { transform:rotate(-90deg)  scale(.46); opacity:.7; }
+    88%,100% { transform:rotate(-180deg) scale(1);   opacity:1; }
   }
   @keyframes aiStarSmall{
-    0%,8%   { transform:translate(0,0) scale(1); }
-    16%     { transform:translate(-6.97px,-1.4px) scale(1.6); }
-    24%,56% { transform:translate(-7px,-8.5px) scale(2.17); }
-    64%     { transform:translate(-.03px,-7.1px) scale(1.6); }
-    72%,100%{ transform:translate(0,0) scale(1); }
+    0%,8%    { transform:rotate(0deg)    scale(1); }
+    38%,58%  { transform:rotate(-90deg)  scale(2.17); }
+    88%,100% { transform:rotate(-180deg) scale(1); }
   }
-  /* qatlam (oldi/orqa) almashuvi — yulduzlar yo'l o'rtasida bir-birini kesib o'tgan paytda */
+  /* qatlam almashuvi — orbitaning aynan yarmida (23% va 73%) */
   @keyframes aiStarBigZ{
-    0%,15.9% { z-index:2; }
-    16%,63.9%{ z-index:1; }
-    64%,100% { z-index:2; }
+    0%  { z-index:2; }
+    23% { z-index:1; }
+    73% { z-index:2; }
   }
   @keyframes aiStarSmallZ{
-    0%,15.9% { z-index:1; }
-    16%,63.9%{ z-index:2; }
-    64%,100% { z-index:1; }
+    0%  { z-index:1; }
+    23% { z-index:2; }
+    73% { z-index:1; }
+  }
+  @keyframes aiLogoGlow{
+    0%,8%,38%,58%,88%,100%{ box-shadow:0 0 14px rgba(139,124,246,0.55); }
+    23%,73%               { box-shadow:0 0 22px rgba(176,160,255,0.95), 0 0 6px rgba(255,255,255,0.35); }
   }
   @media (prefers-reduced-motion: reduce){
-    .ai-assist-panel.open .ai-star-big-svg,
-    .ai-assist-panel.open .ai-star-small-svg,
+    .ai-assist-panel.open .ai-assist-glow-icon,
+    .ai-assist-panel.open .ai-orbit,
     .ai-assist-panel.open .ai-star-big,
-    .ai-assist-panel.open .ai-star-small{ animation:none; }
+    .ai-assist-panel.open .ai-star-small,
+    .ai-assist-panel.open .ai-star-big-svg,
+    .ai-assist-panel.open .ai-star-small-svg{ animation:none; }
   }
   .ai-assist-panel-title h3{
     margin:0;
@@ -6703,8 +6726,8 @@
   <div class="ai-assist-panel-header">
     <div class="ai-assist-panel-title">
       <span class="ai-assist-glow-icon">
-        <svg class="ai-star-svg ai-star-big-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ai-star ai-star-big" d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path></svg>
-        <svg class="ai-star-svg ai-star-small-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ai-star ai-star-small" d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
+        <svg class="ai-star-svg ai-star-big-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ai-orbit"><path class="ai-star ai-star-big" d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path></g></svg>
+        <svg class="ai-star-svg ai-star-small-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ai-orbit"><path class="ai-star ai-star-small" d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></g></svg>
       </span>
       <div>
         <h3>AI Yordamchi</h3>
