@@ -380,6 +380,42 @@
     .search-toggle-btn svg .lupa-flip{ animation:none; }
   }
 
+  /* ---------- BITTA UMUMIY "DIRIJYOR" (flashcard almashish + qidiruv lupasi) ----------
+     Ikkala tugma ilgari alohida-alohida animatsiya qilinardi — shu sabab ritmlari bir-biriga
+     to'liq mos kelmasdi. Endi <header> ustida BITTA animatsiya --ct-k (0→1→0) va --ct-z
+     o'zgaruvchilarini yuritadi; kartochkalar va lupa harakatini aynan shu qiymatdan hisoblaydi.
+     Shu sabab ikkalasi doim, har kadrda, bir xil fazada. (JS --ct-k/--ct-z ni ro'yxatdan
+     o'tkazsagina yoqiladi; eski brauzerlarda avvalgi alohida animatsiyalar ishlayveradi.) */
+  @keyframes ctPhase{
+    0%  { --ct-k:0; --ct-z:0; }
+    6%  { --ct-k:0; }
+    46% { --ct-k:1; }
+    54% { --ct-k:1; --ct-z:0; }
+    55% { --ct-z:1; }
+    94% { --ct-k:0; }
+    100%{ --ct-k:0; --ct-z:1; }
+  }
+  html.ct-sync header{
+    animation:ctPhase 2.6s cubic-bezier(.5,.05,.35,1) infinite;
+  }
+  html.ct-sync .card-transfer-btn .ct-card-1{
+    animation:none;
+    transform:translateX(calc(12px * var(--ct-k, 0))) rotate(calc(10deg * var(--ct-k, 0)));
+    z-index:calc(2 - var(--ct-z, 0));
+  }
+  html.ct-sync .card-transfer-btn .ct-card-2{
+    animation:none;
+    transform:translateX(calc(-12px * var(--ct-k, 0))) rotate(calc(-10deg * var(--ct-k, 0)));
+    z-index:calc(1 + var(--ct-z, 0));
+  }
+  html.ct-sync .search-toggle-btn svg .lupa-flip{
+    animation:none;
+    transform:scaleX(calc(1 - 2 * var(--ct-k, 0)));
+  }
+  @media (prefers-reduced-motion: reduce){
+    html.ct-sync header{ animation:none; }
+  }
+
   /* Chat tugmasi — endi header'da emas, akkaunt (profil) menyusi ichida,
      "Qaydlar"/"Chiqish" tugmalari bilan bir qatorda joylashgan */
   .chat-toggle-btn{
@@ -2534,6 +2570,32 @@
     color:var(--ink-soft);
     font-weight:500;
   }
+
+  /* "Quiz yoki flashcard uchun kanji tanlang" — tanlov bo'sh paytda ramka yo'q:
+     matn ixcham (kichikroq, zichroq) va atrofida yengil aura (nur) bilan suzib turadi.
+     Tanlov paydo bo'lganda chip yumshoq ravishda ramkali ko'rinishga o'tadi. */
+  #view-all .all-bar-info{
+    transition:background-color .3s ease, border-color .3s ease, box-shadow .3s ease, padding .3s ease;
+  }
+  #view-all .all-bar-info.is-empty{
+    background:transparent;
+    border-color:transparent;
+    box-shadow:none;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    padding:2px 10px;
+  }
+  #view-all .all-bar-info.is-empty .all-selected-note{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.015em;
+    line-height:1.2;
+    color:rgba(236,231,220,.82);
+    text-shadow:
+      0 0 8px rgba(229,135,111,.55),
+      0 0 18px rgba(217,105,79,.32),
+      0 1px 5px rgba(0,0,0,.85);
+  }
   #view-all .all-bar-info .all-clear-btn{
     flex:none;
     margin:0;
@@ -2582,13 +2644,22 @@
   #view-all .all-bottom-bar .flashcard-convert-label{
     white-space:nowrap;
     text-align:left;
+    min-width:0;
+    overflow:hidden;
+    /* chap yarmiga sig'ishi uchun tor ekranda matn biroz kichrayadi */
+    font-size:clamp(11px, 3.2vw, 13px);
   }
   #view-all .all-bottom-bar .flashcard-shuffle-btn{
-    flex:none;
+    /* "Aralashtirish" tugmasi endi chetda siqilib turmaydi: chap tomoni
+       "Flashcardga aylantirish" tugmasining aynan o'rtasidan boshlanadi
+       (kenglik = tugmaning yarmi − o'ng ichki chekka). */
+    flex:0 0 calc(50% + 5px);
     max-width:none;
-    padding:9px 14px;
+    min-width:0;
+    padding:10px 8px;
     border-radius:10px;
     font-size:13px;
+    text-align:center;
     white-space:nowrap;
   }
   #view-all .all-bottom-bar .flashcard-shuffle-btn:not(:disabled){
@@ -6377,8 +6448,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -7366,6 +7437,41 @@
     {id:"kayou45", day:45, group:"通", kanji:"通う", romaji:"kayou", type:"kun'yomi", reading:"通う(kayou)", uz:"qatnamoq"},
     {id:"tsuugaku45", day:45, group:"通", kanji:"通学", romaji:"tsuugaku", type:"on + on", reading:"通(tsuu) + 学(gaku)", uz:"maktabga borish"},
     {id:"tsuukin45", day:45, group:"通", kanji:"通勤", romaji:"tsuukin", type:"on + on", reading:"通(tsuu) + 勤(kin)", uz:"ishga borish"},
+
+    // ---- 46-kun ----
+    {id:"osukanji46", day:46, group:"押", kanji:"押", romaji:"osu", type:"kun'yomi", reading:"押す(osu) — yakka kanji", otherReadings:"kun: お-す(osu) · on: オウ(ou)", uz:"bosmoq, bosish, shtamp"},
+    {id:"osu46", day:46, group:"押", kanji:"押す", romaji:"osu", type:"kun'yomi", reading:"押す(osu)", uz:"bosmoq"},
+
+    {id:"karirukanji46", day:46, group:"借", kanji:"借", romaji:"kariru", type:"kun'yomi", reading:"借りる(kariru) — yakka kanji", otherReadings:"kun: か-りる(kariru) · on: シャク(shaku)", uz:"qarz olish, ijara"},
+    {id:"kariru46", day:46, group:"借", kanji:"借りる", romaji:"kariru", type:"kun'yomi", reading:"借りる(kariru)", uz:"qarz olmoq, ijaraga olmoq"},
+    {id:"shakuya46", day:46, group:"借", kanji:"借家", romaji:"shakuya", type:"on + on", reading:"借(shaku) + 家(ya)", uz:"ijaraga beriladigan uy"},
+
+    {id:"urukanji46", day:46, group:"売", kanji:"売", romaji:"uru", type:"kun'yomi", reading:"売る(uru) — yakka kanji", otherReadings:"kun: う-る(uru) · on: バイ(bai)", uz:"sotish"},
+    {id:"uru46", day:46, group:"売", kanji:"売る", romaji:"uru", type:"kun'yomi", reading:"売る(uru)", uz:"sotmoq"},
+    {id:"baiten46", day:46, group:"売", kanji:"売店", romaji:"baiten", type:"on + on", reading:"売(bai) + 店(ten)", uz:"sotuv do'koni, kiosk"},
+    {id:"jidouhanbaiki46", day:46, group:"売", kanji:"自動販売機", romaji:"jidou hanbaiki", type:"on + on + on + on + on", reading:"自(ji) + 動(dou) + 販(han) + 売(bai) + 機(ki)", uz:"savdo avtomati"},
+
+    {id:"kaerukanji46", day:46, group:"帰", kanji:"帰", romaji:"kaeru", type:"kun'yomi", reading:"帰る(kaeru) — yakka kanji", otherReadings:"kun: かえ-る(kaeru) · on: キ(ki)", uz:"uyga qaytish"},
+    {id:"kaeru46", day:46, group:"帰", kanji:"帰る", romaji:"kaeru", type:"kun'yomi", reading:"帰る(kaeru)", uz:"qaytmoq"},
+    {id:"kikoku46", day:46, group:"帰", kanji:"帰国", romaji:"kikoku", type:"on + on", reading:"帰(ki) + 国(koku)", uz:"vatanga qaytish"},
+
+    // ---- 47-kun ----
+    {id:"owarukanji47", day:47, group:"終", kanji:"終", romaji:"owaru", type:"kun'yomi", reading:"終わる(owaru) — yakka kanji", otherReadings:"kun: お-わる(owaru) · on: シュウ(shuu)", uz:"oxiri, tugatish, oxirgi"},
+    {id:"owari47", day:47, group:"終", kanji:"終わり", romaji:"owari", type:"kun'yomi", reading:"終わり(owari)", uz:"oxiri, yakun"},
+    {id:"shuuryou47", day:47, group:"終", kanji:"終了", romaji:"shuuryou", type:"on + on", reading:"終(shuu) + 了(ryou)", uz:"oxiri, tugash"},
+    {id:"owaru47", day:47, group:"終", kanji:"終わる", romaji:"owaru", type:"kun'yomi", reading:"終わる(owaru)", uz:"tugamoq"},
+
+    {id:"hajimerukanji47", day:47, group:"始", kanji:"始", romaji:"hajimeru", type:"kun'yomi", reading:"始める(hajimeru) — yakka kanji", otherReadings:"kun: はじ-める(hajimeru), はじ-まる(hajimaru) · on: シ(shi)", uz:"boshlanishi, boshlash"},
+    {id:"hajimeru47", day:47, group:"始", kanji:"始める", romaji:"hajimeru", type:"kun'yomi", reading:"始める(hajimeru)", uz:"boshlamoq"},
+    {id:"hajimaru47", day:47, group:"始", kanji:"始まる", romaji:"hajimaru", type:"kun'yomi", reading:"始まる(hajimaru)", uz:"boshlanmoq"},
+
+    {id:"sarukanji47", day:47, group:"去", kanji:"去", romaji:"saru", type:"kun'yomi", reading:"去る(saru) — yakka kanji", otherReadings:"kun: さ-る(saru) · on: キョ(kyo), コ(ko)", uz:"tark etish"},
+    {id:"kyonen47", day:47, group:"去", kanji:"去年", romaji:"kyonen", type:"on + on", reading:"去(kyo) + 年(nen)", uz:"o'tgan yil"},
+    {id:"kako47", day:47, group:"去", kanji:"過去", romaji:"kako", type:"on + on", reading:"過(ka) + 去(ko)", uz:"o'tmish"},
+
+    {id:"shinukanji47", day:47, group:"死", kanji:"死", romaji:"shinu", type:"kun'yomi", reading:"死ぬ(shinu) — yakka kanji", otherReadings:"kun: し-ぬ(shinu) · on: シ(shi)", uz:"o'lim, o'lish"},
+    {id:"shi47", day:47, group:"死", kanji:"死", romaji:"shi", type:"on'yomi", reading:"死(shi)", uz:"o'lim"},
+    {id:"shinu47", day:47, group:"死", kanji:"死ぬ", romaji:"shinu", type:"kun'yomi", reading:"死ぬ(shinu)", uz:"o'lmoq"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -12011,6 +12117,56 @@
     setTimeout(showStartButton, wait);
   })();
 
+})();
+</script>
+
+<script>
+/* ---------- RITM SINXRONIZATSIYASI ----------
+   "Flashcard almashish" tugmasi (ctCardOne/ctCardTwo) va "Qidiruv" lupasi (searchLensFlip)
+   CSS'da bir xil 2.6s ritmga ega, lekin har biri sahifaning turli paytida ishga tushgani uchun
+   fazalari siljib qolardi. Bu yerda barcha shu animatsiyalar bitta umumiy soatga
+   (document.timeline) bog'lanadi: qachon boshlanishidan qat'i nazar, doim bir xil fazada yuradi. */
+(function(){
+  // umumiy "dirijyor" o'zgaruvchilarini ro'yxatdan o'tkazamiz (sonli animatsiya qilish uchun shart)
+  try{
+    if(window.CSS && CSS.registerProperty){
+      ['--ct-k','--ct-z'].forEach(function(n){
+        try{ CSS.registerProperty({name:n, syntax:'<number>', inherits:true, initialValue:'0'}); }
+        catch(e){ if(!e || e.name !== 'InvalidModificationError') throw e; }
+      });
+      document.documentElement.classList.add('ct-sync');
+    }
+  }catch(e){}
+  if(!document.getAnimations || !document.timeline) return;
+  var PERIOD = 2600;
+  var NAMES = {ctCardOne:1, ctCardTwo:1, ctCardOneLg:1, ctCardTwoLg:1, searchLensFlip:1};
+  function phase(){
+    var t = document.timeline.currentTime;
+    return (t == null) ? null : (Number(t) % PERIOD);
+  }
+  function syncOne(a){
+    try{
+      if(!a || !NAMES[a.animationName]) return;
+      var ph = phase();
+      if(ph == null) return;
+      var cur = Number(a.currentTime);
+      if(!isFinite(cur)) return;
+      var diff = Math.abs((cur % PERIOD) - ph);
+      diff = Math.min(diff, PERIOD - diff);
+      if(diff > 16) a.currentTime = ph;
+    }catch(e){}
+  }
+  function syncAll(){
+    try{ document.getAnimations().forEach(syncOne); }catch(e){}
+  }
+  document.addEventListener('animationstart', function(e){
+    if(!NAMES[e.animationName]) return;
+    try{ e.target.getAnimations().forEach(syncOne); }catch(err){ syncAll(); }
+  }, true);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) syncAll(); });
+  window.addEventListener('load', syncAll);
+  setInterval(syncAll, 3000);
+  syncAll();
 })();
 </script>
 
