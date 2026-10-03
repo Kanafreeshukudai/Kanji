@@ -5458,6 +5458,107 @@
   }
   .ai-assist-close-btn:active{transform:scale(0.9);}
 
+  /* ---------- AI oynasi: shrift o'lchamini sozlash ---------- */
+  .ai-assist-header-actions{ display:flex; align-items:center; gap:8px; }
+  .ai-assist-font-btn{
+    height:30px; min-width:34px;
+    padding:0 9px;
+    border-radius:15px;
+    border:1px solid rgba(139,124,246,0.35);
+    background:rgba(139,124,246,0.12);
+    color:var(--ink-soft);
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:13px;
+    font-weight:700;
+    line-height:1;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    letter-spacing:.2px;
+  }
+  .ai-assist-font-btn small{ font-size:10px; margin-left:1px; }
+  .ai-assist-font-btn:active{ transform:scale(0.93); }
+  .ai-assist-font-btn.active{
+    background:rgba(139,124,246,0.32);
+    border-color:rgba(139,124,246,0.75);
+    color:#fff;
+  }
+  .ai-font-pop{
+    position:absolute;
+    top:60px; right:12px;
+    z-index:6;
+    width:min(264px, calc(100% - 24px));
+    padding:12px 14px 12px;
+    border-radius:16px;
+    background:#2a2442;
+    border:1px solid rgba(139,124,246,0.55);
+    box-shadow:0 14px 34px -10px rgba(0,0,0,0.7);
+    opacity:0;
+    transform:translateY(-6px) scale(0.97);
+    transform-origin:top right;
+    pointer-events:none;
+    visibility:hidden;
+    transition:opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
+  }
+  .ai-font-pop.open{
+    opacity:1; transform:none; pointer-events:auto; visibility:visible;
+    transition:opacity .18s ease, transform .18s ease, visibility 0s;
+  }
+  .ai-font-pop-top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px;
+    font-size:12px; color:#cabffb; font-weight:700;
+  }
+  .ai-font-val{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ai-font-row{ display:flex; align-items:center; gap:10px; }
+  .ai-font-step{
+    flex:none;
+    width:32px; height:32px;
+    border-radius:50%;
+    border:1px solid rgba(139,124,246,0.4);
+    background:rgba(139,124,246,0.16);
+    color:var(--ink);
+    font-family:inherit; font-weight:800;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ai-font-step.minus{ font-size:12px; }
+  .ai-font-step.plus{ font-size:17px; }
+  .ai-font-step:active{ transform:scale(0.9); }
+  .ai-font-step:disabled{ opacity:0.35; cursor:default; }
+  #aiFontRange{
+    flex:1; min-width:0;
+    accent-color:#8b7cf6;
+    height:28px;
+    margin:0;
+    touch-action:pan-y;
+  }
+  .ai-font-preview{
+    margin-top:10px;
+    padding:8px 10px;
+    border-radius:10px;
+    background:rgba(0,0,0,0.22);
+    color:var(--ink);
+    font-size:var(--ai-fs, 13.5px);
+    line-height:1.5;
+    text-align:center;
+  }
+  .ai-font-reset{
+    display:block;
+    margin:10px auto 0;
+    padding:5px 12px;
+    border-radius:999px;
+    border:1px solid rgba(139,124,246,0.35);
+    background:transparent;
+    color:#b3a9e8;
+    font-family:inherit; font-size:11.5px; font-weight:700;
+    cursor:pointer;
+  }
+  .ai-font-reset:active{ transform:scale(0.95); }
+  .ai-font-reset:disabled{ opacity:0.4; cursor:default; }
+  @media (prefers-reduced-motion: reduce){
+    .ai-font-pop, .ai-font-pop.open{ transition:none; }
+  }
+
   .ai-assist-dev-notice{
     flex:none;
     margin:12px 16px 0;
@@ -5483,7 +5584,7 @@
     gap:10px;
   }
   .ai-assist-msg{
-    max-width:82%;
+    max-width:var(--ai-msg-w, 82%);
     display:flex;
     flex-direction:column;
     gap:2px;
@@ -5493,8 +5594,8 @@
   .ai-assist-bubble{
     padding:9px 13px;
     border-radius:16px;
-    font-size:13.5px;
-    line-height:1.45;
+    font-size:var(--ai-fs, 13.5px);
+    line-height:1.5;
     word-break:break-word;
     white-space:pre-wrap;
   }
@@ -6463,7 +6564,20 @@
         <span>Shaxsiy AI suhbat</span>
       </div>
     </div>
-    <button class="ai-assist-close-btn" id="aiAssistCloseBtn" type="button" aria-label="Yopish">✕</button>
+    <div class="ai-assist-header-actions">
+      <button class="ai-assist-font-btn" id="aiFontBtn" type="button" aria-label="Shrift o'lchamini sozlash" aria-expanded="false" aria-controls="aiFontPop">A<small>A</small></button>
+      <button class="ai-assist-close-btn" id="aiAssistCloseBtn" type="button" aria-label="Yopish">✕</button>
+    </div>
+  </div>
+  <div class="ai-font-pop" id="aiFontPop" role="dialog" aria-label="Shrift o'lchami">
+    <div class="ai-font-pop-top"><span>Shrift o'lchami</span><span class="ai-font-val" id="aiFontVal">100%</span></div>
+    <div class="ai-font-row">
+      <button class="ai-font-step minus" id="aiFontMinus" type="button" aria-label="Kichraytirish">A</button>
+      <input type="range" id="aiFontRange" min="12" max="24" step="0.5" value="13.5" aria-label="Shrift o'lchami">
+      <button class="ai-font-step plus" id="aiFontPlus" type="button" aria-label="Kattalashtirish">A</button>
+    </div>
+    <div class="ai-font-preview">Kanji 漢字 — o'qilishi: かんじ</div>
+    <button class="ai-font-reset" id="aiFontReset" type="button">Asl holiga qaytarish</button>
   </div>
   <div class="ai-assist-messages" id="aiAssistMessages">
     <div class="ai-assist-msg bot">
@@ -6480,6 +6594,56 @@
     </button>
   </div>
 </div>
+
+<script>
+(function(){
+  // AI yordamchi oynasi: shrift o'lchamini foydalanuvchi o'zi sozlaydi (qurilmada saqlanadi)
+  var KEY='kanji-ai-font', DEF=13.5, MIN=12, MAX=24, STEP=0.5;
+  var panel=document.getElementById('aiAssistPanel');
+  var btn=document.getElementById('aiFontBtn');
+  var pop=document.getElementById('aiFontPop');
+  var range=document.getElementById('aiFontRange');
+  var minus=document.getElementById('aiFontMinus');
+  var plus=document.getElementById('aiFontPlus');
+  var reset=document.getElementById('aiFontReset');
+  var val=document.getElementById('aiFontVal');
+  if(!panel||!btn||!pop||!range) return;
+
+  function clamp(v){ v=parseFloat(v); if(isNaN(v)) v=DEF; return Math.min(MAX, Math.max(MIN, Math.round(v/STEP)*STEP)); }
+  function apply(v, save){
+    v=clamp(v);
+    panel.style.setProperty('--ai-fs', v+'px');
+    // katta shriftda xabar pufagi kengroq bo'lsin, matn juda tor ustunga siqilmasin
+    panel.style.setProperty('--ai-msg-w', v>=17 ? '92%' : (v>=15 ? '88%' : '82%'));
+    range.value=v;
+    val.textContent=Math.round(v/DEF*100)+'%';
+    minus.disabled=(v<=MIN);
+    plus.disabled=(v>=MAX);
+    reset.disabled=(v===DEF);
+    if(save){ try{ if(v===DEF) localStorage.removeItem(KEY); else localStorage.setItem(KEY, String(v)); }catch(e){} }
+  }
+  var saved=DEF;
+  try{ var r=localStorage.getItem(KEY); if(r!==null) saved=clamp(r); }catch(e){}
+  apply(saved,false);
+
+  function setOpen(o){
+    pop.classList.toggle('open', o);
+    btn.classList.toggle('active', o);
+    btn.setAttribute('aria-expanded', o?'true':'false');
+  }
+  btn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!pop.classList.contains('open')); });
+  pop.addEventListener('click', function(e){ e.stopPropagation(); });
+  range.addEventListener('input', function(){ apply(range.value,true); });
+  minus.addEventListener('click', function(){ apply(parseFloat(range.value)-STEP*2,true); });
+  plus.addEventListener('click', function(){ apply(parseFloat(range.value)+STEP*2,true); });
+  reset.addEventListener('click', function(){ apply(DEF,true); });
+  // oyna tashqarisiga / xabarlar ustiga bosilganda yoki Escape bosilganda yopiladi
+  document.addEventListener('click', function(){ if(pop.classList.contains('open')) setOpen(false); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && pop.classList.contains('open')) setOpen(false); });
+  var closeBtn=document.getElementById('aiAssistCloseBtn');
+  if(closeBtn) closeBtn.addEventListener('click', function(){ setOpen(false); });
+})();
+</script>
 
 <script>
 (function(){
