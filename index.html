@@ -1655,9 +1655,9 @@
     flex:1;
     min-width:64px;
     border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg);
-    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    /* To'liq shaffof: fon ham, xiralashtirish (backdrop-filter) ham yo'q.
+       Chet chizig'i, matn va raqam nishoni (badge) o'zgarishsiz. */
+    background:transparent;
     color:var(--ink-soft);
     font-family:'Zen Maru Gothic', sans-serif;
     font-weight:700;
@@ -1950,8 +1950,8 @@
        har bir kartochka GPU kompozit qatlamini bekorga band qilib turmaydi —
        vizual natija (tortish, uchib ketish animatsiyasi) aynan bir xil qoladi. */
     touch-action:pan-y;
-    perspective:1400px;
-    -webkit-perspective:1400px;
+    perspective:1900px;
+    -webkit-perspective:1900px;
   }
   .card:active{cursor:grabbing;}
   .card-inner{
@@ -1959,11 +1959,22 @@
     position:relative;
     transform-style:preserve-3d;
     -webkit-transform-style:preserve-3d;
-    transition:transform .55s cubic-bezier(.2,.8,.2,1);
+    /* YUMSHOQ burilish: sekin boshlanadi → o'rtada silliq tezlashadi → uzoq, nozik tinchlanadi.
+       (Avval: .55s va keskin boshlanardigan egri chiziq.) */
+    transition:transform .85s cubic-bezier(.45,.05,.2,1);
     transform:rotateY(0deg);
     -webkit-transform:rotateY(0deg);
   }
   .card.flipped .card-inner{transform:rotateY(180deg); -webkit-transform:rotateY(180deg);}
+  /* Burilish paytida kartochka yengil "ko'tarilib" (kattalashib) qaytadi — havoda
+     aylanayotgandek tuyuladi. Alohida `scale` xossasi ishlatiladi, shuning uchun
+     rotateY transitioniga xalaqit bermaydi. */
+  @keyframes cardFlipLift{
+    0%{ scale:1; }
+    42%{ scale:1.045; }
+    100%{ scale:1; }
+  }
+  .card.flipping .card-inner{ animation:cardFlipLift .85s cubic-bezier(.45,.05,.2,1); }
 
   /* ---- aylanish paytida GPU yukini yengillatish ----
      backdrop-filter (blur+saturate) 3D rotateY bilan birga animatsiya qilinganda
@@ -3317,6 +3328,7 @@
 
   @media (prefers-reduced-motion: reduce){
     .card-inner, .ctrl-btn, .quiz-bar-fill{transition:none !important;}
+    .card.flipping .card-inner{animation:none !important;}
     .card.flipped .face.back{animation:none !important;}
     .card::after{ display:none; }
   }
@@ -5886,6 +5898,17 @@
     overscroll-behavior:contain;
   }
   .ai-assist-panel.open{transform:translate(-50%, 0);}
+  /* Yopiq paytda oyna ekran ostida turadi, lekin binafsha soyasi (box-shadow)
+     tepaga chiqib, ekran pastida aura bo'lib ko'rinardi. Endi yopiqda butunlay
+     yashirin; ochilganda darhol, yopilganda esa sirpanib tushib bo'lgach yashiriladi. */
+  .ai-assist-panel{
+    visibility:hidden;
+    transition:transform .34s cubic-bezier(.2,.8,.2,1), visibility 0s linear .34s;
+  }
+  .ai-assist-panel.open{
+    visibility:visible;
+    transition:transform .34s cubic-bezier(.2,.8,.2,1), visibility 0s;
+  }
 
   /* AI yordamchi oynasi chetida yuguruvchi violet nur (chat va faol
      foydalanuvchilar oynalaridagi bilan bir xil animatsiya: chapdan fade bilan
@@ -9546,7 +9569,7 @@
       card.style.touchAction = 'pan-y'; // MUHIM: orqa tomonda sahifa scrolli ishlashi uchun
       dots('pause');
       clearTimeout(flipTimer);
-      flipTimer = setTimeout(finishFlip, 650); // transitionend kelmasa ham holat albatta tozalanadi
+      flipTimer = setTimeout(finishFlip, 950); // transitionend kelmasa ham holat albatta tozalanadi
       sampleFlipJank();
       if(showingBack) playFlipSound();
     }
