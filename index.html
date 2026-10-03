@@ -663,16 +663,6 @@
   .swipe-tip-modal::after{ right:-80px; background:var(--accent); }
   .swipe-tip-modal > *{ position:relative; z-index:1; }
 
-  .swipe-tip-close{
-    position:absolute !important; top:14px; right:14px;
-    width:30px; height:30px; border-radius:50%;
-    border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg); color:var(--ink-soft);
-    font-size:15px; line-height:1; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    font-family:inherit;
-  }
-  .swipe-tip-close:active{ transform:scale(0.9); }
 
   /* --- surish animatsiyasi (demo) --- */
   .swipe-demo{
@@ -5503,8 +5493,8 @@
     white-space:pre-wrap;
   }
   .ai-assist-msg.bot .ai-assist-bubble{
-    background:rgba(139,124,246,0.16);
-    border:1px solid rgba(139,124,246,0.35);
+    background:rgba(124,154,107,0.14);
+    border:1px solid rgba(147,177,127,0.32);
     color:var(--ink);
     border-bottom-left-radius:4px;
   }
@@ -5539,75 +5529,71 @@
   }
 
 
-  /* ---------- AI "KUTISH" HALQASI + SHADE (fade) ANIMATSIYALARI ----------
-     Matnsiz, faqat zamonaviy gradient halqa: "kometa dumi" shaklidagi tashqi halqa
-     + teskari aylanuvchi ichki halqa + yumshoq nur. Paydo bo'lish/yo'qolishda
-     fade (shade). Faqat transform/opacity ishlatiladi — telefonda yengil. */
+  /* ---------- AI JAVOB ANIMATSIYASI (moss, minimalistik) ----------
+     1) Kutish: bitta ixcham bo'lakda 3 ta moss nuqta, ketma-ket "nafas" oladi.
+     2) Javob: so'zma-so'z paydo bo'ladi — yangi so'z moss rangda yonib,
+        asta oddiy matn rangiga o'tadi; oxirida nozik moss kursor turadi.
+     Faqat opacity/transform/color — telefonda yengil. */
 
-  /* Har bir xabar yumshoq paydo bo'ladi */
-  .ai-assist-msg{ animation:aiMsgIn .38s cubic-bezier(.22,.8,.3,1) both; }
-  .ai-assist-msg.leaving{ animation:aiMsgOut .24s ease forwards; pointer-events:none; }
+  .ai-assist-msg{ animation:aiMsgIn .34s cubic-bezier(.22,.8,.3,1) both; }
+  .ai-assist-msg.leaving{ animation:aiMsgOut .2s ease forwards; pointer-events:none; }
   @keyframes aiMsgIn{
-    from{ opacity:0; transform:translateY(8px) scale(.97); filter:blur(3px); }
-    to{ opacity:1; transform:none; filter:blur(0); }
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:none; }
   }
   @keyframes aiMsgOut{
-    from{ opacity:1; transform:none; filter:blur(0); }
-    to{ opacity:0; transform:translateY(-4px) scale(.94); filter:blur(3px); }
+    from{ opacity:1; transform:none; }
+    to{ opacity:0; transform:translateY(-3px); }
   }
 
-  /* Javob matni harf-harf chiqayotganda har bir bo'lak shade bilan paydo bo'ladi */
-  .ai-chunk{ animation:aiChunkIn .55s ease both; }
-  @keyframes aiChunkIn{ from{ opacity:0; } to{ opacity:1; } }
+  .ai-assist-typing .ai-assist-bubble{ padding:12px 15px; }
+  .ai-think{ display:inline-flex; align-items:center; line-height:0; }
+  .ai-think-dots{ display:inline-flex; align-items:center; gap:5px; height:14px; }
+  .ai-think-dots i{
+    display:block;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--moss-soft);
+    opacity:.25;
+    animation:aiDot 1.3s ease-in-out infinite;
+  }
+  .ai-think-dots i:nth-child(2){ animation-delay:.16s; }
+  .ai-think-dots i:nth-child(3){ animation-delay:.32s; }
+  @keyframes aiDot{
+    0%,70%,100%{ opacity:.25; transform:scale(.8); }
+    35%{ opacity:1; transform:scale(1); box-shadow:0 0 8px rgba(147,177,127,.55); }
+  }
 
-  .ai-assist-typing .ai-assist-bubble{
-    padding:11px 14px;
-    animation:aiThinkGlow 2.6s ease-in-out infinite;
+  /* javob matni: so'zma-so'z */
+  .ai-w{ animation:aiWordIn .6s ease-out both; }
+  @keyframes aiWordIn{
+    0%{ opacity:0; color:var(--moss-soft); }
+    35%{ opacity:1; color:var(--moss-soft); }
+    100%{ opacity:1; color:var(--ink); }
   }
-  .ai-think{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    line-height:0;
+  .ai-caret{
+    display:inline-block;
+    width:2px; height:1.05em;
+    margin-left:1px;
+    vertical-align:-.16em;
+    border-radius:1px;
+    background:var(--moss-soft);
+    box-shadow:0 0 8px rgba(147,177,127,.6);
+    animation:aiCaretBlink 1s ease-in-out infinite;
   }
-  .ai-think-orb{
-    position:relative;
-    flex:none;
-    width:24px; height:24px;
-    filter:drop-shadow(0 0 6px rgba(139,124,246,.65));
-    animation:aiOrbBreathe 2.2s ease-in-out infinite;
-  }
-  /* tashqi halqa: dumi so'nib boradigan gradient */
-  .ai-think-orb::before{
-    content:"";
-    position:absolute; inset:0;
-    border-radius:50%;
-    background:conic-gradient(from 0deg, rgba(139,124,246,0) 0%, #8b7cf6 35%, #e5876f 70%, #f4c98a 100%);
-    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
-    mask:radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
-    animation:aiThinkSpin 1s cubic-bezier(.45,.15,.55,.85) infinite;
-  }
-  /* ichki halqa: teskari yo'nalishda sekinroq aylanadi */
-  .ai-think-orb::after{
-    content:"";
-    position:absolute; inset:6px;
-    border-radius:50%;
-    background:conic-gradient(from 180deg, rgba(92,130,166,0) 0%, #5C82A6 55%, #b9aefc 100%);
-    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
-    mask:radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
-    animation:aiThinkSpin 1.5s linear infinite reverse;
-    opacity:.9;
-  }
-  @keyframes aiThinkSpin{ to{ transform:rotate(360deg); } }
-  @keyframes aiOrbBreathe{ 0%,100%{ transform:scale(.94); } 50%{ transform:scale(1.04); } }
-  @keyframes aiThinkGlow{
-    0%,100%{ box-shadow:0 0 0 0 rgba(139,124,246,0); border-color:rgba(139,124,246,0.35); }
-    50%{ box-shadow:0 0 18px 1px rgba(139,124,246,0.26); border-color:rgba(139,124,246,0.58); }
-  }
+  .ai-caret.done{ animation:aiCaretOut .3s ease forwards; }
+  @keyframes aiCaretBlink{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+  @keyframes aiCaretOut{ to{ opacity:0; } }
+
   @media (prefers-reduced-motion: reduce){
-    .ai-think-orb, .ai-think-orb::before, .ai-think-orb::after, .ai-assist-typing .ai-assist-bubble{ animation:none; }
-    .ai-assist-msg, .ai-chunk{ animation:aiChunkIn .2s ease both; }
-    .ai-assist-msg.leaving{ animation:none; opacity:0; }
+    .ai-think-dots i{ animation:none; opacity:.8; }
+    /* harakat kamaytirilgan qurilmada ham matn birdan chiqmaydi — faqat yumshoq fade */
+    .ai-assist-msg{ animation:aiFadeOnly .25s ease both; }
+    .ai-w{ animation:aiFadeOnly .45s ease both; }
+    .ai-caret{ animation:none; }
+    .ai-assist-msg.leaving{ animation:aiFadeOut .2s ease forwards; }
+    @keyframes aiFadeOnly{ from{ opacity:0; } to{ opacity:1; } }
+    @keyframes aiFadeOut{ to{ opacity:0; } }
   }
 
   .ai-assist-input-bar{
@@ -6448,8 +6434,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -6726,14 +6712,14 @@
     {id:"yaoya", day:13, group:"八", kanji:"八百屋", romaji:"yaoya", type:"jukujikun", reading:"八百屋(yaoya) — maxsus o'qilish", uz:"sabzavot do'koni"},
 
     // ---- 14-kun ----
-    {id:"kyuu", day:14, group:"九", kanji:"九", romaji:"kyuu", type:"on'yomi", reading:"九(kyuu) — yakka kanji", otherReadings:"kun: ここの(kokono), ここの-つ(kokonotsu) · on: キュウ(kyuu), ク(ku)", uz:"to'qqiz"},
+    {id:"kyuu14", day:14, group:"九", kanji:"九", romaji:"kyuu", type:"on'yomi", reading:"九(kyuu) — yakka kanji", otherReadings:"kun: ここの(kokono), ここの-つ(kokonotsu) · on: キュウ(kyuu), ク(ku)", uz:"to'qqiz"},
     {id:"kokonotsu", day:14, group:"九", kanji:"九つ", romaji:"kokonotsu", type:"kun'yomi", reading:"九つ(kokonotsu)", uz:"to'qqizta"},
     {id:"kuji", day:14, group:"九", kanji:"九時", romaji:"kuji", type:"kun'yomi", reading:"九(ku) + 時(ji)", uz:"soat to'qqiz"},
     {id:"kokonoka", day:14, group:"九", kanji:"九日", romaji:"kokonoka", type:"jukujikun", reading:"九日(kokonoka) — maxsus o'qilish", uz:"to'qqizinchi kun / 9-kun"},
 
     {id:"juu", day:14, group:"十", kanji:"十", romaji:"juu", type:"on'yomi", reading:"十(juu) — yakka kanji", otherReadings:"kun: とお(too), と(to) · on: ジュウ(juu), ジュッ(jup), ジッ(ji)", uz:"o'n"},
     {id:"tooka", day:14, group:"十", kanji:"十日", romaji:"tooka", type:"jukujikun", reading:"十日(tooka) — maxsus o'qilish", uz:"o'ninchi kun / 10-kun"},
-    {id:"juppun", day:14, group:"十", kanji:"十分", romaji:"juppun", type:"on + on", reading:"十(jup) + 分(pun)", uz:"yetarli"},
+    {id:"juppun14", day:14, group:"十", kanji:"十分", romaji:"juppun", type:"on + on", reading:"十(jup) + 分(pun)", uz:"yetarli"},
     {id:"jussai", day:14, group:"十", kanji:"十歳", romaji:"jussai", type:"on + on", reading:"十(jus) + 歳(sai)", uz:"o'n yoshda"},
 
     {id:"hyaku", day:14, group:"百", kanji:"百", romaji:"hyaku", type:"on'yomi", reading:"百(hyaku) — yakka kanji", otherReadings:"on: ヒャク(hyaku), ビャク(byaku), ピャク(pyaku) · kun: もも(momo)", uz:"yuz"},
@@ -7472,6 +7458,84 @@
     {id:"shinukanji47", day:47, group:"死", kanji:"死", romaji:"shinu", type:"kun'yomi", reading:"死ぬ(shinu) — yakka kanji", otherReadings:"kun: し-ぬ(shinu) · on: シ(shi)", uz:"o'lim, o'lish"},
     {id:"shi47", day:47, group:"死", kanji:"死", romaji:"shi", type:"on'yomi", reading:"死(shi)", uz:"o'lim"},
     {id:"shinu47", day:47, group:"死", kanji:"死ぬ", romaji:"shinu", type:"kun'yomi", reading:"死ぬ(shinu)", uz:"o'lmoq"},
+
+    // ---- 48-kun ----
+    {id:"toikanji48", day:48, group:"遠", kanji:"遠", romaji:"tooi", type:"kun'yomi", reading:"遠い(tooi) — yakka kanji", otherReadings:"kun: とお-い(tooi) · on: エン(en)", uz:"uzoq"},
+    {id:"tooi48", day:48, group:"遠", kanji:"遠い", romaji:"tooi", type:"kun'yomi", reading:"遠い(tooi)", uz:"uzoq"},
+    {id:"tooku48", day:48, group:"遠", kanji:"遠く", romaji:"tooku", type:"kun'yomi", reading:"遠く(tooku)", uz:"uzoq joy"},
+    {id:"ensoku48", day:48, group:"遠", kanji:"遠足", romaji:"ensoku", type:"on + on", reading:"遠(en) + 足(soku)", uz:"bir kunlik ekskursiya"},
+    {id:"enryo48", day:48, group:"遠", kanji:"遠慮する", romaji:"enryo suru", type:"on + on", reading:"遠(en) + 慮(ryo) + する", uz:"uyalmoq, tortinmoq"},
+    {id:"bouenkyou48", day:48, group:"遠", kanji:"望遠鏡", romaji:"bouenkyou", type:"on + on + on", reading:"望(bou) + 遠(en) + 鏡(kyou)", uz:"teleskop"},
+
+    {id:"chikaikanji48", day:48, group:"近", kanji:"近", romaji:"chikai", type:"kun'yomi", reading:"近い(chikai) — yakka kanji", otherReadings:"kun: ちか-い(chikai) · on: キン(kin), コン(kon)", uz:"yaqin, yaqinda"},
+    {id:"chikai48", day:48, group:"近", kanji:"近い", romaji:"chikai", type:"kun'yomi", reading:"近い(chikai)", uz:"yaqin"},
+    {id:"chikaku48", day:48, group:"近", kanji:"近く", romaji:"chikaku", type:"kun'yomi", reading:"近く(chikaku)", uz:"yaqinroq"},
+    {id:"kinjo48", day:48, group:"近", kanji:"近所", romaji:"kinjo", type:"on + on", reading:"近(kin) + 所(jo)", uz:"turar joy dahasi, mahalla"},
+    {id:"saikin48", day:48, group:"近", kanji:"最近", romaji:"saikin", type:"on + on", reading:"最(sai) + 近(kin)", uz:"shu kunlarda"},
+    {id:"mijika48", day:48, group:"近", kanji:"身近", romaji:"mijika", type:"kun + kun", reading:"身(mi) + 近(jika)", uz:"biriga yaqin"},
+
+    {id:"omoikanji48", day:48, group:"重", kanji:"重", romaji:"omoi", type:"kun'yomi", reading:"重い(omoi) — yakka kanji", otherReadings:"kun: おも-い(omoi), かさ-ねる(kasaneru), かさ-なる(kasanaru) · on: ジュウ(juu), チョウ(chou)", uz:"og'ir"},
+    {id:"omoi48", day:48, group:"重", kanji:"重い", romaji:"omoi", type:"kun'yomi", reading:"重い(omoi)", uz:"og'ir"},
+    {id:"sonchou48", day:48, group:"重", kanji:"尊重する", romaji:"sonchou suru", type:"on + on", reading:"尊(son) + 重(chou) + する", uz:"hurmat ko'rsatish"},
+    {id:"taijuu48", day:48, group:"重", kanji:"体重", romaji:"taijuu", type:"on + on", reading:"体(tai) + 重(juu)", uz:"tana vazni"},
+    {id:"juuyou48", day:48, group:"重", kanji:"重要な", romaji:"juuyou na", type:"on + on", reading:"重(juu) + 要(you) + な", uz:"muhim"},
+    {id:"kichou48", day:48, group:"重", kanji:"貴重な", romaji:"kichou na", type:"on + on", reading:"貴(ki) + 重(chou) + な", uz:"qimmatli"},
+
+    {id:"karuikanji48", day:48, group:"軽", kanji:"軽", romaji:"karui", type:"kun'yomi", reading:"軽い(karui) — yakka kanji", otherReadings:"kun: かる-い(karui) · on: ケイ(kei)", uz:"yengil"},
+    {id:"karui48", day:48, group:"軽", kanji:"軽い", romaji:"karui", type:"kun'yomi", reading:"軽い(karui)", uz:"yengil"},
+    {id:"tegaru48", day:48, group:"軽", kanji:"手軽な", romaji:"tegaru na", type:"kun + kun", reading:"手(te) + 軽(garu) + な", uz:"oson, qulay"},
+
+    // ---- 49-kun ----
+    {id:"atatakaikanji49", day:49, group:"温", kanji:"温", romaji:"atatakai", type:"kun'yomi", reading:"温かい(atatakai) — yakka kanji", otherReadings:"kun: あたた-かい(atatakai) · on: オン(on)", uz:"issiq"},
+    {id:"atatakai49", day:49, group:"温", kanji:"温かい", romaji:"atatakai", type:"kun'yomi", reading:"温かい(atatakai)", uz:"issiq"},
+    {id:"ondo49", day:49, group:"温", kanji:"温度", romaji:"ondo", type:"on + on", reading:"温(on) + 度(do)", uz:"harorat"},
+    {id:"onsen49", day:49, group:"温", kanji:"温泉", romaji:"onsen", type:"on + on", reading:"温(on) + 泉(sen)", uz:"issiq buloq"},
+
+    {id:"tsumetaikanji49", day:49, group:"冷", kanji:"冷", romaji:"tsumetai", type:"kun'yomi", reading:"冷たい(tsumetai) — yakka kanji", otherReadings:"kun: つめ-たい(tsumetai), ひ-える(hieru), ひ-やす(hiyasu), さ-ます(samasu) · on: レイ(rei)", uz:"salqin, sovuq"},
+    {id:"tsumetai49", day:49, group:"冷", kanji:"冷たい", romaji:"tsumetai", type:"kun'yomi", reading:"冷たい(tsumetai)", uz:"sovuq"},
+    {id:"hieru49", day:49, group:"冷", kanji:"冷える", romaji:"hieru", type:"kun'yomi", reading:"冷える(hieru)", uz:"sovimoq"},
+    {id:"hiyasu49", day:49, group:"冷", kanji:"冷やす", romaji:"hiyasu", type:"kun'yomi", reading:"冷やす(hiyasu)", uz:"sovitmoq"},
+    {id:"reibou49", day:49, group:"冷", kanji:"冷房", romaji:"reibou", type:"on + on", reading:"冷(rei) + 房(bou)", uz:"sovutgich (konditsioner funksiyasi)"},
+    {id:"reizouko49", day:49, group:"冷", kanji:"冷蔵庫", romaji:"reizouko", type:"on + on + on", reading:"冷(rei) + 蔵(zou) + 庫(ko)", uz:"muzlatgich"},
+
+    {id:"atsuikanji49", day:49, group:"熱", kanji:"熱", romaji:"atsui", type:"kun'yomi", reading:"熱い(atsui) — yakka kanji", otherReadings:"kun: あつ-い(atsui) · on: ネツ(netsu)", uz:"issiqlik, harorat, isitma"},
+    {id:"atsui49", day:49, group:"熱", kanji:"熱い", romaji:"atsui", type:"kun'yomi", reading:"熱い(atsui)", uz:"issiq"},
+    {id:"netsu49", day:49, group:"熱", kanji:"熱", romaji:"netsu", type:"on'yomi", reading:"熱(netsu)", uz:"isitma"},
+    {id:"nesshin49", day:49, group:"熱", kanji:"熱心な", romaji:"nesshin na", type:"on + on", reading:"熱(netsu) + 心(shin) + な", uz:"g'ayratli"},
+    {id:"netchuu49", day:49, group:"熱", kanji:"熱中する", romaji:"netchuu suru", type:"on + on", reading:"熱(netsu) + 中(chuu) + する", uz:"berilib ketmoq"},
+    {id:"nettou49", day:49, group:"熱", kanji:"熱湯", romaji:"nettou", type:"on + on", reading:"熱(netsu) + 湯(tou)", uz:"issiq suv"},
+
+    {id:"atsuikanji49x", day:49, group:"暑", kanji:"暑", romaji:"atsui", type:"kun'yomi", reading:"暑い(atsui) — yakka kanji", otherReadings:"kun: あつ-い(atsui) · on: ショ(sho)", uz:"issiq (iqlim uchun)"},
+    {id:"atsui49x", day:49, group:"暑", kanji:"暑い", romaji:"atsui", type:"kun'yomi", reading:"暑い(atsui)", uz:"iliq"},
+    {id:"atsusa49", day:49, group:"暑", kanji:"暑さ", romaji:"atsusa", type:"kun'yomi", reading:"暑さ(atsusa)", uz:"iliqlik"},
+    {id:"zansho49", day:49, group:"暑", kanji:"残暑", romaji:"zansho", type:"on + on", reading:"残(zan) + 暑(sho)", uz:"yoz oxiridagi iliqlik"},
+
+    // ---- 50-kun ----
+    {id:"samuikanji50", day:50, group:"寒", kanji:"寒", romaji:"samui", type:"kun'yomi", reading:"寒い(samui) — yakka kanji", otherReadings:"kun: さむ-い(samui) · on: カン(kan)", uz:"sovuq"},
+    {id:"samui50", day:50, group:"寒", kanji:"寒い", romaji:"samui", type:"kun'yomi", reading:"寒い(samui)", uz:"sovuq"},
+    {id:"samusa50", day:50, group:"寒", kanji:"寒さ", romaji:"samusa", type:"kun'yomi", reading:"寒さ(samusa)", uz:"sovuqlik"},
+    {id:"samuke50", day:50, group:"寒", kanji:"寒気", romaji:"samuke", type:"kun + on", reading:"寒気(samuke)", uz:"sovuq bosish, (bor) titroq"},
+    {id:"kanki50", day:50, group:"寒", kanji:"寒気", romaji:"kanki", type:"on + on", reading:"寒(kan) + 気(ki)", uz:"sovuq, sovuqlik"},
+    {id:"kanreizensen50", day:50, group:"寒", kanji:"寒冷前線", romaji:"kanrei zensen", type:"on + on + on + on", reading:"寒(kan) + 冷(rei) + 前(zen) + 線(sen)", uz:"sovuq front"},
+
+    {id:"atatakaikanji50", day:50, group:"暖", kanji:"暖", romaji:"atatakai", type:"kun'yomi", reading:"暖かい(atatakai) — yakka kanji", otherReadings:"kun: あたた-かい(atatakai), あたた-まる(atatamaru), あたた-める(atatameru) · on: ダン(dan)", uz:"issiq, isitish uchun"},
+    {id:"atatakai50", day:50, group:"暖", kanji:"暖かい", romaji:"atatakai", type:"kun'yomi", reading:"暖かい(atatakai)", uz:"issiq"},
+    {id:"atatameru50", day:50, group:"暖", kanji:"暖める", romaji:"atatameru", type:"kun'yomi", reading:"暖める(atatameru)", uz:"isitmoq"},
+    {id:"atatamaru50", day:50, group:"暖", kanji:"暖まる", romaji:"atatamaru", type:"kun'yomi", reading:"暖まる(atatamaru)", uz:"isinmoq"},
+    {id:"danbou50", day:50, group:"暖", kanji:"暖房", romaji:"danbou", type:"on + on", reading:"暖(dan) + 房(bou)", uz:"isitkich"},
+    {id:"danntou50", day:50, group:"暖", kanji:"暖冬", romaji:"dantou", type:"on + on", reading:"暖(dan) + 冬(tou)", uz:"iliq qish"},
+
+    {id:"tokukanji50", day:50, group:"特", kanji:"特", romaji:"toku", type:"on'yomi", reading:"特(toku) — yakka kanji", otherReadings:"on: トク(toku)", uz:"maxsus"},
+    {id:"tokubetsuna50", day:50, group:"特", kanji:"特別な", romaji:"tokubetsu na", type:"on + on", reading:"特(toku) + 別(betsu) + な", uz:"maxsus"},
+    {id:"tokkyuu50", day:50, group:"特", kanji:"特急", romaji:"tokkyuu", type:"on + on", reading:"特(tok) + 急(kyuu)", uz:"maxsus ekspress"},
+    {id:"tokuni50", day:50, group:"特", kanji:"特に", romaji:"toku ni", type:"on'yomi", reading:"特(toku) + に", uz:"ayniqsa"},
+    {id:"tokuchou50", day:50, group:"特", kanji:"特徴", romaji:"tokuchou", type:"on + on", reading:"特(toku) + 徴(chou)", uz:"xususiyat"},
+
+    {id:"wakarerukanji50", day:50, group:"別", kanji:"別", romaji:"wakareru", type:"kun'yomi", reading:"別れる(wakareru) — yakka kanji", otherReadings:"kun: わか-れる(wakareru), わ-ける(wakeru) · on: ベツ(betsu)", uz:"alohida, boshqacha, boshqa"},
+    {id:"wakareru50", day:50, group:"別", kanji:"別れる", romaji:"wakareru", type:"kun'yomi", reading:"別れる(wakareru)", uz:"ajralmoq"},
+    {id:"tokubetsuna50b", day:50, group:"別", kanji:"特別な", romaji:"tokubetsu na", type:"on + on", reading:"特(toku) + 別(betsu) + な", uz:"maxsus"},
+    {id:"betsuno50", day:50, group:"別", kanji:"別の", romaji:"betsu no", type:"on'yomi", reading:"別(betsu) + の", uz:"boshqa"},
+    {id:"betsubetsuni50", day:50, group:"別", kanji:"別々に", romaji:"betsubetsu ni", type:"on'yomi", reading:"別々(betsubetsu) + に", uz:"alohida"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -11394,7 +11458,6 @@
       overlay.setAttribute('aria-hidden','true');
       overlay.innerHTML =
         '<div class="swipe-tip-modal" role="dialog" aria-modal="true" aria-label="Kartochkani surish">'+
-          '<button type="button" class="swipe-tip-close" aria-label="Yopish">✕</button>'+
           '<div class="swipe-demo" aria-hidden="true">'+
             '<div class="swipe-demo-tag left">BILAMAN ✓</div>'+
             '<div class="swipe-demo-card">漢</div>'+
@@ -11413,7 +11476,6 @@
         '</div>';
       document.body.appendChild(overlay);
       overlay.addEventListener('click', (e)=>{ if(e.target === overlay) hide(); });
-      overlay.querySelector('.swipe-tip-close').addEventListener('click', hide);
       overlay.querySelector('.swipe-tip-ok').addEventListener('click', hide);
     }
     function show(side){
@@ -11623,24 +11685,28 @@
       // foydalanuvchi o'zi scroll qilib o'qiydi.
 
       return new Promise((resolve)=>{
+        const tokens = text.match(/\S+\s*|\s+/g) || [text];
+        const total = tokens.length;
+        const caret = document.createElement('span');
+        caret.className = 'ai-caret';
+        bubble.appendChild(caret);
         let i = 0;
-        const total = text.length;
-        // Uzunroq javoblarda tezroq, qisqalarida sekinroq — bir xil umumiy vaqt hissi uchun
-        const perCharDelay = speedMs != null ? speedMs : Math.max(6, Math.min(22, 900 / Math.max(total, 1)));
+        // so'z soni ko'p bo'lsa tezroq, kam bo'lsa sekinroq (umumiy ~1.5-2.5 soniya)
+        const delay = speedMs != null ? speedMs : Math.max(16, Math.min(55, 2200 / Math.max(total, 1)));
+        const step = total > 140 ? 3 : (total > 60 ? 2 : 1);
         function tick(){
-          // Har bir chaqiriqda bir nechta belgi qo'shamiz — juda uzun matnlarda ilova osilib qolmasin
-          const step = total > 400 ? 3 : 1;
           const next = Math.min(i + step, total);
           const span = document.createElement('span');
-          span.className = 'ai-chunk';
-          span.textContent = text.slice(i, next);
-          bubble.appendChild(span);
+          span.className = 'ai-w';
+          span.textContent = tokens.slice(i, next).join('');
+          bubble.insertBefore(span, caret);
           i = next;
           if(i < total){
-            setTimeout(tick, perCharDelay);
+            setTimeout(tick, delay);
           } else {
-            // oxirgi bo'lak shade tugagach DOM'ni yengillashtiramiz (bitta matn tuguniga yig'amiz)
-            setTimeout(()=>{ if(bubble.isConnected) bubble.textContent = text; }, 700);
+            caret.classList.add('done');
+            // animatsiyalar tugagach DOM'ni yengillashtiramiz (bitta matn tuguniga yig'amiz)
+            setTimeout(()=>{ if(bubble.isConnected) bubble.textContent = text; }, 800);
             resolve(row);
           }
         }
@@ -11666,7 +11732,7 @@
       think.className = 'ai-think';
       think.setAttribute('role','status');
       think.setAttribute('aria-label','Kutilmoqda');
-      think.innerHTML = '<span class="ai-think-orb"></span>';
+      think.innerHTML = '<span class="ai-think-dots"><i></i><i></i><i></i></span>';
       bubble.appendChild(think);
       row.appendChild(bubble);
       messages.appendChild(row);
