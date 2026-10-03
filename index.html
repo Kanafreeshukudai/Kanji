@@ -463,12 +463,12 @@
     0%, 100%{ box-shadow:0 0 0 1px rgba(255,255,255,0.12), 0 0 0 0 rgba(217,60,52,0); }
     50%{ box-shadow:0 0 0 1px rgba(255,255,255,0.22), 0 0 16px 4px rgba(217,60,52,0.45); }
   }
-  .chat-toggle-btn.in-use, .ai-assist-btn.in-use{
+  .chat-toggle-btn.in-use{
     position:relative;
     overflow:hidden;
     animation:btnUseGlow 1.4s ease-in-out infinite;
   }
-  .chat-toggle-btn.in-use::after, .ai-assist-btn.in-use::after{
+  .chat-toggle-btn.in-use::after{
     content:"";
     position:absolute;
     inset:0;
@@ -479,8 +479,8 @@
     pointer-events:none;
   }
   @media (prefers-reduced-motion: reduce){
-    .chat-toggle-btn.in-use, .ai-assist-btn.in-use{animation:none;}
-    .chat-toggle-btn.in-use::after, .ai-assist-btn.in-use::after{animation:none; display:none;}
+    .chat-toggle-btn.in-use{animation:none;}
+    .chat-toggle-btn.in-use::after{animation:none; display:none;}
   }
 
   /* ---------- FIREBASE AUTH (Google bilan kirish) ---------- */
@@ -5528,6 +5528,57 @@
     .ai-assist-panel.open .ai-star-big-svg,
     .ai-assist-panel.open .ai-star-small-svg{ animation:none; }
   }
+
+  /* ---------- Yuqoridagi "AI yordamchi" tugmasi: ishlatilayotganda (in-use) ----------
+     Ilgari tugma tovlanib (shimmer/glow) turardi. Endi tovlanish yo'q — o'rniga
+     oyna ichidagi logotip bilan aynan bir xil yulduzlar orbitasi (bir xil
+     keyframes va davr) ishlaydi, shuning uchun ikkalasi uyg'un ko'rinadi. */
+  .ai-assist-btn .ai-btn-stars{
+    position:relative;
+    display:block;
+    flex:none;
+    width:16px; height:16px;
+  }
+  .ai-assist-btn .ai-btn-stars .ai-star-svg{
+    position:absolute;
+    left:0; top:0;
+    width:16px; height:16px;
+    margin:0;
+    overflow:visible;
+  }
+  .ai-assist-btn .ai-orbit{
+    transform-box:view-box;
+    transform-origin:15.5px 13.75px;
+  }
+  .ai-assist-btn .ai-star{
+    transform-box:view-box;
+    vector-effect:non-scaling-stroke;
+    stroke-width:1.4px;
+    fill:currentColor;
+    fill-opacity:.14;
+  }
+  .ai-assist-btn .ai-star-big{ transform-origin:12px 9.5px; }
+  .ai-assist-btn .ai-star-small{ transform-origin:19px 18px; }
+  .ai-assist-btn.in-use{
+    border-color:rgba(139,124,246,0.75);
+    background:linear-gradient(150deg, rgba(139,124,246,0.34), rgba(111,92,230,0.18));
+    color:#e4deff;
+  }
+  .ai-assist-btn.in-use .ai-orbit{
+    animation:aiOrbit 5.4s cubic-bezier(.65,0,.3,1) infinite;
+    will-change:transform;
+  }
+  .ai-assist-btn.in-use .ai-star-big{ animation:aiStarBig 5.4s cubic-bezier(.65,0,.3,1) infinite; will-change:transform,opacity; }
+  .ai-assist-btn.in-use .ai-star-small{ animation:aiStarSmall 5.4s cubic-bezier(.65,0,.3,1) infinite; will-change:transform; }
+  .ai-assist-btn.in-use .ai-star-big-svg{ animation:aiStarBigZ 5.4s step-end infinite; }
+  .ai-assist-btn.in-use .ai-star-small-svg{ animation:aiStarSmallZ 5.4s step-end infinite; }
+  @media (prefers-reduced-motion: reduce){
+    .ai-assist-btn.in-use .ai-orbit,
+    .ai-assist-btn.in-use .ai-star-big,
+    .ai-assist-btn.in-use .ai-star-small,
+    .ai-assist-btn.in-use .ai-star-big-svg,
+    .ai-assist-btn.in-use .ai-star-small-svg{ animation:none; }
+  }
   .ai-assist-panel-title h3{
     margin:0;
     font-family:'Shippori Mincho',serif;
@@ -6267,7 +6318,10 @@
 <div class="auth-box" id="authBox">
   <video class="auth-banner-video" id="authBannerVideo" src="banner.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
   <button class="ai-assist-btn" id="aiAssistBtn" type="button" aria-label="AI yordamchi">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></svg>
+    <i class="ai-btn-stars" aria-hidden="true">
+      <svg class="ai-star-svg ai-star-big-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="ai-orbit"><path class="ai-star ai-star-big" d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path></g></svg>
+      <svg class="ai-star-svg ai-star-small-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="ai-orbit"><path class="ai-star ai-star-small" d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></g></svg>
+    </i>
     <span>AI yordamchi</span>
   </button>
   <!-- FAQAT ADMIN uchun: skriptda faqat belgilangan admin email bilan
