@@ -848,26 +848,15 @@
     position:absolute;
     top:44px;
     right:0;
+    z-index:1;                 /* avatar (z-index:2) ustida, tugmalar uning ortidan chiqadi */
     min-width:180px;
-    padding:12px;
-    border-radius:16px;
-    border:1px solid var(--glass-border-soft);
-    background:var(--panel-1);
-    backdrop-filter:var(--blur-2) saturate(var(--sat-1));
-    -webkit-backdrop-filter:var(--blur-2) saturate(var(--sat-1));
-    box-shadow:0 12px 32px var(--glass-shadow);
     display:flex;
     flex-direction:column;
     align-items:stretch;
-    gap:10px;
-    opacity:0;
-    transform:translateY(-6px);
+    gap:8px;
     pointer-events:none;
-    transition:opacity .18s ease, transform .18s ease;
   }
   .auth-dropdown.open{
-    opacity:1;
-    transform:translateY(0);
     pointer-events:auto;
   }
   .auth-name{
@@ -902,6 +891,70 @@
     cursor:pointer;
   }
   .auth-notes-btn:active{transform:scale(0.96);}
+
+  /* ---------- AKKAUNT MENYUSI: qora + moss, tugmalar avatar ortidan ketma-ket chiqadi ---------- */
+  .auth-profile .auth-avatar-btn{ position:relative; z-index:2; }
+  .auth-dropdown > :nth-child(1){ --i:0; }
+  .auth-dropdown > :nth-child(2){ --i:1; }
+  .auth-dropdown > :nth-child(3){ --i:2; }
+  .auth-dropdown > :nth-child(4){ --i:3; }
+  .auth-dropdown > :nth-child(5){ --i:4; }
+  .auth-dropdown > :nth-child(6){ --i:5; }
+  .auth-dropdown > *{
+    --from:calc(-1 * (26px + var(--i, 0) * 44px));     /* avatar markazigacha masofa */
+    box-sizing:border-box;
+    min-height:36px;
+    display:flex; align-items:center; justify-content:center;
+    margin:0;
+    padding:8px 12px;
+    border-radius:12px;
+    border:1px solid rgba(124,154,107,0.60);
+    background:linear-gradient(150deg, #0c110a, #000);
+    color:var(--ink);
+    box-shadow:0 8px 18px -8px rgba(0,0,0,0.9);
+    transform-origin:calc(100% - 18px) 50%;             /* avatar markazi */
+    opacity:0;
+    transform:translateY(var(--from)) scale(0.35);
+    /* yopilish: tez, teskari tartibda */
+    transition:
+      transform .18s cubic-bezier(.4,0,.8,.4) calc((5 - var(--i, 0)) * 25ms),
+      opacity .14s ease calc((5 - var(--i, 0)) * 25ms),
+      background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .auth-dropdown.open > *{
+    opacity:1;
+    transform:none;
+    /* ochilish: birin-ketin, joyiga biroz "o'tirib" joylashadi */
+    transition:
+      transform .46s cubic-bezier(.2,.9,.25,1.12) calc(var(--i, 0) * 85ms + 40ms),
+      opacity .22s ease calc(var(--i, 0) * 85ms + 40ms),
+      background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .auth-dropdown .auth-name{
+    font-family:'Shippori Mincho',serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .auth-dropdown .chat-toggle-btn,
+  .auth-dropdown .auth-notes-btn{
+    background:linear-gradient(150deg, #0c110a, #000);
+    border-color:rgba(124,154,107,0.60);
+    color:var(--ink);
+  }
+  .auth-dropdown .chat-toggle-btn svg{ color:var(--moss-soft); }
+  .auth-dropdown .auth-logout-btn{
+    background:linear-gradient(150deg, rgba(124,154,107,0.34), rgba(124,154,107,0.14));
+    border-color:var(--moss);
+    color:#dcebd2;
+  }
+  .auth-dropdown .chat-toggle-btn:active,
+  .auth-dropdown .auth-notes-btn:active,
+  .auth-dropdown .auth-logout-btn:active{ transform:scale(0.96); }
+  @media (prefers-reduced-motion: reduce){
+    .auth-dropdown > *,
+    .auth-dropdown.open > *{ transform:none; transition:opacity .2s ease; }
+  }
 
   /* ---------- SHAXSIY QAYDLAR (Google akkauntga bog'liq, Firestore'da saqlanadi) ---------- */
   .notes-overlay{
