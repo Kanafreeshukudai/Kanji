@@ -5547,26 +5547,34 @@
   }
 
   .ai-assist-typing .ai-assist-bubble{ padding:12px 15px; }
-  .ai-think{ display:inline-flex; align-items:center; line-height:0; perspective:110px; }
-  /* 3 ta moss nuqta bitta qatorda: 3D aylanadi, bir tekis to'xtab turadi, yana aylanadi */
+  .ai-think{ display:inline-flex; align-items:center; line-height:0; }
+  /* 3 ta moss nuqta: bir-biriga ergashib X/Y/Z o'qlari bo'yicha 3D aylanadi,
+     so'ng yana bir qatorga tizilib, biroz turadi va qaytadan boshlanadi */
   .ai-think-dots{
-    display:inline-flex; align-items:center; gap:7px;
-    height:14px; padding:0 2px;
-    transform-style:preserve-3d;
-    will-change:transform;
-    animation:aiDots3d 2.4s cubic-bezier(.65,0,.35,1) infinite;
+    position:relative;
+    display:block;
+    width:44px; height:20px;
+    perspective:120px;
   }
   .ai-think-dots i{
-    display:block;
+    position:absolute;
+    left:50%; top:50%;
     width:7px; height:7px;
+    margin:-3.5px 0 0 -3.5px;
     border-radius:50%;
     background:radial-gradient(circle at 35% 30%, #d3e6c3 0%, var(--moss-soft) 45%, var(--moss) 100%);
     box-shadow:0 0 8px rgba(147,177,127,.45);
+    transform:translateX(var(--dx));
+    will-change:transform;
+    animation:aiOrbit3d 2.8s cubic-bezier(.45,0,.55,1) infinite;
   }
-  @keyframes aiDots3d{
-    0%{ transform:rotateY(0deg); }
-    42%{ transform:rotateY(360deg); }
-    100%{ transform:rotateY(360deg); }
+  .ai-think-dots i:nth-child(1){ --dx:-13px; animation-delay:0s; }
+  .ai-think-dots i:nth-child(2){ --dx:0px;   animation-delay:.14s; }
+  .ai-think-dots i:nth-child(3){ --dx:13px;  animation-delay:.28s; }
+  @keyframes aiOrbit3d{
+    0%{ transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateX(var(--dx)) scale(1); }
+    25%{ transform:rotateX(200deg) rotateY(150deg) rotateZ(120deg) translateX(17px) scale(1.2); }
+    50%,100%{ transform:rotateX(360deg) rotateY(360deg) rotateZ(360deg) translateX(var(--dx)) scale(1); }
   }
 
   /* javob matni: so'zma-so'z */
@@ -5591,7 +5599,7 @@
   @keyframes aiCaretOut{ to{ opacity:0; } }
 
   @media (prefers-reduced-motion: reduce){
-    .ai-think-dots{ animation:none; }
+    .ai-think-dots i{ animation:none; }
     /* harakat kamaytirilgan qurilmada ham matn birdan chiqmaydi — faqat yumshoq fade */
     .ai-assist-msg{ animation:aiFadeOnly .25s ease both; }
     .ai-w{ animation:aiFadeOnly .45s ease both; }
