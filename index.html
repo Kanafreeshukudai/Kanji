@@ -5493,8 +5493,8 @@
     white-space:pre-wrap;
   }
   .ai-assist-msg.bot .ai-assist-bubble{
-    background:rgba(124,154,107,0.14);
-    border:1px solid rgba(147,177,127,0.32);
+    background:rgba(155,43,94,0.18);
+    border:1px solid rgba(196,73,127,0.4);
     color:var(--ink);
     border-bottom-left-radius:4px;
   }
@@ -5529,10 +5529,10 @@
   }
 
 
-  /* ---------- AI JAVOB ANIMATSIYASI (moss, minimalistik) ----------
-     1) Kutish: bitta ixcham bo'lakda 3 ta moss nuqta, ketma-ket "nafas" oladi.
-     2) Javob: so'zma-so'z paydo bo'ladi — yangi so'z moss rangda yonib,
-        asta oddiy matn rangiga o'tadi; oxirida nozik moss kursor turadi.
+  /* ---------- AI JAVOB ANIMATSIYASI (bordo, minimalistik) ----------
+     1) Kutish: bitta ixcham bo'lakda 3 ta bordo nuqta, ketma-ket "nafas" oladi.
+     2) Javob: so'zma-so'z paydo bo'ladi — yangi so'z bordo rangda yonib,
+        asta oddiy matn rangiga o'tadi; oxirida nozik bordo kursor turadi.
      Faqat opacity/transform/color — telefonda yengil. */
 
   .ai-assist-msg{ animation:aiMsgIn .34s cubic-bezier(.22,.8,.3,1) both; }
@@ -5548,7 +5548,7 @@
 
   .ai-assist-typing .ai-assist-bubble{ padding:12px 15px; }
   .ai-think{ display:inline-flex; align-items:center; line-height:0; perspective:120px; }
-  /* 3 ta moss nuqta: bir qatordan ketma-ket uchib chiqadi, aylana hosil qilib
+  /* 3 ta bordo nuqta: bir qatordan ketma-ket uchib chiqadi, aylana hosil qilib
      3D aylanadi, so'ng uchib kelib yana bir chiziqqa tekislanadi va takrorlanadi */
   .ai-think-dots{
     position:relative;
@@ -5563,8 +5563,8 @@
     width:7px; height:7px;
     margin:-3.5px 0 0 -3.5px;
     border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #d3e6c3 0%, var(--moss-soft) 45%, var(--moss) 100%);
-    box-shadow:0 0 8px rgba(147,177,127,.45);
+    background:radial-gradient(circle at 35% 30%, #f2a9c6 0%, #d4558a 45%, #9b2b5e 100%);
+    box-shadow:0 0 8px rgba(212,85,138,.5);
     --R:13px;
     transform:rotateZ(var(--a0)) translateX(var(--x0));
     will-change:transform;
@@ -5588,13 +5588,13 @@
     84%, 100%{ transform:rotateX(0deg) rotateY(0deg); }
   }
 
-  /* javob tugagach: matn ortida bir marta paydo bo'lib so'nadigan yumshoq moss aura */
+  /* javob tugagach: matn ortida bir marta paydo bo'lib so'nadigan yumshoq bordo aura */
   .ai-assist-bubble.ai-aura{ position:relative; z-index:0; }
   .ai-assist-bubble.ai-aura::after{
     content:"";
     position:absolute; inset:-4px;
     border-radius:22px;
-    background:radial-gradient(ellipse at center, rgba(147,177,127,.5) 0%, rgba(124,154,107,.28) 55%, rgba(124,154,107,0) 100%);
+    background:radial-gradient(ellipse at center, rgba(212,85,138,.5) 0%, rgba(155,43,94,.3) 55%, rgba(155,43,94,0) 100%);
     filter:blur(12px);
     z-index:-1;
     pointer-events:none;
@@ -5611,8 +5611,8 @@
   /* javob matni: so'zma-so'z */
   .ai-w{ animation:aiWordIn .6s ease-out both; }
   @keyframes aiWordIn{
-    0%{ opacity:0; color:var(--moss-soft); }
-    35%{ opacity:1; color:var(--moss-soft); }
+    0%{ opacity:0; color:#d4558a; }
+    35%{ opacity:1; color:#d4558a; }
     100%{ opacity:1; color:var(--ink); }
   }
   .ai-caret{
@@ -5621,8 +5621,8 @@
     margin-left:1px;
     vertical-align:-.16em;
     border-radius:1px;
-    background:var(--moss-soft);
-    box-shadow:0 0 8px rgba(147,177,127,.6);
+    background:#d4558a;
+    box-shadow:0 0 8px rgba(212,85,138,.6);
     animation:aiCaretBlink 1s ease-in-out infinite;
   }
   .ai-caret.done{ animation:aiCaretOut .3s ease forwards; }
