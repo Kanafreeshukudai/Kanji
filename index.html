@@ -5547,14 +5547,15 @@
   }
 
   .ai-assist-typing .ai-assist-bubble{ padding:12px 15px; }
-  .ai-think{ display:inline-flex; align-items:center; line-height:0; }
-  /* 3 ta moss nuqta: bir-biriga ergashib X/Y/Z o'qlari bo'yicha 3D aylanadi,
-     so'ng yana bir qatorga tizilib, biroz turadi va qaytadan boshlanadi */
+  .ai-think{ display:inline-flex; align-items:center; line-height:0; perspective:120px; }
+  /* 3 ta moss nuqta: bir qatordan ketma-ket uchib chiqadi, aylana hosil qilib
+     3D aylanadi, so'ng uchib kelib yana bir chiziqqa tekislanadi va takrorlanadi */
   .ai-think-dots{
     position:relative;
     display:block;
-    width:44px; height:20px;
-    perspective:120px;
+    width:44px; height:26px;
+    animation:aiRingTilt 3.6s cubic-bezier(.45,0,.55,1) infinite;
+    will-change:transform;
   }
   .ai-think-dots i{
     position:absolute;
@@ -5564,18 +5565,48 @@
     border-radius:50%;
     background:radial-gradient(circle at 35% 30%, #d3e6c3 0%, var(--moss-soft) 45%, var(--moss) 100%);
     box-shadow:0 0 8px rgba(147,177,127,.45);
-    transform:translateX(var(--dx));
+    --R:13px;
+    transform:rotateZ(var(--a0)) translateX(var(--x0));
     will-change:transform;
-    animation:aiOrbit3d 2.8s cubic-bezier(.45,0,.55,1) infinite;
+    animation:aiRingOrbit 3.6s infinite;
   }
-  .ai-think-dots i:nth-child(1){ --dx:-13px; animation-delay:0s; }
-  .ai-think-dots i:nth-child(2){ --dx:0px;   animation-delay:.14s; }
-  .ai-think-dots i:nth-child(3){ --dx:13px;  animation-delay:.28s; }
-  @keyframes aiOrbit3d{
-    0%{ transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateX(var(--dx)) scale(1); }
-    25%{ transform:rotateX(200deg) rotateY(150deg) rotateZ(120deg) translateX(17px) scale(1.2); }
-    50%,100%{ transform:rotateX(360deg) rotateY(360deg) rotateZ(360deg) translateX(var(--dx)) scale(1); }
+  .ai-think-dots i:nth-child(1){ --a0:180deg; --x0:13px; --d:120deg; animation-delay:0s; }
+  .ai-think-dots i:nth-child(2){ --a0:0deg;   --x0:0px;  --d:60deg;  animation-delay:.12s; }
+  .ai-think-dots i:nth-child(3){ --a0:0deg;   --x0:13px; --d:180deg; animation-delay:.24s; }
+  @keyframes aiRingOrbit{
+    0%, 8%{ transform:rotateZ(var(--a0)) translateX(var(--x0)); animation-timing-function:cubic-bezier(.4,0,.2,1); }
+    28%{ transform:rotateZ(calc(var(--a0) + var(--d))) translateX(var(--R)); animation-timing-function:linear; }
+    66%{ transform:rotateZ(calc(var(--a0) + var(--d) + 480deg)) translateX(var(--R)); animation-timing-function:cubic-bezier(.4,0,.2,1); }
+    84%, 100%{ transform:rotateZ(calc(var(--a0) + 720deg)) translateX(var(--x0)); }
   }
+  /* aylana tekisligi 3D da yotadi va aylanayotganda biroz tebranadi; chiziq holatida tekis */
+  @keyframes aiRingTilt{
+    0%, 8%{ transform:rotateX(0deg) rotateY(0deg); }
+    28%{ transform:rotateX(62deg) rotateY(-18deg); }
+    47%{ transform:rotateX(58deg) rotateY(24deg); }
+    66%{ transform:rotateX(64deg) rotateY(-14deg); }
+    84%, 100%{ transform:rotateX(0deg) rotateY(0deg); }
+  }
+
+  /* javob tugagach: matn ortida bir marta paydo bo'lib so'nadigan yumshoq moss aura */
+  .ai-assist-bubble.ai-aura{ position:relative; z-index:0; }
+  .ai-assist-bubble.ai-aura::after{
+    content:"";
+    position:absolute; inset:-4px;
+    border-radius:22px;
+    background:radial-gradient(ellipse at center, rgba(147,177,127,.5) 0%, rgba(124,154,107,.28) 55%, rgba(124,154,107,0) 100%);
+    filter:blur(12px);
+    z-index:-1;
+    pointer-events:none;
+    opacity:0;
+    animation:aiAura 1.6s ease-out both;
+  }
+  @keyframes aiAura{
+    0%{ opacity:0; transform:scale(.97); }
+    35%{ opacity:1; transform:scale(1.03); }
+    100%{ opacity:0; transform:scale(1.07); }
+  }
+  @keyframes aiAuraFade{ 0%{ opacity:0; } 35%{ opacity:.9; } 100%{ opacity:0; } }
 
   /* javob matni: so'zma-so'z */
   .ai-w{ animation:aiWordIn .6s ease-out both; }
@@ -5599,11 +5630,12 @@
   @keyframes aiCaretOut{ to{ opacity:0; } }
 
   @media (prefers-reduced-motion: reduce){
-    .ai-think-dots i{ animation:none; }
+    .ai-think-dots, .ai-think-dots i{ animation:none; }
     /* harakat kamaytirilgan qurilmada ham matn birdan chiqmaydi — faqat yumshoq fade */
     .ai-assist-msg{ animation:aiFadeOnly .25s ease both; }
     .ai-w{ animation:aiFadeOnly .45s ease both; }
     .ai-caret{ animation:none; }
+    .ai-assist-bubble.ai-aura::after{ animation-name:aiAuraFade; }
     .ai-assist-msg.leaving{ animation:aiFadeOut .2s ease forwards; }
     @keyframes aiFadeOnly{ from{ opacity:0; } to{ opacity:1; } }
     @keyframes aiFadeOut{ to{ opacity:0; } }
@@ -11718,6 +11750,9 @@
             setTimeout(tick, delay);
           } else {
             caret.classList.add('done');
+            // javob to'liq chiqib bo'lgach — matn ortida minimalistik moss aura bir paydo bo'lib so'nadi
+            bubble.classList.add('ai-aura');
+            setTimeout(()=>{ if(bubble.isConnected) bubble.classList.remove('ai-aura'); }, 1700);
             // animatsiyalar tugagach DOM'ni yengillashtiramiz (bitta matn tuguniga yig'amiz)
             setTimeout(()=>{ if(bubble.isConnected) bubble.textContent = text; }, 800);
             resolve(row);
