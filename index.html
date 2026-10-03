@@ -816,11 +816,12 @@
     height:36px;
     margin-right:8px;
     border-radius:50%;
-    border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg);
+    border:1px solid rgba(52,211,153,0.50);
+    background:linear-gradient(150deg, rgba(16,217,138,0.20), rgba(16,217,138,0.08));
     backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    color:var(--moss-soft);
+    color:#34d399;
+    box-shadow:0 0 12px rgba(52,211,153,0.28), inset 0 1px 0 rgba(200,255,230,0.14);
     cursor:pointer;
     position:relative;
     transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
@@ -834,8 +835,8 @@
     height:15px;
     padding:0 3px;
     border-radius:999px;
-    background:var(--moss);
-    color:#0d1108;
+    background:#10d98a;
+    color:#04281a;
     font-size:9.5px;
     font-weight:800;
     line-height:15px;
@@ -5393,8 +5394,9 @@
     gap:11px;
     padding:9px 10px;
     border-radius:14px;
-    background:var(--glass-bg);
-    border:1px solid var(--glass-border-soft);
+    background:#0f1114;
+    border:1px solid #3a3f48;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 8px -3px rgba(0,0,0,0.6);
   }
   .presence-avatar{
     position:relative;
@@ -5415,11 +5417,11 @@
     right:-2px; bottom:-2px;
     width:11px; height:11px;
     border-radius:50%;
-    border:2px solid var(--panel-1);
+    border:2px solid #0f1114;
     background:var(--ink-faint);
     z-index:2;
   }
-  .presence-dot.online{background:var(--moss-soft); box-shadow:0 0 6px rgba(147,177,127,0.7);}
+  .presence-dot.online{background:#34d399; box-shadow:0 0 6px rgba(52,211,153,0.75);}
   .presence-info{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px;}
   .presence-name{
     font-size:13px;
@@ -5430,7 +5432,7 @@
     text-overflow:ellipsis;
   }
   .presence-status{font-size:11px; color:var(--ink-faint);}
-  .presence-status.online{color:var(--moss-soft);}
+  .presence-status.online{color:#34d399;}
   .presence-owner-badge{
     flex:none;
     align-self:center;
