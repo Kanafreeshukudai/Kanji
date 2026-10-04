@@ -3219,6 +3219,10 @@
 
   /* ---------- QUIZ ---------- */
   .quiz-wrap{width:100%;}
+  /* Kompyuterda viktorina (savol, progress, javob tugmalari) tepadagi tugmalar
+     (Bilganlarim / Hammasi / Ortga) bilan bir xil tor ustunda turadi — mobil
+     ko'rinishdagidek; ekran kengaysa ham cho'zilib ketmaydi */
+  #view-quiz .quiz-wrap{ max-width:480px; margin-left:auto; margin-right:auto; }
   .quiz-progress{
     display:flex; justify-content:space-between; align-items:center;
     font-size:12.5px; color:var(--ink-soft); margin-bottom:14px;
@@ -8004,8 +8008,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", 60:"60-kun", 61:"61-kun", 62:"62-kun", 63:"63-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -8723,7 +8727,7 @@
     {id:"atarashiikanji33", day:33, group:"新", kanji:"新", romaji:"atarashii", type:"kun'yomi", reading:"新しい(atarashii) — yakka kanji", otherReadings:"on: シン(shin) · kun: あたら-しい(atarashii), あら-た(arata), にい(nii)", uz:"yangi"},
     {id:"atarashii33", day:33, group:"新", kanji:"新しい", romaji:"atarashii", type:"kun'yomi", reading:"新しい(atarashii)", uz:"yangi"},
     {id:"shinbun33", day:33, group:"新", kanji:"新聞", romaji:"shinbun", type:"on + on", reading:"新(shin) + 聞(bun)", uz:"gazeta"},
-    {id:"shinkansen33", day:33, group:"新", kanji:"新幹線", romaji:"shinkansen", type:"on + on + on", reading:"新(shin) + 幹(kan) + 線(sen)", uz:"tez yuradigan poezd"},
+    {id:"shinkansen33", day:33, group:"新", kanji:"新幹線", romaji:"shinkansen", type:"on + on + on", reading:"新(shin) + 幹(kan) + 線(sen)", uz:"tez yuradigan poyezd"},
     {id:"niigata33", day:33, group:"新", kanji:"新潟", romaji:"Niigata", type:"kun + kun", reading:"新(nii) + 潟(gata)", uz:"Niigata (prefektura)"},
 
     {id:"oyakanji33", day:33, group:"親", kanji:"親", romaji:"oya", type:"kun'yomi", reading:"親(oya) — yakka kanji", otherReadings:"on: シン(shin) · kun: おや(oya), した-しい(shitashii)", uz:"ota-ona, qarindoshlik"},
@@ -9313,6 +9317,102 @@
     {id:"youji59", day:59, group:"事", kanji:"用事", romaji:"youji", type:"on + on", reading:"用(you) + 事(ji)", uz:"biznes, kelishuv"},
     {id:"jiko59", day:59, group:"事", kanji:"事故", romaji:"jiko", type:"on + on", reading:"事(ji) + 故(ko)", uz:"baxtsiz hodisa"},
     {id:"daiji59", day:59, group:"事", kanji:"大事な", romaji:"daiji na", type:"on + on + —", reading:"大(dai) + 事(ji) + な", uz:"muhim"},
+
+    // ---- 60-kun ----
+    {id:"ginkanji60", day:60, group:"銀", kanji:"銀", romaji:"gin", type:"on'yomi", reading:"銀(gin) — yakka kanji", otherReadings:"on: ギン(gin)", uz:"kumush"},
+    {id:"ginkou60", day:60, group:"銀", kanji:"銀行", romaji:"ginkou", type:"on + on", reading:"銀(gin) + 行(kou)", uz:"bank"},
+    {id:"giniro60", day:60, group:"銀", kanji:"銀色", romaji:"giniro", type:"on + kun", reading:"銀(gin) + 色(iro)", uz:"kumush rang"},
+    {id:"ginza60", day:60, group:"銀", kanji:"銀座", romaji:"ginza", type:"on + on", reading:"銀(gin) + 座(za)", uz:"Ginza(joy nomi)"},
+
+    {id:"ikanji60", day:60, group:"医", kanji:"医", romaji:"i", type:"on'yomi", reading:"医(i) — yakka kanji", otherReadings:"on: イ(i)", uz:"tibbiy, shifokor"},
+    {id:"isha60", day:60, group:"医", kanji:"医者", romaji:"isha", type:"on + on", reading:"医(i) + 者(sha)", uz:"shifokor"},
+    {id:"iin60", day:60, group:"医", kanji:"医院", romaji:"iin", type:"on + on", reading:"医(i) + 院(in)", uz:"kasalxona, shifoxona"},
+    {id:"igaku60", day:60, group:"医", kanji:"医学", romaji:"igaku", type:"on + on", reading:"医(i) + 学(gaku)", uz:"tibbiyot fani"},
+    {id:"iryouhi60", day:60, group:"医", kanji:"医療費", romaji:"iryouhi", type:"on + on + on", reading:"医(i) + 療(ryou) + 費(hi)", uz:"tibbiy to'lovlar"},
+
+    {id:"shakanji60", day:60, group:"者", kanji:"者", romaji:"sha", type:"on'yomi", reading:"者(sha) — yakka kanji", otherReadings:"on: シャ(sha) · kun: もの(mono)", uz:"odam"},
+    {id:"ishasha60", day:60, group:"者", kanji:"医者", romaji:"isha", type:"on + on", reading:"医(i) + 者(sha)", uz:"shifokor"},
+    {id:"koureisha60", day:60, group:"者", kanji:"高齢者", romaji:"koureisha", type:"on + on + on", reading:"高(kou) + 齢(rei) + 者(sha)", uz:"keksa odamlar, qariyalar"},
+    {id:"kagakusha60", day:60, group:"者", kanji:"科学者", romaji:"kagakusha", type:"on + on + on", reading:"科(ka) + 学(gaku) + 者(sha)", uz:"olim"},
+    {id:"wakamono60", day:60, group:"者", kanji:"若者", romaji:"wakamono", type:"kun + kun", reading:"若(waka) + 者(mono)", uz:"yoshlar"},
+    {id:"daisansha60", day:60, group:"者", kanji:"第三者", romaji:"daisansha", type:"on + on + on", reading:"第(dai) + 三(san) + 者(sha)", uz:"uchinchi shaxs, begona"},
+
+    {id:"yakanji60", day:60, group:"屋", kanji:"屋", romaji:"ya", type:"kun'yomi", reading:"屋(ya) — yakka kanji", otherReadings:"kun: や(ya) · on: オク(oku)", uz:"tom, do'kon, uy"},
+    {id:"honya60", day:60, group:"屋", kanji:"本屋", romaji:"honya", type:"on + kun", reading:"本(hon) + 屋(ya)", uz:"kitob do'koni"},
+    {id:"hanaya60", day:60, group:"屋", kanji:"花屋", romaji:"hanaya", type:"kun + kun", reading:"花(hana) + 屋(ya)", uz:"gul do'koni"},
+    {id:"heya60", day:60, group:"屋", kanji:"部屋", romaji:"heya", type:"on + kun", reading:"部(he) + 屋(ya)", uz:"bir xona"},
+    {id:"yane60", day:60, group:"屋", kanji:"屋根", romaji:"yane", type:"kun + kun", reading:"屋(ya) + 根(ne)", uz:"tom"},
+    {id:"okujou60", day:60, group:"屋", kanji:"屋上", romaji:"okujou", type:"on + on", reading:"屋(oku) + 上(jou)", uz:"uyingizda"},
+
+    // ---- 61-kun ----
+    {id:"sankanji61", day:61, group:"産", kanji:"産", romaji:"san", type:"on'yomi", reading:"産(san) — yakka kanji", otherReadings:"on: サン(san) · kun: う-む(umu), う-まれる(umareru)", uz:"tug'dirmoq, mahsulot"},
+    {id:"sangyou61", day:61, group:"産", kanji:"産業", romaji:"sangyou", type:"on + on", reading:"産(san) + 業(gyou)", uz:"sanoat"},
+    {id:"seisan61", day:61, group:"産", kanji:"生産する", romaji:"seisan suru", type:"on + on + —", reading:"生(sei) + 産(san) + する", uz:"ishlab chiqarish"},
+    {id:"sanchi61", day:61, group:"産", kanji:"産地", romaji:"sanchi", type:"on + on", reading:"産(san) + 地(chi)", uz:"yetishtiriladigan hudud"},
+    {id:"umu61", day:61, group:"産", kanji:"産む", romaji:"umu", type:"kun'yomi", reading:"産(u) + む", uz:"tug'moq, dunyoga keltirmoq"},
+    {id:"omiyage61", day:61, group:"産", kanji:"お土産", romaji:"omiyage", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"suvenier, sovg'a"},
+
+    {id:"gyoukanji61", day:61, group:"業", kanji:"業", romaji:"gyou", type:"on'yomi", reading:"業(gyou) — yakka kanji", otherReadings:"on: ギョウ(gyou), ゴウ(gou) · kun: わざ(waza)", uz:"ish, biznes"},
+    {id:"gyousangyou61", day:61, group:"業", kanji:"産業", romaji:"sangyou", type:"on + on", reading:"産(san) + 業(gyou)", uz:"sanoat"},
+    {id:"nougyou61", day:61, group:"業", kanji:"農業", romaji:"nougyou", type:"on + on", reading:"農(nou) + 業(gyou)", uz:"qishloq xo'jaligi"},
+    {id:"shokugyou61", day:61, group:"業", kanji:"職業", romaji:"shokugyou", type:"on + on", reading:"職(shoku) + 業(gyou)", uz:"kasb"},
+    {id:"sotsugyou61", day:61, group:"業", kanji:"卒業", romaji:"sotsugyou", type:"on + on", reading:"卒(sotsu) + 業(gyou)", uz:"bitirish"},
+    {id:"gyoumu61", day:61, group:"業", kanji:"業務", romaji:"gyoumu", type:"on + on", reading:"業(gyou) + 務(mu)", uz:"vazifa, ish"},
+
+    {id:"shakanji61", day:61, group:"社", kanji:"社", romaji:"sha", type:"on'yomi", reading:"社(sha) — yakka kanji", otherReadings:"on: シャ(sha), ジャ(ja) · kun: やしろ(yashiro)", uz:"ziyoratgoh, kompaniya"},
+    {id:"kaisha61", day:61, group:"社", kanji:"会社", romaji:"kaisha", type:"on + on", reading:"会(kai) + 社(sha)", uz:"kompaniya"},
+    {id:"shakai61", day:61, group:"社", kanji:"社会", romaji:"shakai", type:"on + on", reading:"社(sha) + 会(kai)", uz:"jamiyat"},
+    {id:"shachou61", day:61, group:"社", kanji:"社長", romaji:"shachou", type:"on + on", reading:"社(sha) + 長(chou)", uz:"kompaniya prezidenti, direktor, rahbar"},
+    {id:"jinja61", day:61, group:"社", kanji:"神社", romaji:"jinja", type:"on + on", reading:"神(jin) + 社(ja)", uz:"ibodatxona"},
+
+    {id:"joukanji61", day:61, group:"乗", kanji:"乗", romaji:"jou", type:"on'yomi", reading:"乗(jou) — yakka kanji", otherReadings:"on: ジョウ(jou) · kun: の-る(noru), の-せる(noseru)", uz:"minish"},
+    {id:"noru61", day:61, group:"乗", kanji:"乗る", romaji:"noru", type:"kun'yomi", reading:"乗(no) + る", uz:"minmoq"},
+    {id:"joukyaku61", day:61, group:"乗", kanji:"乗客", romaji:"joukyaku", type:"on + on", reading:"乗(jou) + 客(kyaku)", uz:"yo'lovchi"},
+    {id:"jousha61", day:61, group:"乗", kanji:"乗車する", romaji:"jousha suru", type:"on + on + —", reading:"乗(jou) + 車(sha) + する", uz:"poyezdga, avtobusga va hokazolarga chiqish"},
+    {id:"joushaken61", day:61, group:"乗", kanji:"乗車券", romaji:"joushaken", type:"on + on + on", reading:"乗(jou) + 車(sha) + 券(ken)", uz:"chipta"},
+
+    // ---- 62-kun ----
+    {id:"koukanji62", day:62, group:"降", kanji:"降", romaji:"kou", type:"on'yomi", reading:"降(kou) — yakka kanji", otherReadings:"on: コウ(kou) · kun: お-りる(oriru), ふ-る(furu), お-ろす(orosu)", uz:"tushish"},
+    {id:"oriru62", day:62, group:"降", kanji:"降りる", romaji:"oriru", type:"kun'yomi", reading:"降(o) + りる", uz:"tushmoq"},
+    {id:"furu62", day:62, group:"降", kanji:"降る", romaji:"furu", type:"kun'yomi", reading:"降(fu) + る", uz:"yog'moq (yomg'ir, qor va boshqalar)"},
+
+    {id:"tenkanji62", day:62, group:"転", kanji:"転", romaji:"ten", type:"on'yomi", reading:"転(ten) — yakka kanji", otherReadings:"on: テン(ten) · kun: ころ-ぶ(korobu)", uz:"rulon, burilish"},
+    {id:"korobu62", day:62, group:"転", kanji:"転ぶ", romaji:"korobu", type:"kun'yomi", reading:"転(koro) + ぶ", uz:"pastga tushmoq"},
+    {id:"unten62", day:62, group:"転", kanji:"運転", romaji:"unten", type:"on + on", reading:"運(un) + 転(ten)", uz:"haydash"},
+    {id:"jitensha62", day:62, group:"転", kanji:"自転車", romaji:"jitensha", type:"on + on + on", reading:"自(ji) + 転(ten) + 車(sha)", uz:"velosiped"},
+
+    {id:"hatsukanji62", day:62, group:"発", kanji:"発", romaji:"hatsu", type:"on'yomi", reading:"発(hatsu) — yakka kanji", otherReadings:"on: ハツ(hatsu), ハッ(hat), パツ(patsu)", uz:"masala, boshlash"},
+    {id:"shuppatsu62", day:62, group:"発", kanji:"出発する", romaji:"shuppatsu suru", type:"on + on + —", reading:"出(shu) + 発(ppatsu) + する", uz:"jo'nab-ketish"},
+    {id:"hatsubai62", day:62, group:"発", kanji:"発売", romaji:"hatsubai", type:"on + on", reading:"発(hatsu) + 売(bai)", uz:"sotuvga chiqarish"},
+    {id:"hatsumei62", day:62, group:"発", kanji:"発明する", romaji:"hatsumei suru", type:"on + on + —", reading:"発(hatsu) + 明(mei) + する", uz:"ixtiro qilish"},
+    {id:"hassha62", day:62, group:"発", kanji:"発車", romaji:"hassha", type:"on + on", reading:"発(has) + 車(sha)", uz:"jo'nash, yurish (poyezd, mashina)"},
+    {id:"hatsuon62", day:62, group:"発", kanji:"発音", romaji:"hatsuon", type:"on + on", reading:"発(hatsu) + 音(on)", uz:"talaffuz"},
+
+    {id:"chakukanji62", day:62, group:"着", kanji:"着", romaji:"chaku", type:"on'yomi", reading:"着(chaku) — yakka kanji", otherReadings:"on: チャク(chaku) · kun: つ-く(tsuku), き-る(kiru)", uz:"yetib kelish, kiyish"},
+    {id:"tsuku62", day:62, group:"着", kanji:"着く", romaji:"tsuku", type:"kun'yomi", reading:"着(tsu) + く", uz:"yetib kelish"},
+    {id:"kiru62", day:62, group:"着", kanji:"着る", romaji:"kiru", type:"kun'yomi", reading:"着(ki) + る", uz:"kiymoq"},
+    {id:"kimono62", day:62, group:"着", kanji:"着物", romaji:"kimono", type:"kun + kun", reading:"着(ki) + 物(mono)", uz:"kimono"},
+    {id:"touchaku62", day:62, group:"着", kanji:"到着", romaji:"touchaku", type:"on + on", reading:"到(tou) + 着(chaku)", uz:"yetib kelish"},
+    {id:"shichaku62", day:62, group:"着", kanji:"試着する", romaji:"shichaku suru", type:"on + on + —", reading:"試(shi) + 着(chaku) + する", uz:"sinab ko'rmoq"},
+
+    // ---- 63-kun ----
+    {id:"haru63", day:63, group:"春", kanji:"春", romaji:"haru", type:"kun'yomi", reading:"春(haru) — yakka kanji", otherReadings:"kun: はる(haru) · on: シュン(shun)", uz:"bahor"},
+    {id:"haruyasumi63", day:63, group:"春", kanji:"春休み", romaji:"haruyasumi", type:"kun + kun + —", reading:"春(haru) + 休(yasu) + み", uz:"Bahorgi ta'til"},
+    {id:"shunbun63", day:63, group:"春", kanji:"春分の日", romaji:"shunbun no hi", type:"on + on + — + kun", reading:"春(shun) + 分(bun) + の + 日(hi)", uz:"bahorgi tengkunlik kuni"},
+    {id:"seishun63", day:63, group:"春", kanji:"青春", romaji:"seishun", type:"on + on", reading:"青(sei) + 春(shun)", uz:"yoshlar"},
+
+    {id:"natsu63", day:63, group:"夏", kanji:"夏", romaji:"natsu", type:"kun'yomi", reading:"夏(natsu) — yakka kanji", otherReadings:"kun: なつ(natsu) · on: カ(ka), ゲ(ge)", uz:"yoz"},
+    {id:"natsuyasumi63", day:63, group:"夏", kanji:"夏休み", romaji:"natsuyasumi", type:"kun + kun + —", reading:"夏(natsu) + 休(yasu) + み", uz:"yozgi ta'tillar"},
+    {id:"reika63", day:63, group:"夏", kanji:"冷夏", romaji:"reika", type:"on + on", reading:"冷(rei) + 夏(ka)", uz:"salqin yoz"},
+
+    {id:"aki63", day:63, group:"秋", kanji:"秋", romaji:"aki", type:"kun'yomi", reading:"秋(aki) — yakka kanji", otherReadings:"kun: あき(aki) · on: シュウ(shuu)", uz:"kuz, tushish"},
+    {id:"akikaze63", day:63, group:"秋", kanji:"秋風", romaji:"akikaze", type:"kun + kun", reading:"秋(aki) + 風(kaze)", uz:"kuzgi shabada"},
+    {id:"shuubun63", day:63, group:"秋", kanji:"秋分の日", romaji:"shuubun no hi", type:"on + on + — + kun", reading:"秋(shuu) + 分(bun) + の + 日(hi)", uz:"kuzgi tengkunlik kuni"},
+
+    {id:"fuyu63", day:63, group:"冬", kanji:"冬", romaji:"fuyu", type:"kun'yomi", reading:"冬(fuyu) — yakka kanji", otherReadings:"kun: ふゆ(fuyu) · on: トウ(tou)", uz:"qish"},
+    {id:"fuyuyasumi63", day:63, group:"冬", kanji:"冬休み", romaji:"fuyuyasumi", type:"kun + kun + —", reading:"冬(fuyu) + 休(yasu) + み", uz:"qishki ta'tillar"},
+    {id:"dantou63", day:63, group:"冬", kanji:"暖冬", romaji:"dantou", type:"on + on", reading:"暖(dan) + 冬(tou)", uz:"iliq qish"},
+    {id:"toumin63", day:63, group:"冬", kanji:"冬眠", romaji:"toumin", type:"on + on", reading:"冬(tou) + 眠(min)", uz:"qishki uyqu, uyqu holati"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
