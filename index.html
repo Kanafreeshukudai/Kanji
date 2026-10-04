@@ -1380,14 +1380,16 @@
     display:flex;
     align-items:center;
     gap:8px;
-    border:1px solid var(--glass-border);
-    background:var(--glass-bg-strong);
+    /* kulrang emas: qidiruv tugmasi (active) bilan bir xil iliq accent tusi; yashil ham emas */
+    border:1px solid rgba(229,135,111,0.55);
+    background:linear-gradient(165deg, rgba(217,105,79,0.22), rgba(217,105,79,0.10));
+    box-shadow:0 0 0 3px rgba(217,105,79,0.10);
     backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     border-radius:14px;
     padding:9px 12px;
   }
-  .search-input-row svg{width:15px; height:15px; flex-shrink:0; color:var(--ink-faint);}
+  .search-input-row svg{width:15px; height:15px; flex-shrink:0; color:var(--accent-soft);}
   #searchInput{
     flex:1;
     min-width:0;
@@ -1398,7 +1400,7 @@
     font-family:'Zen Maru Gothic', sans-serif;
     font-size:14.5px;
   }
-  #searchInput::placeholder{color:var(--ink-faint);}
+  #searchInput::placeholder{color:rgba(236,231,220,0.5);}
   .search-clear-x{
     flex-shrink:0;
     width:20px; height:20px;
@@ -1430,6 +1432,8 @@
     font-size:12.5px;
     padding:14px 4px 6px;
   }
+  /* maydon ostidagi ko'rsatma yozuv: saytning moss rangida */
+  .search-hint{ color:var(--moss); }
   .search-result-item{
     border:1px solid var(--glass-border-soft);
     background:rgba(255,255,255,0.05);
@@ -1543,7 +1547,28 @@
   @media (prefers-reduced-motion: reduce){
     .known-banner.pulse, .known-banner.pulse::before{ animation:none; }
   }
-  .known-banner-icon{font-size:16px;}
+  .known-banner-icon{font-size:16px; display:inline-block; transform-origin:50% 85%; will-change:transform;}
+  /* Emoji animatsiyasi FAQAT tugma bosilganda (JS `.icon-anim` qo'shadi, tugagach olib tashlaydi) */
+  @keyframes knownIconSway{
+    0%{ transform:rotate(0) scale(1); }
+    18%{ transform:rotate(-24deg) scale(1.35); }
+    40%{ transform:rotate(20deg) scale(1.3); }
+    62%{ transform:rotate(-12deg) scale(1.15); }
+    82%{ transform:rotate(6deg) scale(1.05); }
+    100%{ transform:rotate(0) scale(1); }
+  }
+  @keyframes allIconHop{
+    0%{ transform:translateY(0) rotateY(0) scale(1); }
+    30%{ transform:translateY(-7px) rotateY(180deg) scale(1.35); }
+    55%{ transform:translateY(0) rotateY(360deg) scale(0.92); }
+    75%{ transform:translateY(-2px) rotateY(360deg) scale(1.1); }
+    100%{ transform:translateY(0) rotateY(360deg) scale(1); }
+  }
+  .known-banner:not(.all-banner) .known-banner-icon.icon-anim{ animation:knownIconSway .65s cubic-bezier(.3,.8,.3,1); }
+  .all-banner .known-banner-icon.icon-anim{ animation:allIconHop .65s cubic-bezier(.3,.8,.3,1); }
+  @media (prefers-reduced-motion: reduce){
+    .known-banner .known-banner-icon.icon-anim{ animation:none !important; }
+  }
   .known-banner-badge{
     display:inline-flex;
     align-items:center;
@@ -3660,11 +3685,26 @@
   .quiz-result .big-em{font-size:46px;}
   .quiz-result h2{font-family:'Shippori Mincho',serif; font-size:23px; margin:10px 0 4px; color:var(--ink);}
   .quiz-result p{color:var(--ink-soft); font-size:14px;}
+  /* Natija tugmalari (Xatolarni takrorlash / Qayta boshlash / Qaytish):
+     "Hammasi" bo'limidagi pastki panel kabi `position:fixed` — xatolar ro'yxati
+     scroll qilinganda tugmalar ekran pastida qotib turadi, ro'yxat ularning orqasidan o'tadi. */
+  .quiz-result{ padding-bottom:calc(200px + env(safe-area-inset-bottom, 0px)); }
   .quiz-result-actions{
+    position:fixed;
+    left:0; right:0;
+    bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+    margin:0 auto;
+    width:min(480px, calc(100% - 24px));
+    z-index:40;
+    isolation:isolate;
     display:flex;
     flex-direction:column;
     gap:10px;
-    margin-top:18px;
+    padding:10px;
+    background:var(--bg-1);
+    border:1px solid var(--glass-border-soft);
+    border-radius:22px;
+    box-shadow:0 -10px 30px rgba(0,0,0,0.75);
   }
   .quiz-result button{
     margin-top:0;
@@ -7964,8 +8004,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -9178,6 +9218,101 @@
     {id:"butakanji55", day:55, group:"豚", kanji:"豚", romaji:"buta", type:"kun'yomi", reading:"豚(buta) — yakka kanji", otherReadings:"kun: ぶた(buta) · on: トン(ton)", uz:"cho'chqa"},
     {id:"butaniku55", day:55, group:"豚", kanji:"豚肉", romaji:"butaniku", type:"kun + on", reading:"豚(buta) + 肉(niku)", uz:"cho'chqa go'shti"},
     {id:"tonkatsu55", day:55, group:"豚", kanji:"豚カツ", romaji:"tonkatsu", type:"on + —", reading:"豚(ton) + カツ", uz:"cho'chqa go'shti kotleti"},
+
+    // ---- 56-kun ----
+    {id:"setsukanji56", day:56, group:"説", kanji:"説", romaji:"setsu", type:"on'yomi", reading:"説(setsu) — yakka kanji", otherReadings:"on: セツ(setsu), ゼイ(zei) · kun: と-く(toku)", uz:"nazariya, tushuntirmoq"},
+    {id:"setsumei56", day:56, group:"説", kanji:"説明する", romaji:"setsumei suru", type:"on + on + —", reading:"説(setsu) + 明(mei) + する", uz:"tushuntirish"},
+    {id:"shousetsu56", day:56, group:"説", kanji:"小説", romaji:"shousetsu", type:"on + on", reading:"小(shou) + 説(setsu)", uz:"roman, qissa, hikoya"},
+
+    {id:"keikanji56", day:56, group:"計", kanji:"計", romaji:"kei", type:"on'yomi", reading:"計(kei) — yakka kanji", otherReadings:"on: ケイ(kei) · kun: はか-る(hakaru)", uz:"o'lchov"},
+    {id:"tokei56", day:56, group:"計", kanji:"時計", romaji:"tokei", type:"on + on", reading:"時(to) + 計(kei)", uz:"soat"},
+    {id:"keikaku56", day:56, group:"計", kanji:"計画する", romaji:"keikaku suru", type:"on + on + —", reading:"計(kei) + 画(kaku) + する", uz:"rejalashtirish"},
+    {id:"taionkei56", day:56, group:"計", kanji:"体温計", romaji:"taionkei", type:"on + on + on", reading:"体(tai) + 温(on) + 計(kei)", uz:"termometr"},
+
+    {id:"byoukanji56", day:56, group:"病", kanji:"病", romaji:"byou", type:"on'yomi", reading:"病(byou) — yakka kanji", otherReadings:"on: ビョウ(byou), ヘイ(hei) · kun: や-む(yamu), やまい(yamai)", uz:"kasal"},
+    {id:"byouki56", day:56, group:"病", kanji:"病気", romaji:"byouki", type:"on + on", reading:"病(byou) + 気(ki)", uz:"kasallik"},
+    {id:"byouin56", day:56, group:"病", kanji:"病院", romaji:"byouin", type:"on + on", reading:"病(byou) + 院(in)", uz:"kasalxona"},
+    {id:"byounin56", day:56, group:"病", kanji:"病人", romaji:"byounin", type:"on + on", reading:"病(byou) + 人(nin)", uz:"kasal odam"},
+    {id:"juubyou56", day:56, group:"病", kanji:"重病", romaji:"juubyou", type:"on + on", reading:"重(juu) + 病(byou)", uz:"jiddiy kasallik"},
+    {id:"shippei56", day:56, group:"病", kanji:"疾病", romaji:"shippei", type:"on + on", reading:"疾(shitsu) + 病(hei)", uz:"kasallik"},
+
+    {id:"tsuukanji56", day:56, group:"痛", kanji:"痛", romaji:"tsuu", type:"on'yomi", reading:"痛(tsuu) — yakka kanji", otherReadings:"on: ツウ(tsuu) · kun: いた-い(itai), いた-む(itamu)", uz:"og'riq"},
+    {id:"itai56", day:56, group:"痛", kanji:"痛い", romaji:"itai", type:"kun'yomi", reading:"痛(ita) + い", uz:"og'riqli"},
+    {id:"itamu56", day:56, group:"痛", kanji:"痛む", romaji:"itamu", type:"kun'yomi", reading:"痛(ita) + む", uz:"og'rimoq"},
+    {id:"itamidome56", day:56, group:"痛", kanji:"痛み止め", romaji:"itamidome", type:"kun + kun", reading:"痛(ita) + み + 止(do) + め", uz:"og'riq qoldiruvchi vosita"},
+    {id:"zutsuu56", day:56, group:"痛", kanji:"頭痛", romaji:"zutsuu", type:"on + on", reading:"頭(zu) + 痛(tsuu)", uz:"bosh og'rig'i"},
+    {id:"fukutsuu56", day:56, group:"痛", kanji:"腹痛", romaji:"fukutsuu", type:"on + on", reading:"腹(fuku) + 痛(tsuu)", uz:"oshqozon og'rig'i"},
+
+    // ---- 57-kun ----
+    {id:"soukanji57", day:57, group:"送", kanji:"送", romaji:"sou", type:"on'yomi", reading:"送(sou) — yakka kanji", otherReadings:"on: ソウ(sou) · kun: おく-る(okuru)", uz:"yuborish, eskort"},
+    {id:"okuru57", day:57, group:"送", kanji:"送る", romaji:"okuru", type:"kun'yomi", reading:"送(oku) + る", uz:"yubormoq"},
+    {id:"housou57", day:57, group:"送", kanji:"放送", romaji:"housou", type:"on + on", reading:"放(hou) + 送(sou)", uz:"efirga uzatish"},
+    {id:"souryou57", day:57, group:"送", kanji:"送料", romaji:"souryou", type:"on + on", reading:"送(sou) + 料(ryou)", uz:"yetkazib berish haqi, pochta narxi"},
+
+    {id:"henkanji57", day:57, group:"返", kanji:"返", romaji:"hen", type:"on'yomi", reading:"返(hen) — yakka kanji", otherReadings:"on: ヘン(hen) · kun: かえ-す(kaesu)", uz:"qaytish, qaytarib berish"},
+    {id:"henji57", day:57, group:"返", kanji:"返事", romaji:"henji", type:"on + on", reading:"返(hen) + 事(ji)", uz:"javob, javob berish"},
+    {id:"kaesu57", day:57, group:"返", kanji:"返す", romaji:"kaesu", type:"kun'yomi", reading:"返(kae) + す", uz:"qaytarmoq"},
+
+    {id:"doukanji57", day:57, group:"道", kanji:"道", romaji:"michi", type:"kun'yomi", reading:"道(michi) — yakka kanji", otherReadings:"kun: みち(michi) · on: ドウ(dou), トウ(tou)", uz:"yo'l, ko'cha, tuman"},
+    {id:"michi57", day:57, group:"道", kanji:"道", romaji:"michi", type:"kun'yomi", reading:"道(michi)", uz:"yo'l"},
+    {id:"dougu57", day:57, group:"道", kanji:"道具", romaji:"dougu", type:"on + on", reading:"道(dou) + 具(gu)", uz:"asbob"},
+    {id:"juudou57", day:57, group:"道", kanji:"柔道", romaji:"juudou", type:"on + on", reading:"柔(juu) + 道(dou)", uz:"dzyudo"},
+    {id:"hokkaidou57", day:57, group:"道", kanji:"北海道", romaji:"hokkaidou", type:"on + on + on", reading:"北(hok) + 海(kai) + 道(dou)", uz:"Hokkaydo"},
+
+    {id:"shuukanji57", day:57, group:"週", kanji:"週", romaji:"shuu", type:"on'yomi", reading:"週(shuu) — yakka kanji", otherReadings:"on: シュウ(shuu)", uz:"hafta"},
+    {id:"konshuu57", day:57, group:"週", kanji:"今週", romaji:"konshuu", type:"on + on", reading:"今(kon) + 週(shuu)", uz:"ushbu hafta"},
+    {id:"raishuu57", day:57, group:"週", kanji:"来週", romaji:"raishuu", type:"on + on", reading:"来(rai) + 週(shuu)", uz:"keyingi hafta"},
+    {id:"senshuu57", day:57, group:"週", kanji:"先週", romaji:"senshuu", type:"on + on", reading:"先(sen) + 週(shuu)", uz:"o'tgan hafta"},
+    {id:"maishuu57", day:57, group:"週", kanji:"毎週", romaji:"maishuu", type:"on + on", reading:"毎(mai) + 週(shuu)", uz:"har hafta"},
+    {id:"isshuukan57", day:57, group:"週", kanji:"一週間", romaji:"isshuukan", type:"on + on + on", reading:"一(is) + 週(shuu) + 間(kan)", uz:"bir hafta"},
+
+    // ---- 58-kun ----
+    {id:"eikanji58", day:58, group:"映", kanji:"映", romaji:"ei", type:"on'yomi", reading:"映(ei) — yakka kanji", otherReadings:"on: エイ(ei) · kun: うつ-る(utsuru), うつ-す(utsusu)", uz:"aks ettirish"},
+    {id:"eiga58", day:58, group:"映", kanji:"映画", romaji:"eiga", type:"on + on", reading:"映(ei) + 画(ga)", uz:"kino"},
+    {id:"jouei58", day:58, group:"映", kanji:"上映する", romaji:"jouei suru", type:"on + on + —", reading:"上(jou) + 映(ei) + する", uz:"ko'rsatmoq (film)"},
+    {id:"eiutsuru58", day:58, group:"映", kanji:"映る", romaji:"utsuru", type:"kun'yomi", reading:"映(utsu) + る", uz:"aks etmoq"},
+    {id:"eiutsusu58", day:58, group:"映", kanji:"映す", romaji:"utsusu", type:"kun'yomi", reading:"映(utsu) + す", uz:"aks ettirmoq"},
+
+    {id:"shakanji58", day:58, group:"写", kanji:"写", romaji:"sha", type:"on'yomi", reading:"写(sha) — yakka kanji", otherReadings:"on: シャ(sha) · kun: うつ-す(utsusu), うつ-る(utsuru)", uz:"nusxa ko'chirish, loyiha"},
+    {id:"shautsusu58", day:58, group:"写", kanji:"写す", romaji:"utsusu", type:"kun'yomi", reading:"写(utsu) + す", uz:"nusxa olish, suratga olish (surat)"},
+    {id:"shautsuru58", day:58, group:"写", kanji:"写る", romaji:"utsuru", type:"kun'yomi", reading:"写(utsu) + る", uz:"aks etmoq, tasvirga tushmoq"},
+    {id:"shashin58", day:58, group:"写", kanji:"写真", romaji:"shashin", type:"on + on", reading:"写(sha) + 真(shin)", uz:"fotosurat"},
+
+    {id:"shinkanji58", day:58, group:"真", kanji:"真", romaji:"shin", type:"on'yomi", reading:"真(shin) — yakka kanji", otherReadings:"on: シン(shin) · kun: ま(ma)", uz:"rost, haqiqiy, shunchaki, aniq"},
+    {id:"shashinshin58", day:58, group:"真", kanji:"写真", romaji:"shashin", type:"on + on", reading:"写(sha) + 真(shin)", uz:"fotosurat"},
+    {id:"mayonaka58", day:58, group:"真", kanji:"真夜中", romaji:"mayonaka", type:"kun + kun + kun", reading:"真(ma) + 夜(yo) + 中(naka)", uz:"yarim tun"},
+    {id:"masshiro58", day:58, group:"真", kanji:"真っ白な", romaji:"masshiro na", type:"kun + kun", reading:"真(ma) + っ + 白(shiro) + な", uz:"oppoq"},
+    {id:"mannaka58", day:58, group:"真", kanji:"真ん中", romaji:"mannaka", type:"kun + kun", reading:"真(ma) + ん + 中(naka)", uz:"qoq o'rtasi"},
+    {id:"shinkuu58", day:58, group:"真", kanji:"真空", romaji:"shinkuu", type:"on + on", reading:"真(shin) + 空(kuu)", uz:"vakuum, bo'shliq"},
+
+    {id:"tabikanji58", day:58, group:"旅", kanji:"旅", romaji:"tabi", type:"kun'yomi", reading:"旅(tabi) — yakka kanji", otherReadings:"kun: たび(tabi) · on: リョ(ryo)", uz:"sayohat"},
+    {id:"ryokou58", day:58, group:"旅", kanji:"旅行する", romaji:"ryokou suru", type:"on + on + —", reading:"旅(ryo) + 行(kou) + する", uz:"sayohat qilmoq"},
+    {id:"ryokan58", day:58, group:"旅", kanji:"旅館", romaji:"ryokan", type:"on + on", reading:"旅(ryo) + 館(kan)", uz:"mehmonxona"},
+    {id:"ryohi58", day:58, group:"旅", kanji:"旅費", romaji:"ryohi", type:"on + on", reading:"旅(ryo) + 費(hi)", uz:"sayohat xarajatlari"},
+
+    // ---- 59-kun ----
+    {id:"sekanji59", day:59, group:"世", kanji:"世", romaji:"se", type:"on'yomi", reading:"世(se) — yakka kanji", otherReadings:"on: セイ(sei), セ(se) · kun: よ(yo)", uz:"dunyo, avlod"},
+    {id:"sekai59", day:59, group:"世", kanji:"世界", romaji:"sekai", type:"on + on", reading:"世(se) + 界(kai)", uz:"dunyo"},
+    {id:"sewa59", day:59, group:"世", kanji:"世話", romaji:"sewa", type:"on + on", reading:"世(se) + 話(wa)", uz:"g'amxo'rlik, mehribonlik (qariyalarga), yordam qilish"},
+    {id:"sedai59", day:59, group:"世", kanji:"世代", romaji:"sedai", type:"on + on", reading:"世(se) + 代(dai)", uz:"avlod"},
+    {id:"yononaka59", day:59, group:"世", kanji:"世の中", romaji:"yononaka", type:"kun + — + kun", reading:"世(yo) + の + 中(naka)", uz:"dunyo, hayot"},
+
+    {id:"kaikanji59", day:59, group:"界", kanji:"界", romaji:"kai", type:"on'yomi", reading:"界(kai) — yakka kanji", otherReadings:"on: カイ(kai)", uz:"dunyo"},
+    {id:"kaisekai59", day:59, group:"界", kanji:"世界", romaji:"sekai", type:"on + on", reading:"世(se) + 界(kai)", uz:"dunyo"},
+    {id:"genkai59", day:59, group:"界", kanji:"限界", romaji:"genkai", type:"on + on", reading:"限(gen) + 界(kai)", uz:"chegara, chegaralar"},
+    {id:"kaigogyoukai59", day:59, group:"界", kanji:"介護業界", romaji:"kaigogyoukai", type:"on + on + on + on", reading:"介(kai) + 護(go) + 業(gyou) + 界(kai)", uz:"hamshiralik parvarishi sanoati"},
+
+    {id:"shikanji59", day:59, group:"仕", kanji:"仕", romaji:"shi", type:"on'yomi", reading:"仕(shi) — yakka kanji", otherReadings:"on: シ(shi), ジ(ji) · kun: つか-える(tsukaeru)", uz:"xizmat qilish (odam)"},
+    {id:"shigoto59", day:59, group:"仕", kanji:"仕事", romaji:"shigoto", type:"on + kun", reading:"仕(shi) + 事(goto)", uz:"ish"},
+    {id:"shikata59", day:59, group:"仕", kanji:"仕方", romaji:"shikata", type:"on + kun", reading:"仕(shi) + 方(kata)", uz:"uslub, usul"},
+    {id:"shiageru59", day:59, group:"仕", kanji:"仕上げる", romaji:"shiageru", type:"on + kun", reading:"仕(shi) + 上(a) + げる", uz:"tugatmoq, oxiriga yetkazmoq"},
+
+    {id:"kotokanji59", day:59, group:"事", kanji:"事", romaji:"koto", type:"kun'yomi", reading:"事(koto) — yakka kanji", otherReadings:"kun: こと(koto) · on: ジ(ji), ズ(zu)", uz:"narsa"},
+    {id:"jishigoto59", day:59, group:"事", kanji:"仕事", romaji:"shigoto", type:"on + kun", reading:"仕(shi) + 事(goto)", uz:"ish"},
+    {id:"shokuji59", day:59, group:"事", kanji:"食事", romaji:"shokuji", type:"on + on", reading:"食(shoku) + 事(ji)", uz:"ovqat"},
+    {id:"youji59", day:59, group:"事", kanji:"用事", romaji:"youji", type:"on + on", reading:"用(you) + 事(ji)", uz:"biznes, kelishuv"},
+    {id:"jiko59", day:59, group:"事", kanji:"事故", romaji:"jiko", type:"on + on", reading:"事(ji) + 故(ko)", uz:"baxtsiz hodisa"},
+    {id:"daiji59", day:59, group:"事", kanji:"大事な", romaji:"daiji na", type:"on + on + —", reading:"大(dai) + 事(ji) + な", uz:"muhim"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -9482,6 +9617,16 @@
   // ---------- Bilganlarim (alohida yashil banner) ----------
   const knownBanner = document.getElementById('knownBanner');
   const knownBannerBadge = document.getElementById('knownBannerBadge');
+  // tugma bosilganda emoji animatsiyasi (qayta-qayta bosilsa ham har safar qaytadan boshlanadi)
+  function playBannerIcon(banner){
+    const ic = banner.querySelector('.known-banner-icon');
+    if(!ic) return;
+    ic.classList.remove('icon-anim');
+    void ic.offsetWidth;
+    ic.classList.add('icon-anim');
+    ic.addEventListener('animationend', ()=>ic.classList.remove('icon-anim'), {once:true});
+  }
+  knownBanner.addEventListener('click', ()=>playBannerIcon(knownBanner));
   knownBanner.addEventListener('click', ()=>showTab('known'));
   function renderKnownBanner(){
     knownBannerBadge.textContent = known.length;
@@ -9492,6 +9637,7 @@
   // ---------- Hammasi (barcha kanjilar ro'yxati, oltin banner) ----------
   const allBanner = document.getElementById('allBanner');
   const allBannerBadge = document.getElementById('allBannerBadge');
+  allBanner.addEventListener('click', ()=>playBannerIcon(allBanner));
   allBanner.addEventListener('click', ()=>showTab('all'));
   function renderAllBanner(){
     allBannerBadge.textContent = ALL_KANJI.length;
