@@ -1594,6 +1594,62 @@
   }
   .all-banner .known-banner-badge{background:var(--gold);}
 
+  /* ---------- BILGANLARIM / HAMMASI TUGMALARI: LIQUID GLASS (o'z rangi saqlangan) ----------
+     Shaffof qora shisha ustiga o'z rangidagi (moss / oltin) yengil tus qo'yiladi:
+     yuqori-chapda yorug'lik yaltirashi, ichki chekka nurlari va blur bor. Faol
+     holatda tus kuchayadi va tugma atrofida o'z rangida yumshoq nur paydo bo'ladi. */
+  .known-banner{
+    -webkit-backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+  }
+  .known-banner:not(.all-banner){
+    background:
+      radial-gradient(130% 170% at 8% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0) 62%),
+      linear-gradient(165deg, rgba(124,154,107,0.24), rgba(124,154,107,0.07)),
+      rgba(0,0,0,0.30);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.34),
+      inset 0 -1px 0 rgba(255,255,255,0.06),
+      inset 0 0 16px rgba(124,154,107,0.10),
+      0 8px 18px -10px rgba(0,0,0,0.7);
+  }
+  .known-banner:not(.all-banner).active{
+    background:
+      radial-gradient(130% 170% at 8% 0%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0) 62%),
+      linear-gradient(165deg, rgba(124,154,107,0.46), rgba(124,154,107,0.18)),
+      rgba(0,0,0,0.26);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.42),
+      inset 0 -1px 0 rgba(255,255,255,0.08),
+      inset 0 0 18px rgba(124,154,107,0.18),
+      0 8px 18px -10px rgba(0,0,0,0.7),
+      0 0 16px rgba(124,154,107,0.28);
+  }
+  .all-banner{
+    background:
+      radial-gradient(130% 170% at 8% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0) 62%),
+      linear-gradient(165deg, rgba(201,166,107,0.24), rgba(201,166,107,0.07)),
+      rgba(0,0,0,0.30);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.34),
+      inset 0 -1px 0 rgba(255,255,255,0.06),
+      inset 0 0 16px rgba(201,166,107,0.10),
+      0 8px 18px -10px rgba(0,0,0,0.7);
+  }
+  .all-banner.active{
+    background:
+      radial-gradient(130% 170% at 8% 0%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0) 62%),
+      linear-gradient(165deg, rgba(201,166,107,0.46), rgba(201,166,107,0.18)),
+      rgba(0,0,0,0.26);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.42),
+      inset 0 -1px 0 rgba(255,255,255,0.08),
+      inset 0 0 18px rgba(201,166,107,0.18),
+      0 8px 18px -10px rgba(0,0,0,0.7),
+      0 0 16px rgba(201,166,107,0.28);
+  }
+  html.perf .known-banner{ -webkit-backdrop-filter:none; backdrop-filter:none; }
+
   .all-day-group{margin:0;}
   .all-day-heading{
     display:flex;
@@ -2005,9 +2061,12 @@
     padding:11px 16px;
     border-radius:999px;
     border:1px solid var(--glass-border);
-    background:var(--glass-bg-strong);
-    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    /* kulrang emas: shaffof qora shisha (chekka ramkasi o'z holicha saqlangan) */
+    background:
+      radial-gradient(120% 160% at 8% 0%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0) 62%),
+      rgba(0,0,0,0.34);
+    backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    -webkit-backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
     color:var(--ink);
     font-family:inherit;
     font-size:14px;
@@ -2017,7 +2076,13 @@
     -webkit-tap-highlight-color:transparent;
     transition:transform .15s ease, background .2s ease;
   }
-  .view-back-btn:active{ transform:scale(0.98); background:var(--glass-bg); }
+  .view-back-btn:active{
+    transform:scale(0.98);
+    background:
+      radial-gradient(120% 160% at 8% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%),
+      rgba(0,0,0,0.5);
+  }
+  html.perf .view-back-btn{ backdrop-filter:none; -webkit-backdrop-filter:none; }
   .view-back-arrow{ font-size:17px; line-height:1; color:var(--accent-soft); }
 
   main{
@@ -3603,9 +3668,12 @@
   }
   .quiz-result button{
     margin-top:0;
-    background:var(--glass-bg);
-    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    /* kulrang emas: shaffof qora shisha (ramka saqlangan) */
+    background:
+      radial-gradient(120% 160% at 8% 0%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0) 62%),
+      rgba(0,0,0,0.34);
+    backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    -webkit-backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
     color:var(--ink);
     border:1.5px solid var(--glass-border-soft);
     padding:13px 24px;
@@ -3615,6 +3683,59 @@
     cursor:pointer;
   }
   .quiz-result button:active{transform:scale(0.98);}
+  /* "Xatolarni takrorlash": qizg'ish-shaffof shisha (Tozalash tugmasi bilan bir xil ruhda) */
+  .quiz-result .quiz-result-retry{
+    background:
+      radial-gradient(130% 150% at 10% 0%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 42%, rgba(255,255,255,0) 64%),
+      rgba(217,105,79,0.18) !important;
+    border:1.5px solid rgba(229,135,111,0.5) !important;
+    color:var(--accent-soft) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.35), 0 8px 18px -10px rgba(0,0,0,0.7);
+  }
+  /* xato qilingan so'zlar ro'yxati */
+  .quiz-mistakes{ margin-top:22px; text-align:left; }
+  .quiz-mistakes-title{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    text-align:center;
+    font-size:14px; font-weight:800; color:var(--ink);
+    margin:0 2px 12px;
+  }
+  .qm-count{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:22px; height:22px; padding:0 7px;
+    border-radius:999px;
+    font-size:12px; font-weight:800;
+    color:var(--accent-soft);
+    background:rgba(217,105,79,0.16);
+    border:1px solid rgba(229,135,111,0.42);
+  }
+  .quiz-mistake-item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    border-radius:14px;
+    border:1px solid rgba(229,135,111,0.30);
+    background:
+      radial-gradient(120% 160% at 6% 0%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0) 62%),
+      rgba(0,0,0,0.34);
+    -webkit-backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 18px -12px rgba(0,0,0,0.7);
+  }
+  .qm-kanji{
+    flex:none;
+    max-width:42%;
+    min-width:52px;
+    text-align:center;
+    font-family:'Shippori Mincho',serif;
+    font-size:21px; line-height:1.2;
+    color:var(--ink);
+    overflow-wrap:anywhere;
+  }
+  .qm-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .qm-correct{ color:var(--moss-soft); font-weight:800; font-size:14px; overflow-wrap:anywhere; }
+  .qm-wrong{ color:var(--accent-soft); font-size:12px; font-weight:600; text-decoration:line-through; opacity:.85; overflow-wrap:anywhere; }
+  html.perf .quiz-result button, html.perf .quiz-mistake-item{ backdrop-filter:none; -webkit-backdrop-filter:none; }
   .quiz-result-restart{
     background:var(--accent) !important;
     color:#fff !important;
@@ -10324,6 +10445,7 @@
 
   // ---------- QUIZ ----------
   let quizItems = [], quizIdx = 0, quizScore = 0, quizReturnTab = 'known', quizPool = [], quizType = 'translate';
+  let quizWrongList = []; // xato javob berilgan savollar: {id, chosen} — natija ekranida ro'yxat va "Xatolarni takrorlash" uchun
   let quizBarPct = 0; // savollar shkalasining joriy foizi — savollar orasida sekin siljishi uchun saqlanadi
   let timedRevealTimeout = null;
   let timedUrgentTimeout = null;
@@ -10335,6 +10457,7 @@
     quizItems = shuffle([...ids]);
     quizIdx = 0; quizScore = 0;
     quizBarPct = 0;
+    quizWrongList = [];
     quizReturnTab = returnTab;
     document.getElementById('quizWrap').classList.toggle('quiz-from-all', returnTab === 'all');
     quizType = mode === 'romaji' ? 'romaji' : mode === 'timed' ? 'timed' : 'translate';
@@ -10724,6 +10847,7 @@
     } else {
       btn.classList.add('wrong');
       playWrongEffect(btn);
+      if(!quizWrongList.some(w=>w.id===correctId)) quizWrongList.push({id:correctId, chosen:chosenId});
       allBtns.forEach(b=>{ if(b.getAttribute('data-id')===correctId) b.classList.add('correct'); });
       flashPage('flash-wrong');
       playWrongSound();
@@ -10905,12 +11029,34 @@
     let emoji = "🌱", msg = "Davom eting, mashq — mahorat kaliti!";
     if(pct === 100){ emoji="🏯"; msg="Mukammal! Barcha so'zlarni bilasiz!"; }
     else if(pct >= 70){ emoji="🎋"; msg="Ajoyib natija!"; }
+    // xato javob berilgan so'zlar ro'yxati (to'g'ri javob + foydalanuvchi tanlagani)
+    const wrongList = quizWrongList.slice();
+    const wrongIds = wrongList.map(w=>w.id);
+    const optField = restartType === 'romaji' ? 'romaji' : 'uz';
+    const mistakesHtml = wrongList.length ? `
+      <div class="quiz-mistakes">
+        <div class="quiz-mistakes-title">Xato qilingan so'zlar <span class="qm-count">${wrongList.length}</span></div>
+        ${wrongList.map(w=>{
+          const word = byId[w.id];
+          const picked = byId[w.chosen];
+          return `
+          <div class="quiz-mistake-item">
+            <div class="qm-kanji">${word.kanji}</div>
+            <div class="qm-body">
+              <div class="qm-correct">✓ ${word[optField]}</div>
+              <div class="qm-wrong">✕ ${picked ? picked[optField] : ''}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : '';
     wrap.innerHTML = `
       <div class="quiz-result">
         <div class="big-em">${emoji}</div>
         <h2>${quizScore} / ${quizItems.length} to'g'ri</h2>
         <p>${msg}</p>
+        ${mistakesHtml}
         <div class="quiz-result-actions">
+          ${wrongList.length ? `<button class="quiz-result-retry" id="btnRetryMistakes">Xatolarni takrorlash (${wrongList.length})</button>` : ''}
           <button class="quiz-result-restart" id="btnRestartQuiz">Qayta boshlash</button>
           <button id="btnBackKnown">${backLabel}</button>
         </div>
@@ -10918,6 +11064,8 @@
     `;
     document.getElementById('btnBackKnown').addEventListener('click', ()=>showTab(quizReturnTab));
     document.getElementById('btnRestartQuiz').addEventListener('click', ()=>startQuiz(restartPool, restartReturnTab, restartType));
+    const retryBtn = document.getElementById('btnRetryMistakes');
+    if(retryBtn) retryBtn.addEventListener('click', ()=>startQuiz(wrongIds, restartReturnTab, restartType));
   }
 
   // ---------- ORQA FON: TOPOGRAFIK CHIZIQLAR + SUZUVCHI ZARRACHALAR ----------
