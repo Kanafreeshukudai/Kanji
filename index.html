@@ -2975,6 +2975,57 @@
   /* chipda joy zaxiralanmaydi — tanlov bo'sh bo'lsa tugma butunlay yo'qoladi */
   #view-all .all-bar-info .all-clear-btn.slot-empty{ display:none; }
 
+  /* ---------- TANLANGAN KANJILAR SONI CHIPI + "TOZALASH" TUGMASI: LIQUID GLASS ----------
+     Chip faqat tanlov bor paytda ramkali shisha bo'ladi (bo'sh paytda avvalgidek
+     ramkasiz nurli yozuv qoladi). "Tozalash" tugmasi esa qizg'ish-shaffof shisha. */
+  #view-all .all-bar-info:not(.is-empty){
+    background:
+      radial-gradient(120% 140% at 8% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0) 62%),
+      linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 45%, rgba(124,154,107,0.08) 100%),
+      rgba(0,0,0,0.34);
+    -webkit-backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    border:1px solid rgba(124,154,107,0.32);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.38),
+      inset 0 -1px 0 rgba(255,255,255,0.07),
+      inset 1px 0 0 rgba(255,255,255,0.10),
+      inset -1px 0 0 rgba(255,255,255,0.05),
+      inset 0 0 18px rgba(255,255,255,0.05),
+      0 10px 24px -10px rgba(0,0,0,0.7);
+  }
+  #view-all .all-bar-info .all-clear-btn{
+    background:
+      radial-gradient(130% 150% at 10% 0%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 42%, rgba(255,255,255,0) 64%),
+      linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0) 50%, rgba(217,105,79,0.12) 100%),
+      rgba(217,105,79,0.16);
+    border:1px solid rgba(229,135,111,0.42);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.40),
+      inset 0 -1px 0 rgba(255,255,255,0.07),
+      inset 0 0 12px rgba(255,255,255,0.05),
+      0 6px 14px -8px rgba(0,0,0,0.7);
+    transition:opacity .2s ease, transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  @media (hover:hover) and (pointer:fine){
+    #view-all .all-bar-info .all-clear-btn:hover{
+      transform:translateY(-2px);
+      border-color:rgba(229,135,111,0.7);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.5),
+        inset 0 -1px 0 rgba(255,255,255,0.09),
+        inset 0 0 14px rgba(255,255,255,0.07),
+        0 10px 16px -8px rgba(0,0,0,0.75),
+        0 0 14px rgba(217,105,79,0.28);
+    }
+  }
+  #view-all .all-bar-info .all-clear-btn:active{ transform:scale(0.95); }
+  /* yengil rejimda (html.perf) blur o'chiq */
+  html.perf #view-all .all-bar-info:not(.is-empty){
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+
   /* --- quiz tugmalari: bitta qatorda, teng enda --- */
   #view-all .all-bottom-bar .quiz-launch-row{
     width:100%;
@@ -3138,50 +3189,58 @@
   .quiz-opt.correct{background:var(--moss); border-color:var(--moss); color:#0B0D10;}
   .quiz-opt.wrong{background:var(--accent); border-color:var(--accent); color:#fff;}
 
-  /* ---------- TO'G'RI JAVOBDA: KICHIK SAMURAY QILICH BILAN KESIB O'TADI ----------
-     variant tugmasi ustidan chapdan o'ngga tez o'tib, o'rtada qilich yalt etib
-     yorqin chiziq (slash) qoldiradi, so'ng tugma ikki bo'lakka "kesilib"
-     bir-biridan ajralib ketadi (pastda esa allaqachon yashil "to'g'ri" rangi
-     ko'rinadi) — bu esa haqiqiy kesish illyuziyasini beradi */
+  /* ---------- TO'G'RI JAVOBDA: QUVONCH PORTLASHI (joy burst) ----------
+     To'g'ri tugma yumshoq "pop" qilib sakraydi va moss-oltin nur bilan
+     yarqiraydi, atrofga halqa tarqaladi va ichidan oltin yulduzchalar,
+     moss barglari hamda sakura gulbarglari otilib chiqadi — kichik bayram. */
   .quiz-opt{ position:relative; }
-  .samurai-slash-layer{
+  .quiz-opt.joy-pop{ animation:joyPop .62s cubic-bezier(.2,1.3,.4,1); }
+  @keyframes joyPop{
+    0%{ transform:scale(1); box-shadow:0 0 0 0 rgba(147,177,127,0.65); }
+    30%{ transform:scale(1.075); box-shadow:0 0 0 7px rgba(147,177,127,0.28), 0 0 26px 6px rgba(255,217,122,0.55); }
+    60%{ transform:scale(0.985); box-shadow:0 0 0 12px rgba(147,177,127,0), 0 0 22px 4px rgba(255,217,122,0.30); }
+    100%{ transform:scale(1); box-shadow:0 0 0 14px rgba(147,177,127,0), 0 0 0 0 rgba(255,217,122,0); }
+  }
+  .joy-layer{
     position:absolute; inset:0;
     pointer-events:none;
     overflow:visible;
     z-index:6;
     border-radius:inherit;
   }
-  .slash-line{
-    position:absolute;
-    top:50%; left:6%; right:6%; height:3px;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, #fff 50%, rgba(255,255,255,0.95) 60%, transparent);
-    box-shadow:0 0 10px 2px rgba(255,255,255,0.85), 0 0 20px 5px rgba(201,166,107,0.55);
-    transform:translateY(-50%) scaleX(0) rotate(-6deg);
-    transform-origin:left center;
-    opacity:0;
-    animation:slashSweep .26s ease-out forwards;
-    animation-delay:.2s;
-  }
-  @keyframes slashSweep{
-    0%{ transform:translateY(-50%) scaleX(0) rotate(-6deg); opacity:1; }
-    65%{ transform:translateY(-50%) scaleX(1) rotate(-6deg); opacity:1; }
-    100%{ transform:translateY(-50%) scaleX(1) rotate(-6deg); opacity:0; }
-  }
-  .opt-cut-half{
-    position:absolute; left:-2px; right:-2px;
-    height:54%;
-    border:2px solid var(--glass-border-soft);
+  .joy-ring{
+    position:absolute; inset:0;
     border-radius:inherit;
-    pointer-events:none;
-    z-index:5;
-    transition:transform .4s cubic-bezier(.3,0,.22,1), opacity .38s ease .02s;
+    border:2px solid rgba(255,225,150,0.9);
+    opacity:0;
+    animation:joyRing .7s ease-out forwards;
   }
-  .opt-cut-top{ top:-2px; clip-path:polygon(0 0,100% 0,100% 82%,0 100%); }
-  .opt-cut-bottom{ bottom:-2px; clip-path:polygon(0 18%,100% 0,100% 100%,0 100%); }
-  .opt-cut-top.cut-open{ transform:translate(-16px,-18px) rotate(-5deg); opacity:0; }
-  .opt-cut-bottom.cut-open{ transform:translate(16px,18px) rotate(5deg); opacity:0; }
+  .joy-ring.r2{ border-color:rgba(147,177,127,0.9); animation-delay:.12s; }
+  @keyframes joyRing{
+    0%{ transform:scale(1); opacity:.9; }
+    100%{ transform:scale(1.5, 1.9); opacity:0; }
+  }
+  .joy-bit{
+    position:absolute; left:50%; top:50%;
+    width:var(--sz,8px); height:var(--sz,8px);
+    margin:calc(var(--sz,8px) / -2) 0 0 calc(var(--sz,8px) / -2);
+    background:var(--c,#FFD97A);
+    opacity:0;
+    animation:joyBit var(--dur,.95s) cubic-bezier(.15,.7,.3,1) var(--dl,0s) forwards;
+    will-change:transform, opacity;
+  }
+  .joy-bit.circle{ border-radius:50%; }
+  .joy-bit.star{ background:none; color:var(--c,#FFD97A); width:auto; height:auto; font-size:var(--sz,12px); line-height:1; margin:-.5em 0 0 -.5em; }
+  .joy-bit.petal{ border-radius:70% 0 70% 0; }
+  @keyframes joyBit{
+    0%{ transform:translate(0,0) rotate(0) scale(.3); opacity:0; }
+    12%{ opacity:1; }
+    55%{ transform:translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); opacity:1; }
+    100%{ transform:translate(calc(var(--dx) * 1.12), calc(var(--dy) + 26px)) rotate(calc(var(--rot) * 1.6)) scale(.6); opacity:0; }
+  }
   @media (prefers-reduced-motion: reduce){
-    .slash-line, .opt-cut-half{ display:none !important; }
+    .quiz-opt.joy-pop{ animation:none !important; }
+    .joy-layer{ display:none !important; }
   }
 
   /* natija belgisi ("Ajoyib!" va h.k.) endi qatordan butunlay CHIQARILGAN —
@@ -3304,6 +3363,129 @@
     background:
       linear-gradient(var(--glass-bg), var(--glass-bg)),
       rgba(11,13,16,0.72);
+  }
+
+  /* ---------- "HAMMASI" ORQALI OCHILGAN QUIZ: shaffof qora + LIQUID GLASS ----------
+     Kulrang emas: deyarli shaffof qora shisha. Yuqori-chap burchakda yorug'lik
+     yaltirashi (specular), chekkalarda ingichka nur, ichkarida yumshoq ichki
+     porlash va orqa fonni xiralashtirib, ranglarini boyitadigan blur bor.
+     Chegara saytning moss rangiga mos. To'g'ri/noto'g'ri ranglari saqlanadi. */
+  #quizWrap.quiz-from-all .quiz-card,
+  #quizWrap.quiz-from-all .quiz-opt:not(.correct):not(.wrong),
+  html.perf #quizWrap.quiz-from-all .quiz-card,
+  html.perf #quizWrap.quiz-from-all .quiz-opt:not(.correct):not(.wrong){
+    background:
+      radial-gradient(120% 90% at 8% 0%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 38%, rgba(255,255,255,0) 60%),
+      linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 45%, rgba(124,154,107,0.07) 100%),
+      rgba(0,0,0,0.34);
+    backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    -webkit-backdrop-filter:blur(16px) saturate(1.8) brightness(0.92);
+    border:1px solid rgba(124,154,107,0.30);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.38),
+      inset 0 -1px 0 rgba(255,255,255,0.07),
+      inset 1px 0 0 rgba(255,255,255,0.10),
+      inset -1px 0 0 rgba(255,255,255,0.05),
+      inset 0 0 22px rgba(255,255,255,0.05),
+      0 12px 28px -12px rgba(0,0,0,0.65);
+  }
+  #quizWrap.quiz-from-all .quiz-opt:not(.correct):not(.wrong){
+    border-width:1px;
+  }
+  /* yengil rejimda (html.perf) blur o'chiq — faqat shaffof qora + yaltirash qoladi */
+  html.perf #quizWrap.quiz-from-all .quiz-card,
+  html.perf #quizWrap.quiz-from-all .quiz-opt:not(.correct):not(.wrong){
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+
+  /* ---------- XATO JAVOBDA: SALBIY EFFEKT (woe) ----------
+     Noto'g'ri tugma qattiq silkinadi va qizil nur bilan "urilgandek"
+     chaqnaydi, atrofdan qizil halqa tugmaga qarab siqiladi, ichidan esa
+     qizil "✕" belgilari va qora-qizil tomchilar pastga qarab to'kiladi. */
+  .quiz-opt.wrong-shake{ animation:wrongShake .6s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes wrongShake{
+    0%{ transform:translateX(0) rotate(0); box-shadow:0 0 0 0 rgba(217,60,52,0.75); }
+    12%{ transform:translateX(-10px) rotate(-1.4deg); box-shadow:0 0 0 5px rgba(217,60,52,0.35), 0 0 26px 6px rgba(217,60,52,0.6); }
+    28%{ transform:translateX(9px) rotate(1.2deg); }
+    42%{ transform:translateX(-7px) rotate(-0.8deg); box-shadow:0 0 0 9px rgba(217,60,52,0.10), 0 0 20px 4px rgba(217,60,52,0.4); }
+    58%{ transform:translateX(5px) rotate(0.5deg); }
+    74%{ transform:translateX(-3px); }
+    100%{ transform:translateX(0) rotate(0); box-shadow:0 0 0 12px rgba(217,60,52,0), 0 0 0 0 rgba(217,60,52,0); }
+  }
+  .woe-layer{
+    position:absolute; inset:0;
+    pointer-events:none;
+    overflow:visible;
+    z-index:6;
+    border-radius:inherit;
+  }
+  .woe-ring{
+    position:absolute; inset:0;
+    border-radius:inherit;
+    border:2px solid rgba(255,107,90,0.95);
+    opacity:0;
+    animation:woeRing .55s ease-in forwards;
+  }
+  .woe-ring.r2{ border-color:rgba(122,31,26,0.9); animation-delay:.1s; }
+  @keyframes woeRing{
+    0%{ transform:scale(1.55,2.0); opacity:0; }
+    30%{ opacity:.9; }
+    100%{ transform:scale(1); opacity:0; }
+  }
+  .woe-bit{
+    position:absolute; left:50%; top:50%;
+    margin:-.5em 0 0 -.5em;
+    color:var(--c,#ff6b5a);
+    font-size:var(--sz,12px); line-height:1;
+    font-weight:800;
+    opacity:0;
+    animation:woeBit var(--dur,.9s) cubic-bezier(.3,.1,.5,1) var(--dl,0s) forwards;
+    will-change:transform, opacity;
+  }
+  .woe-bit.drop{
+    width:var(--sz,6px); height:calc(var(--sz,6px) * 1.5);
+    margin:0;
+    background:var(--c,#7a1f1a);
+    border-radius:50% 50% 55% 55% / 35% 35% 65% 65%;
+  }
+  @keyframes woeBit{
+    0%{ transform:translate(0,0) rotate(0) scale(.4); opacity:0; }
+    14%{ opacity:1; }
+    45%{ transform:translate(var(--dx), calc(var(--dy) * .35)) rotate(var(--rot)) scale(1); opacity:1; }
+    100%{ transform:translate(calc(var(--dx) * 1.2), calc(var(--dy) + 34px)) rotate(calc(var(--rot) * 1.5)) scale(.7); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .quiz-opt.wrong-shake{ animation:none !important; }
+    .woe-layer{ display:none !important; }
+  }
+
+  /* ---------- KOMPYUTERDA: SICHQONCHA USTIGA BORGANDA TUGMA KO'TARILADI ----------
+     Faqat sichqonchali qurilmalarda (telefonda "yopishib qolgan hover" bo'lmasligi
+     uchun) va hali bosilmagan variantlarda: tugma biroz tepaga siljiydi va
+     ostida yumshoq soya paydo bo'ladi. */
+  @media (hover:hover) and (pointer:fine){
+    .quiz-opt:not(.correct):not(.wrong):not(.disabled):hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 22px -10px rgba(0,0,0,0.6);
+    }
+    .quiz-opt:not(.correct):not(.wrong):not(.disabled):hover:active{
+      transform:translateY(-2px) scale(0.98);
+    }
+    /* "Hammasi" quizidagi liquid glass: ichki yaltirash saqlanadi, soya kuchayadi */
+    #quizWrap.quiz-from-all .quiz-opt:not(.correct):not(.wrong):not(.disabled):hover{
+      border-color:rgba(147,177,127,0.55);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.45),
+        inset 0 -1px 0 rgba(255,255,255,0.09),
+        inset 1px 0 0 rgba(255,255,255,0.14),
+        inset -1px 0 0 rgba(255,255,255,0.07),
+        inset 0 0 24px rgba(255,255,255,0.07),
+        0 16px 26px -12px rgba(0,0,0,0.75);
+    }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .quiz-opt:not(.correct):not(.wrong):not(.disabled):hover{ transform:none; }
   }
 
   /* ---------- VAQT SINOVI (timed recall quiz) ---------- */
@@ -7661,8 +7843,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -8809,6 +8991,72 @@
     {id:"kaeru52", day:52, group:"変", kanji:"変える", romaji:"kaeru", type:"kun'yomi", reading:"変える(kaeru)", uz:"o'zgartirmoq (bir narsani)"},
     {id:"henna52", day:52, group:"変", kanji:"変な", romaji:"hen na", type:"on'yomi", reading:"変(hen) + な", uz:"g'alati"},
     {id:"henka52", day:52, group:"変", kanji:"変化する", romaji:"henka suru", type:"on + on", reading:"変(hen) + 化(ka) + する", uz:"o'zgarmoq, o'zgarib turmoq"},
+
+    // ---- 53-kun ----
+    {id:"tsukaukanji53", day:53, group:"使", kanji:"使", romaji:"tsukau", type:"kun'yomi", reading:"使う(tsukau) — yakka kanji", otherReadings:"kun: つか-う(tsukau) · on: シ(shi)", uz:"foydalanish, tutqich"},
+    {id:"tsukau53", day:53, group:"使", kanji:"使う", romaji:"tsukau", type:"kun'yomi", reading:"使う(tsukau)", uz:"foydalanmoq"},
+    {id:"taishikan53", day:53, group:"使", kanji:"大使館", romaji:"taishikan", type:"on + on + on", reading:"大(tai) + 使(shi) + 館(kan)", uz:"elchixona"},
+
+    {id:"tsukurukanji53", day:53, group:"作", kanji:"作", romaji:"tsukuru", type:"kun'yomi", reading:"作る(tsukuru) — yakka kanji", otherReadings:"kun: つく-る(tsukuru), づく-り(zukuri) · on: サク(saku), サ(sa)", uz:"qilish, ish"},
+    {id:"tsukuru53", day:53, group:"作", kanji:"作る", romaji:"tsukuru", type:"kun'yomi", reading:"作る(tsukuru)", uz:"tayyorlamoq"},
+    {id:"tezukuri53", day:53, group:"作", kanji:"手作り", romaji:"tezukuri", type:"kun + kun", reading:"手(te) + 作(zuku) + り", uz:"qo'lda ishlangan"},
+    {id:"sakubun53", day:53, group:"作", kanji:"作文", romaji:"sakubun", type:"on + on", reading:"作(saku) + 文(bun)", uz:"insho"},
+    {id:"sagyou53", day:53, group:"作", kanji:"作業", romaji:"sagyou", type:"on + on", reading:"作(sa) + 業(gyou)", uz:"ish, yumush"},
+
+    {id:"bakerukanji53", day:53, group:"化", kanji:"化", romaji:"ka", type:"on'yomi", reading:"化(ka) — yakka kanji", otherReadings:"on: カ(ka), ケ(ke) · kun: ば-ける(bakeru)", uz:"o'zgartirish, aylantirish"},
+    {id:"kagaku53", day:53, group:"化", kanji:"化学", romaji:"kagaku", type:"on + on", reading:"化(ka) + 学(gaku)", uz:"kimyo"},
+    {id:"bunka53", day:53, group:"化", kanji:"文化", romaji:"bunka", type:"on + on", reading:"文(bun) + 化(ka)", uz:"madaniyat"},
+    {id:"keshou53", day:53, group:"化", kanji:"化粧", romaji:"keshou", type:"on + on", reading:"化(ke) + 粧(shou)", uz:"pardoz"},
+    {id:"henka53", day:53, group:"化", kanji:"変化", romaji:"henka", type:"on + on", reading:"変(hen) + 化(ka)", uz:"o'zgarish"},
+
+    {id:"imakanji53", day:53, group:"今", kanji:"今", romaji:"ima", type:"kun'yomi", reading:"今(ima) — yakka kanji", otherReadings:"kun: いま(ima) · on: コン(kon), キン(kin)", uz:"hozir, hozirgi"},
+    {id:"ima53", day:53, group:"今", kanji:"今", romaji:"ima", type:"kun'yomi", reading:"今(ima)", uz:"hozir"},
+    {id:"kongetsu53", day:53, group:"今", kanji:"今月", romaji:"kongetsu", type:"on + on", reading:"今(kon) + 月(getsu)", uz:"bu oy"},
+    {id:"kyou53", day:53, group:"今", kanji:"今日", romaji:"kyou", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"bugun"},
+    {id:"konshuu53", day:53, group:"今", kanji:"今週", romaji:"konshuu", type:"on + on", reading:"今(kon) + 週(shuu)", uz:"ushbu hafta"},
+    {id:"kotoshi53", day:53, group:"今", kanji:"今年", romaji:"kotoshi", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"bu yil"},
+
+    // ---- 54-kun ----
+    {id:"aukanji54", day:54, group:"会", kanji:"会", romaji:"au", type:"kun'yomi", reading:"会う(au) — yakka kanji", otherReadings:"kun: あ-う(au) · on: カイ(kai), エ(e)", uz:"uyushma, uchrashish"},
+    {id:"au54", day:54, group:"会", kanji:"会う", romaji:"au", type:"kun'yomi", reading:"会う(au)", uz:"uchrashmoq"},
+    {id:"kaiwa54", day:54, group:"会", kanji:"会話", romaji:"kaiwa", type:"on + on", reading:"会(kai) + 話(wa)", uz:"suhbat"},
+    {id:"kaisha54", day:54, group:"会", kanji:"会社", romaji:"kaisha", type:"on + on", reading:"会(kai) + 社(sha)", uz:"kompaniya"},
+
+    {id:"kumokanji54", day:54, group:"雲", kanji:"雲", romaji:"kumo", type:"kun'yomi", reading:"雲(kumo) — yakka kanji", otherReadings:"kun: くも(kumo), ぐも(gumo), くも-り(kumori) · on: ウン(un)", uz:"bulut"},
+
+    {id:"denkikanji54", day:54, group:"電", kanji:"電", romaji:"den", type:"on'yomi", reading:"電(den) — yakka kanji", otherReadings:"on: デン(den)", uz:"elektr energiyasi"},
+    {id:"denki54", day:54, group:"電", kanji:"電気", romaji:"denki", type:"on + on", reading:"電(den) + 気(ki)", uz:"elektr energiyasi"},
+    {id:"densha54", day:54, group:"電", kanji:"電車", romaji:"densha", type:"on + on", reading:"電(den) + 車(sha)", uz:"poyezd"},
+    {id:"denwa54", day:54, group:"電", kanji:"電話", romaji:"denwa", type:"on + on", reading:"電(den) + 話(wa)", uz:"telefon"},
+    {id:"denshirenji54", day:54, group:"電", kanji:"電子レンジ", romaji:"denshi renji", type:"on + on + —", reading:"電(den) + 子(shi) + レンジ", uz:"mikroto'lqinli pech"},
+
+    {id:"yukikanji54", day:54, group:"雪", kanji:"雪", romaji:"yuki", type:"kun'yomi", reading:"雪(yuki) — yakka kanji", otherReadings:"kun: ゆき(yuki) · on: セツ(setsu)", uz:"qor"},
+    {id:"yukiguni54", day:54, group:"雪", kanji:"雪国", romaji:"yukiguni", type:"kun + kun", reading:"雪(yuki) + 国(kuni)", uz:"qorli mamlakat, qorli o'lka"},
+    {id:"ooyuki54", day:54, group:"雪", kanji:"大雪", romaji:"ooyuki", type:"kun + kun", reading:"大(oo) + 雪(yuki)", uz:"kuchli qor"},
+
+    // ---- 55-kun ----
+    {id:"ryoukanji55", day:55, group:"料", kanji:"料", romaji:"ryou", type:"on'yomi", reading:"料(ryou) — yakka kanji", otherReadings:"on: リョウ(ryou)", uz:"ingredientlar, to'lov, yo'l haqi"},
+    {id:"ryouri55", day:55, group:"料", kanji:"料理", romaji:"ryouri", type:"on + on", reading:"料(ryou) + 理(ri)", uz:"taom, ovqat"},
+    {id:"ryoukin55", day:55, group:"料", kanji:"料金", romaji:"ryoukin", type:"on + on", reading:"料(ryou) + 金(kin)", uz:"to'lov miqdori, to'lov"},
+    {id:"souryou55", day:55, group:"料", kanji:"送料", romaji:"souryou", type:"on + on", reading:"送(sou) + 料(ryou)", uz:"pochta summasi, yuborish xarajati"},
+    {id:"shokuryouhin55", day:55, group:"料", kanji:"食料品", romaji:"shokuryouhin", type:"on + on + on", reading:"食(shoku) + 料(ryou) + 品(hin)", uz:"oziq-ovqat mahsulotlari"},
+    {id:"zairyou55", day:55, group:"料", kanji:"材料", romaji:"zairyou", type:"on + on", reading:"材(zai) + 料(ryou)", uz:"ingredientlar"},
+
+    {id:"kakanji55", day:55, group:"科", kanji:"科", romaji:"ka", type:"on'yomi", reading:"科(ka) — yakka kanji", otherReadings:"on: カ(ka)", uz:"filiali, bo'linish"},
+    {id:"kagaku55", day:55, group:"科", kanji:"科学", romaji:"kagaku", type:"on + on", reading:"科(ka) + 学(gaku)", uz:"fan"},
+    {id:"kyoukasho55", day:55, group:"科", kanji:"教科書", romaji:"kyoukasho", type:"on + on + on", reading:"教(kyou) + 科(ka) + 書(sho)", uz:"darslik"},
+    {id:"naika55", day:55, group:"科", kanji:"内科", romaji:"naika", type:"on + on", reading:"内(nai) + 科(ka)", uz:"ichki kasalliklar bo'limi"},
+    {id:"geka55", day:55, group:"科", kanji:"外科", romaji:"geka", type:"on + on", reading:"外(ge) + 科(ka)", uz:"jarrohlik bo'limi"},
+
+    {id:"harakanji55", day:55, group:"腹", kanji:"腹", romaji:"hara", type:"kun'yomi", reading:"腹(hara) — yakka kanji", otherReadings:"kun: はら(hara) · on: フク(fuku)", uz:"oshqozon, qorin"},
+    {id:"onaka55", day:55, group:"腹", kanji:"お腹", romaji:"onaka", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"oshqozon"},
+    {id:"fukutsuu55", day:55, group:"腹", kanji:"腹痛", romaji:"fukutsuu", type:"on + on", reading:"腹(fuku) + 痛(tsuu)", uz:"qorin og'rig'i"},
+    {id:"kuufuku55", day:55, group:"腹", kanji:"空腹", romaji:"kuufuku", type:"on + on", reading:"空(kuu) + 腹(fuku)", uz:"och qorin"},
+    {id:"haragatatsu55", day:55, group:"腹", kanji:"腹が立つ", romaji:"hara ga tatsu", type:"kun'yomi", reading:"腹(hara) + が + 立つ(tatsu)", uz:"g'azablanmoq, jahli chiqmoq"},
+
+    {id:"butakanji55", day:55, group:"豚", kanji:"豚", romaji:"buta", type:"kun'yomi", reading:"豚(buta) — yakka kanji", otherReadings:"kun: ぶた(buta) · on: トン(ton)", uz:"cho'chqa"},
+    {id:"butaniku55", day:55, group:"豚", kanji:"豚肉", romaji:"butaniku", type:"kun + on", reading:"豚(buta) + 肉(niku)", uz:"cho'chqa go'shti"},
+    {id:"tonkatsu55", day:55, group:"豚", kanji:"豚カツ", romaji:"tonkatsu", type:"on + —", reading:"豚(ton) + カツ", uz:"cho'chqa go'shti kotleti"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -10088,6 +10336,7 @@
     quizIdx = 0; quizScore = 0;
     quizBarPct = 0;
     quizReturnTab = returnTab;
+    document.getElementById('quizWrap').classList.toggle('quiz-from-all', returnTab === 'all');
     quizType = mode === 'romaji' ? 'romaji' : mode === 'timed' ? 'timed' : 'translate';
     showTab('quiz');
     renderQuizQuestion();
@@ -10353,54 +10602,111 @@
     });
   }
 
-  // ---------- TO'G'RI JAVOBDA: QILICH BILAN KESIB O'TADI ----------
-  // to'g'ri variant tugmasi ustida o'rtada yorqin "qilich chizig'i" (slash)
-  // yaltiraydi, so'ngra tugmaning ustidan bir lahzalik "arvoh nusxasi" ikki
-  // bo'lakka bo'linib, yuqori-chapga va past-o'ngga uchib ketadi — go'yo
-  // kesib tashlangandek. Haqiqiy tugma (allaqachon yashil rangga o'tgan) shu
-  // effekt ostida butun holicha qoladi, shuning uchun bosish/keyingi savolga
-  // o'tish oqimiga xalaqit bermaydi.
-  function playSamuraiCut(btn){
+  // ---------- TO'G'RI JAVOBDA: QUVONCH PORTLASHI ----------
+  // To'g'ri tugma "pop" qiladi, atrofga ikki halqa tarqaladi va tugma
+  // markazidan oltin yulduzchalar, moss barglari, sakura gulbarglari va
+  // nuqtalar otilib chiqadi. Haqiqiy tugma o'z joyida qoladi, shuning uchun
+  // keyingi savolga o'tish oqimiga xalaqit bermaydi.
+  function playJoyBurst(btn){
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const old = btn.querySelector('.samurai-slash-layer');
+    const old = btn.querySelector('.joy-layer');
     if(old) old.remove();
 
+    btn.classList.remove('joy-pop');
+    void btn.offsetWidth; // reflow — animatsiya qayta ishga tushishi uchun
+    btn.classList.add('joy-pop');
+    setTimeout(()=>btn.classList.remove('joy-pop'), 700);
+
     const layer = document.createElement('div');
-    layer.className = 'samurai-slash-layer';
+    layer.className = 'joy-layer';
     layer.setAttribute('aria-hidden', 'true');
 
-    const line = document.createElement('div');
-    line.className = 'slash-line';
+    ['', 'r2'].forEach(cls=>{
+      const ring = document.createElement('div');
+      ring.className = 'joy-ring' + (cls ? ' ' + cls : '');
+      layer.appendChild(ring);
+    });
 
-    // tugmaning HOZIRGI (allaqachon "to'g'ri" yashil rangga o'tgan) fonini
-    // "arvoh" bo'laklariga ham nusxalab qo'yamiz — shunda kesilib uchayotgan
-    // bo'laklar asl tugma bilan bir xil ko'rinadi
-    const computed = getComputedStyle(btn);
-    const top = document.createElement('div');
-    top.className = 'opt-cut-half opt-cut-top';
-    top.style.background = computed.backgroundColor;
-    top.style.borderColor = computed.borderColor;
-
-    const bottom = document.createElement('div');
-    bottom.className = 'opt-cut-half opt-cut-bottom';
-    bottom.style.background = computed.backgroundColor;
-    bottom.style.borderColor = computed.borderColor;
-
-    layer.appendChild(top);
-    layer.appendChild(bottom);
-    layer.appendChild(line);
+    const light = document.documentElement.classList.contains('perf');
+    const count = light ? 8 : 18;
+    const colors = ['#FFD97A', '#FFE9A8', '#93b17f', '#B7D3A0', '#F6B8C6', '#FFFFFF'];
+    const kinds  = ['star', 'circle', 'petal', 'circle', 'star', 'petal'];
+    const w = btn.offsetWidth || 160, h = btn.offsetHeight || 64;
+    for(let i=0;i<count;i++){
+      const bit = document.createElement('div');
+      const kind = kinds[i % kinds.length];
+      bit.className = 'joy-bit ' + kind;
+      if(kind === 'star') bit.textContent = '✦';
+      // nuqtalar markazdan har tomonga, asosan yuqoriga qarab sochiladi
+      const ang = (Math.PI * 2 * i / count) + (Math.random() - 0.5) * 0.5;
+      const dist = 0.55 + Math.random() * 0.55;
+      const dx = Math.cos(ang) * (w * 0.62) * dist;
+      const dy = Math.sin(ang) * (h * 1.15) * dist - 14;
+      bit.style.setProperty('--dx', dx.toFixed(1) + 'px');
+      bit.style.setProperty('--dy', dy.toFixed(1) + 'px');
+      bit.style.setProperty('--rot', ((Math.random() - 0.5) * 540).toFixed(0) + 'deg');
+      bit.style.setProperty('--sz', (kind === 'star' ? 11 + Math.random() * 7 : 6 + Math.random() * 5).toFixed(1) + 'px');
+      bit.style.setProperty('--c', colors[i % colors.length]);
+      bit.style.setProperty('--dur', (0.85 + Math.random() * 0.4).toFixed(2) + 's');
+      bit.style.setProperty('--dl', (Math.random() * 0.08).toFixed(2) + 's');
+      layer.appendChild(bit);
+    }
     btn.appendChild(layer);
+    setTimeout(()=>{ layer.remove(); }, 1400);
+  }
 
-    // samuray yugurib o'tib, qilich chizig'i yaltiragandan SO'NG (~0.42s)
-    // bo'laklar bir-biridan "kesilib" ajraladi
-    setTimeout(()=>{
-      top.classList.add('cut-open');
-      bottom.classList.add('cut-open');
-    }, 420);
+  // ---------- XATO JAVOBDA: SALBIY EFFEKT ----------
+  // Noto'g'ri tugma silkinadi va qizil chaqnaydi, tashqaridan qizil halqa
+  // tugmaga qarab siqiladi, ichidan "✕" belgilari va tomchilar pastga to'kiladi.
+  function playWrongEffect(btn){
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const old = btn.querySelector('.woe-layer');
+    if(old) old.remove();
 
-    // animatsiya tugagach qatlamni tozalab qo'yamiz (keyingi savolga
-    // o'tishdan oldin, DOMda ortiqcha element qolib ketmasligi uchun)
-    setTimeout(()=>{ layer.remove(); }, 950);
+    btn.classList.remove('wrong-shake');
+    void btn.offsetWidth; // reflow — animatsiya qayta ishga tushishi uchun
+    btn.classList.add('wrong-shake');
+    setTimeout(()=>btn.classList.remove('wrong-shake'), 700);
+
+    const layer = document.createElement('div');
+    layer.className = 'woe-layer';
+    layer.setAttribute('aria-hidden', 'true');
+
+    ['', 'r2'].forEach(cls=>{
+      const ring = document.createElement('div');
+      ring.className = 'woe-ring' + (cls ? ' ' + cls : '');
+      layer.appendChild(ring);
+    });
+
+    const light = document.documentElement.classList.contains('perf');
+    const count = light ? 6 : 12;
+    const colors = ['#ff6b5a', '#d9694f', '#ffb3a8', '#a8322a', '#7a1f1a'];
+    const w = btn.offsetWidth || 160;
+    for(let i=0;i<count;i++){
+      const bit = document.createElement('div');
+      const isX = i % 3 === 0;
+      bit.className = 'woe-bit' + (isX ? '' : ' drop');
+      if(isX) bit.textContent = '✕';
+      // yon tomonlarga ozgina sochilib, asosan pastga tushadi
+      const side = (i / (count - 1)) * 2 - 1; // -1..1
+      bit.style.setProperty('--dx', (side * w * 0.45 + (Math.random() - 0.5) * 18).toFixed(1) + 'px');
+      bit.style.setProperty('--dy', (18 + Math.random() * 34).toFixed(1) + 'px');
+      bit.style.setProperty('--rot', ((Math.random() - 0.5) * 120).toFixed(0) + 'deg');
+      bit.style.setProperty('--sz', (isX ? 11 + Math.random() * 6 : 5 + Math.random() * 4).toFixed(1) + 'px');
+      bit.style.setProperty('--c', colors[i % colors.length]);
+      bit.style.setProperty('--dur', (0.8 + Math.random() * 0.4).toFixed(2) + 's');
+      bit.style.setProperty('--dl', (0.05 + Math.random() * 0.12).toFixed(2) + 's');
+      layer.appendChild(bit);
+    }
+    btn.appendChild(layer);
+    setTimeout(()=>{ layer.remove(); }, 1300);
+  }
+
+  // yengil, "xursand" ikki marta tegish hissi (faqat vibratsiyali qurilmalarda)
+  function vibrateCorrect(){
+    if('vibrate' in navigator){
+      try{ navigator.vibrate([18, 40, 28]); }catch(e){}
+    }
   }
 
   function handleQuizAnswer(btn, correctId, options){
@@ -10413,9 +10719,11 @@
       flashPage('flash-correct');
       playCorrectSound();
       showQuizFeedback(true);
-      playSamuraiCut(btn);
+      playJoyBurst(btn);
+      vibrateCorrect();
     } else {
       btn.classList.add('wrong');
+      playWrongEffect(btn);
       allBtns.forEach(b=>{ if(b.getAttribute('data-id')===correctId) b.classList.add('correct'); });
       flashPage('flash-wrong');
       playWrongSound();
