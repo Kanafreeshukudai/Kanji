@@ -139,6 +139,13 @@
   html.perf .quiz-card{ background:rgba(20,22,26,0.92); }
   html.perf .quiz-opt:not(.correct):not(.wrong){ background:rgba(24,26,31,0.94); }
   html.perf .auth-banner-video{ animation:none !important; }
+  /* Yengil rejimda yuqori chapdagi banner so'nadi, uning o'rniga AI yordamchi tugmasi suriladi
+     (siljish va so'nish JS'da — KanjiPerf — silliq animatsiya qilinadi) */
+  html.bn-off .ai-assist-btn{ order:-1; margin-right:auto; }
+  html.bn-gone .auth-banner-video{ display:none !important; }
+  /* Yengil rejimda orqa fon chiziq/zarrachalari o'chiq — menyudagi tegishli tugmalar faolsiz ko'rinadi */
+  html.perf .auth-bgfx-btn[data-bgfx]{ opacity:.4; pointer-events:none; }
+  html.perf #ctRoomParticles{ display:none !important; }
   *{box-sizing:border-box;}
   /* Barcha tugma va sahifalar uchun: 300ms tap kechikishi va ikki marta bosishdagi zoom yo'q */
   button,[role="button"],a,summary,label,select,input[type="checkbox"],input[type="radio"]{ touch-action:manipulation; }
@@ -6941,6 +6948,7 @@
       var root = document.documentElement;
       if(perfPref === '1' || (perfPref !== '0' && veryWeak)){
         root.classList.add('lite'); root.classList.add('perf');
+        root.classList.add('bn-off'); root.classList.add('bn-gone');   // banner yo'q, AI yordamchi chapda
       } else if(perfPref === '0'){
         if(reduceMotion) root.classList.add('lite');   // foydalanuvchi to'liq sifatni tanladi
       } else if(weakHW || reduceMotion || saveData || savedLite){
@@ -10893,12 +10901,15 @@
 
   const DotsFX = (function(){
     const canvas = document.getElementById('dotsCanvas');
-    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){}, refreshQuality(){} };
+    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){}, refreshQuality(){}, setSuppressed(){} };
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLite = () => document.documentElement.classList.contains('lite');
     const isPerf = () => document.documentElement.classList.contains('perf');
     let W = 0, H = 0, started = false, paused = false, mode = null, booted = false;
     let worker = null, scope = null, resizeTimer = null, wasLite = false, wasPerf = false;
+    // Yengil rejimda ikkala fon qatlami (chiziqlar va zarrachalar) vaqtincha butunlay o'chiriladi —
+    // foydalanuvchining saqlangan tanlovi (fx) o'zgarmaydi, rejim o'chirilganda qayta tiklanadi.
+    let suppressed = document.documentElement.classList.contains('perf');
     // foydalanuvchi tanlovi shu qurilmada eslab qolinadi ('0' = o'chiq). Standart — chiziqlar yoqilgan.
     const KEYS = { lines:'kanji-bgfx', dots:'kanji-bgdots' };
     const fx = { lines:true, dots:true };
@@ -10940,7 +10951,7 @@
     function start(){
       if(started) return;
       started = true;
-      if(fx.lines || fx.dots) boot();   // ikkalasi ham o'chiq bo'lsa, Worker ham yaratilmaydi — resurs sarflanmaydi
+      if((fx.lines || fx.dots) && !suppressed) boot();   // ikkalasi ham o'chiq (yoki yengil rejim) bo'lsa, Worker ham yaratilmaydi — resurs sarflanmaydi
     }
     function boot(){
       if(booted) return;
@@ -10949,7 +10960,7 @@
         measure();
         wasLite = isLite(); wasPerf = isPerf();
         const dpr = window.devicePixelRatio || 1;
-        const base = { type:'init', w:W, h:H, dpr:dpr, lite:wasLite, perf:wasPerf, reduce:reduceMotion, on:fx.lines, dots:fx.dots };
+        const base = { type:'init', w:W, h:H, dpr:dpr, lite:wasLite, perf:wasPerf, reduce:reduceMotion, on:fx.lines && !suppressed, dots:fx.dots && !suppressed };
 
         // 1) Afzal yo'l: alohida oqim (Worker + OffscreenCanvas)
         try{
@@ -11031,20 +11042,34 @@
       fx[name] = v;
       try{ localStorage.setItem(KEYS[name], v ? '1' : '0'); }catch(_){}
       if(!started) return;                               // "Boshlash" bosilmagan — start() o'zi hisobga oladi
+      if(suppressed) return;                             // yengil rejim: tanlov saqlanadi, lekin qatlam ishga tushmaydi
       if(v && !booted) boot();
       else if(mode) send({ type:'enable', layer:name, on:v });
     }
     function getLayer(name){ return !!fx[name]; }
+    // Yengil rejim yoqilganda qatlamlar so'nadi (hisob-kitob to'xtaydi), o'chirilganda silliq qaytadi
+    function setSuppressed(v){
+      v = !!v;
+      if(v === suppressed) return;
+      suppressed = v;
+      if(!started) return;
+      if(v){
+        if(mode){ send({ type:'enable', layer:'lines', on:false }); send({ type:'enable', layer:'dots', on:false }); }
+      } else if(fx.lines || fx.dots){
+        if(!booted) boot();
+        else if(mode){ send({ type:'enable', layer:'lines', on:fx.lines }); send({ type:'enable', layer:'dots', on:fx.dots }); }
+      }
+    }
     // Kartochka gorizontal tortilganda zarrachalar o'sha tomonga yengil ergashadi (v: -1..1)
     let lastDrift = 0;
     function drift(v){
-      if(!started || !mode || !fx.dots || reduceMotion) return;
+      if(!started || !mode || !fx.dots || suppressed || reduceMotion) return;
       v = v > 1 ? 1 : (v < -1 ? -1 : v);
       if(v === lastDrift || (v !== 0 && Math.abs(v - lastDrift) < 0.02)) return;
       lastDrift = v;
       send({ type:'drift', v:v });
     }
-    return { start, pause, resume, setLayer, getLayer, drift, refreshQuality };
+    return { start, pause, resume, setLayer, getLayer, drift, refreshQuality, setSuppressed };
   })();
 
   // Akkaunt menyusidagi fon almashtirgichlari (data-bgfx="lines" | "dots")
@@ -11077,14 +11102,66 @@
       }catch(_){}
     }
     function sync(){ if(btn) btn.setAttribute('aria-checked', isOn() ? 'true' : 'false'); }
+
+    // Yuqori chap burchak: yoqilganda banner so'nadi va AI yordamchi tugmasi uning o'rniga
+    // silliq suriladi; o'chirilganda banner qaytib paydo bo'ladi, AI tugmasi o'z joyiga qaytadi.
+    // FLIP usuli: joylashuv darhol o'zgaradi, so'ng tugma eski joyidan yangisiga animatsiya qilinadi.
+    function animateAuthBox(on){
+      const box = document.getElementById('authBox');
+      const ban = document.getElementById('authBannerVideo');
+      const ai  = document.getElementById('aiAssistBtn');
+      const instant = reduceMo || document.hidden;
+      if(!box || !ban || !ai){
+        root.classList.toggle('bn-off', on); root.classList.toggle('bn-gone', on);
+        return;
+      }
+      if(on === root.classList.contains('bn-off')){ root.classList.toggle('bn-gone', on); return; }
+      try{ ban.getAnimations().forEach(a=>a.cancel()); ai.getAnimations().forEach(a=>a.cancel()); }catch(_){}
+      const aiFirst = ai.getBoundingClientRect();
+      const glide = ()=>{
+        const aiLast = ai.getBoundingClientRect();
+        const dx = aiFirst.left - aiLast.left, dy = aiFirst.top - aiLast.top;
+        if(instant || !ai.animate || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return;
+        ai.animate(
+          [{ transform:'translate(' + dx + 'px,' + dy + 'px)' }, { transform:'translate(0,0)' }],
+          { duration:620, easing:'cubic-bezier(.3,.8,.2,1)' }
+        );
+      };
+      if(on){
+        // banner o'z joyida, oqimdan tashqarida qoladi va so'nadi
+        const b = ban.getBoundingClientRect(), bx = box.getBoundingClientRect();
+        Object.assign(ban.style, { position:'absolute', left:(b.left - bx.left) + 'px', top:(b.top - bx.top) + 'px',
+          width:b.width + 'px', height:b.height + 'px', margin:'0', flex:'none', pointerEvents:'none' });
+        root.classList.add('bn-off');
+        glide();
+        if(instant || !ban.animate){ root.classList.add('bn-gone'); return; }
+        const fade = ban.animate(
+          [{ opacity:1, transform:'scale(1)' }, { opacity:0, transform:'scale(.96)' }],
+          { duration:380, easing:'ease', fill:'forwards' }
+        );
+        fade.onfinish = ()=>{ if(root.classList.contains('bn-off')) root.classList.add('bn-gone'); fade.cancel(); };
+      } else {
+        root.classList.remove('bn-gone');
+        ban.removeAttribute('style');
+        root.classList.remove('bn-off');
+        glide();
+        if(!instant && ban.animate){
+          ban.animate(
+            [{ opacity:0, transform:'scale(.96)' }, { opacity:1, transform:'scale(1)' }],
+            { duration:480, delay:140, easing:'ease', fill:'backwards' }
+          );
+        }
+      }
+    }
     function set(on, persist){
       on = !!on;
+      animateAuthBox(on);
       root.classList.toggle('perf', on);
       if(on) root.classList.add('lite');
       else if(!reduceMo) root.classList.remove('lite');   // o'chirilganda to'liq sifat (harakatni kamaytirish yoqiq bo'lsa — lite qoladi)
       if(persist !== false){ try{ localStorage.setItem('kanji-perf', on ? '1' : '0'); }catch(_){} }
       bannerVideo(on);
-      try{ DotsFX.refreshQuality(); }catch(_){}
+      try{ DotsFX.setSuppressed(on); DotsFX.refreshQuality(); }catch(_){}
       sync();
     }
     sync();
@@ -11237,7 +11314,7 @@
 
     function start(){
       canvas = document.getElementById('splashLineCanvas');
-      if(!canvas || !canvas.getContext || reduceMotion) return;
+      if(!canvas || !canvas.getContext || reduceMotion || document.documentElement.classList.contains('perf')) return;
       ctx = canvas.getContext('2d', { alpha: true });
       resize();
       lines.forEach((L)=>{
@@ -12220,9 +12297,9 @@
     }
     function stepRoomParticles(ts){
       if(!roomParticlesCanvas || !roomParticlesCtx){ roomParticlesRAF = null; return; }
-      if(roomParticlesLastTs != null && ts - roomParticlesLastTs < 40 && document.documentElement.classList.contains('perf')){
-        roomParticlesRAF = requestAnimationFrame(stepRoomParticles);   // yengil rejim: ~24fps
-        return;
+      if(document.documentElement.classList.contains('perf')){            // yengil rejim yoqilsa — to'xtaydi
+        roomParticlesCtx.clearRect(0, 0, roomParticlesCanvas.clientWidth, roomParticlesCanvas.clientHeight);
+        roomParticlesRAF = null; return;
       }
       const w = roomParticlesCanvas.clientWidth;
       const h = roomParticlesCanvas.clientHeight;
@@ -12248,6 +12325,7 @@
     }
     function startRoomParticles(){
       if(!roomParticlesCanvas || roomParticlesRAF) return;
+      if(document.documentElement.classList.contains('perf')) return;   // yengil rejim: zarrachalar yo'q
       initRoomParticles();
       roomParticlesLastTs = null;
       roomParticlesRAF = requestAnimationFrame(stepRoomParticles);
