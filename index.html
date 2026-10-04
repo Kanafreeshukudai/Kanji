@@ -9503,6 +9503,7 @@
     function applyTransform(dx){
       const rot = dx / 18;
       card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
+      try{ DotsFX.drift(dx/180); }catch(_){}   // fon zarralari tortish yo'nalishiga yengil ergashadi
       const op = Math.min(Math.abs(dx)/80, 1);
       if(dx < 0){
         tagLeft.style.opacity = op; tagRight.style.opacity = 0;
@@ -9572,6 +9573,7 @@
       if(rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
       if(!dragging){ return; }
       dragging = false;
+      try{ DotsFX.drift(0); }catch(_){}
       inner.style.transition = '';
       // TAP'ni o'zimiz aniqlaymiz: brauzer ozgina siljishni scroll deb hisoblab 'click'ni
       // yubormay qo'yishi mumkin edi — shu sabab ba'zan bir bosishda aylanmasdi
@@ -10459,9 +10461,10 @@
   //  1) "lines"  — siyrak, ingichka topografik (kontur) chiziqlar. Ular tayyor rasm emas:
   //     har kadrda sekin o'zgaruvchi silliq "balandlik maydoni"dan MARCHING SQUARES
   //     usulida hisoblanadi, sekin oqadi va "nafas oladi".
-  //  2) "dots"   — yirikroq, yarim shaffof yumaloq zarrachalar (aurasiz, tekis doira)
-  //     pastdan tepaga silliq suzib chiqadi. Chuqurlik hissi: uzoqdagilari kichikroq,
-  //     xira, sekin; yaqinlari kattaroq, biroz yorqinroq va tezroq (parallaks).
+  //  2) "dots"   — shisha pufakchaga o'xshash yarim shaffof zarrachalar (aurasiz): ular
+  //     orqa chuqurlikdan mayda va xira bo'lib paydo bo'ladi, yuqoriga suzib borar ekan
+  //     kattalashib va yorqinlashib "yaqinlashadi", tepada asta so'nadi. Kartochka
+  //     tortilganda yengil ergashadi, aylanganda esa sekinlashib, keyin jonlanadi.
   //
   // SILLIQLIK: butun hisob-kitob va chizish ALOHIDA OQIMDA (Web Worker + OffscreenCanvas)
   // bajariladi — scroll, kartochka aylanishi va tortilishi fon bilan band bo'lmaydi.
@@ -10492,7 +10495,8 @@
     let kick = 0, energy = 0;         // vaqtinchalik jonlanish (silliq ko'tarilib, silliq tushadi)
     let parity = 1, frame = 0;        // 1 = har kadr, 2 = har ikkinchi kadr (30fps)
     let lastRender = null, dtS = 1/60, ema = 0, holdUntil = 0;
-    let parts = [], PCOUNT = 36;
+    let parts = [], PCOUNT = 34;
+    let wind = 0, windT = 0;         // kartochka surilganda zarrachalar yengil ergashadigan "shamol" (silliq easing)
 
     const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const raf = (typeof scope.requestAnimationFrame === 'function')
@@ -10506,7 +10510,7 @@
       const STEP = lite ? 0.8 : 0.62;  // siyraklik: qadam katta bo'lsa chiziqlar kam
       LEVELS = [];
       for(let l2 = -2.5, i = 0; l2 <= 2.5 + 1e-6; l2 += STEP, i++) LEVELS.push({ v:l2, major: i % 3 === 0 });
-      PCOUNT = lite ? 18 : 36;
+      PCOUNT = lite ? 16 : 34;
     }
     function setSize(){
       scale = Math.min(dpr, 2) * (lite ? 0.6 : 0.85);
@@ -10587,22 +10591,27 @@
     }
 
     // ================= QATLAM 2: SUZUVCHI ZARRACHALAR =================
+    function sstep(x){ x = x < 0 ? 0 : (x > 1 ? 1 : x); return x*x*(3 - 2*x); }
+    function clamp01(x){ return x < 0 ? 0 : (x > 1 ? 1 : x); }
+    // Zarracha umri vaqtga bog'langan: chuqurlikdan (orqadan) xira va mayda bo'lib paydo bo'ladi,
+    // yuqoriga suzib borar ekan kattalashib va yorqinlashib "yaqinlashadi", so'ng tepada asta so'nadi.
     function makeParticle(anywhere){
-      // z: 0 = juda uzoq, 1 = juda yaqin; daraja uzoqdagilarni ko'proq qiladi (tabiiy chuqurlik)
-      const z = Math.pow(Math.random(), 1.35);
-      const r = 2.2 + z*6.3;                              // radius 2.2–8.5px: yirikroq yumaloq zarracha
-      const y0 = H + r*6 + Math.random()*40;              // tug'ilish chizig'i (ekrandan pastda)
+      const z = Math.pow(Math.random(), 1.3);             // 0 = uzoq, 1 = yaqin (uzoqdagilar ko'proq)
+      const life = 11 + Math.random()*9;                  // 11–20 soniya
       return {
+        // ekran bo'ylab tarqalgan joyda "paydo bo'ladi" (pastdan "kirib kelmaydi") — orqadan chiqayotgandek
         x: Math.random()*W,
-        y: anywhere ? Math.random()*H : y0,
-        y0: y0,
-        yEnd: -(40 + Math.random()*60),                   // ekran tepasidan ham biroz o'tib so'nadi
-        z: z, r: r,
-        speed: (6 + z*28) * (0.75 + Math.random()*0.5),   // px/s — uzoq sekin, yaqin tezroq
-        drift: (Math.random()-0.5)*(3 + z*8),
-        ph: Math.random()*Math.PI*2,
-        f: 0.25 + Math.random()*0.35,
-        maxA: 0.10 + z*0.26 + Math.random()*0.05          // yarim shaffof: uzoq — juda xira, yaqin — biroz yorqinroq
+        y: H*(0.2 + Math.random()*0.88),
+        age: anywhere ? Math.random()*life : 0,
+        life: life,
+        z: z,
+        r: 2.4 + z*6.6,                                   // radius 2.4–9px
+        vy: (6 + z*26) * (0.8 + Math.random()*0.4),       // px/s — uzoq sekin, yaqin tezroq
+        ph0: Math.random()*6.2832,                        // tezlikning sekin "nafasi"
+        ph1: Math.random()*6.2832, f1: 0.16 + Math.random()*0.18,   // asosiy sekin tebranish
+        ph2: Math.random()*6.2832, f2: 0.06 + Math.random()*0.08,   // juda sekin ikkinchi to'lqin
+        a1: 14 + z*26, a2: 8 + z*14,                      // tebranish kuchi (yaqinlari kengroq)
+        maxA: 0.2 + z*0.38 + Math.random()*0.06           // uzoq — xira, yaqin — yorqinroq
       };
     }
     function seedParts(){
@@ -10610,29 +10619,52 @@
       for(let i=0;i<PCOUNT;i++) parts.push(makeParticle(true));
     }
     function stepParts(dt){
-      const mult = dt * rate * (1 + energy*0.6);
+      const mult = dt * rate * (1 + energy*0.6);          // kartochka harakatida sekinlashadi, keyin jonlanadi
       for(let i=0;i<parts.length;i++){
-        let p = parts[i];
-        p.y -= p.speed*mult;
-        if(p.y < p.yEnd){ parts[i] = makeParticle(false); continue; }
-        p.x += Math.sin(p.ph + (p.y0 - p.y)*0.012*p.f*6) * p.drift * mult;
+        const p = parts[i];
+        p.age += mult;
+        if(p.age >= p.life || p.y < -p.r*3){ parts[i] = makeParticle(false); continue; }
+        const vy = p.vy * (0.85 + 0.15*Math.sin(p.age*0.45 + p.ph0));   // tezlik ham yengil nafas oladi
+        p.y -= vy*mult;
+        p.x += (Math.sin(p.ph1 + p.age*p.f1*6.2832)*p.a1 + Math.sin(p.ph2 + p.age*p.f2*6.2832)*p.a2) * mult
+             + wind * (14 + 46*p.z) * dt;                  // shamol: yaqin zarrachalar ko'proq ergashadi (parallaks)
       }
     }
-    function sstep(x){ x = x < 0 ? 0 : (x > 1 ? 1 : x); return x*x*(3 - 2*x); }
+    // Ko'rinishi sayt bilan hamohang: kartochka ramkasidagi kabi shisha pufakcha —
+    // juda shaffof tana + ingichka yorqin chet + yuqori-chapda kichik yaltirash.
+    // Aura (tashqi nur) YO'Q.
     function drawDots(){
       const da = dotsA*dotsA*(3 - 2*dotsA) * (1 + energy*0.15);
       ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#fff';
+      ctx.lineCap = 'round';
       for(let i=0;i<parts.length;i++){
         const p = parts[i];
-        const t = (p.y0 - p.y)/(p.y0 - p.yEnd);
-        const env = sstep(t/0.12) * sstep((1 - t)/0.22);   // pastdan silliq paydo bo'lib, tepada asta so'nadi
-        const a = env * p.maxA * da;
+        const t = p.age/p.life;
+        const q = clamp01(t/0.22);
+        const inE  = 1 - (1-q)*(1-q)*(1-q);                  // orqadan chiqish: avval tez, keyin yumshoq
+        const outE = sstep((1 - t)/0.28);                    // tepada asta so'nish
+        const g = clamp01(t/0.6);
+        const grow = 0.5 + 0.55*(1 - (1-g)*(1-g)) + 0.08*t;  // 0.5 → ~1.1: yaqinlashayotgandek kattalashadi
+        const a = inE * outE * p.maxA * da;
         if(a < 0.004) continue;
-        // AURASIZ: faqat tekis, yarim shaffof, aniq chetli doira (nur/halo yo'q)
-        ctx.globalAlpha = Math.min(1, a);
+        const rr = p.r * grow;
+        // tana + chet
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        ctx.arc(p.x, p.y, rr, 0, 6.2832);
+        ctx.globalAlpha = a*0.2;
         ctx.fill();
+        ctx.globalAlpha = Math.min(1, a*0.9);
+        ctx.lineWidth = 0.8 + rr*0.06;
+        ctx.stroke();
+        // kichik yaltirash (faqat kattaroq zarrachalarda)
+        if(rr > 3.6){
+          ctx.globalAlpha = Math.min(1, a*0.95);
+          ctx.lineWidth = Math.max(0.9, rr*0.16);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, rr*0.68, 3.5, 4.45);
+          ctx.stroke();
+        }
       }
       ctx.globalAlpha = 1;
     }
@@ -10661,6 +10693,8 @@
       kick = Math.max(0, kick - dt*0.3);
       energy += (kick - energy)*(1 - Math.exp(-dt*2.5)); // jonlanish sakrab emas, silliq ko'tariladi
       rate   += (target - rate)*(1 - Math.exp(-dt*3));   // tezlik ham easing bilan o'zgaradi
+      windT  -= windT*Math.min(1, dt*0.8);               // barmoq to'xtasa shamol ham asta tinadi
+      wind   += (windT - wind)*(1 - Math.exp(-dt*2.5));  // shamol sakrab emas, silliq o'zgaradi
       // qatlamlar: yoqilganda yumshoq paydo bo'ladi, o'chirilganda tez (~0.4s) so'nadi
       if(on) appear = Math.min(1, appear + dt*0.45);
       else   appear = Math.max(0, appear - dt*2.6);
@@ -10732,6 +10766,9 @@
           } else { running = true; kickLoop(); }         // yoqish: paydo bo'ladi; o'chirish: so'nib, sikl o'zi to'xtaydi
           break;
         }
+        case 'drift':
+          windT = Math.max(-1, Math.min(1, +m.v || 0));
+          break;
         case 'visible':
           visible = !!m.on;
           if(visible) kickLoop();
@@ -10745,7 +10782,7 @@
 
   const DotsFX = (function(){
     const canvas = document.getElementById('dotsCanvas');
-    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; } };
+    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){} };
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLite = () => document.documentElement.classList.contains('lite');
     let W = 0, H = 0, started = false, paused = false, mode = null, booted = false;
@@ -10871,7 +10908,16 @@
       else if(mode) send({ type:'enable', layer:name, on:v });
     }
     function getLayer(name){ return !!fx[name]; }
-    return { start, pause, resume, setLayer, getLayer };
+    // Kartochka gorizontal tortilganda zarrachalar o'sha tomonga yengil ergashadi (v: -1..1)
+    let lastDrift = 0;
+    function drift(v){
+      if(!started || !mode || !fx.dots || reduceMotion) return;
+      v = v > 1 ? 1 : (v < -1 ? -1 : v);
+      if(v === lastDrift || (v !== 0 && Math.abs(v - lastDrift) < 0.02)) return;
+      lastDrift = v;
+      send({ type:'drift', v:v });
+    }
+    return { start, pause, resume, setLayer, getLayer, drift };
   })();
 
   // Akkaunt menyusidagi fon almashtirgichlari (data-bgfx="lines" | "dots")
