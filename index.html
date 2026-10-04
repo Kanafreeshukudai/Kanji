@@ -1566,27 +1566,60 @@
   @media (prefers-reduced-motion: reduce){
     .known-banner.pulse, .known-banner.pulse::before{ animation:none; }
   }
-  .known-banner-icon{font-size:16px; display:inline-block; transform-origin:50% 85%; will-change:transform;}
+  .known-banner-icon{font-size:16px; display:inline-block;}
   /* Emoji animatsiyasi FAQAT tugma bosilganda (JS `.icon-anim` qo'shadi, tugagach olib tashlaydi) */
-  @keyframes knownIconSway{
-    0%{ transform:rotate(0) scale(1); }
-    18%{ transform:rotate(-24deg) scale(1.35); }
-    40%{ transform:rotate(20deg) scale(1.3); }
-    62%{ transform:rotate(-12deg) scale(1.15); }
-    82%{ transform:rotate(6deg) scale(1.05); }
-    100%{ transform:rotate(0) scale(1); }
+  /* Bosilganda yoqimli, sokin animatsiya:
+     🌿 Bilganlarim — barg poyadan pastdan yuqoriga asta o'sib chiqadi, so'ng yengil to'xtaydi;
+     📚 Hammasi — kitoblar pastdan boshlab bir-birining ustiga tartib bilan taxlanadi.
+     Ikkalasida ham ikon ortida yumshoq nur paydo bo'lib so'nadi. Faqat transform/opacity/clip-path. */
+  .known-banner-icon{ position:relative; }
+  .known-banner-icon i{ font-style:normal; display:inline-block; }
+  .known-banner-icon::before{
+    content:"";
+    position:absolute; left:50%; top:50%;
+    width:32px; height:32px; margin:-16px 0 0 -16px;
+    border-radius:50%;
+    background:radial-gradient(circle, var(--bn-glow, rgba(124,154,107,.55)) 0%, rgba(0,0,0,0) 68%);
+    opacity:0;
+    pointer-events:none;
+    z-index:-1;
   }
-  @keyframes allIconHop{
-    0%{ transform:translateY(0) rotateY(0) scale(1); }
-    30%{ transform:translateY(-7px) rotateY(180deg) scale(1.35); }
-    55%{ transform:translateY(0) rotateY(360deg) scale(0.92); }
-    75%{ transform:translateY(-2px) rotateY(360deg) scale(1.1); }
-    100%{ transform:translateY(0) rotateY(360deg) scale(1); }
+  .all-banner .known-banner-icon{ --bn-glow:rgba(201,166,107,.5); }
+  .known-banner-icon.icon-anim::before{ animation:bnGlow 1s ease-out; }
+  @keyframes bnGlow{
+    0%  { opacity:0; transform:scale(.55); }
+    38% { opacity:1; }
+    100%{ opacity:0; transform:scale(1.25); }
   }
-  .known-banner:not(.all-banner) .known-banner-icon.icon-anim{ animation:knownIconSway .65s cubic-bezier(.3,.8,.3,1); }
-  .all-banner .known-banner-icon.icon-anim{ animation:allIconHop .65s cubic-bezier(.3,.8,.3,1); }
+
+  /* 🌿 barg o'sib chiqishi */
+  .bn-leaf{ transform-origin:50% 100%; will-change:transform, clip-path; }
+  .known-banner-icon.icon-anim .bn-leaf{ animation:leafGrow .95s cubic-bezier(.22,.8,.3,1) both; }
+  @keyframes leafGrow{
+    0%  { opacity:0; transform:scale(.25) rotate(-10deg); clip-path:inset(100% 0 0 0); }
+    30% { opacity:1; transform:scale(.62) rotate(-6deg);  clip-path:inset(45% 0 0 0); }
+    62% { transform:scale(1.14) rotate(5deg);             clip-path:inset(0 0 0 0); }
+    82% { transform:scale(0.98) rotate(-2deg); }
+    100%{ opacity:1; transform:scale(1) rotate(0);        clip-path:inset(0 0 0 0); }
+  }
+
+  /* 📚 kitoblar taxlanishi: bitta emoji uchta gorizontal qatlamga bo'linadi, pastdan yuqoriga birin-ketin tushadi */
+  .known-banner-icon .bk2, .known-banner-icon .bk3{ display:none; position:absolute; left:0; top:0; }
+  .known-banner-icon.icon-anim .bk2, .known-banner-icon.icon-anim .bk3{ display:inline-block; }
+  .known-banner-icon.icon-anim .bk{ will-change:transform, opacity; animation:bookDrop .52s cubic-bezier(.3,.75,.3,1) both; }
+  .known-banner-icon.icon-anim .bk1{ clip-path:inset(62% 0 0 0);     animation-delay:0s; }
+  .known-banner-icon.icon-anim .bk2{ clip-path:inset(31% 0 36% 0);   animation-delay:.16s; }
+  .known-banner-icon.icon-anim .bk3{ clip-path:inset(0 0 69% 0);     animation-delay:.32s; }
+  @keyframes bookDrop{
+    0%  { opacity:0; transform:translateY(-11px); }
+    55% { opacity:1; transform:translateY(1.5px); }
+    80% { transform:translateY(-.6px); }
+    100%{ opacity:1; transform:translateY(0); }
+  }
   @media (prefers-reduced-motion: reduce){
-    .known-banner .known-banner-icon.icon-anim{ animation:none !important; }
+    .known-banner-icon.icon-anim::before, .known-banner-icon.icon-anim .bn-leaf, .known-banner-icon.icon-anim .bk{ animation:none !important; }
+    .known-banner-icon.icon-anim .bk1{ clip-path:none; }
+    .known-banner-icon.icon-anim .bk2, .known-banner-icon.icon-anim .bk3{ display:none; }
   }
   .known-banner-badge{
     display:inline-flex;
@@ -7517,12 +7550,12 @@
 
 <div class="banner-row">
   <button class="known-banner" id="knownBanner" type="button">
-    <span class="known-banner-icon">🌿</span>
+    <span class="known-banner-icon"><i class="bn-leaf">🌿</i></span>
     <span class="known-banner-label">Bilganlarim</span>
     <span class="known-banner-badge" id="knownBannerBadge">0</span>
   </button>
   <button class="known-banner all-banner" id="allBanner" type="button">
-    <span class="known-banner-icon">📚</span>
+    <span class="known-banner-icon"><i class="bk bk1">📚</i><i class="bk bk2" aria-hidden="true">📚</i><i class="bk bk3" aria-hidden="true">📚</i></span>
     <span class="known-banner-label">Hammasi</span>
     <span class="known-banner-badge" id="allBannerBadge">0</span>
   </button>
@@ -9824,10 +9857,11 @@
   function playBannerIcon(banner){
     const ic = banner.querySelector('.known-banner-icon');
     if(!ic) return;
+    clearTimeout(ic._animT);
     ic.classList.remove('icon-anim');
     void ic.offsetWidth;
     ic.classList.add('icon-anim');
-    ic.addEventListener('animationend', ()=>ic.classList.remove('icon-anim'), {once:true});
+    ic._animT = setTimeout(()=>ic.classList.remove('icon-anim'), 1050);   // ichki qatlamlar tugagach tozalanadi
   }
   knownBanner.addEventListener('click', ()=>playBannerIcon(knownBanner));
   knownBanner.addEventListener('click', ()=>showTab('known'));
@@ -11577,7 +11611,9 @@
         ph1: Math.random()*6.2832, f1: 0.16 + Math.random()*0.18,   // asosiy sekin tebranish
         ph2: Math.random()*6.2832, f2: 0.06 + Math.random()*0.08,   // juda sekin ikkinchi to'lqin
         a1: 14 + z*26, a2: 8 + z*14,                      // tebranish kuchi (yaqinlari kengroq)
-        maxA: 0.2 + z*0.38 + Math.random()*0.06           // uzoq — xira, yaqin — yorqinroq
+        maxA: 0.2 + z*0.38 + Math.random()*0.06,          // uzoq — xira, yaqin — yorqinroq
+        ox: 0, ov: 0,                                     // shamoldan og'ish (px) va uning tezligi (prujina)
+        sk: 13 + Math.random()*12                         // prujina qattiqligi — har biri biroz o'zicha javob beradi
       };
     }
     // Kartochka surib yuborilganda uning ATROFIDAGI (ramka ichidagi va yaqin) pufakchalarning bir qismi
@@ -11615,6 +11651,17 @@
       const mult = dt * rate * (1 + energy*0.6);          // kartochka harakatida sekinlashadi, keyin jonlanadi
       for(let i=0;i<parts.length;i++){
         const p = parts[i];
+        // SHAMOL: kartochka tortilganda TEPADAGI pufakchalar o'z joyidan biroz og'adi (prujinada),
+        // barmoq qo'yilsa/shamol tinsa — asta-sekin joyiga qaytib, ozgina tebranib to'xtaydi.
+        // Pufakchalar surilib ketib qolmaydi: og'ish chegaralangan (yaqinlari ko'proq, tepadagilari kuchliroq).
+        {
+          const hf = 1 - sstep(clamp01(p.y / (H*0.75)));      // tepa = 1, pastga tushgan sari 0
+          const tgt = (8 + 24*p.z) * hf * wind;                // maqsad og'ish, px
+          const sc = 2 * 0.55 * Math.sqrt(p.sk);               // damping (yengil tebranish)
+          const dts = dt > 0.05 ? 0.05 : dt;
+          p.ov += (p.sk*(tgt - p.ox) - sc*p.ov) * dts;
+          p.ox += p.ov * dts;
+        }
         const f = p.fl;
         if(f){
           // kartochka surib yuborilganda uning yonidagi pufakchalar ortidan tortilib, birga chiqib ketadi
@@ -11635,7 +11682,7 @@
         const vy = p.vy * (0.85 + 0.15*Math.sin(p.age*0.45 + p.ph0));   // tezlik ham yengil nafas oladi
         p.y -= vy*mult;
         p.x += (Math.sin(p.ph1 + p.age*p.f1*6.2832)*p.a1 + Math.sin(p.ph2 + p.age*p.f2*6.2832)*p.a2) * mult
-             + wind * (14 + 46*p.z) * dt;                  // shamol: yaqin zarrachalar ko'proq ergashadi (parallaks)
+;
       }
     }
     // Ko'rinishi sayt bilan hamohang: kartochka ramkasidagi kabi shisha pufakcha —
@@ -11658,8 +11705,9 @@
         if(a < 0.004) continue;
         const rr = p.r * grow;
         // tana + chet
+        const px = p.x + p.ox;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, rr, 0, 6.2832);
+        ctx.arc(px, p.y, rr, 0, 6.2832);
         ctx.globalAlpha = a*0.2;
         ctx.fill();
         ctx.globalAlpha = Math.min(1, a*0.9);
@@ -11670,7 +11718,7 @@
           ctx.globalAlpha = Math.min(1, a*0.95);
           ctx.lineWidth = Math.max(0.9, rr*0.16);
           ctx.beginPath();
-          ctx.arc(p.x, p.y, rr*0.68, 3.5, 4.45);
+          ctx.arc(px, p.y, rr*0.68, 3.5, 4.45);
           ctx.stroke();
         }
       }
