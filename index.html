@@ -3205,7 +3205,22 @@
   @media (prefers-reduced-motion: reduce){
     .page-flash.flash-correct, .page-flash.flash-wrong{animation:none !important; opacity:0 !important;}
   }
-  .quiz-opt.disabled{pointer-events:none; opacity:0.55;}
+  .quiz-opt.disabled{pointer-events:none; opacity:0.7;}
+
+  /* ---------- QUIZ: savol va variantlar o'qilishi uchun yengil to'q "zamin" ----------
+     Shisha effekti saqlanadi, lekin ostiga qora qatlam qo'shildi — shu sababli fon
+     chiziqlari/zarrachalari matn ustidan o'tib ketsa ham yozuv aniq ko'rinadi.
+     (to'g'ri/noto'g'ri holatlar o'z rangini avvalgidek saqlaydi) */
+  .quiz-card{
+    background:
+      linear-gradient(var(--glass-bg), var(--glass-bg)),
+      rgba(11,13,16,0.66);
+  }
+  .quiz-opt:not(.correct):not(.wrong){
+    background:
+      linear-gradient(var(--glass-bg), var(--glass-bg)),
+      rgba(11,13,16,0.72);
+  }
 
   /* ---------- VAQT SINOVI (timed recall quiz) ---------- */
   .quiz-card-timed{}
@@ -9869,11 +9884,18 @@
         el.classList.add('view-enter');
       }
     });
-    // Bilganlarim va Hammasi: kunlar qatori o'rnida "Ortga" tugmasi turadi
-    tabsWrap.classList.toggle('tabs-hidden', tab==='all' || tab==='known');
+    // Bilganlarim va Hammasi (hamda ulardan boshlangan quiz): kunlar qatori o'rnida
+    // "Ortga" tugmasi turadi — Hammasi/Bilganlarim bannerlari tagida
+    const quizFromList = tab==='quiz' && (quizReturnTab==='all' || quizReturnTab==='known');
+    const showBack = tab==='all' || tab==='known' || quizFromList;
+    tabsWrap.classList.toggle('tabs-hidden', showBack);
     tabsWrap.classList.remove('tabs-ghost');
     const backRow = document.getElementById('viewBackRow');
-    if(backRow) backRow.classList.toggle('hidden', !(tab==='all' || tab==='known'));
+    if(backRow) backRow.classList.toggle('hidden', !showBack);
+    const backBtn = document.getElementById('btnBack');
+    if(backBtn) backBtn.setAttribute('aria-label', quizFromList
+      ? (quizReturnTab==='all' ? 'Hammasiga qaytish' : 'Bilganlarimga qaytish')
+      : 'Kartochkalarga qaytish');
     if(tab!=='learn') kunlarOpen = false;
     if(tab!=='quiz' && timedRevealTimeout){ clearTimeout(timedRevealTimeout); timedRevealTimeout = null; }
     if(tab!=='quiz' && timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
@@ -9919,7 +9941,12 @@
   // kartochkalar to'xtagan joyidan davom etadi.
   (function(){
     const b = document.getElementById('btnBack');
-    if(b) b.addEventListener('click', ()=>showTab('learn'));
+    if(b) b.addEventListener('click', ()=>{
+      // Quiz ichida: boshlangan joyiga (Hammasi yoki Bilganlarim) qaytadi,
+      // aks holda — kartochkalar bo'limiga
+      if(currentTab==='quiz' && (quizReturnTab==='all' || quizReturnTab==='known')) showTab(quizReturnTab);
+      else showTab('learn');
+    });
   })();
 
   // ---------- QUIZ ----------
