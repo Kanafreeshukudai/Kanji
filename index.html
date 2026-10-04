@@ -145,7 +145,10 @@
   /* ---------- LIVING BACKDROP (soft blurred color, so the glass has something nice to catch) ---------- */
   .bg-scene{
     position:fixed;
-    inset:0;
+    top:0; left:0;
+    width:100%;
+    height:100vh;
+    height:100lvh;
     z-index:-1;
     overflow:hidden;
     background:var(--bg-1);
@@ -165,7 +168,10 @@
      kartochkalar, tugmalar) doim uning ustida ko'rinadi. */
   .dots-canvas{
     position:fixed;
-    inset:0;
+    top:0; left:0;
+    width:100%;
+    height:100vh;            /* eski brauzerlar uchun */
+    height:100lvh;           /* eng katta ko'rinish — manzil paneli o'zgarsa ham siljimaydi */
     z-index:-1;
     display:block;
     pointer-events:none;
@@ -10506,14 +10512,14 @@
     function configure(l){
       lite = !!l;
       // worker'da to'r ingichka (silliq), asosiy oqimda esa yengilroq
-      CS = lite ? 14 : (heavy ? 9 : 14);
+      CS = lite ? 14 : (heavy ? 7 : 11);   // to'r qanchalik mayda bo'lsa, egri chiziq shunchalik silliq
       const STEP = lite ? 0.8 : 0.62;  // siyraklik: qadam katta bo'lsa chiziqlar kam
       LEVELS = [];
       for(let l2 = -2.5, i = 0; l2 <= 2.5 + 1e-6; l2 += STEP, i++) LEVELS.push({ v:l2, major: i % 3 === 0 });
       PCOUNT = lite ? 16 : 34;
     }
     function setSize(){
-      scale = Math.min(dpr, 2) * (lite ? 0.6 : 0.85);
+      scale = Math.min(dpr, 2) * (lite ? 0.7 : (heavy ? 1 : 0.9));
       canvas.width = Math.max(1, Math.round(W*scale));
       canvas.height = Math.max(1, Math.round(H*scale));
       ctx.setTransform(scale,0,0,scale,0,0);
@@ -10584,7 +10590,7 @@
         const lv = LEVELS[n];
         ctx.beginPath();
         drawLevel(lv.v);
-        ctx.lineWidth = lv.major ? 1.5 : 1;
+        ctx.lineWidth = lv.major ? 1.4 : 1.05;
         ctx.strokeStyle = 'rgba(255,255,255,' + Math.min(0.5, (lv.major ? 0.30 : 0.17) * k).toFixed(3) + ')';
         ctx.stroke();
       }
@@ -10689,14 +10695,14 @@
       lastRender = ts;
       if(dt <= 0) return;
       if(dt > 0.1) dt = 0.1;
-      dtS += (dt - dtS)*0.15;                            // kadr vaqtidagi tebranishni silliqlash
+      dtS += (dt - dtS)*0.08;                            // kadr vaqtidagi tebranishni silliqlash (kuchliroq)
       kick = Math.max(0, kick - dt*0.3);
-      energy += (kick - energy)*(1 - Math.exp(-dt*2.5)); // jonlanish sakrab emas, silliq ko'tariladi
-      rate   += (target - rate)*(1 - Math.exp(-dt*3));   // tezlik ham easing bilan o'zgaradi
+      energy += (kick - energy)*(1 - Math.exp(-dt*1.5)); // jonlanish sakrab emas, silliq ko'tariladi
+      rate   += (target - rate)*(1 - Math.exp(-dt*1.6)); // tezlik ham easing bilan, yanada yumshoq o'zgaradi
       windT  -= windT*Math.min(1, dt*0.8);               // barmoq to'xtasa shamol ham asta tinadi
       wind   += (windT - wind)*(1 - Math.exp(-dt*2.5));  // shamol sakrab emas, silliq o'zgaradi
       // qatlamlar: yoqilganda yumshoq paydo bo'ladi, o'chirilganda tez (~0.4s) so'nadi
-      if(on) appear = Math.min(1, appear + dt*0.45);
+      if(on) appear = Math.min(1, appear + dt*0.32);
       else   appear = Math.max(0, appear - dt*2.6);
       const dOn = dotsOn && !reduce;
       if(dOn) dotsA = Math.min(1, dotsA + dt*0.6);
@@ -10711,7 +10717,7 @@
       const t0 = now();
       render();
       ema += ((now() - t0) - ema)*0.1;
-      if(parity === 1 && frame > 90 && ema > 9) parity = 2; // og'ir bo'lsa o'zi 30fps ga tushadi
+      if(parity === 1 && frame > 120 && ema > 12) parity = 2; // faqat juda og'ir bo'lsa 30fps ga tushadi
     }
     function kickLoop(){
       if(running && visible && rafId === null){ lastRender = null; rafId = raf(loop); }
@@ -10805,8 +10811,18 @@
     // Mobil brauzerda scroll paytida manzil paneli yashirinib/chiqib, innerHeight o'zgaradi:
     // balandlik faqat OSHADI (kamaymaydi) — fon scroll'da sakramaydi.
     // Kenglik o'zgarsa (ekran burilsa) — to'liq qayta o'lchanadi.
+    // Sensorli qurilmada balandlik boshidanoq ENG KATTA ko'rinish (manzil paneli yashirin)
+    // darajasiga qo'yiladi — scroll oxirida panel chiqib/yashirinsa ham canvas qayta
+    // o'lchanmaydi, cho'zilmaydi va fon siljimaydi.
+    const coarse = !!(window.matchMedia && window.matchMedia('(hover:none) and (pointer:coarse)').matches);
+    function fullH(){
+      const ih = window.innerHeight;
+      if(!coarse) return ih;
+      const sh = (window.screen && Math.max(window.screen.height||0, window.screen.width||0)) || 0;
+      return Math.max(ih, Math.min(sh, Math.round(ih*1.35)));
+    }
     function measure(){
-      const newW = window.innerWidth, newH = window.innerHeight;
+      const newW = window.innerWidth, newH = fullH();
       if(W && newW === W && newH <= H) return false;
       if(W && newW !== W) H = 0;
       W = newW; H = Math.max(H, newH);
