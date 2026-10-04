@@ -138,11 +138,6 @@
   html.perf .ct-table-seat-avatar-slot::before{ display:none !important; }
   html.perf .quiz-card{ background:rgba(20,22,26,0.92); }
   html.perf .quiz-opt:not(.correct):not(.wrong){ background:rgba(24,26,31,0.94); }
-  html.perf .auth-banner-video{ animation:none !important; }
-  /* Yengil rejimda yuqori chapdagi banner so'nadi, uning o'rniga AI yordamchi tugmasi suriladi
-     (siljish va so'nish JS'da — KanjiPerf — silliq animatsiya qilinadi) */
-  html.bn-off .ai-assist-btn{ order:-1; margin-right:auto; }
-  html.bn-gone .auth-banner-video{ display:none !important; }
   /* Yengil rejimda orqa fon chiziq/zarrachalari o'chiq — menyudagi tegishli tugmalar faolsiz ko'rinadi */
   html.perf .auth-bgfx-btn[data-bgfx]{ opacity:.4; pointer-events:none; }
   html.perf #ctRoomParticles{ display:none !important; }
@@ -609,21 +604,6 @@
   .auth-avatar-btn img{width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; background:var(--bg-2);}
   .auth-avatar-btn span#userAvatarInitial{width:100%; height:100%; border-radius:50%; background:var(--bg-2); display:flex; align-items:center; justify-content:center;}
 
-  /* ---------- BANNER VIDEO — auth-box ichida, AI yordamchi tugmasi bilan avatar chap tarafida ---------- */
-  .auth-banner-video{
-    flex:1 1 auto;
-    min-width:0;
-    height:36px;
-    margin-right:10px;
-    border-radius:12px;
-    border:1px solid var(--glass-border-soft);
-    overflow:hidden;
-    object-fit:cover;
-    display:block;
-    background:var(--glass-bg);
-    cursor:pointer;
-  }
-
   /* ---------- Banner video bosilganda chiqadigan "tez kunda" bildirishnomasi ---------- */
   .banner-soon-toast{
     position:fixed;
@@ -865,6 +845,47 @@
     .ai-assist-btn{width:36px; padding:0; justify-content:center;}
     .ai-assist-btn span{display:none;}
   }
+
+  /* AI yordamchi eng chapda turadi; qolgan tugmalar (qo'ng'izcha, chat, foydalanuvchilar, profil) o'ng tomonda */
+  .auth-box .ai-assist-btn{ order:-1; margin-right:auto; }
+
+  /* ---------- QO'NG'IZCHA tugmasi (moss rangida) — shikoyat / xatolik / taklif ----------
+     Bosilganda banner sahifasi ochiladi: u yerda video o'ynaydi va Telegram orqali
+     xabar yuborish kartochkasi turadi. Asosiy oynada video o'ynamaydi. */
+  .bug-report-btn{
+    display:flex; align-items:center; justify-content:center;
+    flex:none; width:36px; height:36px; padding:0; margin-right:8px;
+    border-radius:50%;
+    border:1px solid rgba(147,177,127,0.55);
+    background:linear-gradient(150deg, rgba(124,154,107,0.30), rgba(124,154,107,0.10));
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--moss-soft);
+    box-shadow:0 0 12px rgba(124,154,107,0.26), inset 0 1px 0 rgba(220,245,205,0.14);
+    cursor:pointer;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease;
+  }
+  .bug-report-btn:active{ transform:scale(0.92); }
+  .bug-report-btn svg{ width:21px; height:21px; display:block; }
+  .bug-report-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:3px; }
+
+  /* ---------- CHAT tugmasi — foydalanuvchilar ro'yxati tugmasi yonida ---------- */
+  .chat-bar-btn{
+    display:none; align-items:center; justify-content:center;
+    flex:none; width:36px; height:36px; padding:0; margin-right:8px;
+    border-radius:50%;
+    border:1px solid var(--glass-border);
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink);
+    cursor:pointer;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease;
+  }
+  .chat-bar-btn:active{ transform:scale(0.92); }
+  .chat-bar-btn svg{ width:17px; height:17px; display:block; }
+  .chat-bar-btn.in-use{ background:var(--glass-bg-strong); border-color:rgba(255,255,255,0.6); }
+  .chat-bar-btn:focus-visible{ outline:2px solid var(--glass-border); outline-offset:3px; }
 
   /* ---------- FAQAT ADMIN uchun: foydalanuvchilar online/offline tugmasi ----------
      Bu tugma faqat oldindan belgilangan admin email bilan kirilganda
@@ -6948,7 +6969,6 @@
       var root = document.documentElement;
       if(perfPref === '1' || (perfPref !== '0' && veryWeak)){
         root.classList.add('lite'); root.classList.add('perf');
-        root.classList.add('bn-off'); root.classList.add('bn-gone');   // banner yo'q, AI yordamchi chapda
       } else if(perfPref === '0'){
         if(reduceMotion) root.classList.add('lite');   // foydalanuvchi to'liq sifatni tanladi
       } else if(weakHW || reduceMotion || saveData || savedLite){
@@ -6961,13 +6981,30 @@
 
 <!-- ---------- Firebase Auth: Google bilan kirish ---------- -->
 <div class="auth-box" id="authBox">
-  <video class="auth-banner-video" id="authBannerVideo" src="banner.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
   <button class="ai-assist-btn" id="aiAssistBtn" type="button" aria-label="AI yordamchi">
     <i class="ai-btn-stars" aria-hidden="true">
       <svg class="ai-star-svg ai-star-big-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="ai-orbit"><path class="ai-star ai-star-big" d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path></g></svg>
       <svg class="ai-star-svg ai-star-small-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="ai-orbit"><path class="ai-star ai-star-small" d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></g></svg>
     </i>
     <span>AI yordamchi</span>
+  </button>
+  <!-- Qo'ng'izcha: shikoyat / xatolik / taklif — bosilganda banner sahifasi (video + Telegram kartochkasi) ochiladi -->
+  <button class="bug-report-btn" id="bugReportBtn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 5.2 8.4 3M14 5.2 15.6 3"></path>
+      <path d="M9.3 7.7a2.9 2.9 0 0 1 5.4 0"></path>
+      <path d="M6.6 14.4C6.6 10.6 9 8 12 8s5.4 2.6 5.4 6.4S15 21 12 21s-5.4-2.8-5.4-6.6z"></path>
+      <path d="M12 8.2V21"></path>
+      <path d="M6.9 12.4 4 11M6.6 15.6H3.4M7.5 18.6 5 20.6M17.1 12.4 20 11M17.4 15.6h3.2M16.5 18.6 19 20.6"></path>
+      <circle cx="9.2" cy="12.6" r="1" fill="currentColor" stroke="none"></circle>
+      <circle cx="14.8" cy="12.6" r="1" fill="currentColor" stroke="none"></circle>
+      <circle cx="9.4" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
+      <circle cx="14.6" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
+    </svg>
+  </button>
+  <!-- Chat: faqat kirilganda ko'rinadi (skript), foydalanuvchilar ro'yxati tugmasi yonida -->
+  <button class="chat-bar-btn" id="chatBarBtn" type="button" aria-label="Chat" title="Chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
   </button>
   <!-- FAQAT ADMIN uchun: skriptda faqat belgilangan admin email bilan
        kirilganda display:flex qilinadi, aks holda butunlay yashirin qoladi. -->
@@ -7197,8 +7234,8 @@
   <button class="banner-page-close" id="bannerPageClose" type="button" aria-label="Yopish">✕</button>
   <video class="banner-page-video" id="bannerPageVideo" muted loop playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noremoteplayback"></video>
   <div class="banner-bug-card">
-    <h3>🐞 Bug yoki xatolik topdingizmi?</h3>
-    <p>Ilovada kamchilik yoki xatolik uchrasa, iltimos, uning <b>skrinshotini</b> olib Telegram orqali yuboring — tez orada tuzatamiz.</p>
+    <h3>🐞 Xatolik, shikoyat yoki taklif bormi?</h3>
+    <p>Ilovada kamchilik yoki xatolik uchrasa, iltimos, uning <b>skrinshotini</b> olib Telegram orqali yuboring. Shikoyat va takliflaringizni ham shu yerga yozing — tez orada ko'rib chiqamiz.</p>
     <a class="banner-bug-link" id="bannerBugLink" href="https://t.me/MrToshmatoff" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#27A7E7"/><path fill="#fff" d="M16.906 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.01-1.252-.242-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg><span>Telegramda yozish</span></a>
   </div>
 </div>
@@ -11086,86 +11123,25 @@
 
   // ---------- YENGIL REJIM BOSHQARUVCHISI ----------
   // Akkaunt menyusidagi "Yengil rejim" tugmasi. Yoqilganda html'ga 'perf' (va 'lite') klassi qo'shiladi:
-  // CSS og'ir effektlarni o'chiradi, fon dvigateli past aniqlikda ~24fps ishlaydi, kichik banner video
-  // to'xtatiladi, zarrachalar kamayadi. Tanlov qurilmada eslab qolinadi ('1' yoqiq, '0' o'chiq).
+  // CSS og'ir effektlarni o'chiradi, fon dvigateli past aniqlikda ~24fps ishlaydi, orqa fon
+  // chiziq/zarrachalari o'chadi. Tanlov qurilmada eslab qolinadi ('1' yoqiq, '0' o'chiq).
   window.KanjiPerf = (function(){
     const root = document.documentElement;
     const btn = document.getElementById('perfModeBtn');
     const reduceMo = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     const isOn = () => root.classList.contains('perf');
-    function bannerVideo(on){
-      const v = document.getElementById('authBannerVideo');
-      if(!v) return;
-      try{
-        if(on) v.pause();
-        else if(v.play) v.play().catch(()=>{});
-      }catch(_){}
-    }
     function sync(){ if(btn) btn.setAttribute('aria-checked', isOn() ? 'true' : 'false'); }
 
-    // Yuqori chap burchak: yoqilganda banner so'nadi va AI yordamchi tugmasi uning o'rniga
-    // silliq suriladi; o'chirilganda banner qaytib paydo bo'ladi, AI tugmasi o'z joyiga qaytadi.
-    // FLIP usuli: joylashuv darhol o'zgaradi, so'ng tugma eski joyidan yangisiga animatsiya qilinadi.
-    function animateAuthBox(on){
-      const box = document.getElementById('authBox');
-      const ban = document.getElementById('authBannerVideo');
-      const ai  = document.getElementById('aiAssistBtn');
-      const instant = reduceMo || document.hidden;
-      if(!box || !ban || !ai){
-        root.classList.toggle('bn-off', on); root.classList.toggle('bn-gone', on);
-        return;
-      }
-      if(on === root.classList.contains('bn-off')){ root.classList.toggle('bn-gone', on); return; }
-      try{ ban.getAnimations().forEach(a=>a.cancel()); ai.getAnimations().forEach(a=>a.cancel()); }catch(_){}
-      const aiFirst = ai.getBoundingClientRect();
-      const glide = ()=>{
-        const aiLast = ai.getBoundingClientRect();
-        const dx = aiFirst.left - aiLast.left, dy = aiFirst.top - aiLast.top;
-        if(instant || !ai.animate || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return;
-        ai.animate(
-          [{ transform:'translate(' + dx + 'px,' + dy + 'px)' }, { transform:'translate(0,0)' }],
-          { duration:620, easing:'cubic-bezier(.3,.8,.2,1)' }
-        );
-      };
-      if(on){
-        // banner o'z joyida, oqimdan tashqarida qoladi va so'nadi
-        const b = ban.getBoundingClientRect(), bx = box.getBoundingClientRect();
-        Object.assign(ban.style, { position:'absolute', left:(b.left - bx.left) + 'px', top:(b.top - bx.top) + 'px',
-          width:b.width + 'px', height:b.height + 'px', margin:'0', flex:'none', pointerEvents:'none' });
-        root.classList.add('bn-off');
-        glide();
-        if(instant || !ban.animate){ root.classList.add('bn-gone'); return; }
-        const fade = ban.animate(
-          [{ opacity:1, transform:'scale(1)' }, { opacity:0, transform:'scale(.96)' }],
-          { duration:380, easing:'ease', fill:'forwards' }
-        );
-        fade.onfinish = ()=>{ if(root.classList.contains('bn-off')) root.classList.add('bn-gone'); fade.cancel(); };
-      } else {
-        root.classList.remove('bn-gone');
-        ban.removeAttribute('style');
-        root.classList.remove('bn-off');
-        glide();
-        if(!instant && ban.animate){
-          ban.animate(
-            [{ opacity:0, transform:'scale(.96)' }, { opacity:1, transform:'scale(1)' }],
-            { duration:480, delay:140, easing:'ease', fill:'backwards' }
-          );
-        }
-      }
-    }
     function set(on, persist){
       on = !!on;
-      animateAuthBox(on);
       root.classList.toggle('perf', on);
       if(on) root.classList.add('lite');
       else if(!reduceMo) root.classList.remove('lite');   // o'chirilganda to'liq sifat (harakatni kamaytirish yoqiq bo'lsa — lite qoladi)
       if(persist !== false){ try{ localStorage.setItem('kanji-perf', on ? '1' : '0'); }catch(_){} }
-      bannerVideo(on);
       try{ DotsFX.setSuppressed(on); DotsFX.refreshQuality(); }catch(_){}
       sync();
     }
     sync();
-    if(isOn()) bannerVideo(true);
     if(btn) btn.addEventListener('click', ()=> set(!isOn()));
     return { set, isOn };
   })();
@@ -11730,6 +11706,7 @@
     if(panel){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
     if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
     if(fabBtn) fabBtn.classList.add('in-use');
+    const barBtn = document.getElementById('chatBarBtn'); if(barBtn) barBtn.classList.add('in-use');
     lockPageScroll();
     setTimeout(()=>{ try{ document.getElementById('chatInput').focus(); }catch(e){} }, 260);
   }
@@ -11740,6 +11717,7 @@
     if(panel){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
     if(overlay){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
     if(fabBtn) fabBtn.classList.remove('in-use');
+    const barBtn = document.getElementById('chatBarBtn'); if(barBtn) barBtn.classList.remove('in-use');
     unlockPageScroll();
   }
   // ---------- NICKNAME MODAL (zamonaviy oyna, prompt() o'rniga) ----------
@@ -13186,6 +13164,9 @@
       if(dropdown) dropdown.classList.remove('open');
       openChatPanel();
     });
+    // tepadagi panelda (foydalanuvchilar ro'yxati yonida) turgan chat tugmasi — o'sha mantiqni ishlatadi
+    const chatBarBtn = document.getElementById('chatBarBtn');
+    if(chatBarBtn && fab) chatBarBtn.addEventListener('click', ()=> fab.click());
     if(closeBtn) closeBtn.addEventListener('click', closeChatPanel);
     if(overlay) overlay.addEventListener('click', closeChatPanel);
     if(sendBtn) sendBtn.addEventListener('click', sendChatMessage);
@@ -13218,7 +13199,7 @@
 
   // ---------- Banner bosilganda: to'liq video (ovozsiz) alohida sahifada, markazda ----------
   (function initBannerPage(){
-    const banner = document.getElementById('authBannerVideo');
+    const banner = document.getElementById('bugReportBtn');   // qo'ng'izcha tugmasi sahifani ochadi
     const page = document.getElementById('bannerPage');
     const vid = document.getElementById('bannerPageVideo');
     const closeBtn = document.getElementById('bannerPageClose');
@@ -13236,7 +13217,7 @@
     vid.muted = true; vid.volume = 0;
     vid.addEventListener('loadedmetadata', fitVideo);
     window.addEventListener('resize', fitVideo);
-    vid.src = banner.getAttribute('src') || 'banner.mp4';
+    vid.src = 'banner.mp4';   // video faqat shu sahifada o'ynaydi (asosiy oynada emas)
     function openPage(){
       if(page.classList.contains('show')) return;
       fitVideo();
@@ -14106,15 +14087,6 @@
     });
   }
 
-  (function(){
-    var bannerVideo = document.getElementById("authBannerVideo");
-    if(bannerVideo){
-      bannerVideo.muted = true;
-      if(document.documentElement.classList.contains('perf')){ try{ bannerVideo.pause(); }catch(e){} }
-      else bannerVideo.play && bannerVideo.play().catch(function(){});
-    }
-  })();
-
   const loginBtn = document.getElementById("login-btn");
   const userProfile = document.getElementById("user-profile");
   const userName = document.getElementById("user-name");
@@ -14178,6 +14150,8 @@
     if (user) {
       if (loginBtn) loginBtn.style.display = "none";
       if (userProfile) userProfile.style.display = "flex";
+      const chatBarBtnEl = document.getElementById("chatBarBtn");
+      if (chatBarBtnEl) chatBarBtnEl.style.display = "flex";
       if (userName) userName.textContent = user.displayName || user.email || "Foydalanuvchi";
       if (user.photoURL) {
         avatarImg.src = user.photoURL;
@@ -14198,6 +14172,8 @@
     } else {
       if (loginBtn) loginBtn.style.display = "flex";
       if (userProfile) userProfile.style.display = "none";
+      const chatBarBtnOff = document.getElementById("chatBarBtn");
+      if (chatBarBtnOff) chatBarBtnOff.style.display = "none";
       authDropdown.classList.remove("open");
       // Hisobga kirilmagan yoki chiqib ketilgan — "Boshlash" qat'iy ravishda o'chiq turadi.
       if (splashStartBtn) {
