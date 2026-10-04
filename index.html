@@ -139,7 +139,7 @@
   html.perf .quiz-card{ background:rgba(20,22,26,0.92); }
   html.perf .quiz-opt:not(.correct):not(.wrong){ background:rgba(24,26,31,0.94); }
   /* Yengil rejimda orqa fon chiziq/zarrachalari o'chiq — menyudagi tegishli tugmalar faolsiz ko'rinadi */
-  html.perf .auth-bgfx-btn[data-bgfx]{ opacity:.4; pointer-events:none; }
+  html.perf .auth-dropdown.open > .auth-bgfx-btn[data-bgfx]{ opacity:.4; pointer-events:none; }
   html.perf #ctRoomParticles{ display:none !important; }
   *{box-sizing:border-box;}
   /* Barcha tugma va sahifalar uchun: 300ms tap kechikishi va ikki marta bosishdagi zoom yo'q */
@@ -841,13 +841,20 @@
   .ai-assist-btn:active{transform:scale(0.94);}
   .ai-assist-btn svg{width:16px; height:16px; flex-shrink:0; display:block;}
   .ai-assist-btn span{line-height:1;}
-  @media (max-width:360px){
-    .ai-assist-btn{width:36px; padding:0; justify-content:center;}
+  @media (max-width:330px){
+    .ai-assist-btn{padding:0; justify-content:center;}
     .ai-assist-btn span{display:none;}
   }
 
   /* AI yordamchi eng chapda turadi; qolgan tugmalar (qo'ng'izcha, chat, foydalanuvchilar, profil) o'ng tomonda */
-  .auth-box .ai-assist-btn{ order:-1; margin-right:auto; }
+  .auth-box .bug-report-btn{ order:-2; }
+  .auth-box .ai-assist-btn{
+    order:-1;
+    flex:1 1 auto;          /* qatordagi bo'sh joyni to'ldirish uchun cho'ziladi */
+    min-width:0;
+    justify-content:center;
+    overflow:hidden;
+  }
 
   /* ---------- QO'NG'IZCHA tugmasi (moss rangida) — shikoyat / xatolik / taklif ----------
      Bosilganda banner sahifasi ochiladi: u yerda video o'ynaydi va Telegram orqali
@@ -869,23 +876,24 @@
   .bug-report-btn svg{ width:21px; height:21px; display:block; }
   .bug-report-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:3px; }
 
-  /* ---------- CHAT tugmasi — foydalanuvchilar ro'yxati tugmasi yonida ---------- */
+  /* ---------- CHAT tugmasi — foydalanuvchilar ro'yxati tugmasi yonida (qora + orange) ---------- */
   .chat-bar-btn{
     display:none; align-items:center; justify-content:center;
     flex:none; width:36px; height:36px; padding:0; margin-right:8px;
     border-radius:50%;
-    border:1px solid var(--glass-border);
-    background:var(--glass-bg);
+    border:1px solid rgba(255,138,31,0.62);
+    background:linear-gradient(150deg, rgba(60,31,8,0.94), rgba(11,9,6,0.97));
     backdrop-filter:var(--blur-1) saturate(var(--sat-1));
     -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
-    color:var(--ink);
+    color:#ff9d45;
+    box-shadow:0 0 12px rgba(255,138,31,0.24), inset 0 1px 0 rgba(255,190,120,0.14);
     cursor:pointer;
     transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease;
   }
   .chat-bar-btn:active{ transform:scale(0.92); }
   .chat-bar-btn svg{ width:17px; height:17px; display:block; }
-  .chat-bar-btn.in-use{ background:var(--glass-bg-strong); border-color:rgba(255,255,255,0.6); }
-  .chat-bar-btn:focus-visible{ outline:2px solid var(--glass-border); outline-offset:3px; }
+  .chat-bar-btn.in-use{ border-color:rgba(255,170,80,0.95); color:#ffb870; box-shadow:0 0 16px rgba(255,138,31,0.42), inset 0 1px 0 rgba(255,200,140,0.2); }
+  .chat-bar-btn:focus-visible{ outline:2px solid #ff9d45; outline-offset:3px; }
 
   /* ---------- FAQAT ADMIN uchun: foydalanuvchilar online/offline tugmasi ----------
      Bu tugma faqat oldindan belgilangan admin email bilan kirilganda
@@ -996,6 +1004,8 @@
   .auth-dropdown > :nth-child(4){ --i:3; }
   .auth-dropdown > :nth-child(5){ --i:4; }
   .auth-dropdown > :nth-child(6){ --i:5; }
+  .auth-dropdown > :nth-child(7){ --i:6; }
+  .auth-dropdown > :nth-child(8){ --i:7; }
   .auth-dropdown > *{
     --from:calc(-1 * (26px + var(--i, 0) * 44px));     /* avatar markazigacha masofa */
     box-sizing:border-box;
@@ -1014,8 +1024,8 @@
     transform:translateY(var(--from)) scale(0.35);
     /* yopilish: tez, teskari tartibda */
     transition:
-      transform .18s cubic-bezier(.4,0,.8,.4) calc((5 - var(--i, 0)) * 25ms),
-      opacity .14s ease calc((5 - var(--i, 0)) * 25ms),
+      transform .18s cubic-bezier(.4,0,.8,.4) calc((8 - var(--i, 0)) * 25ms),
+      opacity .14s ease calc((8 - var(--i, 0)) * 25ms),
       background-color .2s ease, border-color .2s ease, color .2s ease;
   }
   .auth-dropdown.open > *{
