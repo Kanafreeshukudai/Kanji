@@ -5268,34 +5268,36 @@
      tovlanish hosil bo'ladi. Ranglar sayt palitrasidagi --gold o'zgaruvchisi
      asosida. */
   .ct-table-center-hint:not(.picker-open){
-    background-image:linear-gradient(180deg, var(--glass-bg), var(--glass-bg)),
+    /* Qatlamlar (yuqoridan pastga): 1) matn ustidan o'tuvchi tilla nur,
+       2) matnning oddiy rangi, 3) quti foni. Shisha fon endi matn ORQASIDA
+       turadi — oldin u matn ustini qoplab, qora soya bo'lib ko'rinardi. */
+    background-image:
       linear-gradient(100deg,
-        var(--ink-soft) 0%,
-        var(--ink-soft) 38%,
+        transparent 0%,
+        transparent 42%,
         var(--gold) 48%,
         #f2e4bf 50%,
         var(--gold) 52%,
-        var(--ink-soft) 62%,
-        var(--ink-soft) 100%);
-    background-size:100% 100%, 250% 100%;
-    background-position:0 0, 0 0;
-    background-repeat:no-repeat, no-repeat;
-    -webkit-background-clip:padding-box, text;
-    background-clip:padding-box, text;
+        transparent 58%,
+        transparent 100%),
+      linear-gradient(var(--ink-soft), var(--ink-soft)),
+      linear-gradient(180deg, var(--glass-bg), var(--glass-bg));
+    background-size:250% 100%, 100% 100%, 100% 100%;
+    background-position:0% 0, 0 0, 0 0;
+    background-repeat:no-repeat, no-repeat, no-repeat;
+    -webkit-background-clip:text, text, padding-box;
+    background-clip:text, text, padding-box;
     -webkit-text-fill-color:transparent;
     color:transparent;
     animation:centerHintShimmer 3.4s linear infinite;
   }
-  /* Gradient matn ustini DOIM to'liq qoplab turadi (0% -> 100%): nur o'ng chetdan
-     chap chetga to'liq o'tib chiqib ketadi, so'ng qisqa tanaffus bo'ladi. Avval
-     pozitsiya -40%..140% oralig'ida edi — chetlarda gradient matnni qoplamay,
-     yozuv "soya"da yo'qolib/qotib qolardi. */
+  /* Tilla nur o'ng chetdan chap chetga to'liq o'tib chiqib ketadi, so'ng qisqa tanaffus */
   @keyframes centerHintShimmer{
-    0%{ background-position:0 0, 0% 0; }
-    75%,100%{ background-position:0 0, 100% 0; }
+    0%{ background-position:0% 0, 0 0, 0 0; }
+    75%,100%{ background-position:100% 0, 0 0, 0 0; }
   }
   @media (prefers-reduced-motion: reduce){
-    .ct-table-center-hint:not(.picker-open){ animation:none; background-position:0 0, 0 0; }
+    .ct-table-center-hint:not(.picker-open){ animation:none; background-position:0% 0, 0 0, 0 0; }
   }
   .ct-table-center-hint.picker-open{max-width:min(92%,340px); width:92%;}
   /* ---------- XONA MARKAZI: qabul qilingan kartochka(lar) ----------
@@ -7386,12 +7388,12 @@
       </button>
       <!-- Orqa fon animatsiyasini yoqish/o'chirish (holat qurilmada eslab qolinadi) -->
       <!-- Orqa fon qatlamlarini yoqish/o'chirish (holat qurilmada eslab qolinadi) -->
-      <button id="bgFxToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="true" data-bgfx="lines" aria-label="Fon chiziqlari">
+      <button id="bgFxToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" data-bgfx="lines" aria-label="Fon chiziqlari">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8c3-3.5 6 3.5 9 0s6-3.5 9 0"></path><path d="M3 16c3-3.5 6 3.5 9 0s6-3.5 9 0"></path></svg>
         <span>Fon chiziqlari</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
-      <button id="bgDotsToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="true" data-bgfx="dots" aria-label="Fon zarralari">
+      <button id="bgDotsToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" data-bgfx="dots" aria-label="Fon zarralari">
         <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="7" cy="17" r="2.2"></circle><circle cx="16" cy="12" r="1.6"></circle><circle cx="10" cy="6.5" r="1.3"></circle><circle cx="18.5" cy="19" r="1.1"></circle></svg>
         <span>Fon zarralari</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
@@ -7791,6 +7793,19 @@
     </div>
   </div>
 </div>
+<div class="logout-confirm-overlay" id="bgLinesConfirmOverlay" aria-hidden="true">
+  <div class="logout-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="bgLinesConfirmTitle" aria-describedby="bgLinesConfirmText">
+    <div class="logout-confirm-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8c3-3.5 6 3.5 9 0s6-3.5 9 0"></path><path d="M3 16c3-3.5 6 3.5 9 0s6-3.5 9 0"></path></svg>
+    </div>
+    <h4 id="bgLinesConfirmTitle">Fon chiziqlarini yoqasizmi?</h4>
+    <p id="bgLinesConfirmText">Bu effekt kompyuter va telefonni sezilarli darajada sekinlashtirishi hamda batareyani tez sarflashi mumkin. Qurilmangiz sekin ishlasa, uni istalgan vaqt o'chirib qo'yishingiz mumkin.</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-btn" id="bgLinesCancelBtn">Bekor qilish</button>
+      <button type="button" class="logout-ok-btn" id="bgLinesOkBtn">Yoqish</button>
+    </div>
+  </div>
+</div>
 <div class="notes-overlay" id="notesOverlay" aria-hidden="true"></div>
 <div class="notes-panel" id="notesPanel" aria-hidden="true">
   <div class="notes-panel-header">
@@ -8008,8 +8023,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", 60:"60-kun", 61:"61-kun", 62:"62-kun", 63:"63-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", 60:"60-kun", 61:"61-kun", 62:"62-kun", 63:"63-kun", 64:"64-kun", 65:"65-kun", 66:"66-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -9413,6 +9428,75 @@
     {id:"fuyuyasumi63", day:63, group:"冬", kanji:"冬休み", romaji:"fuyuyasumi", type:"kun + kun + —", reading:"冬(fuyu) + 休(yasu) + み", uz:"qishki ta'tillar"},
     {id:"dantou63", day:63, group:"冬", kanji:"暖冬", romaji:"dantou", type:"on + on", reading:"暖(dan) + 冬(tou)", uz:"iliq qish"},
     {id:"toumin63", day:63, group:"冬", kanji:"冬眠", romaji:"toumin", type:"on + on", reading:"冬(tou) + 眠(min)", uz:"qishki uyqu, uyqu holati"},
+
+    // ---- 64-kun ----
+    {id:"sora64", day:64, group:"空", kanji:"空", romaji:"sora", type:"kun'yomi", reading:"空(sora) — yakka kanji", otherReadings:"kun: そら(sora), あ-く(aku), から(kara), す-く(suku) · on: クウ(kuu)", uz:"osmon"},
+    {id:"kuuki64", day:64, group:"空", kanji:"空気", romaji:"kuuki", type:"on + on", reading:"空(kuu) + 気(ki)", uz:"havo"},
+    {id:"kuukou64", day:64, group:"空", kanji:"空港", romaji:"kuukou", type:"on + on", reading:"空(kuu) + 港(kou)", uz:"aeroport"},
+    {id:"suku64", day:64, group:"空", kanji:"空く", romaji:"suku", type:"kun'yomi", reading:"空(su) + く", uz:"bo'sh bo'lmoq, ochiq bo'lmoq"},
+
+    {id:"hikari64", day:64, group:"光", kanji:"光", romaji:"hikari", type:"kun'yomi", reading:"光(hikari) — yakka kanji", otherReadings:"kun: ひかり(hikari), ひか-る(hikaru) · on: コウ(kou)", uz:"yorug'lik"},
+    {id:"hikaru64", day:64, group:"光", kanji:"光る", romaji:"hikaru", type:"kun'yomi", reading:"光(hika) + る", uz:"porlash, yaltiroq"},
+    {id:"nikkou64", day:64, group:"光", kanji:"日光", romaji:"nikkou", type:"on + on", reading:"日(nik) + 光(kou)", uz:"quyosh nuri, Nikko (sayohlik joyi)"},
+
+    {id:"dai64", day:64, group:"台", kanji:"台", romaji:"dai", type:"on'yomi", reading:"台(dai) — yakka kanji", otherReadings:"on: ダイ(dai), タイ(tai)", uz:"asos, stend (turish, poydevor)"},
+    {id:"daicounter64", day:64, group:"台", kanji:"~台", romaji:"~dai", type:"on'yomi", reading:"台(dai) — sanoq so'zi", uz:"~ta (mashinalar uchun hisoblagich)"},
+    {id:"taifuu64", day:64, group:"台", kanji:"台風", romaji:"taifuu", type:"on + on", reading:"台(tai) + 風(fuu)", uz:"tayfun"},
+    {id:"daidokoro64", day:64, group:"台", kanji:"台所", romaji:"daidokoro", type:"on + kun", reading:"台(dai) + 所(dokoro)", uz:"oshxona"},
+
+    {id:"kaze64", day:64, group:"風", kanji:"風", romaji:"kaze", type:"kun'yomi", reading:"風(kaze) — yakka kanji", otherReadings:"kun: かぜ(kaze), かざ(kaza) · on: フウ(fuu), フ(fu)", uz:"shamol"},
+    {id:"furo64", day:64, group:"風", kanji:"風呂", romaji:"furo", type:"on + on", reading:"風(fu) + 呂(ro)", uz:"hammom"},
+    {id:"kyoufuu64", day:64, group:"風", kanji:"強風", romaji:"kyoufuu", type:"on + on", reading:"強(kyou) + 風(fuu)", uz:"kuchli shabada"},
+    {id:"kaze_cold64", day:64, group:"風", kanji:"*風邪", romaji:"kaze", type:"istisno", reading:"jukujikun — maxsus o'qiladi", uz:"shamollash(kasallik)"},
+
+    // ---- 65-kun ----
+    {id:"kikanji65", day:65, group:"季", kanji:"季", romaji:"ki", type:"on'yomi", reading:"季(ki) — yakka kanji", otherReadings:"on: キ(ki)", uz:"mavsum"},
+    {id:"kisetsu65", day:65, group:"季", kanji:"季節", romaji:"kisetsu", type:"on + on", reading:"季(ki) + 節(setsu)", uz:"mavsum"},
+    {id:"kisetsufuu65", day:65, group:"季", kanji:"季節風", romaji:"kisetsufuu", type:"on + on + on", reading:"季(ki) + 節(setsu) + 風(fuu)", uz:"musson"},
+    {id:"shiki65", day:65, group:"季", kanji:"四季", romaji:"shiki", type:"on + on", reading:"四(shi) + 季(ki)", uz:"to'rt fasl"},
+
+    {id:"setsukanji65", day:65, group:"節", kanji:"節", romaji:"setsu", type:"on'yomi", reading:"節(setsu) — yakka kanji", otherReadings:"on: セツ(setsu), セチ(sechi) · kun: ふし(fushi)", uz:"bo'limi, qo'shma"},
+    {id:"kisetsu_setsu65", day:65, group:"節", kanji:"季節", romaji:"kisetsu", type:"on + on", reading:"季(ki) + 節(setsu)", uz:"mavsum"},
+    {id:"chousetsu65", day:65, group:"節", kanji:"調節する", romaji:"chousetsu suru", type:"on + on + —", reading:"調(chou) + 節(setsu) + する", uz:"sozlamoq, moslamoq, tartibga solmoq"},
+    {id:"kansetsu65", day:65, group:"節", kanji:"関節", romaji:"kansetsu", type:"on + on", reading:"関(kan) + 節(setsu)", uz:"bo'g'im"},
+    {id:"setsuyaku65", day:65, group:"節", kanji:"節約", romaji:"setsuyaku", type:"on + on", reading:"節(setsu) + 約(yaku)", uz:"tejash (vaqt / suv / h.k.)"},
+    {id:"osechi65", day:65, group:"節", kanji:"お節料理", romaji:"osechi ryouri", type:"— + on + on + on", reading:"お + 節(sechi) + 料(ryou) + 理(ri)", uz:"Yangi yil uchun maxsus taom"},
+
+    {id:"asa65", day:65, group:"朝", kanji:"朝", romaji:"asa", type:"kun'yomi", reading:"朝(asa) — yakka kanji", otherReadings:"kun: あさ(asa) · on: チョウ(chou)", uz:"ertalab"},
+    {id:"asagohan65", day:65, group:"朝", kanji:"朝ごはん", romaji:"asagohan", type:"kun + kun", reading:"朝(asa) + ごはん(gohan)", uz:"nonushta"},
+    {id:"choushoku65", day:65, group:"朝", kanji:"朝食", romaji:"choushoku", type:"on + on", reading:"朝(chou) + 食(shoku)", uz:"nonushta"},
+    {id:"asahi65", day:65, group:"朝", kanji:"朝日", romaji:"asahi", type:"kun + kun", reading:"朝(asa) + 日(hi)", uz:"ertalab quyosh"},
+
+    {id:"hiru65", day:65, group:"昼", kanji:"昼", romaji:"hiru", type:"kun'yomi", reading:"昼(hiru) — yakka kanji", otherReadings:"kun: ひる(hiru) · on: チュウ(chuu)", uz:"peshin (kunduzi)"},
+    {id:"hirune65", day:65, group:"昼", kanji:"昼寝", romaji:"hirune", type:"kun + kun", reading:"昼(hiru) + 寝(ne)", uz:"uxlash, tushlik vaqtidagi uyqu"},
+    {id:"hiruyasumi65", day:65, group:"昼", kanji:"昼休み", romaji:"hiruyasumi", type:"kun + kun + —", reading:"昼(hiru) + 休(yasu) + み", uz:"tushlik tanaffusi"},
+    {id:"chuushoku65", day:65, group:"昼", kanji:"昼食", romaji:"chuushoku", type:"on + on", reading:"昼(chuu) + 食(shoku)", uz:"tushlik"},
+
+    // ---- 66-kun ----
+    {id:"yoru66", day:66, group:"夜", kanji:"夜", romaji:"yoru", type:"kun'yomi", reading:"夜(yoru) — yakka kanji", otherReadings:"kun: よる(yoru), よ(yo) · on: ヤ(ya)", uz:"tun"},
+    {id:"konya66", day:66, group:"夜", kanji:"今夜", romaji:"konya", type:"on + on", reading:"今(kon) + 夜(ya)", uz:"bugun kechqurun"},
+    {id:"yashoku66", day:66, group:"夜", kanji:"夜食", romaji:"yashoku", type:"on + on", reading:"夜(ya) + 食(shoku)", uz:"yarim tungi ovqat"},
+    {id:"yonaka66", day:66, group:"夜", kanji:"夜中", romaji:"yonaka", type:"kun + kun", reading:"夜(yo) + 中(naka)", uz:"yarim tun"},
+
+    {id:"houkanji66", day:66, group:"方", kanji:"方", romaji:"hou", type:"on'yomi", reading:"方(hou) — yakka kanji", otherReadings:"on: ホウ(hou) · kun: かた(kata), がた(gata)", uz:"yo'nalishi, yo'l"},
+    {id:"katakata66", day:66, group:"方", kanji:"~方", romaji:"~kata", type:"kun'yomi", reading:"方(kata)", uz:"qanday qilib~, usulda"},
+    {id:"kata66", day:66, group:"方", kanji:"方", romaji:"kata", type:"kun'yomi", reading:"方(kata)", uz:"shaxs (faxriy)"},
+    {id:"yuugata66", day:66, group:"方", kanji:"夕方", romaji:"yuugata", type:"on + kun", reading:"夕(yuu) + 方(gata)", uz:"kechqurun"},
+    {id:"houhou66", day:66, group:"方", kanji:"方法", romaji:"houhou", type:"on + on", reading:"方(hou) + 法(hou)", uz:"usul, yo'nalish"},
+    {id:"koukou66", day:66, group:"方", kanji:"方向", romaji:"houkou", type:"on + on", reading:"方(hou) + 向(kou)", uz:"yo'nalishi"},
+
+    {id:"ban66", day:66, group:"晩", kanji:"晩", romaji:"ban", type:"on'yomi", reading:"晩(ban) — yakka kanji", otherReadings:"on: バン(ban)", uz:"kechqurun, kechasi (tun)"},
+    {id:"konban66", day:66, group:"晩", kanji:"今晩", romaji:"konban", type:"on + on", reading:"今(kon) + 晩(ban)", uz:"bugun kechqurun"},
+    {id:"bangohan66", day:66, group:"晩", kanji:"晩ご飯", romaji:"bangohan", type:"on + — + on", reading:"晩(ban) + ご + 飯(han)", uz:"kechki ovqat"},
+    {id:"hitoban66", day:66, group:"晩", kanji:"一晩", romaji:"hitoban", type:"kun + on", reading:"一(hito) + 晩(ban)", uz:"bir kecha"},
+    {id:"hitobanjuu66", day:66, group:"晩", kanji:"一晩中", romaji:"hitobanjuu", type:"kun + on + on", reading:"一(hito) + 晩(ban) + 中(juu)", uz:"butun tun (uzoq)"},
+
+    {id:"youkanji66", day:66, group:"曜", kanji:"曜", romaji:"you", type:"on'yomi", reading:"曜(you) — yakka kanji", otherReadings:"on: ヨウ(you)", uz:"haftaning yorqin kuni"},
+    {id:"getsuyoubi66", day:66, group:"曜", kanji:"月曜日", romaji:"getsuyoubi", type:"on + on + kun", reading:"月(getsu) + 曜(you) + 日(bi)", uz:"dushanba"},
+    {id:"kayoubi66", day:66, group:"曜", kanji:"火曜日", romaji:"kayoubi", type:"kun + on + kun", reading:"火(ka) + 曜(you) + 日(bi)", uz:"seshanba"},
+    {id:"suiyoubi66", day:66, group:"曜", kanji:"水曜日", romaji:"suiyoubi", type:"on + on + kun", reading:"水(sui) + 曜(you) + 日(bi)", uz:"chorshanba"},
+    {id:"mokuyoubi66", day:66, group:"曜", kanji:"木曜日", romaji:"mokuyoubi", type:"on + on + kun", reading:"木(moku) + 曜(you) + 日(bi)", uz:"Payshanba"},
+    {id:"kinyoubi66", day:66, group:"曜", kanji:"金曜日", romaji:"kinyoubi", type:"on + on + kun", reading:"金(kin) + 曜(you) + 日(bi)", uz:"Juma"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -10341,8 +10425,10 @@
       setTimeout(()=>dots('resume'), 450);
       const threshold = 90;
       if(curX <= -threshold){
+        try{ DotsFX.fling(-1, card.getBoundingClientRect()); }catch(_){}
         flyOut(-1, markKnown);
       } else if(curX >= threshold){
+        try{ DotsFX.fling(1, card.getBoundingClientRect()); }catch(_){}
         flyOut(1, markLater);
       } else if(moved){
         card.style.transition = 'transform .35s cubic-bezier(.2,.8,.2,1)';
@@ -11475,6 +11561,33 @@
         maxA: 0.2 + z*0.38 + Math.random()*0.06           // uzoq — xira, yaqin — yorqinroq
       };
     }
+    // Kartochka surib yuborilganda uning ATROFIDAGI (ramka ichidagi va yaqin) pufakchalarning bir qismi
+    // kartochka ortidan tortilib, shu tomonga birga uchib ketadi — hammasi emas, faqat yaqinlari.
+    function flingParts(m){
+      const dir = m.dir < 0 ? -1 : 1;
+      const L = m.l, R = m.r, T = m.t, B = m.b;
+      const cy = (T + B) / 2;
+      const FAR = 130;                  // ramkadan shuncha px gacha bo'lgan pufakchalar ta'sirlanadi
+      for(let i=0;i<parts.length;i++){
+        const p = parts[i];
+        if(p.fl) continue;
+        const dx = p.x < L ? L - p.x : (p.x > R ? p.x - R : 0);
+        const dy = p.y < T ? T - p.y : (p.y > B ? p.y - B : 0);
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if(d > FAR) continue;
+        const chance = d <= 0 ? 0.65 : 0.65 * (1 - d/FAR);   // ramka ichida ~65%, uzoqlashgan sari kamayadi
+        if(Math.random() > chance) continue;
+        p.fl = {
+          dir: dir, t: 0, k: 0,
+          delay: Math.min(0.24, d/1000 + Math.random()*0.1),   // ketma-ket, ortidan ergashgandek
+          vx: dir * (80 + Math.random()*180),
+          cap: 900 + p.z*700 + Math.random()*200,              // yaqin (z katta) pufakchalar tezroq
+          cy: cy
+        };
+      }
+      windT = dir * 0.9;                                       // qolganlari ham yengil shu tomonga og'adi
+      kickLoop();
+    }
     function seedParts(){
       parts = [];
       for(let i=0;i<PCOUNT;i++) parts.push(makeParticle(true));
@@ -11483,6 +11596,21 @@
       const mult = dt * rate * (1 + energy*0.6);          // kartochka harakatida sekinlashadi, keyin jonlanadi
       for(let i=0;i<parts.length;i++){
         const p = parts[i];
+        const f = p.fl;
+        if(f){
+          // kartochka surib yuborilganda uning yonidagi pufakchalar ortidan tortilib, birga chiqib ketadi
+          f.t += dt;
+          if(f.t >= f.delay){
+            const k = f.t - f.delay;
+            f.vx += f.dir * 3200 * dt;
+            if(Math.abs(f.vx) > f.cap) f.vx = f.dir * f.cap;
+            p.x += f.vx * dt;
+            p.y += (f.cy - p.y) * Math.min(1, dt*1.6);       // kartochka markaz balandligiga yengil so'rilish
+            f.k = clamp01(k / 0.5);                           // so'nish darajasi 0..1
+            if(f.k >= 1 || p.x < -p.r*3 || p.x > W + p.r*3){ parts[i] = makeParticle(false); }
+            continue;
+          }
+        }
         p.age += mult;
         if(p.age >= p.life || p.y < -p.r*3){ parts[i] = makeParticle(false); continue; }
         const vy = p.vy * (0.85 + 0.15*Math.sin(p.age*0.45 + p.ph0));   // tezlik ham yengil nafas oladi
@@ -11507,7 +11635,7 @@
         const outE = sstep((1 - t)/0.28);                    // tepada asta so'nish
         const g = clamp01(t/0.6);
         const grow = 0.5 + 0.55*(1 - (1-g)*(1-g)) + 0.08*t;  // 0.5 → ~1.1: yaqinlashayotgandek kattalashadi
-        const a = inE * outE * p.maxA * da;
+        const a = inE * outE * p.maxA * da * (p.fl ? (1 - sstep(p.fl.k)) : 1);
         if(a < 0.004) continue;
         const rr = p.r * grow;
         // tana + chet
@@ -11637,6 +11765,9 @@
         case 'drift':
           windT = Math.max(-1, Math.min(1, +m.v || 0));
           break;
+        case 'fling':
+          if(ctx && dotsA > 0 && !reduce) flingParts(m);
+          break;
         case 'visible':
           visible = !!m.on;
           if(visible) kickLoop();
@@ -11650,7 +11781,7 @@
 
   const DotsFX = (function(){
     const canvas = document.getElementById('dotsCanvas');
-    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){}, refreshQuality(){}, setSuppressed(){} };
+    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){}, fling(){}, refreshQuality(){}, setSuppressed(){} };
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLite = () => document.documentElement.classList.contains('lite');
     const isPerf = () => document.documentElement.classList.contains('perf');
@@ -11661,13 +11792,20 @@
     let suppressed = document.documentElement.classList.contains('perf');
     // foydalanuvchi tanlovi shu qurilmada eslab qolinadi ('0' = o'chiq). Standart — chiziqlar yoqilgan.
     const KEYS = { lines:'kanji-bgfx', dots:'kanji-bgdots' };
-    const fx = { lines:true, dots:true };
+    const fx = { lines:false, dots:false };   // standart: ikkalasi ham O'CHIQ (og'ir — foydalanuvchi o'zi yoqadi)
     try{
-      fx.lines = localStorage.getItem(KEYS.lines) !== '0';
-      fx.dots  = localStorage.getItem(KEYS.dots)  !== '0';
-      // ikkala fon BIR VAQTDA ishlamaydi: eski saqlangan holatda ikkalasi yoqiq bo'lsa, chiziqlar qoladi
+      // bir martalik tiklash: avval standart bo'yicha yoqiq bo'lib qolgan hammada fon o'chiriladi,
+      // shundan keyin foydalanuvchining o'z tanlovi eslab qolinadi
+      if(localStorage.getItem('kanji-bgfx-v2') !== '1'){
+        localStorage.setItem(KEYS.lines, '0');
+        localStorage.setItem(KEYS.dots, '0');
+        localStorage.setItem('kanji-bgfx-v2', '1');
+      }
+      fx.lines = localStorage.getItem(KEYS.lines) === '1';
+      fx.dots  = localStorage.getItem(KEYS.dots)  === '1';
+      // ikkala fon BIR VAQTDA ishlamaydi: ikkalasi yoqiq bo'lib qolsa, chiziqlar qoladi
       if(fx.lines && fx.dots){ fx.dots = false; localStorage.setItem(KEYS.dots, '0'); }
-    }catch(_){ if(fx.lines && fx.dots) fx.dots = false; }
+    }catch(_){ /* saqlash mumkin emas — ikkalasi o'chiq */ }
 
     function send(msg, transfer){
       if(mode === 'worker') worker.postMessage(msg, transfer || []);
@@ -11818,7 +11956,12 @@
       lastDrift = v;
       send({ type:'drift', v:v });
     }
-    return { start, pause, resume, setLayer, getLayer, drift, refreshQuality, setSuppressed };
+    // Kartochka surib yuborilganda (dir: -1 chap, 1 o'ng; rect: kartochka ramkasi) yaqin pufakchalar birga ketadi
+    function fling(dir, rect){
+      if(!started || !mode || !fx.dots || suppressed || reduceMotion || !rect) return;
+      send({ type:'fling', dir:dir, l:rect.left, r:rect.right, t:rect.top, b:rect.bottom });
+    }
+    return { start, pause, resume, setLayer, getLayer, drift, fling, refreshQuality, setSuppressed };
   })();
 
   // Akkaunt menyusidagi fon almashtirgichlari (data-bgfx="lines" | "dots")
@@ -11827,9 +11970,30 @@
     // biri yoqilganda ikkinchisi o'chadi — shuning uchun HAR DOIM ikkala switch qayta tekshiriladi
     const syncAll = ()=> btns.forEach((b)=> b.setAttribute('aria-checked', DotsFX.getLayer(b.getAttribute('data-bgfx')) ? 'true' : 'false'));
     syncAll();
+    // Fon chiziqlarini YOQISHDA tasdiq so'raladi (og'ir effekt); o'chirish va zarralar — to'g'ridan-to'g'ri
+    const ov = document.getElementById('bgLinesConfirmOverlay');
+    const okB = document.getElementById('bgLinesOkBtn');
+    const cancelB = document.getElementById('bgLinesCancelBtn');
+    function closeConfirm(){
+      if(!ov) return;
+      ov.classList.remove('open'); ov.setAttribute('aria-hidden', 'true');
+    }
+    function askLines(){
+      if(!ov){ DotsFX.setLayer('lines', true); syncAll(); return; }
+      ov.classList.add('open'); ov.setAttribute('aria-hidden', 'false');
+      if(cancelB) setTimeout(()=> cancelB.focus(), 60);   // tasodifan yoqilib ketmasligi uchun fokus "Bekor qilish"da
+    }
+    if(okB) okB.addEventListener('click', ()=>{ closeConfirm(); DotsFX.setLayer('lines', true); syncAll(); });
+    if(cancelB) cancelB.addEventListener('click', closeConfirm);
+    if(ov) ov.addEventListener('click', (e)=>{ if(e.target === ov) closeConfirm(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && ov && ov.classList.contains('open')) closeConfirm(); });
     btns.forEach((btn)=>{
       const name = btn.getAttribute('data-bgfx');
-      btn.addEventListener('click', ()=>{ DotsFX.setLayer(name, !DotsFX.getLayer(name)); syncAll(); });
+      btn.addEventListener('click', ()=>{
+        const turningOn = !DotsFX.getLayer(name);
+        if(name === 'lines' && turningOn){ askLines(); return; }
+        DotsFX.setLayer(name, turningOn); syncAll();
+      });
     });
   })();
 
