@@ -93,6 +93,52 @@
   html.lite .bg-scene .blob.b4{ display:none; }
   html.lite .card.flipped .face.back{ animation:none !important; }
   html.lite .card::after{ display:none; }
+
+  /* ---------- YENGIL REJIM (html.perf) — eng kuchsiz qurilmalar uchun ----------
+     Maqsad: qotmasdan, maksimal silliq ishlash. Eng og'ir narsalar o'chiriladi:
+     backdrop-filter (shisha xiralashtirish), filter (blur/glow), doimiy ishlaydigan
+     bezak animatsiyalari. Shisha o'rniga biroz zichroq yarim shaffof zamin ishlatiladi,
+     shuning uchun ko'rinish o'qiladigan va chiroyli bo'lib qoladi. Bir martalik
+     (animationend/transitionend kutadigan) animatsiyalar tegilmaydi. */
+  html.perf{
+    --glass-bg: rgba(30,32,37,0.80);
+    --glass-bg-strong: rgba(44,46,52,0.88);
+    --blur-1:0px; --blur-2:0px; --blur-3:0px; --blur-4:0px;
+    --sat-1:100%; --sat-2:100%; --blob-blur:0px;
+  }
+  html.perf *, html.perf *::before, html.perf *::after{
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+    filter:none !important;
+    text-shadow:none !important;
+  }
+  html.perf .swipe-tip-modal::before, html.perf .swipe-tip-modal::after{ display:none !important; }
+  /* doimiy bezak animatsiyalari to'xtatiladi (funksional indikatorlar — taymer, yozish nuqtalari — qoladi) */
+  html.perf .ct-card-1, html.perf .ct-card-2,
+  html.perf .ct-card-lg.ct-card-1, html.perf .ct-card-lg.ct-card-2,
+  html.perf.ct-sync header,
+  html.perf .chat-toggle-btn.in-use, html.perf .chat-toggle-btn.in-use::after,
+  html.perf .tab-btn.new-day, html.perf .tab-btn.new-day.active,
+  html.perf .card.flipped:not(.flipping)::after,
+  html.perf .swipe-hints .hint .hint-arrow,
+  html.perf .ct-table-center-hint:not(.picker-open),
+  html.perf .ct-choose-flashcard-btn,
+  html.perf .chat-panel.open::after, html.perf .presence-panel.open::after, html.perf .ai-assist-panel.open::after,
+  html.perf .ai-assist-panel.open .ai-assist-glow-icon,
+  html.perf .ai-assist-panel.open .ai-orbit, html.perf .ai-assist-btn.in-use .ai-orbit,
+  html.perf .ai-assist-panel.open .ai-star-big, html.perf .ai-assist-panel.open .ai-star-small,
+  html.perf .ai-assist-btn.in-use .ai-star-big, html.perf .ai-assist-btn.in-use .ai-star-small,
+  html.perf .ai-assist-panel.open .ai-star-big-svg, html.perf .ai-assist-panel.open .ai-star-small-svg,
+  html.perf .ai-assist-btn.in-use .ai-star-big-svg, html.perf .ai-assist-btn.in-use .ai-star-small-svg,
+  html.perf .splash-artwork, html.perf .splash-start-btn{
+    animation:none !important;
+  }
+  /* faqat blur bilan yumshatilgan "nur" qatlamlari yashiriladi (filtersiz qattiq shaklga aylanib qolmasligi uchun) */
+  html.perf .card::after, html.perf .ai-aura::after,
+  html.perf .ct-table-seat-avatar-slot::before{ display:none !important; }
+  html.perf .quiz-card{ background:rgba(20,22,26,0.92); }
+  html.perf .quiz-opt:not(.correct):not(.wrong){ background:rgba(24,26,31,0.94); }
+  html.perf .auth-banner-video{ animation:none !important; }
   *{box-sizing:border-box;}
   /* Barcha tugma va sahifalar uchun: 300ms tap kechikishi va ikki marta bosishdagi zoom yo'q */
   button,[role="button"],a,summary,label,select,input[type="checkbox"],input[type="radio"]{ touch-action:manipulation; }
@@ -6886,8 +6932,19 @@
       var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var saveData = nav.connection && nav.connection.saveData;
       var savedLite = false; try{ savedLite = localStorage.getItem('kanji-lite') === '1'; }catch(e){}
-      if(weakHW || reduceMotion || saveData || savedLite){
-        document.documentElement.classList.add('lite');
+      // YENGIL REJIM ('perf'): foydalanuvchi menyudan yoqadi ('1') yoki o'chiradi ('0');
+      // tanlov bo'lmasa — faqat JUDA kuchsiz qurilmalarda (<=2 yadro yoki <=2GB RAM) yoki
+      // trafik tejash yoqilganda avtomatik yoqiladi. Oddiy 'lite' (yumshoqroq) avvalgidek ishlaydi.
+      var perfPref = null; try{ perfPref = localStorage.getItem('kanji-perf'); }catch(e){}
+      var veryWeak = (nav.hardwareConcurrency && nav.hardwareConcurrency <= 2) ||
+                     (nav.deviceMemory && nav.deviceMemory <= 2) || saveData;
+      var root = document.documentElement;
+      if(perfPref === '1' || (perfPref !== '0' && veryWeak)){
+        root.classList.add('lite'); root.classList.add('perf');
+      } else if(perfPref === '0'){
+        if(reduceMotion) root.classList.add('lite');   // foydalanuvchi to'liq sifatni tanladi
+      } else if(weakHW || reduceMotion || saveData || savedLite){
+        root.classList.add('lite');
       }
     }catch(e){}
   })();
@@ -6935,6 +6992,12 @@
       <button id="bgDotsToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="true" data-bgfx="dots" aria-label="Fon zarralari">
         <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="7" cy="17" r="2.2"></circle><circle cx="16" cy="12" r="1.6"></circle><circle cx="10" cy="6.5" r="1.3"></circle><circle cx="18.5" cy="19" r="1.1"></circle></svg>
         <span>Fon zarralari</span>
+        <i class="bgfx-switch" aria-hidden="true"></i>
+      </button>
+      <!-- Yengil rejim: kuchsiz qurilmalar uchun (shisha xiralashtirish, og'ir animatsiyalar o'chadi; holat qurilmada eslab qolinadi) -->
+      <button id="perfModeBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" aria-label="Yengil rejim">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"></path></svg>
+        <span>Yengil rejim</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
       <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
@@ -9653,7 +9716,9 @@
     // Aylanish paytida kadrlar tez-tez qotsa, qurilma zaif deb hisoblanib 'lite' rejim yoqiladi va eslab qolinadi
     function sampleFlipJank(){
       const root = document.documentElement;
-      if(root.classList.contains('lite')) return;
+      if(root.classList.contains('perf')) return;
+      let pref = null; try{ pref = localStorage.getItem('kanji-perf'); }catch(_){}
+      if(pref === '0') return;                    // foydalanuvchi to'liq sifatni tanlagan — o'zgartirmaymiz
       const s = (window.__kjJank = window.__kjJank || {slow:0, flips:0});
       let last = performance.now(), slow = 0; const end = last + 600;
       (function f(now){
@@ -9662,8 +9727,13 @@
         if(now < end){ requestAnimationFrame(f); return; }
         s.slow += slow; s.flips++;
         if(s.flips >= 3 && s.slow >= 6){
-          root.classList.add('lite');
-          try{ localStorage.setItem('kanji-lite','1'); }catch(_){}
+          s.slow = 0; s.flips = 0;
+          if(!root.classList.contains('lite')){   // 1-bosqich: yumshoqroq 'lite'
+            root.classList.add('lite');
+            try{ localStorage.setItem('kanji-lite','1'); }catch(_){}
+          } else if(window.KanjiPerf){            // 2-bosqich: lite ham yetmasa — to'liq yengil rejim
+            window.KanjiPerf.set(true);
+          }
         }
       })(last);
     }
@@ -10517,7 +10587,8 @@
     let canvas = null, ctx = null;
     let W = 0, H = 0, dpr = 1, scale = 1;
     let nx = 0, ny = 0, field = null, CS = 9, LEVELS = [];
-    let lite = false, heavy = false, reduce = false;
+    let lite = false, perf = false, heavy = false, reduce = false;
+    let lastDrawTs = 0;               // perf: kadrlar orasidagi minimal vaqt (~24fps)
     let running = false, visible = true, rafId = null;
     let on = true;                    // "lines" qatlami yoqilganmi
     let dotsOn = true;                // "dots" qatlami yoqilganmi
@@ -10536,17 +10607,17 @@
       ? (f) => scope.requestAnimationFrame(f)
       : (f) => setTimeout(() => f(now()), 16);
 
-    function configure(l){
-      lite = !!l;
+    function configure(l, p){
+      lite = !!l; perf = !!p;
       // worker'da to'r ingichka (silliq), asosiy oqimda esa yengilroq
-      CS = lite ? 14 : (heavy ? 7 : 11);   // to'r qanchalik mayda bo'lsa, egri chiziq shunchalik silliq
-      const STEP = lite ? 0.8 : 0.62;  // siyraklik: qadam katta bo'lsa chiziqlar kam
+      CS = perf ? 22 : (lite ? 14 : (heavy ? 7 : 11));   // to'r qanchalik mayda bo'lsa, egri chiziq shunchalik silliq
+      const STEP = perf ? 1.1 : (lite ? 0.8 : 0.62);  // siyraklik: qadam katta bo'lsa chiziqlar kam
       LEVELS = [];
       for(let l2 = -2.5, i = 0; l2 <= 2.5 + 1e-6; l2 += STEP, i++) LEVELS.push({ v:l2, major: i % 3 === 0 });
-      PCOUNT = lite ? 16 : 34;
+      PCOUNT = perf ? 8 : (lite ? 16 : 34);
     }
     function setSize(){
-      scale = Math.min(dpr, 2) * (lite ? 0.7 : (heavy ? 1 : 0.9));
+      scale = perf ? Math.min(dpr, 1.5) * 0.55 : Math.min(dpr, 2) * (lite ? 0.7 : (heavy ? 1 : 0.9));
       canvas.width = Math.max(1, Math.round(W*scale));
       canvas.height = Math.max(1, Math.round(H*scale));
       ctx.setTransform(scale,0,0,scale,0,0);
@@ -10717,6 +10788,10 @@
       if(lastRender === null) lastRender = ts;
       frame++;
       if(parity === 2 && (frame & 1)) return;            // barqaror 30fps
+      if(perf){                                          // yengil rejim: ~24fps — GPU/CPU ancha bo'sh qoladi
+        if(lastDrawTs && ts - lastDrawTs < 40) return;
+        lastDrawTs = ts;
+      }
       if(ts < holdUntil){ lastRender = ts; return; }     // (zaxira rejim) scroll paytida pauza
       let dt = (ts - lastRender)/1000;
       lastRender = ts;
@@ -10741,6 +10816,7 @@
       }
       if(appear > 0) tm += dtS * SPEED * rate * (1 + energy*1.2);
       if(dotsA > 0) stepParts(dtS);
+      if(perf && target < 0.5) return;                   // yengil rejim: kartochka aylanayotganda fon qotib turadi (oxirgi kadr qoladi)
       const t0 = now();
       render();
       ema += ((now() - t0) - ema)*0.1;
@@ -10756,11 +10832,12 @@
         case 'init':
           canvas = m.canvas; W = m.w; H = m.h; dpr = m.dpr || 1;
           heavy = !!m.worker; reduce = !!m.reduce;
+          perf = !!m.perf;
           on = m.on !== false; dotsOn = m.dots !== false;
           ctx = canvas.getContext('2d', { alpha: true });
           if(!ctx) return;
-          configure(m.lite);
-          parity = (heavy && !lite) ? 1 : 2;
+          configure(m.lite, m.perf);
+          parity = (heavy && !lite) || perf ? 1 : 2;
           setSize();
           if(!reduce) seedParts();
           if(reduce){ if(on){ appear = 1; render(); } }  // harakatni kamaytirish: chiziqlarning bitta statik kadri
@@ -10775,8 +10852,9 @@
           break;
         }
         case 'quality':
-          if(!ctx || lite === !!m.lite) return;
-          configure(m.lite); setSize();
+          if(!ctx || (lite === !!m.lite && perf === !!m.perf)) return;
+          configure(m.lite, m.perf); setSize();
+          parity = (heavy && !lite) || perf ? 1 : 2;
           if(!reduce) seedParts();
           if(on || dotsA > 0) render();
           break;
@@ -10815,11 +10893,12 @@
 
   const DotsFX = (function(){
     const canvas = document.getElementById('dotsCanvas');
-    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){} };
+    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; }, drift(){}, refreshQuality(){} };
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLite = () => document.documentElement.classList.contains('lite');
+    const isPerf = () => document.documentElement.classList.contains('perf');
     let W = 0, H = 0, started = false, paused = false, mode = null, booted = false;
-    let worker = null, scope = null, resizeTimer = null, wasLite = false;
+    let worker = null, scope = null, resizeTimer = null, wasLite = false, wasPerf = false;
     // foydalanuvchi tanlovi shu qurilmada eslab qolinadi ('0' = o'chiq). Standart — chiziqlar yoqilgan.
     const KEYS = { lines:'kanji-bgfx', dots:'kanji-bgdots' };
     const fx = { lines:true, dots:true };
@@ -10868,9 +10947,9 @@
       booted = true;
       requestAnimationFrame(()=>{
         measure();
-        wasLite = isLite();
+        wasLite = isLite(); wasPerf = isPerf();
         const dpr = window.devicePixelRatio || 1;
-        const base = { type:'init', w:W, h:H, dpr:dpr, lite:wasLite, reduce:reduceMotion, on:fx.lines, dots:fx.dots };
+        const base = { type:'init', w:W, h:H, dpr:dpr, lite:wasLite, perf:wasPerf, reduce:reduceMotion, on:fx.lines, dots:fx.dots };
 
         // 1) Afzal yo'l: alohida oqim (Worker + OffscreenCanvas)
         try{
@@ -10922,9 +11001,14 @@
       if(!paused) return;
       paused = false;
       if(!mode) return;
-      const l = isLite();
-      if(l !== wasLite){ wasLite = l; send({ type:'quality', lite:l }); } // 'lite' keyinroq yoqilgan bo'lsa, fon ham yengillashadi
+      refreshQuality();
       send({ type:'rate', target:1, kick:true });
+    }
+    // 'lite' / 'perf' keyinroq yoqilsa yoki o'chirilsa — fon ham darhol shunga moslashadi
+    function refreshQuality(){
+      if(!started || !mode) return;
+      const l = isLite(), pf = isPerf();
+      if(l !== wasLite || pf !== wasPerf){ wasLite = l; wasPerf = pf; send({ type:'quality', lite:l, perf:pf }); }
     }
 
     // Qatlamni yoqish/o'chirish ('lines' | 'dots'). O'chirilganda qatlam tez so'nadi; ikkalasi
@@ -10960,7 +11044,7 @@
       lastDrift = v;
       send({ type:'drift', v:v });
     }
-    return { start, pause, resume, setLayer, getLayer, drift };
+    return { start, pause, resume, setLayer, getLayer, drift, refreshQuality };
   })();
 
   // Akkaunt menyusidagi fon almashtirgichlari (data-bgfx="lines" | "dots")
@@ -10973,6 +11057,40 @@
       const name = btn.getAttribute('data-bgfx');
       btn.addEventListener('click', ()=>{ DotsFX.setLayer(name, !DotsFX.getLayer(name)); syncAll(); });
     });
+  })();
+
+  // ---------- YENGIL REJIM BOSHQARUVCHISI ----------
+  // Akkaunt menyusidagi "Yengil rejim" tugmasi. Yoqilganda html'ga 'perf' (va 'lite') klassi qo'shiladi:
+  // CSS og'ir effektlarni o'chiradi, fon dvigateli past aniqlikda ~24fps ishlaydi, kichik banner video
+  // to'xtatiladi, zarrachalar kamayadi. Tanlov qurilmada eslab qolinadi ('1' yoqiq, '0' o'chiq).
+  window.KanjiPerf = (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('perfModeBtn');
+    const reduceMo = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const isOn = () => root.classList.contains('perf');
+    function bannerVideo(on){
+      const v = document.getElementById('authBannerVideo');
+      if(!v) return;
+      try{
+        if(on) v.pause();
+        else if(v.play) v.play().catch(()=>{});
+      }catch(_){}
+    }
+    function sync(){ if(btn) btn.setAttribute('aria-checked', isOn() ? 'true' : 'false'); }
+    function set(on, persist){
+      on = !!on;
+      root.classList.toggle('perf', on);
+      if(on) root.classList.add('lite');
+      else if(!reduceMo) root.classList.remove('lite');   // o'chirilganda to'liq sifat (harakatni kamaytirish yoqiq bo'lsa — lite qoladi)
+      if(persist !== false){ try{ localStorage.setItem('kanji-perf', on ? '1' : '0'); }catch(_){} }
+      bannerVideo(on);
+      try{ DotsFX.refreshQuality(); }catch(_){}
+      sync();
+    }
+    sync();
+    if(isOn()) bannerVideo(true);
+    if(btn) btn.addEventListener('click', ()=> set(!isOn()));
+    return { set, isOn };
   })();
 
   // ---------- SPLASH: SUZUVCHI CHIZIQLAR ----------
@@ -11027,7 +11145,7 @@
     ];
 
     function resize(){
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = document.documentElement.classList.contains('perf') ? 1 : Math.min(window.devicePixelRatio || 1, 2);
       W = window.innerWidth; H = window.innerHeight;
       canvas.width = Math.max(1, Math.round(W*dpr));
       canvas.height = Math.max(1, Math.round(H*dpr));
@@ -11098,6 +11216,10 @@
 
     function step(ts){
       if(!running) return;
+      if(lastT !== null && ts - lastT < 40 && document.documentElement.classList.contains('perf')){
+        rafId = requestAnimationFrame(step);   // yengil rejim: ~24fps
+        return;
+      }
       if(lastT === null) lastT = ts;
       let dt = (ts - lastT)/1000;
       lastT = ts;
@@ -12092,11 +12214,16 @@
       const w = roomParticlesCanvas.clientWidth;
       const h = roomParticlesCanvas.clientHeight;
       const isLite = document.documentElement.classList.contains('lite');
-      const count = isLite ? 18 : (w < 420 ? 34 : 56);
+      const isPerf = document.documentElement.classList.contains('perf');
+      const count = isPerf ? 8 : (isLite ? 18 : (w < 420 ? 34 : 56));
       roomParticlesList = Array.from({length: count}, () => makeRoomParticle(w, h));
     }
     function stepRoomParticles(ts){
       if(!roomParticlesCanvas || !roomParticlesCtx){ roomParticlesRAF = null; return; }
+      if(roomParticlesLastTs != null && ts - roomParticlesLastTs < 40 && document.documentElement.classList.contains('perf')){
+        roomParticlesRAF = requestAnimationFrame(stepRoomParticles);   // yengil rejim: ~24fps
+        return;
+      }
       const w = roomParticlesCanvas.clientWidth;
       const h = roomParticlesCanvas.clientHeight;
       if(roomParticlesLastTs == null) roomParticlesLastTs = ts;
@@ -13905,7 +14032,8 @@
     var bannerVideo = document.getElementById("authBannerVideo");
     if(bannerVideo){
       bannerVideo.muted = true;
-      bannerVideo.play && bannerVideo.play().catch(function(){});
+      if(document.documentElement.classList.contains('perf')){ try{ bannerVideo.pause(); }catch(e){} }
+      else bannerVideo.play && bannerVideo.play().catch(function(){});
     }
   })();
 
