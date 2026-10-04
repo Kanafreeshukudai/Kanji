@@ -1087,7 +1087,7 @@
     .auth-dropdown.open > *{ transform:none; transition:opacity .2s ease; }
   }
 
-  /* ---------- CHIQISHNI TASDIQLASH oynasi (qora + moss) ---------- */
+  /* ---------- CHIQISH / FON YOQISH TASDIQLASH oynalari (qora + qizil) ---------- */
   .logout-confirm-overlay{
     position:fixed;
     inset:0;
@@ -1114,8 +1114,8 @@
     box-sizing:border-box;
     padding:22px 18px 18px;
     border-radius:20px;
-    border:1px solid rgba(124,154,107,0.70);
-    background:linear-gradient(160deg, #0b100a, #000 55%);
+    border:1px solid rgba(214,69,69,0.75);
+    background:linear-gradient(160deg, #1a0a0a, #000 55%);
     box-shadow:0 24px 60px -20px rgba(0,0,0,0.95);
     text-align:center;
     transform:translateY(14px) scale(0.94);
@@ -1126,9 +1126,9 @@
     width:46px; height:46px;
     margin:0 auto 12px;
     border-radius:50%;
-    border:1px solid rgba(124,154,107,0.70);
+    border:1px solid rgba(214,69,69,0.75);
     background:#000;
-    color:var(--moss-soft);
+    color:#ff7b7b;
     display:flex; align-items:center; justify-content:center;
   }
   .logout-confirm-icon svg{ width:21px; height:21px; display:block; }
@@ -1143,7 +1143,7 @@
     margin:0 0 18px;
     font-size:12.5px;
     line-height:1.55;
-    color:#b5c9a8;
+    color:#e3b5b5;
   }
   .logout-confirm-actions{ display:flex; gap:10px; }
   .logout-confirm-actions button{
@@ -1160,14 +1160,14 @@
   .logout-confirm-actions button:active{ transform:scale(0.96); }
   .logout-confirm-actions button:disabled{ opacity:0.6; cursor:default; }
   .logout-cancel-btn{
-    border:1px solid rgba(124,154,107,0.70);
+    border:1px solid rgba(214,69,69,0.6);
     background:#000;
     color:var(--ink);
   }
   .logout-ok-btn{
-    border:1px solid var(--moss);
-    background:linear-gradient(150deg, var(--moss-soft), var(--moss));
-    color:#0B0D10;
+    border:1px solid #c93a3a;
+    background:linear-gradient(150deg, #e65454, #b92d2d);
+    color:#fff;
   }
   @media (prefers-reduced-motion: reduce){
     .logout-confirm-overlay, .logout-confirm-card{ transition:opacity .15s ease; transform:none; }
@@ -1196,23 +1196,42 @@
     transition:transform .34s cubic-bezier(.2,.8,.2,1);
     display:flex;
     flex-direction:column;
-    background:linear-gradient(180deg, var(--panel-2), var(--panel-1) 70%);
-    border:1px solid var(--glass-border-soft);
+    background:linear-gradient(180deg, #0e0f11, #000 72%);
+    border:1px solid rgba(255,255,255,0.38);
     border-bottom:none;
     border-radius:24px 24px 0 0;
-    box-shadow:0 -20px 50px -18px rgba(0,0,0,0.6);
+    box-shadow:0 -20px 50px -18px rgba(0,0,0,0.8);
     padding-bottom:env(safe-area-inset-bottom);
     overflow:hidden;
     overscroll-behavior:contain;
   }
   .notes-panel.open{transform:translate(-50%, 0);}
+  /* Qaydlar oynasi tepasida yuguruvchi moss nur (chat / faol foydalanuvchilar / AI oynalaridagi
+     tayyor chatEdgeGlow animatsiyasi: chapdan fade bilan chiqadi, o'ngda so'nadi). */
+  .notes-panel::after{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    z-index:5;
+    pointer-events:none;
+    opacity:0;
+    background:radial-gradient(ellipse closest-side,
+      #dcebd2 0%, #a9c796 28%, #7C9A6B 68%, rgba(124,154,107,0) 100%)
+      -220px 0 / 220px 3px no-repeat;
+    filter:drop-shadow(0 0 4px rgba(124,154,107,.9));
+  }
+  .notes-panel.open::after{animation:chatEdgeGlow 3.8s linear .5s infinite;}
+  @media (prefers-reduced-motion: reduce){
+    .notes-panel.open::after{animation:none;}
+  }
   .notes-panel-header{
     flex:none;
     display:flex;
     align-items:center;
     justify-content:space-between;
     padding:16px 18px 12px;
-    border-bottom:1px solid var(--glass-border-soft);
+    border-bottom:1px solid rgba(255,255,255,0.18);
   }
   .notes-panel-title{display:flex; flex-direction:column; gap:2px;}
   .notes-panel-title h3{
