@@ -6905,9 +6905,15 @@
         <span>Qaydlar</span>
       </button>
       <!-- Orqa fon animatsiyasini yoqish/o'chirish (holat qurilmada eslab qolinadi) -->
-      <button id="bgFxToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="true" aria-label="Fon animatsiyasi">
+      <!-- Orqa fon qatlamlarini yoqish/o'chirish (holat qurilmada eslab qolinadi) -->
+      <button id="bgFxToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="true" data-bgfx="lines" aria-label="Fon chiziqlari">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8c3-3.5 6 3.5 9 0s6-3.5 9 0"></path><path d="M3 16c3-3.5 6 3.5 9 0s6-3.5 9 0"></path></svg>
-        <span>Fon animatsiyasi</span>
+        <span>Fon chiziqlari</span>
+        <i class="bgfx-switch" aria-hidden="true"></i>
+      </button>
+      <button id="bgDotsToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="true" data-bgfx="dots" aria-label="Fon zarralari">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="7" cy="17" r="2.2"></circle><circle cx="16" cy="12" r="1.6"></circle><circle cx="10" cy="6.5" r="1.3"></circle><circle cx="18.5" cy="19" r="1.1"></circle></svg>
+        <span>Fon zarralari</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
       <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
@@ -10446,31 +10452,30 @@
     document.getElementById('btnRestartQuiz').addEventListener('click', ()=>startQuiz(restartPool, restartReturnTab, restartType));
   }
 
-  // ---------- FON: TOPOGRAFIK (KONTUR) CHIZIQLAR ----------
-  // Siyrak, ingichka oq egri chiziqlar sekin oqib, "nafas olib" turadi. Ular tayyor
-  // rasm emas — har kadrda sekin o'zgaruvchi silliq "balandlik maydoni"dan
-  // (sinuslar yig'indisi) MARCHING SQUARES usulida hisoblab chiqariladi.
+  // ---------- ORQA FON: TOPOGRAFIK CHIZIQLAR + SUZUVCHI ZARRACHALAR ----------
+  // Ikki qatlam bitta canvas va bitta Worker'da ishlaydi. Ular BIR VAQTDA ishlamaydi:
+  // akkaunt menyusida biri yoqilsa ikkinchisi avtomatik o'chadi (ikkalasini o'chirib
+  // qo'yish ham mumkin — u holda sahifa sof qora):
+  //  1) "lines"  — siyrak, ingichka topografik (kontur) chiziqlar. Ular tayyor rasm emas:
+  //     har kadrda sekin o'zgaruvchi silliq "balandlik maydoni"dan MARCHING SQUARES
+  //     usulida hisoblanadi, sekin oqadi va "nafas oladi".
+  //  2) "dots"   — yirikroq, yarim shaffof yumaloq zarrachalar (aurasiz, tekis doira)
+  //     pastdan tepaga silliq suzib chiqadi. Chuqurlik hissi: uzoqdagilari kichikroq,
+  //     xira, sekin; yaqinlari kattaroq, biroz yorqinroq va tezroq (parallaks).
   //
-  // SILLIQLIK UCHUN ASOSIY QAROR: butun hisob-kitob va chizish ALOHIDA OQIMDA
-  // (Web Worker + OffscreenCanvas) bajariladi. Shu sababli sahifa scroll qilinganda,
-  // kartochka aylanganda yoki tortilganda asosiy oqim fon bilan band bo'lmaydi va
-  // hech narsa qotmaydi. Worker/OffscreenCanvas bo'lmagan eski brauzerlarda xuddi
-  // shu kod asosiy oqimda, yengilroq sozlamalar bilan (va scroll paytida pauza
-  // bilan) ishlaydi.
-  //
-  // Qo'shimcha yumshoqlik:
-  //  - vaqt kadrlar orasidagi tebranishlardan tozalanadi (dt silliqlanadi);
-  //  - tezlik va "jonlanish" keskin sakramaydi — easing bilan ortadi/kamayadi;
-  //  - kartochka harakatlanganda fon to'xtab qolmaydi, faqat sekinlashib, keyin
-  //    yana asta tezlashadi;
-  //  - chiziqlar ingichka to'r (9px) bilan hisoblanadi — egri chiziq qirrasiz;
-  //  - kadr hisobi og'ir bo'lsa, o'zi 30fps ga tushadi (barqaror, bir tekis).
-  // Nur/blob ishlatilmaydi — sof AMOLED qora fon kulrang bo'lib qolmaydi.
-  // Tashqi API avvalgidek: start / pause / resume.
+  // SILLIQLIK: butun hisob-kitob va chizish ALOHIDA OQIMDA (Web Worker + OffscreenCanvas)
+  // bajariladi — scroll, kartochka aylanishi va tortilishi fon bilan band bo'lmaydi.
+  // Worker/OffscreenCanvas bo'lmagan eski brauzerlarda o'sha kod asosiy oqimda,
+  // yengilroq sozlamalar bilan (scroll paytida pauza bilan) ishlaydi.
+  // Qo'shimcha yumshoqlik: dt silliqlanadi, tezlik/jonlanish easing bilan o'zgaradi,
+  // kartochka harakatida fon to'xtamaydi — faqat sekinlashadi; kadr og'ir bo'lsa
+  // o'zi barqaror 30fps ga tushadi. Ikkala qatlam o'chirilsa hisob-kitob to'liq
+  // to'xtaydi va sahifa sof qora (AMOLED) fonda qoladi. Nur/blob ishlatilmaydi.
+  // Tashqi API: start / pause / resume / setLayer(nom, yoqilgan) / getLayer(nom).
 
   // Dvigatel o'z-o'zidan yetarli bo'lishi shart (Worker ichiga matn sifatida yuboriladi),
   // shu sababli tashqi o'zgaruvchilarga hech qachon murojaat qilmaydi.
-  function contourEngine(scope){
+  function fxEngine(scope){
     const K = 0.0145;     // fazoviy chastota: shakllar ~300px atrofida
     const SPEED = 1.35;   // umumiy sekinlik koeffitsiyenti
     let canvas = null, ctx = null;
@@ -10478,13 +10483,16 @@
     let nx = 0, ny = 0, field = null, CS = 9, LEVELS = [];
     let lite = false, heavy = false, reduce = false;
     let running = false, visible = true, rafId = null;
-    let on = true;                    // fon yoqilganmi (o'chirilsa chiziqlar so'nib, hisob-kitob to'xtaydi)
+    let on = true;                    // "lines" qatlami yoqilganmi
+    let dotsOn = true;                // "dots" qatlami yoqilganmi
     let tm = Math.random()*100;       // har ochilishda boshqacha manzara
-    let appear = 0;                   // 0..1 — silliq paydo bo'lish
+    let appear = 0;                   // chiziqlarning ko'rinish darajasi 0..1
+    let dotsA = 0;                    // zarrachalarning ko'rinish darajasi 0..1
     let rate = 1, target = 1;         // vaqt tezligi va uning maqsadi (easing)
     let kick = 0, energy = 0;         // vaqtinchalik jonlanish (silliq ko'tarilib, silliq tushadi)
     let parity = 1, frame = 0;        // 1 = har kadr, 2 = har ikkinchi kadr (30fps)
     let lastRender = null, dtS = 1/60, ema = 0, holdUntil = 0;
+    let parts = [], PCOUNT = 36;
 
     const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const raf = (typeof scope.requestAnimationFrame === 'function')
@@ -10498,6 +10506,7 @@
       const STEP = lite ? 0.8 : 0.62;  // siyraklik: qadam katta bo'lsa chiziqlar kam
       LEVELS = [];
       for(let l2 = -2.5, i = 0; l2 <= 2.5 + 1e-6; l2 += STEP, i++) LEVELS.push({ v:l2, major: i % 3 === 0 });
+      PCOUNT = lite ? 18 : 36;
     }
     function setSize(){
       scale = Math.min(dpr, 2) * (lite ? 0.6 : 0.85);
@@ -10508,6 +10517,7 @@
       field = new Float32Array((nx+1)*(ny+1));
     }
 
+    // ================= QATLAM 1: TOPOGRAFIK CHIZIQLAR =================
     function computeField(t){
       const nx1 = nx + 1;
       const breathLvl = Math.sin(t*0.30)*0.34;            // halqalar kengayadi/torayadi
@@ -10561,9 +10571,8 @@
       }
     }
 
-    function render(){
+    function drawLines(){
       computeField(tm);
-      ctx.clearRect(0,0,W,H);
       ctx.lineJoin = 'round'; ctx.lineCap = 'round';
       const ap = appear*appear*(3 - 2*appear);          // smoothstep — yumshoq paydo bo'lish
       const k = ap * (1 + energy*0.2);
@@ -10575,6 +10584,64 @@
         ctx.strokeStyle = 'rgba(255,255,255,' + Math.min(0.5, (lv.major ? 0.30 : 0.17) * k).toFixed(3) + ')';
         ctx.stroke();
       }
+    }
+
+    // ================= QATLAM 2: SUZUVCHI ZARRACHALAR =================
+    function makeParticle(anywhere){
+      // z: 0 = juda uzoq, 1 = juda yaqin; daraja uzoqdagilarni ko'proq qiladi (tabiiy chuqurlik)
+      const z = Math.pow(Math.random(), 1.35);
+      const r = 2.2 + z*6.3;                              // radius 2.2–8.5px: yirikroq yumaloq zarracha
+      const y0 = H + r*6 + Math.random()*40;              // tug'ilish chizig'i (ekrandan pastda)
+      return {
+        x: Math.random()*W,
+        y: anywhere ? Math.random()*H : y0,
+        y0: y0,
+        yEnd: -(40 + Math.random()*60),                   // ekran tepasidan ham biroz o'tib so'nadi
+        z: z, r: r,
+        speed: (6 + z*28) * (0.75 + Math.random()*0.5),   // px/s — uzoq sekin, yaqin tezroq
+        drift: (Math.random()-0.5)*(3 + z*8),
+        ph: Math.random()*Math.PI*2,
+        f: 0.25 + Math.random()*0.35,
+        maxA: 0.10 + z*0.26 + Math.random()*0.05          // yarim shaffof: uzoq — juda xira, yaqin — biroz yorqinroq
+      };
+    }
+    function seedParts(){
+      parts = [];
+      for(let i=0;i<PCOUNT;i++) parts.push(makeParticle(true));
+    }
+    function stepParts(dt){
+      const mult = dt * rate * (1 + energy*0.6);
+      for(let i=0;i<parts.length;i++){
+        let p = parts[i];
+        p.y -= p.speed*mult;
+        if(p.y < p.yEnd){ parts[i] = makeParticle(false); continue; }
+        p.x += Math.sin(p.ph + (p.y0 - p.y)*0.012*p.f*6) * p.drift * mult;
+      }
+    }
+    function sstep(x){ x = x < 0 ? 0 : (x > 1 ? 1 : x); return x*x*(3 - 2*x); }
+    function drawDots(){
+      const da = dotsA*dotsA*(3 - 2*dotsA) * (1 + energy*0.15);
+      ctx.fillStyle = '#fff';
+      for(let i=0;i<parts.length;i++){
+        const p = parts[i];
+        const t = (p.y0 - p.y)/(p.y0 - p.yEnd);
+        const env = sstep(t/0.12) * sstep((1 - t)/0.22);   // pastdan silliq paydo bo'lib, tepada asta so'nadi
+        const a = env * p.maxA * da;
+        if(a < 0.004) continue;
+        // AURASIZ: faqat tekis, yarim shaffof, aniq chetli doira (nur/halo yo'q)
+        ctx.globalAlpha = Math.min(1, a);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // ================= UMUMIY =================
+    function render(){
+      ctx.clearRect(0,0,W,H);
+      if(appear > 0) drawLines();
+      if(dotsA > 0) drawDots();
     }
 
     function loop(ts){
@@ -10594,15 +10661,19 @@
       kick = Math.max(0, kick - dt*0.3);
       energy += (kick - energy)*(1 - Math.exp(-dt*2.5)); // jonlanish sakrab emas, silliq ko'tariladi
       rate   += (target - rate)*(1 - Math.exp(-dt*3));   // tezlik ham easing bilan o'zgaradi
-      // yoqilganda yumshoq paydo bo'ladi, o'chirilganda tez (~0.4s) so'nadi
+      // qatlamlar: yoqilganda yumshoq paydo bo'ladi, o'chirilganda tez (~0.4s) so'nadi
       if(on) appear = Math.min(1, appear + dt*0.45);
       else   appear = Math.max(0, appear - dt*2.6);
-      if(!on && appear <= 0){                            // butunlay so'ndi — sof qora fon, hisob-kitob yo'q
+      const dOn = dotsOn && !reduce;
+      if(dOn) dotsA = Math.min(1, dotsA + dt*0.6);
+      else    dotsA = Math.max(0, dotsA - dt*2.6);
+      if(!on && appear <= 0 && !dOn && dotsA <= 0){      // ikkalasi ham so'ndi — sof qora fon, hisob-kitob yo'q
         ctx.clearRect(0,0,W,H);
         running = false;
         return;
       }
-      tm += dtS * SPEED * rate * (1 + energy*1.2);
+      if(appear > 0) tm += dtS * SPEED * rate * (1 + energy*1.2);
+      if(dotsA > 0) stepParts(dtS);
       const t0 = now();
       render();
       ema += ((now() - t0) - ema)*0.1;
@@ -10617,35 +10688,50 @@
       switch(m.type){
         case 'init':
           canvas = m.canvas; W = m.w; H = m.h; dpr = m.dpr || 1;
-          heavy = !!m.worker; reduce = !!m.reduce; on = m.on !== false;
+          heavy = !!m.worker; reduce = !!m.reduce;
+          on = m.on !== false; dotsOn = m.dots !== false;
           ctx = canvas.getContext('2d', { alpha: true });
           if(!ctx) return;
           configure(m.lite);
           parity = (heavy && !lite) ? 1 : 2;
           setSize();
-          if(reduce){ if(on){ appear = 1; render(); } }  // harakatni kamaytirish: bitta statik kadr
-          else if(on){ running = true; kickLoop(); }
+          if(!reduce) seedParts();
+          if(reduce){ if(on){ appear = 1; render(); } }  // harakatni kamaytirish: chiziqlarning bitta statik kadri
+          else if(on || dotsOn){ running = true; kickLoop(); }
           break;
-        case 'resize':
+        case 'resize': {
           if(!ctx) return;
+          const ow = W;
           W = m.w; H = m.h; dpr = m.dpr || dpr;
-          setSize(); if(on) render();
+          if(ow && W !== ow) for(let i=0;i<parts.length;i++) parts[i].x *= W/ow;
+          setSize(); if(on || dotsA > 0) render();
           break;
+        }
         case 'quality':
           if(!ctx || lite === !!m.lite) return;
-          configure(m.lite); setSize(); if(on) render();
+          configure(m.lite); setSize();
+          if(!reduce) seedParts();
+          if(on || dotsA > 0) render();
           break;
         case 'rate':
           target = m.target;
           if(m.kick) kick = 1;
           break;
-        case 'enable':
-          on = !!m.on;
+        case 'enable': {
+          if(m.layer === 'dots'){
+            dotsOn = !!m.on;
+            if(dotsOn && !parts.length && ctx && !reduce) seedParts();
+          } else {
+            on = !!m.on;
+          }
           if(!ctx) return;
           if(reduce){
-            if(on){ appear = 1; render(); } else { appear = 0; ctx.clearRect(0,0,W,H); }
+            if(m.layer !== 'dots'){
+              if(on){ appear = 1; render(); } else { appear = 0; ctx.clearRect(0,0,W,H); }
+            }
           } else { running = true; kickLoop(); }         // yoqish: paydo bo'ladi; o'chirish: so'nib, sikl o'zi to'xtaydi
           break;
+        }
         case 'visible':
           visible = !!m.on;
           if(visible) kickLoop();
@@ -10659,15 +10745,20 @@
 
   const DotsFX = (function(){
     const canvas = document.getElementById('dotsCanvas');
-    if(!canvas) return { start(){}, pause(){}, resume(){}, setEnabled(){}, isEnabled(){ return false; } };
+    if(!canvas) return { start(){}, pause(){}, resume(){}, setLayer(){}, getLayer(){ return false; } };
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLite = () => document.documentElement.classList.contains('lite');
     let W = 0, H = 0, started = false, paused = false, mode = null, booted = false;
-    // foydalanuvchi tanlovi shu qurilmada eslab qolinadi ('0' = o'chiq). Standart — yoqilgan.
-    const LS_KEY = 'kanji-bgfx';
-    let enabled = true;
-    try{ enabled = localStorage.getItem(LS_KEY) !== '0'; }catch(_){}
     let worker = null, scope = null, resizeTimer = null, wasLite = false;
+    // foydalanuvchi tanlovi shu qurilmada eslab qolinadi ('0' = o'chiq). Standart — chiziqlar yoqilgan.
+    const KEYS = { lines:'kanji-bgfx', dots:'kanji-bgdots' };
+    const fx = { lines:true, dots:true };
+    try{
+      fx.lines = localStorage.getItem(KEYS.lines) !== '0';
+      fx.dots  = localStorage.getItem(KEYS.dots)  !== '0';
+      // ikkala fon BIR VAQTDA ishlamaydi: eski saqlangan holatda ikkalasi yoqiq bo'lsa, chiziqlar qoladi
+      if(fx.lines && fx.dots){ fx.dots = false; localStorage.setItem(KEYS.dots, '0'); }
+    }catch(_){ if(fx.lines && fx.dots) fx.dots = false; }
 
     function send(msg, transfer){
       if(mode === 'worker') worker.postMessage(msg, transfer || []);
@@ -10675,7 +10766,7 @@
     }
 
     // Mobil brauzerda scroll paytida manzil paneli yashirinib/chiqib, innerHeight o'zgaradi:
-    // balandlik faqat OSHADI (kamaymaydi) — chiziqlar scroll'da sakramaydi.
+    // balandlik faqat OSHADI (kamaymaydi) — fon scroll'da sakramaydi.
     // Kenglik o'zgarsa (ekran burilsa) — to'liq qayta o'lchanadi.
     function measure(){
       const newW = window.innerWidth, newH = window.innerHeight;
@@ -10690,7 +10781,7 @@
     function start(){
       if(started) return;
       started = true;
-      if(enabled) boot();      // o'chirilgan bo'lsa, Worker ham yaratilmaydi — resurs umuman sarflanmaydi
+      if(fx.lines || fx.dots) boot();   // ikkalasi ham o'chiq bo'lsa, Worker ham yaratilmaydi — resurs sarflanmaydi
     }
     function boot(){
       if(booted) return;
@@ -10699,13 +10790,13 @@
         measure();
         wasLite = isLite();
         const dpr = window.devicePixelRatio || 1;
-        const base = { type:'init', w:W, h:H, dpr:dpr, lite:wasLite, reduce:reduceMotion, on:enabled };
+        const base = { type:'init', w:W, h:H, dpr:dpr, lite:wasLite, reduce:reduceMotion, on:fx.lines, dots:fx.dots };
 
         // 1) Afzal yo'l: alohida oqim (Worker + OffscreenCanvas)
         try{
           if(typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined' &&
              canvas.transferControlToOffscreen && window.Blob && window.URL && URL.createObjectURL){
-            const src = '(' + contourEngine.toString() + ')(self);';
+            const src = '(' + fxEngine.toString() + ')(self);';
             const url = URL.createObjectURL(new Blob([src], { type:'text/javascript' }));
             const w = new Worker(url);
             URL.revokeObjectURL(url);
@@ -10718,7 +10809,7 @@
 
         // 2) Zaxira yo'l: o'sha dvigatel asosiy oqimda (yengilroq sozlamalar)
         scope = { onmessage: null, requestAnimationFrame: (f)=>window.requestAnimationFrame(f) };
-        contourEngine(scope);
+        fxEngine(scope);
         mode = 'main';
         send(Object.assign({}, base, { canvas: canvas, worker: false }));
         if(!reduceMotion){
@@ -10755,28 +10846,44 @@
       if(l !== wasLite){ wasLite = l; send({ type:'quality', lite:l }); } // 'lite' keyinroq yoqilgan bo'lsa, fon ham yengillashadi
       send({ type:'rate', target:1, kick:true });
     }
-    // Orqa fonni yoqish/o'chirish. O'chirilganda chiziqlar tez so'nadi, hisob-kitob to'liq
-    // to'xtaydi va sahifa sof qora (AMOLED) fonda qoladi. Qayta yoqilganda silliq paydo bo'ladi.
-    function setEnabled(v){
+
+    // Qatlamni yoqish/o'chirish ('lines' | 'dots'). O'chirilganda qatlam tez so'nadi; ikkalasi
+    // o'chiq bo'lsa hisob-kitob to'liq to'xtaydi va sahifa sof qora fonda qoladi.
+    // Qayta yoqilganda qatlam silliq paydo bo'ladi.
+    function setLayer(name, v){
+      if(!(name in fx)) return;
       v = !!v;
-      if(v === enabled) return;
-      enabled = v;
-      try{ localStorage.setItem(LS_KEY, v ? '1' : '0'); }catch(_){}
+      if(v === fx[name]) return;
+      // Ikkala qatlam BIR VAQTDA ishlamaydi: biri yoqilsa, ikkinchisi avtomatik o'chadi
+      // (u tez so'nadi, yangisi esa silliq paydo bo'ladi — o'tish yumshoq bo'ladi).
+      if(v){
+        const other = (name === 'lines') ? 'dots' : 'lines';
+        if(fx[other]){
+          fx[other] = false;
+          try{ localStorage.setItem(KEYS[other], '0'); }catch(_){}
+          if(started && mode) send({ type:'enable', layer:other, on:false });
+        }
+      }
+      fx[name] = v;
+      try{ localStorage.setItem(KEYS[name], v ? '1' : '0'); }catch(_){}
       if(!started) return;                               // "Boshlash" bosilmagan — start() o'zi hisobga oladi
       if(v && !booted) boot();
-      else if(mode) send({ type:'enable', on:v });
+      else if(mode) send({ type:'enable', layer:name, on:v });
     }
-    function isEnabled(){ return enabled; }
-    return { start, pause, resume, setEnabled, isEnabled };
+    function getLayer(name){ return !!fx[name]; }
+    return { start, pause, resume, setLayer, getLayer };
   })();
 
-  // Akkaunt menyusidagi "Fon animatsiyasi" almashtirgichi
-  (function initBgFxToggle(){
-    const btn = document.getElementById('bgFxToggleBtn');
-    if(!btn) return;
-    const sync = ()=> btn.setAttribute('aria-checked', DotsFX.isEnabled() ? 'true' : 'false');
-    sync();
-    btn.addEventListener('click', ()=>{ DotsFX.setEnabled(!DotsFX.isEnabled()); sync(); });
+  // Akkaunt menyusidagi fon almashtirgichlari (data-bgfx="lines" | "dots")
+  (function initBgFxToggles(){
+    const btns = Array.from(document.querySelectorAll('[data-bgfx]'));
+    // biri yoqilganda ikkinchisi o'chadi — shuning uchun HAR DOIM ikkala switch qayta tekshiriladi
+    const syncAll = ()=> btns.forEach((b)=> b.setAttribute('aria-checked', DotsFX.getLayer(b.getAttribute('data-bgfx')) ? 'true' : 'false'));
+    syncAll();
+    btns.forEach((btn)=>{
+      const name = btn.getAttribute('data-bgfx');
+      btn.addEventListener('click', ()=>{ DotsFX.setLayer(name, !DotsFX.getLayer(name)); syncAll(); });
+    });
   })();
 
   // ---------- SPLASH: SUZUVCHI CHIZIQLAR ----------
