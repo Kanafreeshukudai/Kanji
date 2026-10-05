@@ -2226,15 +2226,34 @@
     font-weight:700;
     margin:12px 2px 6px;
   }
+  /* Oldingi kunlar: 4 ustunli to'r — barcha tugmalar bir xil eni va balandligida */
   .tabs-older-grid{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:7px;
     padding-bottom:2px;
   }
   .tabs-older-grid .tab-btn{
-    flex:0 1 auto;
-    min-width:74px;
+    flex:none;
+    width:100%;
+    min-width:0;
+    height:38px;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:0 3px;
+    white-space:nowrap;
+    overflow:hidden;
+    font-size:clamp(11px, 3.3vw, 13px);
+  }
+  .tabs-older-grid .tab-btn .badge{
+    flex:none;
+    margin-left:0;
+    padding:1px 5px;
+    font-size:clamp(9px, 2.7vw, 10.5px);
+    line-height:1.35;
   }
 
   /* ---------- ORTGA TUGMASI (Bilganlarim / Hammasi ekranlarida) ----------
@@ -4817,6 +4836,28 @@
     filter:grayscale(0.3);
   }
   .ct-start-room-btn.hidden{display:none;}
+  /* "Tayyorman" tugmasi: bosilgach yashil kontur + belgi ko'rinishiga o'tadi (qayta bosilsa bekor bo'ladi) */
+  .ct-ready-btn.is-ready{
+    background:rgba(124,154,107,0.14);
+    color:#cfe3c3;
+    border:1px solid rgba(124,154,107,0.7);
+    box-shadow:none;
+  }
+  /* o'rindiq tagidagi holat nishoni: Xost / Tayyor / Kutmoqda */
+  .ct-seat-status{
+    font-size:9.5px; font-weight:700; line-height:1;
+    padding:3px 7px; border-radius:999px;
+    border:1px solid var(--glass-border-soft);
+    color:var(--ink-faint);
+    white-space:nowrap;
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .ct-seat-status.host{color:var(--gold); border-color:rgba(201,166,107,0.6); background:rgba(201,166,107,0.12);}
+  .ct-seat-status.ready{color:#cfe3c3; border-color:rgba(124,154,107,0.75); background:rgba(124,154,107,0.2);}
+  .ct-seat.ct-seat-ready .ct-seat-avatar{
+    border-color:var(--moss-soft);
+    box-shadow:0 0 0 3px rgba(124,154,107,0.22), 0 0 14px rgba(124,154,107,0.45);
+  }
   /* xona "boshlandi" holatiga o'tganda ko'rinadigan vaqtinchalik joy —
      xonaning ichki (o'yin) qismi keyingi bosqichda shu yerga yoziladi */
   /* ---------- XONA ICHKARISI: katta sahifa (stol atrofida o'tirish) ---------- */
@@ -7875,6 +7916,8 @@
       <p class="ct-waiting-hint" id="ctWaitingHint">Boshqa ishtirokchilarni kuting...</p>
       <!-- Faqat xostga ko'rinadi, kamida 2 ta ishtirokchi bo'lganda yoqiladi -->
       <button class="ct-start-room-btn hidden" id="ctStartRoomBtn" type="button" disabled>Boshlash</button>
+      <!-- Faqat xost bo'lmagan ishtirokchilarga ko'rinadi: bosilsa "Tayyor" holati hammaga ko'rinadi, qayta bosilsa bekor bo'ladi -->
+      <button class="ct-start-room-btn ct-ready-btn hidden" id="ctReadyBtn" type="button">Tayyorman</button>
       <button class="ct-leave-btn" id="ctLeaveRoomBtn" type="button">Chiqish</button>
     </div>
   </div>
@@ -10116,11 +10159,10 @@
   let allListBuilt = false;
   function renderAll(){
     if(!allListBuilt){
-      const lastDay = DAY_ORDER[DAY_ORDER.length-1];
       allList.innerHTML = DAY_ORDER.map(d=>{
         const items = ALL_KANJI.filter(w=>w.day===d);
         if(items.length === 0) return '';
-        const collapsed = d !== lastDay; // eng oxirgi kun ochiq, qolganlari yopiq boshlanadi
+        const collapsed = true; // barcha kunlar (eng oxirgisi ham) yopiq boshlanadi
         return `
           <div class="all-day-group${collapsed ? ' collapsed' : ''}" data-day-group="${d}">
             <div class="all-day-heading">
@@ -13048,6 +13090,7 @@
     const codeCopyBtn = document.getElementById('ctCodeCopyBtn');
     const leaveRoomBtn = document.getElementById('ctLeaveRoomBtn');
     const startRoomBtn = document.getElementById('ctStartRoomBtn');
+    const readyBtn = document.getElementById('ctReadyBtn');
     const waitingHintEl = document.getElementById('ctWaitingHint');
     const roomPageEl = document.getElementById('ctRoomPage');
     const roomPageLeaveBtn = document.getElementById('ctRoomPageLeaveBtn');
@@ -13875,7 +13918,11 @@
             label = "Ishtirokchi";
             avatar = '👤';
           }
-          html += `<div class="ct-seat ct-seat-filled"><div class="ct-seat-avatar">${avatar}</div><div class="ct-seat-label">${escapeCt(label)}</div></div>`;
+          const seatReady = !isHostSeat && !!(data.ready && data.ready[uid] === true);
+          const statusHtml = isHostSeat
+            ? '<div class="ct-seat-status host">Xost</div>'
+            : (seatReady ? '<div class="ct-seat-status ready">Tayyor ✓</div>' : '<div class="ct-seat-status">Kutmoqda</div>');
+          html += `<div class="ct-seat ct-seat-filled${seatReady ? ' ct-seat-ready' : ''}"><div class="ct-seat-avatar">${avatar}</div><div class="ct-seat-label">${escapeCt(label)}</div>${statusHtml}</div>`;
         } else {
           html += '<div class="ct-seat ct-seat-empty"><div class="ct-seat-avatar">+</div><div class="ct-seat-label">Bo\'sh joy</div></div>';
         }
@@ -13887,27 +13934,43 @@
       if(waitingTitleEl){
         waitingTitleEl.textContent = uids2.length >= data.size ? "Xona to'ldi!" : "Kutilmoqda...";
       }
-      // ---------- "Boshlash" tugmasi: faqat xostga ko'rinadi, kamida
-      // 2 ta ishtirokchi bo'lgandagina bosish mumkin bo'ladi ----------
+      // ---------- Tayyorlik: xost bo'lmagan har bir ishtirokchi "Tayyorman"ni bosadi;
+      // hamma tayyor bo'lgandagina xostning "Boshlash" tugmasi yoqiladi. Har bir
+      // ishtirokchining holati o'rindiqlari tagida hammaga ko'rinadi. ----------
+      const readyMap = data.ready || {};
+      const guestUids = uids2.filter(u => u !== data.hostUid);
+      const readyCount = guestUids.filter(u => readyMap[u] === true).length;
+      const allReady = guestUids.length >= 1 && readyCount === guestUids.length;
+      const myUid = (window.__kanjiFB && window.__kanjiFB.auth && window.__kanjiFB.auth.currentUser) ? window.__kanjiFB.auth.currentUser.uid : null;
+      const myReady = !!(myUid && readyMap[myUid] === true);
       if(startRoomBtn){
         if(waitingRoomIsHost && !isStarted){
           startRoomBtn.classList.remove('hidden');
-          startRoomBtn.disabled = uids2.length < 2;
+          startRoomBtn.disabled = !allReady;
         } else {
           startRoomBtn.classList.add('hidden');
         }
       }
-      if(waitingHintEl) waitingHintEl.classList.toggle('hidden', isStarted);
-      // ---------- Xona to'lganda avtomatik boshlash ----------
-      // Barcha o'rinlar band bo'lib, xona hali "waiting" holatida bo'lsa,
-      // xostning kliyenti xonani o'zi avtomatik boshlaydi — host tugmani
-      // qo'lda bosishini kutmasdan, to'lgan zahoti hammaga xona ichkarisiga
-      // kirish va stol atrofida joylashish amalga oshadi. Bayroq bir nechta
-      // snapshot hodisasida takroriy so'rov yuborilishining oldini oladi.
-      if(waitingRoomIsHost && !isStarted && !waitingRoomAutoStartTriggered &&
-         data.size > 0 && uids2.length >= data.size){
-        waitingRoomAutoStartTriggered = true;
-        startRoom();
+      if(readyBtn){
+        if(!waitingRoomIsHost && !isStarted){
+          readyBtn.classList.remove('hidden');
+          readyBtn.classList.toggle('is-ready', myReady);
+          readyBtn.textContent = myReady ? "Tayyor ✓" : "Tayyorman";
+        } else {
+          readyBtn.classList.add('hidden');
+        }
+      }
+      if(waitingHintEl){
+        waitingHintEl.classList.toggle('hidden', isStarted);
+        if(waitingRoomIsHost){
+          waitingHintEl.textContent = guestUids.length === 0
+            ? "Boshqa ishtirokchilarni kuting..."
+            : (allReady ? "Hamma tayyor! Boshlash tugmasini bosing." : `Tayyor: ${readyCount}/${guestUids.length} — hamma tayyor bo'lishini kuting...`);
+        } else {
+          waitingHintEl.textContent = myReady
+            ? "Xost xonani boshlashini kuting..."
+            : "Tayyor bo'lsangiz, \"Tayyorman\" tugmasini bosing.";
+        }
       }
       // Xona boshlangach — kichik oyna yopilib, ishtirokchilar stol
       // atrofida joylashgan to'liq ekran ochiladi. Kartochka almashish
@@ -13930,6 +13993,15 @@
     async function startRoom(){
       const {updateDoc, serverTimestamp} = window.__kanjiFB;
       if(!waitingRoomRef || !waitingRoomIsHost || !startRoomBtn) return;
+      {
+        const d = lastRoomData || {};
+        const g = (d.participantUids || []).filter(u => u !== d.hostUid);
+        const rd = d.ready || {};
+        if(g.length < 1 || !g.every(u => rd[u] === true)){
+          showCardTransferToast("Hamma ishtirokchi \"Tayyorman\"ni bosishi kerak");
+          return;
+        }
+      }
       startRoomBtn.disabled = true;
       try{
         const firstUid = (lastRoomData && lastRoomData.participantUids && lastRoomData.participantUids[0]) || null;
@@ -13943,6 +14015,23 @@
       }
     }
     if(startRoomBtn) startRoomBtn.addEventListener('click', startRoom);
+    // "Tayyorman" — o'z holatini almashtiradi (ready.<uid> maydoni); hamma onSnapshot orqali ko'radi
+    async function toggleReady(){
+      const {auth, updateDoc} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!waitingRoomRef || waitingRoomIsHost || !user || !readyBtn) return;
+      const cur = !!(lastRoomData && lastRoomData.ready && lastRoomData.ready[user.uid] === true);
+      readyBtn.disabled = true;
+      try{
+        await updateDoc(waitingRoomRef, { [`ready.${user.uid}`]: !cur });
+      }catch(e){
+        console.error("Tayyorlik holatini yuborishda xatolik:", e.message);
+        showCardTransferToast("Holatni yuborib bo'lmadi. Qayta urinib ko'ring.");
+      }finally{
+        readyBtn.disabled = false;
+      }
+    }
+    if(readyBtn) readyBtn.addEventListener('click', toggleReady);
     function enterWaitingRoom(roomRef, opts){
       const {onSnapshot} = window.__kanjiFB;
       stopPublicRoomsListener();
@@ -13956,7 +14045,15 @@
       if(joinView) joinView.classList.add('hidden');
       if(waitingView) waitingView.classList.remove('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
+      if(readyBtn) readyBtn.classList.add('hidden');
       if(waitingHintEl) waitingHintEl.classList.remove('hidden');
+      // xonaga (qayta) kirgan ishtirokchi har safar "tayyor emas" holatidan boshlaydi (xatolik bo'lsa e'tiborsiz)
+      if(!waitingRoomIsHost){
+        try{
+          const {auth: _a, updateDoc: _u} = window.__kanjiFB;
+          if(_a.currentUser) _u(roomRef, { [`ready.${_a.currentUser.uid}`]: false }).catch(()=>{});
+        }catch(_){}
+      }
       closeRoomPage();
       if(codeDisplayEl){
         if(opts && opts.code){
@@ -14022,6 +14119,7 @@
       closeRoomPage();
       if(waitingView) waitingView.classList.add('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
+      if(readyBtn) readyBtn.classList.add('hidden');
       if(topTabs) topTabs.classList.remove('hidden');
       switchCtTab('create');
     }
