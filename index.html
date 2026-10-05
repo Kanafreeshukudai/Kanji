@@ -584,12 +584,13 @@
     width:36px;
     height:36px;
     border-radius:50%;
-    /* Qora halqa — qora fonda ham seziladi: qalin qora halqa + ingichka och tashqi chiziq */
-    border:2px solid #000;
+    /* Ingichka qora halqa: avatarga tegmaydi (orada qora bo'shliq bor); qora fonda
+       ham seziladi — tashqarisida juda ingichka och chiziq */
+    border:1.5px solid #000;
     background:#000;
-    box-shadow:0 0 0 1px rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.14);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.5), 0 0 6px rgba(255,255,255,0.1);
     box-sizing:border-box;
-    padding:2px;
+    padding:3px;
     cursor:pointer;
     overflow:hidden;
     display:flex;
@@ -601,6 +602,29 @@
     transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .auth-avatar-btn:active{transform:scale(0.92);}
+  /* ---------- Ovoz o'chiq belgisi: avatar burchagida ---------- */
+  .auth-sound-badge{
+    position:absolute;
+    right:-4px;
+    bottom:-4px;
+    z-index:3;
+    width:16px; height:16px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#000;
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.75);
+    box-shadow:0 2px 6px rgba(0,0,0,0.6);
+    pointer-events:none;
+    opacity:0;
+    transform:scale(0.2) rotate(-40deg);
+    transition:opacity .28s ease, transform .38s cubic-bezier(.34,1.56,.64,1);
+  }
+  .auth-sound-badge svg{width:10px; height:10px; display:block;}
+  .auth-sound-badge.show{
+    opacity:1;
+    transform:scale(1) rotate(0deg);
+  }
   /* ---------- Akkaunt halqasi: yopiq — qora, menyu ochiq — oq (yumshoq o'tish animatsiyasi bilan) ---------- */
   .auth-avatar-btn{
     transition:
@@ -611,21 +635,21 @@
       color .2s ease, opacity .2s ease, filter .2s ease;
   }
   .auth-avatar-btn.menu-open{
+    /* faqat halqa rangi qoradan oqqa o'tadi; orqa fon qora qoladi — halqa avatarga tegmaydi */
     border-color:#fff;
-    background:#fff;
-    box-shadow:0 0 0 1px rgba(0,0,0,0.85), 0 0 14px rgba(255,255,255,0.38);
+    box-shadow:0 0 0 0 rgba(255,255,255,0), 0 0 8px rgba(255,255,255,0.45);
     animation:avatarRingOpen .6s cubic-bezier(.2,.8,.2,1);
   }
   .auth-avatar-btn.menu-closing{
     animation:avatarRingClose .5s cubic-bezier(.2,.8,.2,1);
   }
   @keyframes avatarRingOpen{
-    0%  { box-shadow:0 0 0 1px rgba(255,255,255,0.6), 0 0 0 0 rgba(255,255,255,0.55); }
-    100%{ box-shadow:0 0 0 1px rgba(0,0,0,0.85), 0 0 0 11px rgba(255,255,255,0); }
+    0%  { box-shadow:0 0 0 1px rgba(255,255,255,0.5), 0 0 0 0 rgba(255,255,255,0.5); }
+    100%{ box-shadow:0 0 0 0 rgba(255,255,255,0), 0 0 8px rgba(255,255,255,0.45); }
   }
   @keyframes avatarRingClose{
-    0%  { box-shadow:0 0 0 1px rgba(0,0,0,0.85), 0 0 0 0 rgba(255,255,255,0.35); }
-    100%{ box-shadow:0 0 0 1px rgba(255,255,255,0.6), 0 0 0 9px rgba(255,255,255,0); }
+    0%  { box-shadow:0 0 0 0 rgba(255,255,255,0), 0 0 8px rgba(255,255,255,0.4); }
+    100%{ box-shadow:0 0 0 1px rgba(255,255,255,0.5), 0 0 6px rgba(255,255,255,0.1); }
   }
   @media (prefers-reduced-motion: reduce){
     .auth-avatar-btn.menu-open, .auth-avatar-btn.menu-closing{ animation:none; }
@@ -7639,6 +7663,10 @@
       <img id="userAvatarImg" src="" alt="" style="display:none;">
       <span id="userAvatarInitial"></span>
     </button>
+    <!-- Ovoz o'chirilganda avatar burchagida chiqadigan belgi (ovoz yoqilganda yo'qoladi) -->
+    <span class="auth-sound-badge" id="authSoundBadge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path></svg>
+    </span>
     <div class="auth-dropdown" id="authDropdown">
       <span id="user-name" class="auth-name"></span>
       <button id="notes-btn" class="auth-notes-btn" type="button">
@@ -15591,6 +15619,17 @@
     new MutationObserver(syncRing).observe(authDropdown, { attributes: true, attributeFilter: ["class"] });
     syncRing();
   }
+  // Ovoz o'chirilganda avatar burchagida "ovoz o'chiq" belgisi turadi, yoqilganda yo'qoladi
+  (function () {
+    const soundBtn = document.getElementById("soundToggleBtn");
+    const soundBadge = document.getElementById("authSoundBadge");
+    if (!soundBtn || !soundBadge) return;
+    const syncBadge = () => soundBadge.classList.toggle("show", soundBtn.getAttribute("aria-checked") === "false");
+    if (typeof MutationObserver !== "undefined") {
+      new MutationObserver(syncBadge).observe(soundBtn, { attributes: true, attributeFilter: ["aria-checked"] });
+    }
+    syncBadge();
+  })();
   document.addEventListener("click", (e) => {
     if (!userProfile) return;
     if (!userProfile.contains(e.target)) authDropdown.classList.remove("open");
