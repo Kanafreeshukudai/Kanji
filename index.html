@@ -2501,6 +2501,35 @@
     box-shadow:0 0 26px 6px rgba(201,166,107,0.55);
     opacity:0;pointer-events:none;z-index:-1;
   }
+  /* ---------- AYLANISH IZI: ramkaning tepa va pastki chetidan ingichka, so'nuvchi yorug' chiziq ----------
+     Kartochka aylanayotganda (.flipping) tepa chetda chapdan o'ngga, pastki chetda o'ngdan chapga
+     tez yugurib o'tuvchi, o'tkir "bosh" va uzun so'nuvchi "dum"li nur chizig'i paydo bo'ladi.
+     Pseudo-element .card ning o'zida (aylanayotgan .card-inner da emas), shuning uchun
+     burilish paytida ham tekis qoladi va kartochkaning asl ramkasi izi kabi ko'rinadi. */
+  .card::before{
+    content:"";
+    position:absolute;
+    left:20px; right:20px; top:-1px; bottom:-1px;
+    z-index:3;
+    pointer-events:none;
+    opacity:0;
+    background:
+      linear-gradient(90deg, rgba(255,240,215,0) 0%, rgba(255,240,215,0.18) 45%, rgba(255,246,228,1) 94%, rgba(255,255,255,0) 100%) no-repeat,
+      linear-gradient(270deg, rgba(255,240,215,0) 0%, rgba(255,240,215,0.18) 45%, rgba(255,246,228,1) 94%, rgba(255,255,255,0) 100%) no-repeat;
+    background-size:55% 1.5px, 55% 1.5px;
+    background-position:-200% 0, 300% 100%;
+    filter:drop-shadow(0 0 3px rgba(255,226,170,0.75));
+  }
+  .card.flipping::before{ animation:cardFlipTrace .6s cubic-bezier(.25,.7,.3,1) both; }
+  @keyframes cardFlipTrace{
+    0%   { opacity:0;   background-position:-200% 0, 300% 100%; }
+    14%  { opacity:1; }
+    100% { opacity:0;   background-position:300% 0, -200% 100%; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card.flipping::before{ animation:none; }
+  }
+
   .card.flipped:not(.flipping)::after{ animation:cardGlowPulse 2.2s ease-in-out infinite; }
   @keyframes cardGlowPulse{ 0%,100%{opacity:0;} 50%{opacity:1;} }
   @keyframes cardGlow{
@@ -2788,6 +2817,20 @@
   .face.back .other-readings-label{ color:#aeb3b7; opacity:1; }
   .face.back .other-readings{ color:#cfd3d6; }
   .face.back .face-back-scroll{ scrollbar-color:rgba(255,255,255,0.35) transparent; }
+
+  /* ---------- SURILISH PAYTIDA RAMKA RANGI: chapga — yashil (moss), o'ngga — qizil ----------
+     JS tortish masofasiga qarab --sw-a (0..1) va --sw-rgb ni yangilaydi; ramka va
+     tashqi nur masofaga qarab silliq quyuqlashadi, qo'yib yuborilganda yana so'nadi. */
+  .card.swiping .face{
+    border-color:rgba(var(--sw-rgb,147,177,127), calc(0.3 + 0.7 * var(--sw-a,0)));
+    box-shadow:
+      0 24px 50px -16px var(--glass-shadow),
+      0 2px 10px rgba(0,0,0,0.3),
+      inset 0 0 0 1px rgba(var(--sw-rgb,147,177,127), calc(0.9 * var(--sw-a,0))),
+      inset 0 0 calc(26px * var(--sw-a,0)) rgba(var(--sw-rgb,147,177,127), calc(0.35 * var(--sw-a,0))),
+      0 0 calc(30px * var(--sw-a,0)) calc(2px * var(--sw-a,0)) rgba(var(--sw-rgb,147,177,127), calc(0.6 * var(--sw-a,0)));
+    transition:border-color .14s ease-out, box-shadow .14s ease-out;
+  }
 
   .swipe-tag{
     position:absolute;
@@ -8319,8 +8362,8 @@
 (function(){
 
   // ---------- DATA (from PDF: 山・川・田 kanji so'z birikmalari) ----------
-  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", 60:"60-kun", 61:"61-kun", 62:"62-kun", 63:"63-kun", 64:"64-kun", 65:"65-kun", 66:"66-kun", 67:"67-kun", 68:"68-kun", 69:"69-kun", 70:"70-kun", 71:"71-kun", 72:"72-kun", 73:"73-kun", custom:"Maxsus Flashcard"};
-  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73];
+  const DAY_LABELS = {1:"1-kun", 2:"2-kun", 3:"3-kun", 4:"4-kun", 5:"5-kun", 6:"6-kun", 7:"7-kun", 8:"8-kun", 9:"9-kun", 10:"10-kun", 11:"11-kun", 12:"12-kun", 13:"13-kun", 14:"14-kun", 15:"15-kun", 16:"16-kun", 17:"17-kun", 18:"18-kun", 19:"19-kun", 20:"20-kun", 21:"21-kun", 22:"22-kun", 23:"23-kun", 24:"24-kun", 25:"25-kun", 26:"26-kun", 27:"27-kun", 28:"28-kun", 29:"29-kun", 30:"30-kun", 31:"31-kun", 32:"32-kun", 33:"33-kun", 34:"34-kun", 35:"35-kun", 36:"36-kun", 37:"37-kun", 38:"38-kun", 39:"39-kun", 40:"40-kun", 41:"41-kun", 42:"42-kun", 43:"43-kun", 44:"44-kun", 45:"45-kun", 46:"46-kun", 47:"47-kun", 48:"48-kun", 49:"49-kun", 50:"50-kun", 51:"51-kun", 52:"52-kun", 53:"53-kun", 54:"54-kun", 55:"55-kun", 56:"56-kun", 57:"57-kun", 58:"58-kun", 59:"59-kun", 60:"60-kun", 61:"61-kun", 62:"62-kun", 63:"63-kun", 64:"64-kun", 65:"65-kun", 66:"66-kun", 67:"67-kun", 68:"68-kun", 69:"69-kun", 70:"70-kun", 71:"71-kun", 72:"72-kun", 73:"73-kun", 74:"74-kun", 75:"75-kun", 76:"76-kun", custom:"Maxsus Flashcard"};
+  const DAY_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76];
   const CUSTOM_DAY_ID = 'custom'; // "Hammasi" bo'limidan tanlab yasalgan maxsus kartochka to'plami
 
   const WORDS = [
@@ -9954,6 +9997,79 @@
     {id:"kenkanji73", day:73, group:"県", kanji:"県", romaji:"ken", type:"on'yomi", reading:"県(ken) — yakka kanji", otherReadings:"on: ケン(ken)", uz:"prefektura"},
     {id:"kenchou73", day:73, group:"県", kanji:"県庁", romaji:"kenchou", type:"on + on", reading:"県(ken) + 庁(chou)", uz:"prefektura idorasi"},
     {id:"kanagawaken73", day:73, group:"県", kanji:"神奈川県", romaji:"kanagawaken", type:"— + on", reading:"神奈川(Kanagawa) + 県(ken)", uz:"Kanagava prefekturasi"},
+
+    // ---- 74-kun ----
+    {id:"shikanji74", day:74, group:"市", kanji:"市", romaji:"shi", type:"on'yomi", reading:"市(shi) — yakka kanji", otherReadings:"on: シ(shi) · kun: いち(ichi)", uz:"shahar"},
+    {id:"ichi74", day:74, group:"市", kanji:"市", romaji:"ichi", type:"kun'yomi", reading:"市(ichi)", uz:"bozor"},
+    {id:"shimin74", day:74, group:"市", kanji:"市民", romaji:"shimin", type:"on + on", reading:"市(shi) + 民(min)", uz:"shahar aholisi"},
+    {id:"shichou74", day:74, group:"市", kanji:"市長", romaji:"shichou", type:"on + on", reading:"市(shi) + 長(chou)", uz:"shahar hokimi"},
+    {id:"shijou74", day:74, group:"市", kanji:"市場", romaji:"shijou", type:"on + on", reading:"市(shi) + 場(jou)", uz:"bozor"},
+    {id:"uoichiba74", day:74, group:"市", kanji:"魚市場", romaji:"uoichiba", type:"kun + kun + kun", reading:"魚(uo) + 市(ichi) + 場(ba)", uz:"baliq bozori"},
+
+    {id:"kukanji74", day:74, group:"区", kanji:"区", romaji:"ku", type:"on'yomi", reading:"区(ku) — yakka kanji", otherReadings:"on: ク(ku)", uz:"tuman / ma'muriy hudud"},
+    {id:"kuyakusho74", day:74, group:"区", kanji:"区役所", romaji:"kuyakusho", type:"on + on + on", reading:"区(ku) + 役(yaku) + 所(sho)", uz:"palata idorasi"},
+    {id:"kubetsusuru74", day:74, group:"区", kanji:"区別する", romaji:"kubetsu suru", type:"on + on", reading:"区(ku) + 別(betsu) + する", uz:"farqlamoq, ajratmoq"},
+    {id:"chiku74", day:74, group:"区", kanji:"地区", romaji:"chiku", type:"on + on", reading:"地(chi) + 区(ku)", uz:"Hudud, rayon, tuman, zona"},
+
+    {id:"choukanji74", day:74, group:"町", kanji:"町", romaji:"chou", type:"on'yomi", reading:"町(chou) — yakka kanji", otherReadings:"on: チョウ(chou) · kun: まち(machi)", uz:"shaharcha"},
+    {id:"machi74", day:74, group:"町", kanji:"町", romaji:"machi", type:"kun'yomi", reading:"町(machi)", uz:"shaharcha"},
+    {id:"shitamachi74", day:74, group:"町", kanji:"下町", romaji:"shitamachi", type:"kun + kun", reading:"下(shita) + 町(machi)", uz:"eski shahar"},
+    {id:"chouchou74", day:74, group:"町", kanji:"町長", romaji:"chouchou", type:"on + on", reading:"町(chou) + 長(chou)", uz:"shahar hokimi"},
+
+    {id:"sonkanji74", day:74, group:"村", kanji:"村", romaji:"son", type:"on'yomi", reading:"村(son) — yakka kanji", otherReadings:"on: ソン(son) · kun: むら(mura)", uz:"qishloq"},
+    {id:"mura74", day:74, group:"村", kanji:"村", romaji:"mura", type:"kun'yomi", reading:"村(mura)", uz:"qishloq"},
+    {id:"nouson74", day:74, group:"村", kanji:"農村", romaji:"nouson", type:"on + on", reading:"農(nou) + 村(son)", uz:"dehqonlar hududi"},
+    {id:"kimura74", day:74, group:"村", kanji:"木村", romaji:"Kimura", type:"kun + kun", reading:"木(ki) + 村(mura)", uz:"Yaponcha ism, KIMURA"},
+
+    // ---- 75-kun ----
+    {id:"bankanji75", day:75, group:"番", kanji:"番", romaji:"ban", type:"on'yomi", reading:"番(ban) — yakka kanji", otherReadings:"on: バン(ban)", uz:"raqam, buyurtma"},
+    {id:"bangou75", day:75, group:"番", kanji:"番号", romaji:"bangou", type:"on + on", reading:"番(ban) + 号(gou)", uz:"raqam"},
+    {id:"yuubinbangou75", day:75, group:"番", kanji:"郵便番号", romaji:"yuubinbangou", type:"on + on + on + on", reading:"郵(yuu) + 便(bin) + 番(ban) + 号(gou)", uz:"pochta / pochta indeksi"},
+    {id:"kouban75", day:75, group:"番", kanji:"交番", romaji:"kouban", type:"on + on", reading:"交(kou) + 番(ban)", uz:"politsiya idorasi"},
+    {id:"banchi75", day:75, group:"番", kanji:"番地", romaji:"banchi", type:"on + on", reading:"番(ban) + 地(chi)", uz:"hudud raqami"},
+
+    {id:"joukanji75", day:75, group:"場", kanji:"場", romaji:"jou", type:"on'yomi", reading:"場(jou) — yakka kanji", otherReadings:"on: ジョウ(jou) · kun: ば(ba)", uz:"joy, sahna"},
+    {id:"ba75", day:75, group:"場", kanji:"場", romaji:"ba", type:"kun'yomi", reading:"場(ba)", uz:"joy, sahna"},
+    {id:"basho75", day:75, group:"場", kanji:"場所", romaji:"basho", type:"kun + on", reading:"場(ba) + 所(sho)", uz:"joy"},
+    {id:"baai75", day:75, group:"場", kanji:"場合", romaji:"baai", type:"kun + kun", reading:"場(ba) + 合(ai)", uz:"-da, -holatda"},
+    {id:"hiroba75", day:75, group:"場", kanji:"広場", romaji:"hiroba", type:"kun + kun", reading:"広(hiro) + 場(ba)", uz:"maydon"},
+    {id:"undoujou75", day:75, group:"場", kanji:"運動場", romaji:"undoujou", type:"on + on + on", reading:"運(un) + 動(dou) + 場(jou)", uz:"o'yin maydonchasi"},
+    {id:"koujou75", day:75, group:"場", kanji:"工場", romaji:"koujou", type:"on + on", reading:"工(kou) + 場(jou)", uz:"zavod"},
+
+    {id:"kenkanji75", day:75, group:"建", kanji:"建", romaji:"ken", type:"on'yomi", reading:"建(ken) — yakka kanji", otherReadings:"on: ケン(ken) · kun: た-つ(tatsu), た-てる(tateru)", uz:"qurish"},
+    {id:"tatsu75", day:75, group:"建", kanji:"建つ", romaji:"tatsu", type:"kun'yomi", reading:"建(ta) + つ", uz:"qurilmoq"},
+    {id:"tateru75", day:75, group:"建", kanji:"建てる", romaji:"tateru", type:"kun'yomi", reading:"建(ta) + てる", uz:"qurmoq"},
+    {id:"tatemono75", day:75, group:"建", kanji:"建物", romaji:"tatemono", type:"kun + kun", reading:"建(tate) + 物(mono)", uz:"bino"},
+    {id:"kensetsu75", day:75, group:"建", kanji:"建設", romaji:"kensetsu", type:"on + on", reading:"建(ken) + 設(setsu)", uz:"qurish, qurilish"},
+
+    {id:"monokanji75", day:75, group:"物", kanji:"物", romaji:"mono", type:"kun'yomi", reading:"物(mono) — yakka kanji", otherReadings:"kun: もの(mono) · on: ブツ(butsu), モツ(motsu)", uz:"narsa"},
+    {id:"kaimono75", day:75, group:"物", kanji:"買い物", romaji:"kaimono", type:"kun + kun", reading:"買(ka) + い + 物(mono)", uz:"xarid qilish"},
+    {id:"nimotsu75", day:75, group:"物", kanji:"荷物", romaji:"nimotsu", type:"kun + on", reading:"荷(ni) + 物(motsu)", uz:"bagaj / yuk"},
+    {id:"doubutsu75", day:75, group:"物", kanji:"動物", romaji:"doubutsu", type:"on + on", reading:"動(dou) + 物(butsu)", uz:"hayvon"},
+    {id:"bukka75", day:75, group:"物", kanji:"物価", romaji:"bukka", type:"on + on", reading:"物(butsu) + 価(ka)", uz:"narxlar, yashash narxi"},
+
+    // ---- 76-kun ----
+    {id:"goukanji76", day:76, group:"号", kanji:"号", romaji:"gou", type:"on'yomi", reading:"号(gou) — yakka kanji", otherReadings:"on: ゴウ(gou)", uz:"raqam, masala"},
+    {id:"bangou76", day:76, group:"号", kanji:"番号", romaji:"bangou", type:"on + on", reading:"番(ban) + 号(gou)", uz:"raqam"},
+    {id:"shingou76", day:76, group:"号", kanji:"信号", romaji:"shingou", type:"on + on", reading:"信(shin) + 号(gou)", uz:"svetofor"},
+    {id:"nigoushitsu76", day:76, group:"号", kanji:"2号室", romaji:"nigoushitsu", type:"on + on + on", reading:"2(ni) + 号(gou) + 室(shitsu)", uz:"Xona raqami - 2"},
+    {id:"sengetsugou76", day:76, group:"号", kanji:"先月号", romaji:"sengetsugou", type:"on + on + on", reading:"先(sen) + 月(getsu) + 号(gou)", uz:"o'tgan oydagi son (gazeta)"},
+
+    {id:"koukanji76", day:76, group:"工", kanji:"工", romaji:"kou", type:"on'yomi", reading:"工(kou) — yakka kanji", otherReadings:"on: コウ(kou), ク(ku)", uz:"hunarmandchilik, mahorat, qurilish"},
+    {id:"kouji76", day:76, group:"工", kanji:"工事", romaji:"kouji", type:"on + on", reading:"工(kou) + 事(ji)", uz:"qurilish"},
+    {id:"koujou76", day:76, group:"工", kanji:"工場", romaji:"koujou", type:"on + on", reading:"工(kou) + 場(jou)", uz:"zavod"},
+    {id:"jinkouno76", day:76, group:"工", kanji:"人工の", romaji:"jinkou no", type:"on + on", reading:"人(jin) + 工(kou) + の", uz:"sun'iy"},
+    {id:"kufuusuru76", day:76, group:"工", kanji:"工夫する", romaji:"kufuu suru", type:"on + on", reading:"工(ku) + 夫(fuu) + する", uz:"o'ylab topmoq"},
+
+    {id:"zukanji76", day:76, group:"図", kanji:"図", romaji:"zu", type:"on'yomi", reading:"図(zu) — yakka kanji", otherReadings:"on: ズ(zu), ト(to)", uz:"diagramma, ishlab chiqish"},
+    {id:"chizu76", day:76, group:"図", kanji:"地図", romaji:"chizu", type:"on + on", reading:"地(chi) + 図(zu)", uz:"xarita"},
+    {id:"toshokan76", day:76, group:"図", kanji:"図書館", romaji:"toshokan", type:"on + on + on", reading:"図(to) + 書(sho) + 館(kan)", uz:"kutubxona"},
+
+    {id:"inkanji76", day:76, group:"院", kanji:"院", romaji:"in", type:"on'yomi", reading:"院(in) — yakka kanji", otherReadings:"on: イン(in)", uz:"muassasa, joy, instituti"},
+    {id:"byouin76", day:76, group:"院", kanji:"病院", romaji:"byouin", type:"on + on", reading:"病(byou) + 院(in)", uz:"kasalxona"},
+    {id:"nyuuin76", day:76, group:"院", kanji:"入院", romaji:"nyuuin", type:"on + on", reading:"入(nyuu) + 院(in)", uz:"kasalxonaga yotish"},
+    {id:"taiin76", day:76, group:"院", kanji:"退院", romaji:"taiin", type:"on + on", reading:"退(tai) + 院(in)", uz:"kasalxonani tark etish"},
+    {id:"daigakuin76", day:76, group:"院", kanji:"大学院", romaji:"daigakuin", type:"on + on + on", reading:"大(dai) + 学(gaku) + 院(in)", uz:"magistratura"},
   ];
   const byId = Object.fromEntries(WORDS.map(w=>[w.id,w]));
   const ALL_KANJI = WORDS;
@@ -10801,6 +10917,10 @@
       card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
       try{ DotsFX.drift(dx/180); }catch(_){}   // fon zarralari tortish yo'nalishiga yengil ergashadi
       const op = Math.min(Math.abs(dx)/80, 1);
+      // ramka rangi: chapga — yashil (moss), o'ngga — qizil
+      card.classList.add('swiping');
+      card.style.setProperty('--sw-rgb', dx < 0 ? '147,177,127' : '235,64,56');
+      card.style.setProperty('--sw-a', op.toFixed(3));
       if(dx < 0){
         tagLeft.style.opacity = op; tagRight.style.opacity = 0;
         edgeGlowLeft.style.opacity = op; edgeGlowRight.style.opacity = 0;
@@ -10891,6 +11011,8 @@
       } else if(moved){
         card.style.transition = 'transform .35s cubic-bezier(.2,.8,.2,1)';
         card.style.transform = '';
+        card.style.setProperty('--sw-a', 0);
+        setTimeout(()=>{ card.classList.remove('swiping'); card.style.removeProperty('--sw-rgb'); card.style.removeProperty('--sw-a'); }, 400);
         tagLeft.style.opacity = 0; tagRight.style.opacity = 0;
         edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
         // harakat to'liq tugagach GPU qatlamini bo'shatamiz — vizual holat allaqachon '' ga qaytgan
