@@ -1071,9 +1071,9 @@
   .auth-bgfx-btn[aria-checked="true"] .bgfx-switch{ background:rgba(255,255,255,0.92); border-color:#fff; }
   .auth-bgfx-btn[aria-checked="true"] .bgfx-switch::after{ transform:translateX(13px); background:#000; }
   /* Ovoz tugmasi: yoqiq holatda karnay, o'chiq holatda kesilgan karnay belgisi */
-  .auth-sound-btn .snd-off{ display:none; }
-  .auth-sound-btn[aria-checked="false"] .snd-on{ display:none; }
-  .auth-sound-btn[aria-checked="false"] .snd-off{ display:block; }
+  .auth-dropdown .auth-sound-btn .snd-off{ display:none; }
+  .auth-dropdown .auth-sound-btn[aria-checked="false"] .snd-on{ display:none; }
+  .auth-dropdown .auth-sound-btn[aria-checked="false"] .snd-off{ display:block; }
   /* Chiqish: shaffof qizil */
   .auth-dropdown .auth-logout-btn{
     background:rgba(220,53,53,0.22);
@@ -1303,6 +1303,11 @@
     -webkit-overflow-scrolling:touch;
   }
   .notes-chip-row::-webkit-scrollbar{display:none;}
+  /* ko'p qayd bo'lsa chetlari yumshoq so'nib, yon tomonga surish mumkinligini bildiradi */
+  .notes-chip-row{
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 22px), transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 22px), transparent 100%);
+  }
   .notes-chip{
     position:relative;
     flex:0 0 auto;
@@ -1330,6 +1335,7 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     font-size:12.5px; font-weight:700; color:var(--ink);
   }
+  .notes-chip-preview:empty{display:none;}
   .notes-chip-preview{
     max-width:100%;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -12881,7 +12887,7 @@
     if(fabBtn) fabBtn.classList.add('in-use');
     const barBtn = document.getElementById('chatBarBtn'); if(barBtn) barBtn.classList.add('in-use');
     lockPageScroll();
-    setTimeout(()=>{ try{ document.getElementById('chatInput').focus(); }catch(e){} }, 260);
+    // Klaviatura oyna ochilishi bilan birga chiqmaydi — faqat yozish maydoniga bosilganda ochiladi
   }
   function closeChatPanel(){
     const panel = document.getElementById('chatPanel');
@@ -15666,10 +15672,10 @@
   // Kartochka: sarlavha = birinchi qator, ostida qolgan matn (yoki belgilar soni)
   function noteCardParts(text) {
     const lines = (text || "").split(/\n+/).map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return { title: "(bo'sh qayd)", preview: "Bo'sh" };
+    if (!lines.length) return { title: "(bo'sh qayd)", preview: "" };
     const title = lines[0].length > 40 ? lines[0].slice(0, 40) + "…" : lines[0];
     const rest = lines.slice(1).join(" ");
-    return { title, preview: rest ? (rest.length > 48 ? rest.slice(0, 48) + "…" : rest) : (text.trim().length + " belgi") };
+    return { title, preview: rest ? (rest.length > 48 ? rest.slice(0, 48) + "…" : rest) : "" };
   }
   const NOTES_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>';
   let notesSavedTimer = null;
