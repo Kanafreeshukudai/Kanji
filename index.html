@@ -248,7 +248,8 @@
     z-index:-1;
     pointer-events:none;
     opacity:0;
-    filter:blur(14px);
+    /* filter:blur olib tashlandi: gradient allaqachon yumshoq, blur esa butun balandlikdagi
+       qatlamda har kadrda qayta hisoblanib qotishga sabab bo'lardi */
     transition:opacity .16s ease;
     will-change:opacity;
   }
@@ -2800,18 +2801,29 @@
   .face.back .face-back-scroll{ scrollbar-color:rgba(255,255,255,0.35) transparent; }
 
   /* ---------- SURILISH PAYTIDA RAMKA RANGI: chapga — yashil (moss), o'ngga — qizil ----------
-     JS tortish masofasiga qarab --sw-a (0..1) va --sw-rgb ni yangilaydi; ramka va
-     tashqi nur masofaga qarab silliq quyuqlashadi, qo'yib yuborilganda yana so'nadi. */
-  .card.swiping .face{
-    border-color:rgba(var(--sw-rgb,147,177,127), calc(0.3 + 0.7 * var(--sw-a,0)));
-    box-shadow:
-      0 24px 50px -16px var(--glass-shadow),
-      0 2px 10px rgba(0,0,0,0.3),
-      inset 0 0 0 1px rgba(var(--sw-rgb,147,177,127), calc(0.9 * var(--sw-a,0))),
-      inset 0 0 calc(26px * var(--sw-a,0)) rgba(var(--sw-rgb,147,177,127), calc(0.35 * var(--sw-a,0))),
-      0 0 calc(30px * var(--sw-a,0)) calc(2px * var(--sw-a,0)) rgba(var(--sw-rgb,147,177,127), calc(0.6 * var(--sw-a,0)));
-    transition:border-color .14s ease-out, box-shadow .14s ease-out;
+     MUHIM (silliqlik): ramka va nur bir marta chiziladi (statik halqa), tortish paytida esa
+     FAQAT opacity o'zgaradi — bu GPU kompozitorda bajariladi, har kadrda qayta chizish
+     (repaint) yoki box-shadow/blur qayta hisoblash YO'Q. Shuning uchun zaif qurilmada ham
+     qotmaydi. Halqalar .card ichida, shuning uchun kartochka bilan birga harakatlanadi. */
+  .swipe-ring{
+    position:absolute; inset:0;
+    border-radius:22px;
+    pointer-events:none;
+    z-index:2;
+    opacity:0;
+    transition:opacity .12s linear;
   }
+  .swipe-ring.left{
+    border:2px solid rgba(147,177,127,0.95);
+    box-shadow:0 0 26px 3px rgba(124,154,107,0.6), inset 0 0 24px rgba(124,154,107,0.35);
+  }
+  .swipe-ring.right{
+    border:2px solid rgba(235,64,56,0.95);
+    box-shadow:0 0 26px 3px rgba(235,64,56,0.55), inset 0 0 24px rgba(235,64,56,0.32);
+  }
+  /* will-change faqat haqiqiy tortish davomida (GPU qatlami bekorga band bo'lib turmasin) */
+  .card.swiping .swipe-ring{ will-change:opacity; }
+  @media (prefers-reduced-motion: reduce){ .swipe-ring{ transition:none; } }
 
   .swipe-tag{
     position:absolute;
@@ -10609,6 +10621,8 @@
     card.innerHTML = `
       <div class="swipe-tag left">BILAMAN ✓</div>
       <div class="swipe-tag right">NAVBATDA ↺</div>
+      <div class="swipe-ring left" aria-hidden="true"></div>
+      <div class="swipe-ring right" aria-hidden="true"></div>
       <div class="card-inner">
         <div class="face front">
           <div class="kanji-display">${word.kanji}</div>
@@ -10868,6 +10882,8 @@
     const inner = card.querySelector('.card-inner');
     const tagLeft = card.querySelector('.swipe-tag.left');
     const tagRight = card.querySelector('.swipe-tag.right');
+    const ringLeft = card.querySelector('.swipe-ring.left');
+    const ringRight = card.querySelector('.swipe-ring.right');
     // orqa tomondagi (ma'no/tarjima) matn konteyneri — ba'zi mobil brauzerlar
     // (ayniqsa iOS Safari) 3D aylantirilgan (rotateY) ota-element ichida
     // native overflow-y:auto scrollni to'g'ri ishga tushira olmaydi, shu
@@ -10903,9 +10919,10 @@
       try{ DotsFX.drift(dx/180); }catch(_){}   // fon zarralari tortish yo'nalishiga yengil ergashadi
       const op = Math.min(Math.abs(dx)/80, 1);
       // ramka rangi: chapga — yashil (moss), o'ngga — qizil
+      // ramka rangi: faqat opacity o'zgaradi (kompozitor) — repaint yo'q
       card.classList.add('swiping');
-      card.style.setProperty('--sw-rgb', dx < 0 ? '147,177,127' : '235,64,56');
-      card.style.setProperty('--sw-a', op.toFixed(3));
+      ringLeft.style.opacity  = dx < 0 ? op : 0;
+      ringRight.style.opacity = dx < 0 ? 0 : op;
       if(dx < 0){
         tagLeft.style.opacity = op; tagRight.style.opacity = 0;
         edgeGlowLeft.style.opacity = op; edgeGlowRight.style.opacity = 0;
@@ -10996,8 +11013,8 @@
       } else if(moved){
         card.style.transition = 'transform .35s cubic-bezier(.2,.8,.2,1)';
         card.style.transform = '';
-        card.style.setProperty('--sw-a', 0);
-        setTimeout(()=>{ card.classList.remove('swiping'); card.style.removeProperty('--sw-rgb'); card.style.removeProperty('--sw-a'); }, 400);
+        ringLeft.style.opacity = 0; ringRight.style.opacity = 0;
+        setTimeout(()=>{ card.classList.remove('swiping'); }, 400);
         tagLeft.style.opacity = 0; tagRight.style.opacity = 0;
         edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
         // harakat to'liq tugagach GPU qatlamini bo'shatamiz — vizual holat allaqachon '' ga qaytgan
