@@ -49,8 +49,11 @@
     --card-w: min(84vw, 360px);
     --card-h: min(120vw, 460px);
     /* Kartochka aylanishi: darhol javob beradi (kutdirmaydi), oxirida uzoq va yumshoq tinchlanadi */
-    --flip-dur: .6s;
-    --flip-ease: cubic-bezier(.3,.8,.2,1);
+    --flip-dur: .62s;
+    /* Simmetrik ease-in-out: avvalgi egri chiziq (.3,.8,.2,1) burilishning ~75% ini birinchi
+       ~170ms da bajarib, qolganini sekin tinchlantirardi — old yuz bir zumda "uzilib" ketib,
+       tepa/pastki chetlar sakrab, oxirida qotib qolgandek ko'rinardi. */
+    --flip-ease: cubic-bezier(.45,.05,.25,1);
     /* umumiy kontent kengligi — kichik ekranda 480px, katta ekranlarda
        pastdagi @media qoidalari orqali kengayadi, shu bilan kartochkalar
        katta ekranda markazdagi tor ustunga siqilib qolmaydi */
@@ -2429,10 +2432,10 @@
      rotateY transitioniga xalaqit bermaydi. */
   @keyframes cardFlipLift{
     0%{ scale:1; }
-    32%{ scale:1.035; }
+    50%{ scale:1.03; }
     100%{ scale:1; }
   }
-  .card.flipping .card-inner{ animation:cardFlipLift var(--flip-dur) cubic-bezier(.4,0,.2,1); }
+  .card.flipping .card-inner{ animation:cardFlipLift var(--flip-dur) ease-in-out; }
 
   /* ---- aylanish paytida GPU yukini yengillatish ----
      backdrop-filter (blur+saturate) 3D rotateY bilan birga animatsiya qilinganda
@@ -2446,6 +2449,9 @@
     -webkit-backdrop-filter:none !important;
   }
   .card.flipping .face.back{ animation:none !important; }
+  /* aylanish paytida old chet nuri (drop-shadow filter) alohida render-sirt talab qilib,
+     kadrlarni og'irlashtirardi — vaqtincha o'chiriladi (juda nozik 2px nur, sezilmaydi) */
+  .card.flipping .face.front::after{ filter:none; }
 
   /* ---- maxsus kartochka hosil bo'lish animatsiyasi ---- */
   @keyframes cardFormSpin{
@@ -2501,37 +2507,11 @@
     box-shadow:0 0 26px 6px rgba(201,166,107,0.55);
     opacity:0;pointer-events:none;z-index:-1;
   }
-  /* ---------- AYLANISH IZI: ramkaning tepa va pastki chetidan ingichka, so'nuvchi yorug' chiziq ----------
-     Kartochka aylanayotganda (.flipping) tepa chetda chapdan o'ngga, pastki chetda o'ngdan chapga
-     tez yugurib o'tuvchi, o'tkir "bosh" va uzun so'nuvchi "dum"li nur chizig'i paydo bo'ladi.
-     Pseudo-element .card ning o'zida (aylanayotgan .card-inner da emas), shuning uchun
-     burilish paytida ham tekis qoladi va kartochkaning asl ramkasi izi kabi ko'rinadi. */
-  .card::before{
-    content:"";
-    position:absolute;
-    left:20px; right:20px; top:-1px; bottom:-1px;
-    z-index:3;
-    pointer-events:none;
-    opacity:0;
-    background:
-      linear-gradient(90deg, rgba(255,240,215,0) 0%, rgba(255,240,215,0.18) 45%, rgba(255,246,228,1) 94%, rgba(255,255,255,0) 100%) no-repeat,
-      linear-gradient(270deg, rgba(255,240,215,0) 0%, rgba(255,240,215,0.18) 45%, rgba(255,246,228,1) 94%, rgba(255,255,255,0) 100%) no-repeat;
-    background-size:55% 1.5px, 55% 1.5px;
-    background-position:-200% 0, 300% 100%;
-    filter:drop-shadow(0 0 3px rgba(255,226,170,0.75));
-  }
-  .card.flipping::before{ animation:cardFlipTrace .6s cubic-bezier(.25,.7,.3,1) both; }
-  @keyframes cardFlipTrace{
-    0%   { opacity:0;   background-position:-200% 0, 300% 100%; }
-    14%  { opacity:1; }
-    100% { opacity:0;   background-position:300% 0, -200% 100%; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .card.flipping::before{ animation:none; }
-  }
-
   .card.flipped:not(.flipping)::after{ animation:cardGlowPulse 2.2s ease-in-out infinite; }
   @keyframes cardGlowPulse{ 0%,100%{opacity:0;} 50%{opacity:1;} }
+  /* old tomonga qaytayotganda orqa tomon nuri birdan o'chib qolmasin — yumshoq so'nadi */
+  .card.flipping:not(.flipped)::after{ animation:cardGlowOut .28s ease-out both; }
+  @keyframes cardGlowOut{ 0%{opacity:.7;} 100%{opacity:0;} }
   @keyframes cardGlow{
     0%,100%{
       border-color:var(--glass-border-soft);
@@ -2569,6 +2549,7 @@
       inset 0 1px 0 rgba(255,255,255,0.18),
       inset 0 0 0 1px rgba(255,255,255,0.04);
     border:1px solid rgba(255,255,255,0.22);
+    outline:1px solid transparent; /* 3D burilishda yumaloq chetlar tishlanib qolmasligi uchun (antialias) */
     /* Shisha (backdrop-filter) va oq yaltiroq qatlam olib tashlandi —
        aynan ular qora ustida kulrang hosil qilardi. Chetdagi nur (::after) saqlanadi. */
     background:#000;
@@ -2978,7 +2959,11 @@
 
   /* ---------- KNOWN SUMMARY ---------- */
   .known-summary{
-    width:100%;
+    /* Bilganlarim bo'limi ham boshqa qatorlar (Bilganlarim/Hammasi, Ortga, quiz tugmalari)
+       kabi katta ekranda ham o'sha tor ustunda turadi va markazlanadi */
+    width:calc(100% - 40px);
+    max-width:480px;
+    margin:0 auto;
     display:flex;
     flex-direction:column;
     gap:14px;
