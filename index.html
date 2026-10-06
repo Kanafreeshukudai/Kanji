@@ -6788,6 +6788,28 @@
   .chat-mod-card .chat-menu-ico{width:18px; height:18px; flex:none; display:block; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
   .chat-menu-card button:not(.danger):not([data-a="x"]) .chat-menu-ico,
   .chat-mod-card button:not(.danger):not([data-m="x"]) .chat-menu-ico{color:#e8eaed;}
+  /* ---------- Chat reaksiyalari ---------- */
+  .chat-react-row{display:flex; flex-wrap:wrap; gap:4px; padding:0 2px; margin-top:1px;}
+  .chat-msg.mine .chat-react-row{justify-content:flex-end;}
+  .chat-react-chip{
+    display:inline-flex; align-items:center; gap:4px; margin:0;
+    padding:2px 8px; border-radius:999px;
+    border:1px solid var(--glass-border-soft); background:var(--glass-bg-strong);
+    color:var(--ink-soft); font-family:inherit;
+    font-size:calc(var(--chat-fs, 13.5px) * 0.9); line-height:1.35;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition:transform .12s ease, background-color .15s ease, border-color .15s ease;
+  }
+  .chat-react-chip b{font-size:0.82em; font-weight:700;}
+  .chat-react-chip.me{border-color:var(--accent-soft); background:rgba(255,160,70,0.20); color:var(--ink);}
+  .chat-react-chip:active{transform:scale(0.92);}
+  .chat-menu-card .chat-react-pick-row{display:flex; gap:4px; padding:2px 0 8px; border-bottom:1px solid rgba(255,255,255,0.17);}
+  .chat-menu-card .chat-react-pick-row button{
+    flex:1 1 0; min-width:0; height:42px; padding:0; margin:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:21px; line-height:1; border-radius:12px;
+  }
+  .chat-menu-card .chat-react-pick-row button.me{border-color:var(--accent-soft); background:rgba(255,160,70,0.22);}
   .chat-msg-nick{
     font-size:calc(var(--chat-fs, 13.5px) * 0.815);
     font-weight:700;
@@ -13324,6 +13346,8 @@
       return new Date(ts).toLocaleTimeString('uz-UZ', {hour:'2-digit', minute:'2-digit'});
     }catch(e){ return ''; }
   }
+  // 7 ta ommabop universal reaksiya (kalit Firestore'da, emoji ekranda)
+  const CHAT_REACTIONS = [['like','\u{1F44D}'],['love','\u2764\uFE0F'],['laugh','\u{1F602}'],['wow','\u{1F62E}'],['sad','\u{1F622}'],['fire','\u{1F525}'],['clap','\u{1F44F}']];
   function renderChatMessages(){
     const wrap = document.getElementById('chatMessages');
     if(!wrap) return;
@@ -13331,12 +13355,19 @@
     const myUid = (typeof window.__kanjiCurrentUid === 'function') ? window.__kanjiCurrentUid() : null;
     if(!msgs.length){
       wrap.innerHTML = '<div class="chat-empty"><span class="big-em">💬</span>Hali xabar yo\'q.<br>Birinchi bo\'lib yozing!</div>';
+      wrap._rendered = false; wrap._lastCount = 0;
       return;
     }
     const iAmAdmin = typeof window.__kanjiIsAdmin === 'function' && window.__kanjiIsAdmin();
     const esc = (v)=>String(v||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
     const escAttr = (v)=>String(v||'').replace(/[<>&"']/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
     const myPhoto = (typeof window.__kanjiCurrentPhoto === 'function') ? window.__kanjiCurrentPhoto() : '';
+    // Reaksiya bosilganda ro'yxat pastga sakrab ketmasligi uchun joyni eslab qolamiz
+    const prevTop = wrap.scrollTop;
+    const nearBottom = (wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight) < 140;
+    const lastM = msgs[msgs.length-1];
+    const grew = msgs.length > (wrap._lastCount || 0);
+    const lastMine = !!myUid && !!lastM && lastM.uid === myUid;
     wrap.innerHTML = msgs.map((m,i)=>{
       const mine = !!myUid && m.uid === myUid;
       const photo = m.photo || (mine ? myPhoto : '');
@@ -13349,11 +13380,33 @@
         <div class="chat-msg-body">
           <div class="chat-msg-nick">${esc(m.nick)}</div>
           <div class="chat-bubble">${esc(m.text)}</div>
+          ${reactChipsHtml(m, i, myUid)}
           <div class="chat-msg-time">${formatChatTime(m.time)}${m.edited?' · tahrirlangan':''}</div>
         </div>
       </div>`;
     }).join('');
-    wrap.scrollTop = wrap.scrollHeight;
+    if(!wrap._rendered || nearBottom || (grew && lastMine)) wrap.scrollTop = wrap.scrollHeight;
+    else wrap.scrollTop = prevTop;
+    wrap._rendered = wrap.clientHeight > 0;
+    wrap._lastCount = msgs.length;
+  }
+  function reactChipsHtml(m, i, myUid){
+    const rx = m.reactions || {};
+    const chips = CHAT_REACTIONS.map(([k,e])=>{
+      const arr = Array.isArray(rx[k]) ? rx[k] : [];
+      if(!arr.length) return '';
+      const me = !!myUid && arr.indexOf(myUid) > -1;
+      return `<button type="button" class="chat-react-chip${me?' me':''}" data-i="${i}" data-k="${k}"><span>${e}</span><b>${arr.length}</b></button>`;
+    }).join('');
+    return chips ? `<div class="chat-react-row">${chips}</div>` : '';
+  }
+  function toggleChatReaction(m, key){
+    const myUid = (typeof window.__kanjiCurrentUid === 'function') ? window.__kanjiCurrentUid() : null;
+    if(!myUid || !m || !m.id || typeof window.__kanjiChatReact !== 'function') return;
+    if(myBlockActive()) return;
+    const arr = (m.reactions && Array.isArray(m.reactions[key])) ? m.reactions[key] : [];
+    const on = arr.indexOf(myUid) === -1;
+    window.__kanjiChatReact(m.id, key, on).catch(()=>alert("Reaksiya qo'yib bo'lmadi. Internetni tekshiring."));
   }
   // ---------- MODERATSIYA UI (admin) va mute/ban holati ----------
   function myBlockActive(){
@@ -13422,13 +13475,17 @@
     const mine = !!myUid && m.uid === myUid;
     const targetIsAdmin = typeof window.__kanjiIsAdminEmail === 'function' && window.__kanjiIsAdminEmail(m.email);
     const acts = [];
-    if(iAmAdmin) acts.push(['edit', MENU_ICONS.edit, 'Tahrirlash']);
+    if(iAmAdmin || mine) acts.push(['edit', MENU_ICONS.edit, 'Tahrirlash']);
     if(iAmAdmin || mine) acts.push(['del', MENU_ICONS.trash, "O'chirish"]);
     if(iAmAdmin && !mine && !targetIsAdmin) acts.push(['mod', MENU_ICONS.mute, 'Mute / Ban']);
-    if(!acts.length) return;
+    const myRx = m.reactions || {};
+    const pickRow = '<div class="chat-react-pick-row">' + CHAT_REACTIONS.map(([k,e])=>{
+      const on = !!myUid && Array.isArray(myRx[k]) && myRx[k].indexOf(myUid) > -1;
+      return `<button type="button" data-r="${k}" class="${on?'me':''}" aria-label="${e}">${e}</button>`;
+    }).join('') + '</div>';
     const ov = document.createElement('div');
     ov.className = 'chat-menu-overlay';
-    ov.innerHTML = '<div class="chat-menu-card"><div class="chat-menu-head"></div>'
+    ov.innerHTML = '<div class="chat-menu-card"><div class="chat-menu-head"></div>' + pickRow
       + acts.map(a=>`<button data-a="${a[0]}" class="${a[0]==='del'?'danger':''}">${menuIcon(a[1])}<span>${a[2]}</span></button>`).join('')
       + '<button data-a="x">Bekor qilish</button></div>';
     const head = ov.querySelector('.chat-menu-head');
@@ -13445,6 +13502,8 @@
     ht.appendChild(b1); ht.appendChild(sp); head.appendChild(ht);
     ov.addEventListener('click', (e)=>{
       if(e.target === ov){ ov.remove(); return; }
+      const rb = e.target.closest('button[data-r]');
+      if(rb){ ov.remove(); toggleChatReaction(m, rb.dataset.r); return; }
       const b = e.target.closest('button[data-a]');
       if(!b) return;
       ov.remove();
@@ -13470,6 +13529,7 @@
     }
     wrap.addEventListener('pointerdown', (e)=>{
       if(e.pointerType === 'mouse' && e.button !== 0) return;
+      if(e.target.closest('.chat-react-chip')) return;
       const el = e.target.closest('.chat-msg');
       if(!el) return;
       const m = lastChatMsgs[+el.dataset.i];
@@ -13490,6 +13550,16 @@
     ['pointerup','pointercancel','pointerleave'].forEach(ev=>wrap.addEventListener(ev, cancel));
     wrap.addEventListener('scroll', cancel, {passive:true});
     wrap.addEventListener('contextmenu', (e)=>{ if(e.target.closest('.chat-msg')) e.preventDefault(); });
+  })();
+  (function initChatReactClicks(){
+    const wrap = document.getElementById('chatMessages');
+    if(!wrap) return;
+    wrap.addEventListener('click', (e)=>{
+      const chip = e.target.closest('.chat-react-chip');
+      if(!chip) return;
+      const m = lastChatMsgs[+chip.dataset.i];
+      if(m) toggleChatReaction(m, chip.dataset.k);
+    });
   })();
   function sendChatMessage(){
     const input = document.getElementById('chatInput');
@@ -16876,6 +16946,7 @@
             photo: data.photo || "",
             text: data.text || "",
             edited: !!data.editedAt,
+            reactions: (data.reactions && typeof data.reactions === "object") ? data.reactions : {},
             time: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : Date.now()
           };
         });
@@ -16907,6 +16978,15 @@
   window.__kanjiChatEdit = (id, text) =>
     updateDoc(doc(db, "chatMessages", id), { text: String(text).slice(0, 500), editedAt: serverTimestamp() });
   window.__kanjiChatDelete = (id) => deleteDoc(doc(db, "chatMessages", id));
+  // Reaksiya: chatMessages/{id}.reactions.{kalit} = [uid, uid, ...]
+  // Kalitlar: like, love, laugh, wow, sad, fire, clap (qoidalar ham faqat shularni qabul qiladi)
+  window.__kanjiChatReact = (id, key, on) => {
+    const user = auth.currentUser;
+    if (!user) return Promise.reject(new Error("not-logged-in"));
+    return updateDoc(doc(db, "chatMessages", id), {
+      ["reactions." + key]: on ? arrayUnion(user.uid) : arrayRemove(user.uid)
+    });
+  };
   window.__kanjiChatClear = async () => {
     for (;;) {
       const s2 = await getDocs(query(chatCol, limit(300)));
