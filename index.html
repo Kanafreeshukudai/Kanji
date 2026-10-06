@@ -1143,6 +1143,65 @@
   .auth-dropdown .auth-bgfx-btn:active,
   .auth-dropdown .auth-notes-btn:active,
   .auth-dropdown .auth-logout-btn:active{ transform:scale(0.96); }
+  /* Ism tugmasi: bosiladi -> akkaunt kartasi ochiladi */
+  .auth-dropdown button.auth-name{
+    cursor:pointer; font-family:'Shippori Mincho',serif;
+    border-color:rgba(147,177,127,0.75);
+    box-shadow:0 8px 18px -8px rgba(0,0,0,0.9), 0 0 12px rgba(147,177,127,0.18);
+  }
+  .auth-dropdown button.auth-name::after{
+    content:""; flex:none; width:6px; height:6px; margin-left:2px;
+    border-right:2px solid var(--moss-soft); border-bottom:2px solid var(--moss-soft);
+    transform:rotate(-45deg);
+  }
+  .auth-dropdown button.auth-name:active{ transform:scale(0.96); }
+
+  /* ---------- AKKAUNT KARTASI (moss) ---------- */
+  .acc-overlay{
+    position:fixed; inset:0; z-index:10800;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(6,10,7,0.66);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .acc-overlay.show{ opacity:1; pointer-events:auto; }
+  .acc-card{
+    width:100%; max-width:340px; border-radius:22px; padding:24px 18px 16px;
+    text-align:center;
+    background:linear-gradient(165deg, #1b2a1f 0%, #121b15 55%, #0c120e 100%);
+    border:1px solid rgba(147,177,127,0.55);
+    box-shadow:0 18px 50px rgba(0,0,0,0.6), 0 0 32px rgba(124,154,107,0.22);
+    transform:translateY(14px) scale(0.96);
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .acc-overlay.show .acc-card{ transform:none; }
+  .acc-avatar{
+    width:76px; height:76px; margin:0 auto 12px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:linear-gradient(150deg, var(--moss), #2f4a2f);
+    border:2px solid var(--moss-soft);
+    box-shadow:0 0 0 4px rgba(124,154,107,0.18), 0 0 18px rgba(147,177,127,0.35);
+    color:#fff; font-size:30px; font-weight:700; font-family:'Shippori Mincho',serif;
+  }
+  .acc-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .acc-name{ margin:0 0 4px; font-size:18px; font-weight:700; color:#fff; word-break:break-word; font-family:'Shippori Mincho',serif; }
+  .acc-email{ margin:0; font-size:13px; color:var(--moss-soft); word-break:break-all; }
+  .acc-sep{ height:1px; margin:16px 0 14px; background:linear-gradient(90deg, transparent, rgba(147,177,127,0.5), transparent); }
+  .acc-switch-btn, .acc-close-btn{
+    width:100%; border-radius:12px; padding:11px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .acc-switch-btn{
+    border:1px solid var(--moss-soft); color:#0d140f;
+    background:linear-gradient(150deg, var(--moss-soft), var(--moss));
+    box-shadow:0 0 14px rgba(147,177,127,0.3);
+  }
+  .acc-switch-btn svg{ width:16px; height:16px; flex:none; }
+  .acc-switch-btn:disabled{ opacity:.65; cursor:default; }
+  .acc-close-btn{ margin-top:8px; border:1px solid rgba(147,177,127,0.5); background:rgba(124,154,107,0.12); color:#fff; }
+  .acc-switch-btn:active, .acc-close-btn:active{ transform:scale(0.97); }
+  .acc-msg{ min-height:16px; margin:10px 0 0; font-size:12px; color:var(--moss-soft); }
+  .acc-msg.err{ color:#ffb4a8; }
+  @media (prefers-reduced-motion: reduce){ .acc-card{ transition:none; } }
   @media (prefers-reduced-motion: reduce){
     .auth-dropdown > *,
     .auth-dropdown.open > *{ transform:none; transition:opacity .2s ease; }
@@ -6511,15 +6570,68 @@
   .presence-owner-badge{
     flex:none;
     align-self:center;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
     font-size:10px;
     font-weight:800;
     letter-spacing:0.05em;
     text-transform:uppercase;
     color:#0B0D10;
-    background:var(--gold);
+    background:linear-gradient(110deg, var(--gold) 0%, var(--gold) 28%, var(--moss-soft) 46%, #d7efc3 50%, var(--moss-soft) 54%, var(--gold) 72%, var(--gold) 100%);
+    background-size:240% 100%;
+    animation:ownerMossShimmer 3.2s ease-in-out infinite;
     padding:4px 10px;
     border-radius:999px;
-    box-shadow:0 0 8px rgba(201,166,107,0.45);
+    box-shadow:0 0 8px rgba(201,166,107,0.45), 0 0 10px rgba(147,177,127,0.35);
+  }
+  @keyframes ownerMossShimmer{
+    0%{ background-position:100% 0; }
+    55%,100%{ background-position:-40% 0; }
+  }
+  .presence-item.presence-item-owner{ cursor:pointer; }
+  .presence-item.presence-item-owner:active{ transform:scale(0.985); }
+
+  /* ---------- Owner bildirishnomasi (qator bosilganda) ---------- */
+  .owner-notice-overlay{
+    position:fixed; inset:0; z-index:10800;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(6,7,9,0.62);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .owner-notice-overlay.show{ opacity:1; pointer-events:auto; }
+  .owner-notice-card{
+    position:relative; overflow:hidden;
+    width:100%; max-width:340px; border-radius:22px; padding:26px 20px 18px;
+    text-align:center;
+    background:linear-gradient(160deg, rgba(147,177,127,0.16), rgba(201,166,107,0.10) 55%, rgba(20,22,26,0.92));
+    background-color:var(--panel-1);
+    border:1px solid rgba(147,177,127,0.45);
+    box-shadow:0 18px 50px rgba(0,0,0,0.55), 0 0 30px rgba(147,177,127,0.22);
+    transform:translateY(14px) scale(0.96); transition:transform .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .owner-notice-overlay.show .owner-notice-card{ transform:none; }
+  .owner-notice-crown{ font-size:34px; line-height:1; margin-bottom:8px; filter:drop-shadow(0 0 10px rgba(201,166,107,0.6)); }
+  .owner-notice-name{ margin:0 0 8px; font-size:19px; font-weight:800; color:var(--ink); letter-spacing:0.01em; }
+  .owner-notice-badge{
+    display:inline-block; position:relative; overflow:hidden;
+    font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;
+    color:#0B0D10; padding:5px 14px; border-radius:999px;
+    background:linear-gradient(110deg, var(--gold) 0%, var(--gold) 28%, var(--moss-soft) 46%, #d7efc3 50%, var(--moss-soft) 54%, var(--gold) 72%, var(--gold) 100%);
+    background-size:240% 100%; animation:ownerMossShimmer 3.2s ease-in-out infinite;
+    box-shadow:0 0 10px rgba(201,166,107,0.45), 0 0 12px rgba(147,177,127,0.4);
+  }
+  .owner-notice-title{ margin:14px 0 6px; font-size:13px; font-weight:700; color:var(--moss-soft); }
+  .owner-notice-text{ margin:0; font-size:13.5px; line-height:1.55; color:var(--ink-soft); }
+  .owner-notice-close{
+    margin-top:16px; width:100%; border:1px solid rgba(147,177,127,0.5);
+    background:rgba(124,154,107,0.16); color:var(--ink); border-radius:12px; padding:10px;
+    font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
+  }
+  .owner-notice-close:active{ transform:scale(0.97); }
+  @media (prefers-reduced-motion: reduce){
+    .presence-owner-badge, .owner-notice-badge{ animation:none; }
+    .owner-notice-card{ transition:none; }
   }
   .presence-admin-badge{
     flex:none;
@@ -7708,7 +7820,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path></svg>
     </span>
     <div class="auth-dropdown" id="authDropdown">
-      <span id="user-name" class="auth-name"></span>
+      <button id="user-name" class="auth-name" type="button" aria-haspopup="dialog" aria-label="Akkaunt ma'lumotlari"></button>
       <button id="notes-btn" class="auth-notes-btn" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
         <span>Qaydlar</span>
@@ -15719,7 +15831,7 @@
   // ko'rinish nazorati — chinakam himoya uchun Firebase konsolida
   // "presence" kolleksiyasini o'qish Firestore Security Rules orqali ham
   // shu admin UID/emailiga cheklab qo'yilishi tavsiya etiladi.
-  const PRESENCE_ADMIN_EMAILS = ["doniyorbektoshmatov7@gmail.com", "gulchiroyjumayeva018@gmail.com"];
+  const PRESENCE_ADMIN_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
   const PRESENCE_STALE_MS = 35000;
@@ -15889,6 +16001,85 @@
     if (!userProfile.contains(e.target)) authDropdown.classList.remove("open");
   });
 
+  // ---------- AKKAUNT KARTASI: ism, email, avatar + akkauntni almashtirish ----------
+  (function initAccountCard() {
+    if (!userName) return;
+    const ov = document.createElement("div");
+    ov.className = "acc-overlay";
+    ov.setAttribute("aria-hidden", "true");
+    ov.innerHTML =
+      '<div class="acc-card" role="dialog" aria-modal="true" aria-label="Akkaunt">' +
+        '<div class="acc-avatar" id="accAvatar"></div>' +
+        '<h4 class="acc-name" id="accName"></h4>' +
+        '<p class="acc-email" id="accEmail"></p>' +
+        '<div class="acc-sep"></div>' +
+        '<button type="button" class="acc-switch-btn" id="accSwitchBtn">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4-4 4"></path><path d="M3 11V9a2 2 0 0 1 2-2h16"></path><path d="M7 21l-4-4 4-4"></path><path d="M21 13v2a2 2 0 0 1-2 2H3"></path></svg>' +
+          '<span>Akkauntni almashtirish</span>' +
+        '</button>' +
+        '<p class="acc-msg" id="accMsg" aria-live="polite"></p>' +
+        '<button type="button" class="acc-close-btn" id="accCloseBtn">Yopish</button>' +
+      '</div>';
+    document.body.appendChild(ov);
+    const avatarEl = ov.querySelector("#accAvatar");
+    const nameEl = ov.querySelector("#accName");
+    const emailEl = ov.querySelector("#accEmail");
+    const switchBtn = ov.querySelector("#accSwitchBtn");
+    const msgEl = ov.querySelector("#accMsg");
+    const closeBtn = ov.querySelector("#accCloseBtn");
+
+    function fill(user) {
+      const nm = (user && (user.displayName || user.email)) || "Foydalanuvchi";
+      nameEl.textContent = nm;
+      emailEl.textContent = (user && user.email) || "";
+      avatarEl.innerHTML = "";
+      if (user && user.photoURL) {
+        const img = document.createElement("img");
+        img.src = user.photoURL; img.alt = "";
+        avatarEl.appendChild(img);
+      } else {
+        avatarEl.textContent = nm.trim().charAt(0).toUpperCase();
+      }
+    }
+    function setMsg(t, err) { msgEl.textContent = t || ""; msgEl.classList.toggle("err", !!err); }
+    function open() {
+      const u = auth.currentUser;
+      if (!u) return;
+      fill(u); setMsg("");
+      switchBtn.disabled = false;
+      authDropdown.classList.remove("open");
+      ov.classList.add("show"); ov.setAttribute("aria-hidden", "false");
+    }
+    function close() { ov.classList.remove("show"); ov.setAttribute("aria-hidden", "true"); }
+
+    userName.addEventListener("click", open);
+    closeBtn.addEventListener("click", close);
+    ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ov.classList.contains("show")) close(); });
+
+    switchBtn.addEventListener("click", () => {
+      const old = auth.currentUser;
+      switchBtn.disabled = true;
+      setMsg("Hisob tanlash oynasi ochilmoqda…");
+      // Eski hisobni darrov offline qilib qo'yamiz (popup bloklanmasligi uchun kutmaymiz)
+      if (old) { try { presenceBeat(old, false); } catch (e) {} }
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const u = result.user;
+          if (old && u.uid === old.uid) { setMsg("Xuddi shu hisob tanlandi."); switchBtn.disabled = false; return; }
+          fill(u); setMsg("Hisob almashtirildi ✓");
+          setTimeout(close, 900);
+        })
+        .catch((error) => {
+          const code = (error && error.code) || "";
+          if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") setMsg("");
+          else if (code === "auth/popup-blocked") setMsg("Brauzer oynani blokladi. Ruxsat bering.", true);
+          else setMsg("Almashtirib bo'lmadi. Qayta urinib ko'ring.", true);
+          switchBtn.disabled = false;
+        });
+    });
+  })();
+
   onAuthStateChanged(auth, (user) => {
     // Auth holati birinchi marta aniqlandi — endi splash ekrani noto'g'ri
     // "kiring" ogohlantirishini xotirjam ko'rsatishi (yoki ko'rsatmasligi)
@@ -16031,6 +16222,33 @@
     return diffYear + " yil oldin";
   }
 
+  // Owner qatori bosilganda chiqadigan bildirishnoma
+  let ownerNoticeEl = null;
+  function showOwnerNotice() {
+    if (!ownerNoticeEl) {
+      ownerNoticeEl = document.createElement("div");
+      ownerNoticeEl.className = "owner-notice-overlay";
+      ownerNoticeEl.setAttribute("aria-hidden", "true");
+      ownerNoticeEl.innerHTML =
+        '<div class="owner-notice-card" role="dialog" aria-modal="true" aria-labelledby="ownerNoticeName">' +
+          '<div class="owner-notice-crown" aria-hidden="true">\uD83D\uDC51</div>' +
+          '<h4 class="owner-notice-name" id="ownerNoticeName">Doniyorbek Toshmatov</h4>' +
+          '<span class="owner-notice-badge">Owner \u00B7 Ilova egasi</span>' +
+          '<p class="owner-notice-title">Bu ilovaning yaratuvchisi va egasi</p>' +
+          '<p class="owner-notice-text">Har bir kartochka, har bir kanji \u2014 uning sabri va mehnatidan tug\u2019ilgan. ' +
+          'Siz bilim yo\u2019lida qadam tashlayotgan bu maskan uning orzusi edi.</p>' +
+          '<button type="button" class="owner-notice-close">Yopish</button>' +
+        '</div>';
+      document.body.appendChild(ownerNoticeEl);
+      const hide = () => { ownerNoticeEl.classList.remove("show"); ownerNoticeEl.setAttribute("aria-hidden", "true"); };
+      ownerNoticeEl.addEventListener("click", (e) => { if (e.target === ownerNoticeEl) hide(); });
+      ownerNoticeEl.querySelector(".owner-notice-close").addEventListener("click", hide);
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ownerNoticeEl.classList.contains("show")) hide(); });
+    }
+    ownerNoticeEl.classList.add("show");
+    ownerNoticeEl.setAttribute("aria-hidden", "false");
+  }
+
   function presenceRenderList() {
     const listEl = document.getElementById("presenceList");
     const emptyEl = document.getElementById("presenceEmpty");
@@ -16145,15 +16363,11 @@
         ownerBadge.className = "presence-owner-badge";
         ownerBadge.textContent = "Owner";
         row.appendChild(ownerBadge);
-      }
-
-      // Admin (qiz bola) uchun pushti-binafsha "Admin" yozuvi
-      const isGirlAdmin = !!item.email && item.email.toLowerCase() === "gulchiroyjumayeva018@gmail.com";
-      if (isGirlAdmin) {
-        const adminBadge = document.createElement("span");
-        adminBadge.className = "presence-admin-badge";
-        adminBadge.textContent = "Admin";
-        row.appendChild(adminBadge);
+        row.classList.add("presence-item-owner");
+        row.setAttribute("role", "button");
+        row.setAttribute("tabindex", "0");
+        row.addEventListener("click", showOwnerNotice);
+        row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showOwnerNotice(); } });
       }
 
       listEl.appendChild(row);
@@ -16162,8 +16376,7 @@
 
   function setupPresenceAdminUI(user) {
     const toggleBtn = document.getElementById("presenceToggleBtn");
-    const isAdmin = !!user.email && PRESENCE_ADMIN_EMAILS.some(function(e){ return e.toLowerCase() === user.email.toLowerCase(); });
-    if (!isAdmin) {
+    if (!user) {
       teardownPresenceAdminUI();
       return;
     }
