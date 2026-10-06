@@ -951,6 +951,41 @@
   .chat-bar-btn svg{ width:17px; height:17px; display:block; }
   .chat-bar-btn.in-use{ border-color:rgba(255,170,80,0.95); color:#ffb870; box-shadow:0 0 16px rgba(255,138,31,0.42), inset 0 1px 0 rgba(255,200,140,0.2); }
   .chat-bar-btn:focus-visible{ outline:2px solid #ff9d45; outline-offset:3px; }
+  .chat-bar-btn{ position:relative; }
+
+  /* ---------- O'qilmagan xabarlar soni (chat tugmasi, chat sarlavhasi va "yangi xabar" tugmasi) ---------- */
+  .chat-unread-badge{
+    min-width:17px; height:17px; padding:0 5px; box-sizing:border-box;
+    border-radius:999px;
+    background:#ff3b30; color:#fff;
+    font-size:10.5px; font-weight:800; line-height:17px; text-align:center;
+    font-style:normal; font-variant-numeric:tabular-nums;
+    box-shadow:0 0 0 2px var(--bg-1), 0 0 10px rgba(255,59,48,0.55);
+    pointer-events:none;
+  }
+  .chat-bar-btn .chat-unread-badge{ position:absolute; top:-5px; right:-5px; z-index:2; }
+  .chat-unread-badge[hidden]{ display:none !important; }
+  .chat-unread-badge.pop{ animation:chatBadgePop .42s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes chatBadgePop{ 0%{transform:scale(.4);} 60%{transform:scale(1.28);} 100%{transform:scale(1);} }
+  .chat-panel .chat-panel-title h3 .chat-unread-badge{
+    display:inline-block; vertical-align:middle; margin-left:6px; position:static;
+    box-shadow:0 0 8px rgba(255,59,48,0.5);
+  }
+  .chat-newmsg-anchor{ position:relative; flex:none; height:0; z-index:5; }
+  .chat-newmsg-pill{
+    position:absolute; left:50%; bottom:10px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:7px;
+    border:1px solid rgba(255,138,31,0.7);
+    background:linear-gradient(150deg, rgba(60,31,8,0.96), rgba(11,9,6,0.98));
+    color:#ffb870; border-radius:999px; padding:7px 14px 7px 11px;
+    font-family:inherit; font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(0,0,0,0.7), 0 0 14px rgba(255,138,31,0.28);
+  }
+  .chat-newmsg-pill[hidden]{ display:none; }
+  .chat-newmsg-pill:active{ transform:translateX(-50%) scale(0.96); }
+  .chat-newmsg-pill svg{ width:14px; height:14px; flex:none; }
+  .chat-newmsg-pill .chat-unread-badge{ position:static; box-shadow:none; }
+  @media (prefers-reduced-motion: reduce){ .chat-unread-badge.pop{ animation:none; } }
 
   /* ---------- FAQAT ADMIN uchun: foydalanuvchilar online/offline tugmasi ----------
      Bu tugma faqat oldindan belgilangan admin email bilan kirilganda
@@ -4337,26 +4372,53 @@
     from{opacity:0; transform:translateY(10px);}
     to{opacity:1; transform:translateY(0);}
   }
+  /* ---------- LOADING CHIZIG'I (haqiqiy yuklanishga bog'langan) ----------
+     Matn chiziqning aynan markazida; chiziq to'lgan qismida matn rangi
+     avtomatik to'q rangga o'tadi (ikki qatlamli matn + clip-path). */
   .splash-bar-track{
-    margin-top:32px;
-    width:140px;
-    height:3px;
+    --bar-w:min(250px, 70vw);
+    position:relative;
+    margin-top:30px;
+    width:var(--bar-w);
+    height:30px;
     border-radius:999px;
-    background:rgba(255,255,255,0.08);
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.09));
+    border:1px solid rgba(255,255,255,0.16);
+    box-shadow:inset 0 2px 6px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4), 0 10px 26px -12px rgba(0,0,0,0.75);
     overflow:hidden;
-    transition:opacity .4s ease;
+    transition:opacity .45s ease, transform .45s ease, box-shadow .45s ease;
   }
-  .splash-bar-track.splash-bar-fade{opacity:0;}
+  .splash-bar-track.splash-bar-fade{opacity:0; transform:translateY(-4px) scale(0.97); pointer-events:none;}
+  .splash-bar-track.is-done{box-shadow:inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.4), 0 0 24px rgba(201,166,107,0.5);}
+  .splash-bar-label{
+    position:absolute; inset:0; z-index:2;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:12px; font-weight:800; letter-spacing:0.06em;
+    white-space:nowrap; font-variant-numeric:tabular-nums;
+    user-select:none; pointer-events:none;
+  }
+  .splash-bar-label.base{color:var(--ink-soft);}
   .splash-bar-fill{
-    height:100%;
-    width:0%;
-    border-radius:999px;
+    --rest:100%;
+    position:absolute; inset:0;
+    clip-path:inset(0 var(--rest) 0 0 round 999px);
     background:linear-gradient(90deg, var(--accent), var(--gold));
-    animation:splashBarFill 1.5s cubic-bezier(.3,.6,.3,1) forwards .15s;
+    overflow:hidden;
   }
-  @keyframes splashBarFill{
-    from{width:0%;}
-    to{width:100%;}
+  .splash-bar-label.top{color:#1d1209;}
+  .splash-bar-fill::after{
+    content:""; position:absolute; top:0; bottom:0; left:-45%; width:45%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.42), transparent);
+    animation:splashBarShine 1.5s ease-in-out infinite;
+  }
+  .splash-bar-track.is-done .splash-bar-fill::after{animation:none; opacity:0;}
+  @keyframes splashBarShine{
+    from{left:-45%;}
+    to{left:100%;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .splash-bar-fill::after{animation:none; opacity:0;}
   }
   .splash-start-btn{
     margin-top:30px;
@@ -7630,7 +7692,7 @@
     margin:-6px;
   }
   @media (prefers-reduced-motion: reduce){
-    .splash-kanji, .splash-title, .splash-sub, .splash-bar-fill{animation:none !important; opacity:1 !important; width:100% !important;}
+    .splash-kanji, .splash-title, .splash-sub{animation:none !important; opacity:1 !important; width:100% !important;}
   }
   @media (prefers-reduced-motion: reduce){
     .splash-credit{animation:none !important; opacity:1 !important;}
@@ -7920,6 +7982,7 @@
   <!-- Chat: faqat kirilganda ko'rinadi (skript), foydalanuvchilar ro'yxati tugmasi yonida -->
   <button class="chat-bar-btn" id="chatBarBtn" type="button" aria-label="Chat" title="Chat">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+    <em class="chat-unread-badge" id="chatBarBadge" hidden>0</em>
   </button>
   <!-- FAQAT ADMIN uchun: skriptda faqat belgilangan admin email bilan
        kirilganda display:flex qilinadi, aks holda butunlay yashirin qoladi. -->
@@ -7988,7 +8051,10 @@
     </div>
     <div class="splash-title">Kanji Flashcard</div>
     <div class="splash-sub">So'z birikmalari</div>
-    <div class="splash-bar-track" id="splashBarTrack"><div class="splash-bar-fill"></div></div>
+    <div class="splash-bar-track" id="splashBarTrack" role="progressbar" aria-label="Yuklanmoqda" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <span class="splash-bar-label base" id="splashBarLabelBase">Yuklanmoqda… 0%</span>
+      <div class="splash-bar-fill" id="splashBarFill"><span class="splash-bar-label top" id="splashBarLabelTop">Yuklanmoqda… 0%</span></div>
+    </div>
     <!--
       PHONK MUSIQA: shu papkada "song.m4a" nomli audio fayl bo'lishi kerak
       (index.html bilan bir joyda, masalan GitHub Pages repo tub papkasida).
@@ -8018,6 +8084,116 @@
     <span class="splash-credit-year" id="splashCreditYear">2026</span>
   </div>
 </div>
+
+<script>
+/* ---------- SPLASH LOADER (haqiqiy yuklanishga bog'langan) ----------
+   Chiziq vaqtga emas, HAQIQIY yuklanish bosqichlariga qarab to'ladi.
+   100% va "Boshlash" tugmasi faqat hammasi tayyor bo'lgandan keyin chiqadi:
+   sahifa (load), shriftlar, splash rasmi, holat (loadState), qo'shiq va
+   Firebase auth holati. Sekin/uzilgan tarmoqda cheksiz kutib qolmaslik uchun
+   faqat ikkinchi darajali bosqichlarga (qo'shiq, shrift, auth) uzun xavfsizlik
+   chegarasi qo'yilgan; sahifaning o'zi (window load) esa har doim kutiladi. */
+(function(){
+  var W = {dom:8, state:14, load:30, fonts:20, art:10, audio:12, auth:6};
+  var done = {}, cbs = [], finished = false, shown = 0, t0 = Date.now();
+  var track = document.getElementById('splashBarTrack');
+  var fill = document.getElementById('splashBarFill');
+  var lb = document.getElementById('splashBarLabelBase');
+  var lt = document.getElementById('splashBarLabelTop');
+  var lastP = -1, finishing = false;
+
+  function mark(n){ if(W[n] && !done[n]) done[n] = true; }
+  function doneW(){ var s = 0; for(var k in done) s += W[k]; return s; }
+  function allDone(){ for(var k in W) if(!done[k]) return false; return true; }
+  function paint(){
+    var p = Math.min(100, Math.floor(shown));
+    if(p === lastP) return;
+    lastP = p;
+    var txt = p >= 100 ? 'Tayyor ✓' : ('Yuklanmoqda… ' + p + '%');
+    if(fill) fill.style.setProperty('--rest', (100 - Math.min(100, shown)).toFixed(2) + '%');
+    if(lb) lb.textContent = txt;
+    if(lt) lt.textContent = txt;
+    if(track) track.setAttribute('aria-valuenow', String(p));
+  }
+  function finish(){
+    if(finished) return;
+    finished = true;
+    if(track) track.classList.add('is-done');
+    clearInterval(timer);
+    setTimeout(function(){ var l = cbs.splice(0); l.forEach(function(f){ try{ f(); }catch(e){ console.error(e); } }); }, 420);
+  }
+  function tick(){
+    var ad = allDone();
+    var dw = doneW(), pend = 100 - dw;
+    // kutayotganda chiziq biroz "jonli" siljiydi, lekin hech qachon keyingi bosqichdan oshib ketmaydi
+    var allowance = pend * 0.3 * (1 - Math.exp(-(Date.now() - t0) / 4000));
+    var tgt = ad ? 100 : Math.min(99, dw + allowance);
+    if(document.hidden && ad) shown = 100;
+    if(tgt > shown) shown = Math.min(tgt, shown + Math.max((tgt - shown) * 0.08, 0.35));
+    paint();
+    if(ad && shown >= 99.99){ shown = 100; paint(); finish(); }
+  }
+  var timer = setInterval(tick, 40);
+
+  // --- bosqichlar ---
+  if(document.readyState !== 'loading') mark('dom'); else document.addEventListener('DOMContentLoaded', function(){ mark('dom'); });
+  if(document.readyState === 'complete') mark('load'); else window.addEventListener('load', function(){ mark('load'); });
+  // asosiy skript holatni (loadState) yuklagach 'state' ni belgilaydi; xavfsizlik chegarasi 25s
+  setTimeout(function(){ mark('state'); }, 25000);
+
+  (function fonts(){
+    var started = Date.now(), failed = false;
+    var link = document.querySelector('link[href*="fonts.googleapis.com/css2"]');
+    if(link) link.addEventListener('error', function(){ failed = true; });
+    function go(){
+      if(!document.fonts || !document.fonts.load){ mark('fonts'); return; }
+      var p = Promise.all([
+        document.fonts.load('400 48px "Shippori Mincho"'),
+        document.fonts.load('600 48px "Shippori Mincho"'),
+        document.fonts.load('700 16px "Zen Maru Gothic"'),
+        document.fonts.ready
+      ]).catch(function(){});
+      var cap = new Promise(function(res){ setTimeout(res, 12000); });
+      Promise.race([p, cap]).then(function(){ mark('fonts'); });
+    }
+    (function poll(){
+      // shrift stylesheet'i haqiqatan qo'llanguncha kutamiz (aks holda fonts.load() bo'sh qaytadi)
+      var applied = !link || (link.rel === 'stylesheet' && !!link.sheet);
+      if(applied || failed || Date.now() - started > 15000){ go(); return; }
+      setTimeout(poll, 60);
+    })();
+  })();
+
+  (function art(){
+    var img = document.querySelector('#splashArtwork img');
+    var ok = function(){ mark('art'); };
+    if(!img || img.complete) ok();
+    else { img.addEventListener('load', ok); img.addEventListener('error', ok); }
+  })();
+
+  (function audio(){
+    var a = document.getElementById('splashPhonkAudio');
+    var ok = function(){ mark('audio'); };
+    if(!a || a.readyState >= 2) { ok(); return; }
+    ['loadeddata','canplay','canplaythrough','error','abort'].forEach(function(ev){ a.addEventListener(ev, ok, {once:true}); });
+    // ba'zi brauzerlar (iOS) foydalanuvchi bosmaguncha audio yuklamaydi — shuning uchun qisqa chegara
+    setTimeout(ok, 3500);
+  })();
+
+  (function auth(){
+    var started = Date.now();
+    (function poll(){
+      if(window.__kanjiAuthChecked || Date.now() - started > 8000){ mark('auth'); return; }
+      setTimeout(poll, 100);
+    })();
+  })();
+
+  window.__splashLoader = {
+    done: mark,
+    whenDone: function(cb){ if(finished) cb(); else cbs.push(cb); }
+  };
+})();
+</script>
 
 <div class="page-flash" id="pageFlash" aria-hidden="true"></div>
 <div class="intro-ripple" id="introRipple" aria-hidden="true"></div>
@@ -8403,7 +8579,7 @@
     <div class="chat-panel-left">
       <div id="chatHeaderAvatar"></div>
       <div class="chat-panel-title">
-        <h3>Chat</h3>
+        <h3>Chat<em class="chat-unread-badge" id="chatTitleBadge" hidden>0</em></h3>
         <span id="chatNickLabel">Mehmon sifatida</span>
       </div>
     </div>
@@ -8425,6 +8601,12 @@
     <button class="chat-font-reset" id="chatFontReset" type="button">Asl holiga qaytarish</button>
   </div>
   <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-newmsg-anchor">
+    <button type="button" class="chat-newmsg-pill" id="chatNewMsgPill" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+      <span>Yangi xabar</span><em class="chat-unread-badge" id="chatPillBadge">0</em>
+    </button>
+  </div>
   <div class="chat-input-bar">
     <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
     <button class="chat-send-btn" id="chatSendBtn" type="button" aria-label="Yuborish">
@@ -13325,12 +13507,80 @@
   // window.__kanjiChatOnMessages (yangi xabarlar kelganda chaqiriladigan hook)
   // va window.__kanjiCurrentUid / __kanjiCurrentUserName orqali bog'lanamiz.
   let lastChatMsgs = [];
+
+  // ---------- O'QILMAGAN XABARLAR SONI ----------
+  // Chat yopiq bo'lsa ham Firestore tinglovchisi ishlab turadi, shuning uchun har bir
+  // yangi (o'zimniki bo'lmagan) xabar sanalib, chat tugmasida raqam bo'lib ko'rinadi.
+  // "Oxirgi o'qilgan xabar vaqti" har bir akkaunt uchun localStorage'da saqlanadi.
+  const CHAT_READ_KEY = 'kanjiChatLastRead_';
+  let chatLastRead = null, chatLastReadUid = null, chatPrevUnread = 0;
+  function chatCurUid(){ return (typeof window.__kanjiCurrentUid === 'function') ? window.__kanjiCurrentUid() : null; }
+  function chatMaxTime(msgs){ let t = 0; for(const m of msgs){ if(m.time > t) t = m.time; } return t; }
+  function chatIsOpen(){ const p = document.getElementById('chatPanel'); return !!p && p.classList.contains('open'); }
+  function chatAtBottom(){
+    const w = document.getElementById('chatMessages');
+    return !w || (w.scrollHeight - w.scrollTop - w.clientHeight) < 60;
+  }
+  function chatStoreRead(uid){ try{ localStorage.setItem(CHAT_READ_KEY + uid, String(chatLastRead)); }catch(e){} }
+  function markChatRead(){
+    const uid = chatCurUid();
+    if(!uid || chatLastReadUid !== uid) return;
+    const t = chatMaxTime(lastChatMsgs);
+    if(t > chatLastRead){ chatLastRead = t; chatStoreRead(uid); }
+  }
+  function paintChatUnread(n){
+    const txt = n > 99 ? '99+' : String(n);
+    const barBadge = document.getElementById('chatBarBadge');
+    const titleBadge = document.getElementById('chatTitleBadge');
+    const pill = document.getElementById('chatNewMsgPill');
+    const pillBadge = document.getElementById('chatPillBadge');
+    const barBtn = document.getElementById('chatBarBtn');
+    const open = chatIsOpen();
+    if(barBadge){
+      barBadge.hidden = n < 1; barBadge.textContent = txt;
+      if(n > chatPrevUnread){ barBadge.classList.remove('pop'); void barBadge.offsetWidth; barBadge.classList.add('pop'); }
+    }
+    if(titleBadge){ titleBadge.hidden = !(open && n > 0); titleBadge.textContent = txt; }
+    if(pill){ pill.hidden = !(open && n > 0); }
+    if(pillBadge) pillBadge.textContent = txt;
+    if(barBtn) barBtn.setAttribute('aria-label', n > 0 ? ('Chat, ' + n + ' ta o\'qilmagan xabar') : 'Chat');
+    chatPrevUnread = n;
+  }
+  function updateChatUnread(){
+    const uid = chatCurUid();
+    if(!uid){ chatLastRead = null; chatLastReadUid = null; paintChatUnread(0); return; }
+    if(chatLastReadUid !== uid){
+      chatLastReadUid = uid; chatLastRead = null; chatPrevUnread = 0;
+      try{ const v = parseInt(localStorage.getItem(CHAT_READ_KEY + uid), 10); if(!isNaN(v)) chatLastRead = v; }catch(e){}
+      if(chatLastRead === null){
+        // birinchi marta: eski xabarlar o'qilgan hisoblanadi, faqat keyingilari "yangi"
+        chatLastRead = lastChatMsgs.length ? chatMaxTime(lastChatMsgs) : Date.now();
+        chatStoreRead(uid);
+      }
+    }
+    // chat ochiq, sahifa ko'rinib turibdi va ro'yxat eng pastda — xabarlar o'qilgan
+    if(chatIsOpen() && !document.hidden && chatAtBottom()) markChatRead();
+    const n = lastChatMsgs.filter(m => m.uid !== uid && m.time > chatLastRead).length;
+    paintChatUnread(n);
+  }
+  (function initChatUnread(){
+    const wrap = document.getElementById('chatMessages');
+    const pill = document.getElementById('chatNewMsgPill');
+    if(wrap) wrap.addEventListener('scroll', ()=>{ if(chatPrevUnread > 0 && chatAtBottom()) updateChatUnread(); }, {passive:true});
+    if(pill) pill.addEventListener('click', ()=>{
+      if(wrap) wrap.scrollTo({top: wrap.scrollHeight, behavior:'smooth'});
+      markChatRead(); updateChatUnread();
+    });
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) updateChatUnread(); });
+  })();
+
   // Modul hali yuklanmagan bo'lsa ham xato bermasin — main script birinchi
   // ishga tushgani uchun bu funksiyani shu yerda oldindan e'lon qilamiz,
   // module script keyin kelib uni chaqiradi.
   window.__kanjiChatOnMessages = function(msgs){
     lastChatMsgs = Array.isArray(msgs) ? msgs : [];
     renderChatMessages();
+    updateChatUnread();
   };
   // Google avatar elementi (rasm yuklanmasa — ism bosh harfi)
   function fillAvatar(box, extraClass){
@@ -13499,7 +13749,7 @@
     list.innerHTML = bans.length ? bans.map((b,i)=>`<div class="chat-ban-row"><span>${String(b.email).replace(/[<>&]/g,'')} — ${b.type === 'ban' ? 'ban' : 'mute'}</span><button data-unblock="${i}">Ochish</button></div>`).join('') : '<div class="chat-ban-row"><span>Bloklanganlar yo\'q</span></div>';
     list._bans = bans;
   }
-  window.__kanjiChatRefresh = function(){ renderChatMessages(); renderBans(); applyChatBlock(); };
+  window.__kanjiChatRefresh = function(){ renderChatMessages(); renderBans(); applyChatBlock(); updateChatUnread(); };
   // Menyu uchun chiziqli (stroke) ikonkalar — emoji o'rniga
   const MENU_ICONS = {
     edit:  '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
@@ -13693,6 +13943,9 @@
     if(fabBtn) fabBtn.classList.add('in-use');
     const barBtn = document.getElementById('chatBarBtn'); if(barBtn) barBtn.classList.add('in-use');
     lockPageScroll();
+    // Chat ochilganda eng pastga tushamiz va barcha xabarlar o'qilgan hisoblanadi
+    const mw = document.getElementById('chatMessages'); if(mw) mw.scrollTop = mw.scrollHeight;
+    markChatRead(); updateChatUnread();
     // Klaviatura oyna ochilishi bilan birga chiqmaydi — faqat yozish maydoniga bosilganda ochiladi
   }
   function closeChatPanel(){
@@ -13704,6 +13957,7 @@
     if(fabBtn) fabBtn.classList.remove('in-use');
     const barBtn = document.getElementById('chatBarBtn'); if(barBtn) barBtn.classList.remove('in-use');
     unlockPageScroll();
+    updateChatUnread();
   }
   // ---------- NICKNAME MODAL (zamonaviy oyna, prompt() o'rniga) ----------
   function openNicknameModal(){
@@ -15979,9 +16233,13 @@
     }
     showTab('learn');
     updateCounts();
-    const MIN_SPLASH_MS = 2400;
-    const wait = Math.max(0, MIN_SPLASH_MS - (Date.now() - splashStart));
-    setTimeout(showStartButton, wait);
+    // "Boshlash" tugmasi vaqtga qarab emas, HAQIQIY yuklanish tugagandagina chiqadi
+    if(window.__splashLoader){
+      window.__splashLoader.done('state');
+      window.__splashLoader.whenDone(showStartButton);
+    } else {
+      setTimeout(showStartButton, 2400);
+    }
   })();
 
 })();
