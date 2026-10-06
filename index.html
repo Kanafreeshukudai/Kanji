@@ -133,7 +133,7 @@
   html.perf .ai-assist-btn.in-use .ai-star-big, html.perf .ai-assist-btn.in-use .ai-star-small,
   html.perf .ai-assist-panel.open .ai-star-big-svg, html.perf .ai-assist-panel.open .ai-star-small-svg,
   html.perf .ai-assist-btn.in-use .ai-star-big-svg, html.perf .ai-assist-btn.in-use .ai-star-small-svg,
-  html.perf .splash-artwork, html.perf .splash-start-btn{
+  html.perf .splash-artwork, html.perf .splash-start-btn, html.perf .splash-music-disc::after{
     animation:none !important;
   }
   /* faqat blur bilan yumshatilgan "nur" qatlamlari yashiriladi (filtersiz qattiq shaklga aylanib qolmasligi uchun) */
@@ -1146,12 +1146,10 @@
   /* Ism tugmasi: bosiladi -> akkaunt kartasi ochiladi */
   .auth-dropdown button.auth-name{
     cursor:pointer; font-family:'Shippori Mincho',serif;
-    border-color:rgba(147,177,127,0.75);
-    box-shadow:0 8px 18px -8px rgba(0,0,0,0.9), 0 0 12px rgba(147,177,127,0.18);
   }
   .auth-dropdown button.auth-name::after{
     content:""; flex:none; width:6px; height:6px; margin-left:2px;
-    border-right:2px solid var(--moss-soft); border-bottom:2px solid var(--moss-soft);
+    border-right:2px solid #fff; border-bottom:2px solid #fff;
     transform:rotate(-45deg);
   }
   .auth-dropdown button.auth-name:active{ transform:scale(0.96); }
@@ -4216,7 +4214,7 @@
     overflow:hidden;
     background:#000;
     border:2px solid #000;
-    box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 70px 14px rgba(217,60,52,0.32);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 70px calc(14px + var(--beat, 0) * 10px) rgba(217,60,52,calc(0.32 + var(--beat, 0) * 0.3));
     animation:splashArtworkPulse 1.05s ease-in-out infinite;
     animation-play-state:paused;
     will-change:transform;
@@ -4397,40 +4395,74 @@
     transition:opacity .5s ease .15s, transform .5s ease .15s;
   }
   .splash-music-wrap.show{opacity:1; transform:translateY(0);}
+  /* Zamonaviy "glass" kapsula: chapda aylana play/pause, o'rtada matn, o'ngda eqvalayzer */
   .splash-music-toggle{
-    width:42px;
-    height:42px;
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:11px;
+    height:46px;
+    padding:6px 18px 6px 6px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.16);
+    background:linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    backdrop-filter:blur(14px) saturate(140%);
+    box-shadow:0 10px 28px -10px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.18);
+    color:var(--ink);
+    font-family:'Zen Maru Gothic', sans-serif;
+    cursor:pointer;
+    transition:transform .2s ease, border-color .3s ease, box-shadow .3s ease, background .3s ease;
+    touch-action:manipulation;
+  }
+  @media (hover:hover){
+    .splash-music-toggle:hover{border-color:rgba(201,166,107,0.5); box-shadow:0 12px 30px -10px rgba(0,0,0,0.7), 0 0 22px -6px rgba(201,166,107,0.35), inset 0 1px 0 rgba(255,255,255,0.22);}
+  }
+  .splash-music-toggle:active{transform:scale(0.95) !important;}
+  .splash-music-disc{
+    position:relative;
+    flex:none;
+    width:34px; height:34px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--accent), var(--gold));
+    color:#fff8ef;
+    box-shadow:0 4px 14px rgba(217,105,79,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+    transition:background .3s ease, color .3s ease, box-shadow .3s ease;
+  }
+  .splash-music-disc::after{
+    content:""; position:absolute; inset:-1px; border-radius:50%;
+    border:1.5px solid rgba(201,166,107,0.55);
+    animation:splashMusicRing 1.8s ease-out infinite;
+    pointer-events:none;
+  }
+  @keyframes splashMusicRing{
+    0%{transform:scale(1); opacity:.7;}
+    100%{transform:scale(1.55); opacity:0;}
+  }
+  .splash-music-toggle svg{width:15px; height:15px; flex:none; display:block;}
+  .splash-music-toggle .icon-play{display:none; margin-left:1.5px;}
+  .splash-music-label{
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+    line-height:1.15; text-align:left;
+  }
+  .splash-music-title{font-size:13px; font-weight:800; letter-spacing:0.04em; color:var(--ink);}
+  .splash-music-state{font-size:10.5px; font-weight:500; color:var(--ink-soft); letter-spacing:0.02em;}
+  .splash-music-state::before{content:"Ijroda";}
+  .splash-music-eq{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    border-radius:999px;
-    border:1px solid rgba(124,154,107,0.5);
-    background:rgba(124,154,107,0.16);
-    color:var(--moss-soft);
-    cursor:pointer;
-    transition:background .25s ease, border-color .25s ease, color .25s ease;
-    touch-action:manipulation;
-  }
-  .splash-music-toggle:active{transform:scale(0.9) !important;}
-  .splash-music-toggle svg{width:17px; height:17px; flex:none;}
-  .splash-music-toggle .icon-play{display:none;}
-  .splash-music-wrap.paused .splash-music-toggle{background:rgba(124,154,107,0.06); border-color:rgba(124,154,107,0.22); color:var(--ink-soft);}
-  .splash-music-wrap.paused .splash-music-toggle .icon-pause{display:none;}
-  .splash-music-wrap.paused .splash-music-toggle .icon-play{display:block;}
-  .splash-music-eq{
-    margin-top:10px;
-    display:inline-flex;
-    align-items:flex-end;
-    justify-content:center;
-    gap:3px;
-    height:14px;
+    gap:2.5px;
+    height:16px;
+    margin-left:2px;
   }
   .splash-music-eq span{
-    width:3px;
+    width:2.5px;
     height:100%;
     border-radius:2px;
-    background:var(--moss-soft);
-    transform-origin:bottom;
+    background:linear-gradient(to top, var(--accent), var(--gold));
+    transform-origin:center;
     animation:splashMusicEq 0.9s ease-in-out infinite;
   }
   .splash-music-eq span:nth-child(1){animation-delay:0s;}
@@ -4441,6 +4473,15 @@
     0%,100%{transform:scaleY(0.25);}
     50%{transform:scaleY(1);}
   }
+  /* Pauza holati: disc shishasimon, ustunchalar to'xtaydi, matn "Pauza" bo'ladi */
+  .splash-music-wrap.paused .splash-music-toggle{border-color:rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);}
+  .splash-music-wrap.paused .splash-music-disc{
+    background:rgba(255,255,255,0.1); color:var(--ink-soft); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);
+  }
+  .splash-music-wrap.paused .splash-music-disc::after{animation:none; opacity:0;}
+  .splash-music-wrap.paused .icon-pause{display:none;}
+  .splash-music-wrap.paused .icon-play{display:block;}
+  .splash-music-wrap.paused .splash-music-state::before{content:"Pauza";}
   .splash-music-wrap.paused .splash-music-eq span{
     animation-play-state:paused;
     transform:scaleY(0.2);
@@ -4448,6 +4489,7 @@
   }
   @media (prefers-reduced-motion: reduce){
     .splash-music-eq span{animation:none !important; transform:scaleY(0.6) !important;}
+    .splash-music-disc::after{animation:none !important; opacity:0;}
   }
 
   /* ---------- NICKNAME MODAL ---------- */
@@ -7875,10 +7917,13 @@
     <audio id="splashPhonkAudio" src="song.m4a" preload="auto" loop playsinline></audio>
     <div class="splash-music-wrap" id="splashMusicWrap">
       <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
-        <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
-        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
+        <span class="splash-music-disc">
+          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
+          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
+        </span>
+        <span class="splash-music-label"><span class="splash-music-title">Mustang (Spirit)</span><span class="splash-music-state"></span></span>
+        <span class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
       </button>
-      <div class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     </div>
     <button class="auth-login-btn splash-login-btn" id="login-btn" type="button" style="display:none;">
       <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.3 27 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
@@ -15405,87 +15450,161 @@
     const artwork = document.getElementById('splashArtwork');
     const AudioCtor = window.AudioContext || window.webkitAudioContext;
     if(!audio || !artwork || !AudioCtor) return { start(){}, stop(){} };
+    // Harakatni kamaytirish yoqilgan bo'lsa rasm qimirlamaydi
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      return { start(){}, stop(){} };
+    }
 
-    let ctx = null, analyser = null, source = null, freqData = null;
-    let rafId = null;
-    let punch = 0;              // 0..1 — zarbadan keyin asta so'nadigan "yaqinlashish" kuchi
-    const energyHistory = [];   // so'nggi ~0.7s bas energiyasi (lokal o'rtachani bilish uchun)
-    let lastBeatTime = 0;
+    let ctx = null, source = null, lowpass = null, analyser = null, sink = null, timeData = null;
+    let ready = false, graphFailed = false, useFloat = false;
+    let rafId = null, lastT = 0;
+    let punch = 0;          // zarbadan keyin tez so'nadigan "ezilish" kuchi (0..1)
+    let level = 0;          // bas balandligiga qarab silliq o'zgaruvchi doimiy komponent (0..1)
+    let avg = 0;            // bas energiyasining qisqa o'rtachasi (~0.5s)
+    let peak = 0.02;        // bas energiyasining sekin so'nuvchi cho'qqisi (normallashtirish uchun)
+    let prevE = 0, lastBeat = 0, silentFrames = 0, fallback = false;
 
-    const MIN_BEAT_INTERVAL_MS = 220; // ketma-ket zarblar orasidagi eng kichik oraliq (juda tez-tez "titramasin")
-    const DECAY = 0.90;                // har kadrda "yaqinlashish"ning so'nish tezligi (uzoqlashish tuyg'usi)
-    const MAX_SCALE_DELTA = 0.06;      // eng kuchli zarbdagi maksimal kattalashuv (avvalgi pulsga yaqin)
-    const BEAT_RATIO = 1.28;           // instant energiya lokal o'rtachadan necha barobar oshsa — zarb hisoblanadi
-    const BEAT_FLOOR = 0.12;           // juda past ovozda (tishinlik) yolg'on zarb ushlab qolinmasligi uchun chegara
+    const MIN_BEAT_INTERVAL_MS = 230; // ketma-ket zarblar orasidagi eng kichik oraliq
+    const PUNCH_DECAY = 0.88;         // 60fps dagi har kadr uchun so'nish (kadr tezligiga qarab moslanadi)
+    const MAX_SCALE_DELTA = 0.085;    // eng kuchli zarbdagi maksimal kattalashuv
+    const BEAT_RATIO = 1.25;          // lahzalik energiya qisqa o'rtachadan necha barobar oshsa — zarb
+    const ENERGY_FLOOR = 0.012;       // bundan past (deyarli jimlik) bo'lsa zarb sanalmaydi
+    const SILENT_LIMIT = 0.0008;      // bundan past energiya — "tahlil ishlamayapti yoki jimlik"
 
     function ensureGraph(){
-      if(ctx) return true;
+      if(ready) return true;
+      if(graphFailed) return false;
       try{
         ctx = new AudioCtor();
         source = ctx.createMediaElementSource(audio);
+      }catch(e){
+        // Bu bosqichda xato bo'lsa audio element o'z holicha chalinaveradi
+        ctx = null; source = null; graphFailed = true;
+        return false;
+      }
+      try{
+        // Eshitiladigan yo'l: source -> destination (o'zgarishsiz).
+        // Tahlil yo'li: source -> past chastotali filtr (kick/bas) -> analyser (ovozsiz).
+        lowpass = ctx.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.value = 150;
+        lowpass.Q.value = 0.7;
         analyser = ctx.createAnalyser();
-        analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.55;
-        // Musiqa eshitilishda davom etishi uchun analyser orqali destination'ga ulanadi
-        source.connect(analyser);
-        analyser.connect(ctx.destination);
-        freqData = new Uint8Array(analyser.frequencyBinCount);
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0;
+        sink = ctx.createGain();
+        sink.gain.value = 0;
+        source.connect(ctx.destination);
+        source.connect(lowpass);
+        lowpass.connect(analyser);
+        analyser.connect(sink);
+        sink.connect(ctx.destination);
+        useFloat = typeof analyser.getFloatTimeDomainData === 'function';
+        timeData = useFloat ? new Float32Array(analyser.fftSize) : new Uint8Array(analyser.fftSize);
+        ready = true;
         return true;
       }catch(e){
-        // Masalan, brauzer AudioContext'ni cheklagan yoki boshqa sabab —
-        // bunday holda eski statik CSS puls animatsiyasi ishlashda davom etadi
-        ctx = null;
+        try{ source.connect(ctx.destination); }catch(_){}
+        graphFailed = true;
         return false;
       }
     }
 
-    function bassEnergy(){
-      analyser.getByteFrequencyData(freqData);
-      const nyquist = ctx.sampleRate / 2;
-      const binHz = nyquist / freqData.length;
-      // ~20–180Hz — kick/bass zarbalari asosan shu diapazonda seziladi
-      const loBin = Math.max(1, Math.floor(20 / binHz));
-      const hiBin = Math.min(freqData.length - 1, Math.ceil(180 / binHz));
-      let sum = 0, count = 0;
-      for(let i = loBin; i <= hiBin; i++){ sum += freqData[i]; count++; }
-      return count ? (sum / count) / 255 : 0;
+    // Filtrlangan (faqat bas) signalning haqiqiy amplitudasi — RMS (chiziqli shkala)
+    function bassRms(){
+      let sum = 0;
+      const n = timeData.length;
+      if(useFloat){
+        analyser.getFloatTimeDomainData(timeData);
+        for(let i = 0; i < n; i++){ const v = timeData[i]; sum += v * v; }
+      } else {
+        analyser.getByteTimeDomainData(timeData);
+        for(let i = 0; i < n; i++){ const v = (timeData[i] - 128) / 128; sum += v * v; }
+      }
+      return Math.sqrt(sum / n);
     }
 
-    function loop(){
+    // Tahlil ishlamasa (AudioContext uxlab qolgan, audio cheklangan va h.k.) rasm qotib
+    // qolmasligi uchun eski CSS "nafas olish" animatsiyasiga qaytamiz.
+    function enterFallback(){
+      if(fallback) return;
+      fallback = true;
+      artwork.style.transform = '';
+      artwork.style.removeProperty('--beat');
+      artwork.style.animation = '';
+    }
+    function exitFallback(){
+      if(!fallback) return;
+      fallback = false;
+      artwork.style.animation = 'none';
+    }
+
+    function loop(now){
       rafId = requestAnimationFrame(loop);
-      if(!analyser || audio.paused){ return; }
-      const e = bassEnergy();
-      energyHistory.push(e);
-      if(energyHistory.length > 43) energyHistory.shift();
-      let avg = 0;
-      for(let i = 0; i < energyHistory.length; i++) avg += energyHistory[i];
-      avg = energyHistory.length ? avg / energyHistory.length : 0;
+      const dt = Math.min(3, lastT ? (now - lastT) / 16.667 : 1);
+      lastT = now;
+      if(!ready || audio.paused) return;
+      if(ctx.state === 'suspended'){ ctx.resume().catch(()=>{}); }
 
-      const now = performance.now();
-      if(e > avg * BEAT_RATIO && e > BEAT_FLOOR && (now - lastBeatTime) > MIN_BEAT_INTERVAL_MS){
-        lastBeatTime = now;
-        punch = 1; // zarb aniqlandi — rasm shu zahoti "ezilib" yaqinlashadi
+      const e = bassRms();
+
+      // Jimlik / tahlil ishlamayotganini aniqlash
+      if(e < SILENT_LIMIT){
+        silentFrames++;
+        if(silentFrames > 60 && audio.currentTime > 0.5 && audio.volume > 0.3) enterFallback();
+      } else {
+        silentFrames = 0;
+        if(fallback) exitFallback();
       }
-      punch *= DECAY; // keyingi zarbgacha asta uzoqlashib, tinch holatga qaytadi
+      if(fallback) return;
 
-      const scale = 1 + punch * MAX_SCALE_DELTA;
-      artwork.style.transform = 'scale(' + scale.toFixed(4) + ')';
+      // Moslashuvchan o'lchamlar: cho'qqi sekin so'nadi, o'rtacha tez yangilanadi
+      peak = Math.max(0.01, e, peak * Math.pow(0.997, dt));
+      avg += (e - avg) * (1 - Math.pow(0.97, dt));
+
+      const rising = e > prevE;
+      prevE = e;
+      if(rising && e > avg * BEAT_RATIO && e > ENERGY_FLOOR && e > peak * 0.35 && (now - lastBeat) > MIN_BEAT_INTERVAL_MS){
+        lastBeat = now;
+        punch = Math.min(1, 0.55 + 0.45 * (e / peak)); // kuchli zarb — kuchliroq "ezilish"
+      }
+      punch *= Math.pow(PUNCH_DECAY, dt);
+
+      // Zarb aniqlanmay qolsa ham rasm bas balandligiga qarab silliq harakatlanadi
+      const n = Math.min(1, e / peak);
+      const target = n * n;
+      level += (target - level) * (1 - Math.pow(target > level ? 0.5 : 0.85, dt));
+
+      const drive = Math.max(punch, level * 0.5);
+      artwork.style.transform = 'scale(' + (1 + drive * MAX_SCALE_DELTA).toFixed(4) + ')';
+      artwork.style.setProperty('--beat', drive.toFixed(3)); // nur (glow) ham ritmga mos
+    }
+
+    // Brauzer/iOS audio kontekstni to'xtatib qo'ygan bo'lsa — teginishda qayta yoqamiz
+    document.addEventListener('pointerdown', ()=>{
+      if(ctx && ctx.state === 'suspended' && !audio.paused) ctx.resume().catch(()=>{});
+    }, {passive:true});
+
+    function resetState(){
+      punch = 0; level = 0; avg = 0; peak = 0.02; prevE = 0;
+      lastBeat = 0; silentFrames = 0; fallback = false; lastT = 0;
     }
 
     return {
       start(){
-        if(!ensureGraph()) return;
-        if(ctx.state === 'suspended') ctx.resume();
-        // Endi rasmni JS boshqaradi — eski statik CSS puls animatsiyasi o'chiriladi
+        if(!ensureGraph()) return; // tahlil imkonsiz bo'lsa — eski CSS puls animatsiyasi ishlayveradi
+        if(ctx.state === 'suspended') ctx.resume().catch(()=>{});
+        resetState();
+        // Endi rasmni JS boshqaradi — statik CSS puls animatsiyasi o'chiriladi
         artwork.style.animation = 'none';
-        if(!rafId) loop();
+        if(!rafId) rafId = requestAnimationFrame(loop);
       },
       stop(){
         if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
         artwork.style.transform = '';
         artwork.style.animation = '';
-        punch = 0;
-        energyHistory.length = 0;
+        artwork.style.removeProperty('--beat');
+        resetState();
       }
     };
   })();
