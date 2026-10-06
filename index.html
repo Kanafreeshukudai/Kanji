@@ -4206,10 +4206,46 @@
      Kanji animatsiyasi (qo'shiq turgan joy) tepasida turadi va qo'shiqqa
      "nafas olayotgandek" mos ravishda ozgina yaqinlashib-uzoqlashib turadi —
      musiqaning zarb tempiga mos, silliq va sezilarsiz masofada. */
-  .splash-artwork{
+  /* Rasm + uning ortidan ramka o'lchamida tarqaladigan qizil to'lqinlar (bas urilganda) */
+  .splash-artwork-wrap{
+    position:relative;
+    z-index:1;
+    flex:none;
     width:132px;
     height:132px;
     margin-bottom:20px;
+  }
+  .splash-artwork-waves{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+  }
+  .splash-wave{
+    position:absolute;
+    inset:0;
+    border-radius:26px;
+    border:2px solid rgba(240,72,62,0.9);
+    box-shadow:0 0 14px 1px rgba(217,60,52,0.55), inset 0 0 12px rgba(217,60,52,0.35);
+    opacity:0;
+    transform:scale(1);
+    will-change:transform, opacity;
+    animation:splashWaveOut 0.95s cubic-bezier(.16,.7,.3,1) forwards;
+  }
+  @keyframes splashWaveOut{
+    0%{ transform:scale(1);    opacity:var(--wa, 0.85); }
+    100%{ transform:scale(1.95); opacity:0; }
+  }
+  html.perf .splash-wave{ box-shadow:none; }
+  @media (prefers-reduced-motion: reduce){
+    .splash-wave{ display:none; }
+  }
+  .splash-artwork{
+    position:relative;
+    z-index:1;
+    width:132px;
+    height:132px;
+    margin-bottom:0;
     border-radius:26px;
     overflow:hidden;
     background:#000;
@@ -7897,8 +7933,11 @@
 <div class="splash-screen" id="splashScreen" aria-hidden="true">
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
   <div class="splash-content" id="splashContent">
-    <div class="splash-artwork" id="splashArtwork">
-      <img src="splash-art.jpg" alt="" draggable="false">
+    <div class="splash-artwork-wrap">
+      <div class="splash-artwork-waves" id="splashArtworkWaves" aria-hidden="true"></div>
+      <div class="splash-artwork" id="splashArtwork">
+        <img src="splash-art.jpg" alt="" draggable="false">
+      </div>
     </div>
     <div class="splash-kanji-stage">
       <span class="splash-kanji">山</span>
@@ -15448,6 +15487,7 @@
   const BeatSync = (function(){
     const audio = document.getElementById('splashPhonkAudio');
     const artwork = document.getElementById('splashArtwork');
+    const waves = document.getElementById('splashArtworkWaves');
     const AudioCtor = window.AudioContext || window.webkitAudioContext;
     if(!audio || !artwork || !AudioCtor) return { start(){}, stop(){} };
     // Harakatni kamaytirish yoqilgan bo'lsa rasm qimirlamaydi
@@ -15526,6 +15566,18 @@
 
     // Tahlil ishlamasa (AudioContext uxlab qolgan, audio cheklangan va h.k.) rasm qotib
     // qolmasligi uchun eski CSS "nafas olish" animatsiyasiga qaytamiz.
+    // Bas urilganda rasm ramkasi o'lchamida qizil to'lqin chiqaradi (tashqariga kengayib so'nadi)
+    const MAX_WAVES = 5;
+    function spawnWave(strength){
+      if(!waves) return;
+      while(waves.childElementCount >= MAX_WAVES) waves.removeChild(waves.firstChild);
+      const w = document.createElement('div');
+      w.className = 'splash-wave';
+      w.style.setProperty('--wa', (0.5 + 0.45 * strength).toFixed(2));
+      w.addEventListener('animationend', ()=>{ if(w.parentNode) w.parentNode.removeChild(w); }, {once:true});
+      waves.appendChild(w);
+    }
+
     function enterFallback(){
       if(fallback) return;
       fallback = true;
@@ -15567,6 +15619,7 @@
       if(rising && e > avg * BEAT_RATIO && e > ENERGY_FLOOR && e > peak * 0.35 && (now - lastBeat) > MIN_BEAT_INTERVAL_MS){
         lastBeat = now;
         punch = Math.min(1, 0.55 + 0.45 * (e / peak)); // kuchli zarb — kuchliroq "ezilish"
+        spawnWave(punch);                              // shu zarbda qizil to'lqin ham tarqaladi
       }
       punch *= Math.pow(PUNCH_DECAY, dt);
 
@@ -15604,6 +15657,7 @@
         artwork.style.transform = '';
         artwork.style.animation = '';
         artwork.style.removeProperty('--beat');
+        if(waves) waves.textContent = '';
         resetState();
       }
     };
