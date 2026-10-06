@@ -6788,21 +6788,27 @@
   .chat-mod-card .chat-menu-ico{width:18px; height:18px; flex:none; display:block; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
   .chat-menu-card button:not(.danger):not([data-a="x"]) .chat-menu-ico,
   .chat-mod-card button:not(.danger):not([data-m="x"]) .chat-menu-ico{color:#e8eaed;}
-  /* ---------- Chat reaksiyalari ---------- */
-  .chat-react-row{display:flex; flex-wrap:wrap; gap:4px; padding:0 2px; margin-top:1px;}
-  .chat-msg.mine .chat-react-row{justify-content:flex-end;}
+  /* ---------- Chat reaksiyalari (xabar ramkasi ichida, Telegram uslubi) ---------- */
+  .chat-bubble .chat-react-row{display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; white-space:normal; -webkit-user-select:none; user-select:none;}
   .chat-react-chip{
     display:inline-flex; align-items:center; gap:4px; margin:0;
-    padding:2px 8px; border-radius:999px;
-    border:1px solid var(--glass-border-soft); background:var(--glass-bg-strong);
-    color:var(--ink-soft); font-family:inherit;
-    font-size:calc(var(--chat-fs, 13.5px) * 0.9); line-height:1.35;
-    cursor:pointer; -webkit-tap-highlight-color:transparent;
-    transition:transform .12s ease, background-color .15s ease, border-color .15s ease;
+    padding:2px 8px 2px 6px; border-radius:999px;
+    border:1px solid transparent; background:rgba(255,255,255,0.10);
+    color:inherit; font-family:inherit; font-weight:600;
+    font-size:calc(var(--chat-fs, 13.5px) * 0.88); line-height:1.35;
+    cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;
+    transition:transform .12s ease, background-color .15s ease;
   }
-  .chat-react-chip b{font-size:0.82em; font-weight:700;}
-  .chat-react-chip.me{border-color:var(--accent-soft); background:rgba(255,160,70,0.20); color:var(--ink);}
+  .chat-react-chip b{font-size:0.86em; font-weight:700;}
+  .chat-msg.mine .chat-react-chip{background:rgba(255,255,255,0.22); color:#fff8ef;}
+  .chat-msg.mine .chat-react-chip.me{background:#fff8ef; color:#7a4a12;}
+  .chat-msg.theirs .chat-react-chip.me{background:rgba(255,160,70,0.30); border-color:var(--accent-soft);}
   .chat-react-chip:active{transform:scale(0.92);}
+  .chat-who-list{display:flex; flex-direction:column; gap:2px; max-height:46vh; overflow-y:auto; margin:2px 0;}
+  .chat-who-row{display:flex; align-items:center; gap:10px; padding:6px 4px; color:var(--ink); font-size:14px;}
+  .chat-who-row .chat-avatar{width:32px; height:32px;}
+  .chat-who-row span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chat-who-title{font-size:15px; font-weight:800; color:var(--ink); padding:2px 2px 8px; border-bottom:1px solid rgba(255,255,255,0.17);}
   .chat-menu-card .chat-react-pick-row{display:flex; gap:4px; padding:2px 0 8px; border-bottom:1px solid rgba(255,255,255,0.17);}
   .chat-menu-card .chat-react-pick-row button{
     flex:1 1 0; min-width:0; height:42px; padding:0; margin:0;
@@ -13379,8 +13385,7 @@
         ${avatar}
         <div class="chat-msg-body">
           <div class="chat-msg-nick">${esc(m.nick)}</div>
-          <div class="chat-bubble">${esc(m.text)}</div>
-          ${reactChipsHtml(m, i, myUid)}
+          <div class="chat-bubble">${esc(m.text)}${reactChipsHtml(m, i, myUid)}</div>
           <div class="chat-msg-time">${formatChatTime(m.time)}${m.edited?' · tahrirlangan':''}</div>
         </div>
       </div>`;
@@ -13407,6 +13412,49 @@
     const arr = (m.reactions && Array.isArray(m.reactions[key])) ? m.reactions[key] : [];
     const on = arr.indexOf(myUid) === -1;
     window.__kanjiChatReact(m.id, key, on).catch(()=>alert("Reaksiya qo'yib bo'lmadi. Internetni tekshiring."));
+  }
+  let chatChipLongFired = false;
+  function openReactorsSheet(m, key){
+    const uids = (m.reactions && Array.isArray(m.reactions[key])) ? m.reactions[key].slice() : [];
+    if(!uids.length) return;
+    const myUid = (typeof window.__kanjiCurrentUid === 'function') ? window.__kanjiCurrentUid() : null;
+    const def = CHAT_REACTIONS.find(r=>r[0]===key);
+    const info = {};
+    lastChatMsgs.forEach(x=>{
+      if(!x.uid) return;
+      if(!info[x.uid]) info[x.uid] = {nick:x.nick||'', photo:x.photo||''};
+      else if(!info[x.uid].photo && x.photo) info[x.uid].photo = x.photo;
+    });
+    const ov = document.createElement('div');
+    ov.className = 'chat-menu-overlay';
+    const card = document.createElement('div'); card.className = 'chat-menu-card';
+    const title = document.createElement('div'); title.className = 'chat-who-title';
+    title.textContent = (def ? def[1] : '') + '  ' + uids.length;
+    const list = document.createElement('div'); list.className = 'chat-who-list';
+    const close = document.createElement('button'); close.type = 'button'; close.dataset.a = 'x'; close.textContent = 'Yopish';
+    card.appendChild(title); card.appendChild(list); card.appendChild(close); ov.appendChild(card);
+    function paint(){
+      list.innerHTML = '';
+      uids.forEach(u=>{
+        const it = info[u] || {};
+        const name = (it.nick || 'Foydalanuvchi') + (u === myUid ? ' (siz)' : '');
+        const row = document.createElement('div'); row.className = 'chat-who-row';
+        const initial = (it.nick || '?').trim().charAt(0).toUpperCase() || '?';
+        const fb = ()=>{ const d=document.createElement('div'); d.className='chat-avatar chat-avatar-fallback'; d.textContent=initial; return d; };
+        let av;
+        if(it.photo){ av = document.createElement('img'); av.className='chat-avatar'; av.referrerPolicy='no-referrer'; av.alt=''; av.onerror=()=>{ av.replaceWith(fb()); }; av.src = it.photo; }
+        else av = fb();
+        const sp = document.createElement('span'); sp.textContent = name;
+        row.appendChild(av); row.appendChild(sp); list.appendChild(row);
+      });
+    }
+    paint();
+    const missing = uids.filter(u=>!info[u]);
+    if(missing.length && typeof window.__kanjiChatProfiles === 'function'){
+      window.__kanjiChatProfiles(missing).then(map=>{ Object.assign(info, map || {}); paint(); }).catch(()=>{});
+    }
+    ov.addEventListener('click', (e)=>{ if(e.target === ov || e.target.closest('button[data-a="x"]')) ov.remove(); });
+    document.body.appendChild(ov);
   }
   // ---------- MODERATSIYA UI (admin) va mute/ban holati ----------
   function myBlockActive(){
@@ -13529,7 +13577,20 @@
     }
     wrap.addEventListener('pointerdown', (e)=>{
       if(e.pointerType === 'mouse' && e.button !== 0) return;
-      if(e.target.closest('.chat-react-chip')) return;
+      chatChipLongFired = false;
+      const chip = e.target.closest('.chat-react-chip');
+      if(chip){
+        const cm = lastChatMsgs[+chip.dataset.i];
+        if(!cm) return;
+        cancel();
+        startX = e.clientX; startY = e.clientY;
+        timer = setTimeout(()=>{
+          timer = null; chatChipLongFired = true;
+          try{ if(navigator.vibrate) navigator.vibrate(18); }catch(_){}
+          openReactorsSheet(cm, chip.dataset.k);
+        }, 450);
+        return;
+      }
       const el = e.target.closest('.chat-msg');
       if(!el) return;
       const m = lastChatMsgs[+el.dataset.i];
@@ -13557,6 +13618,7 @@
     wrap.addEventListener('click', (e)=>{
       const chip = e.target.closest('.chat-react-chip');
       if(!chip) return;
+      if(chatChipLongFired){ chatChipLongFired = false; e.preventDefault(); return; }
       const m = lastChatMsgs[+chip.dataset.i];
       if(m) toggleChatReaction(m, chip.dataset.k);
     });
@@ -16978,6 +17040,14 @@
   window.__kanjiChatEdit = (id, text) =>
     updateDoc(doc(db, "chatMessages", id), { text: String(text).slice(0, 500), editedAt: serverTimestamp() });
   window.__kanjiChatDelete = (id) => deleteDoc(doc(db, "chatMessages", id));
+  // Reaksiya bosganlarning ismi/rasmi (xabarlarda topilmaganlar uchun chatProfiles'dan)
+  window.__kanjiChatProfiles = async (uids) => {
+    const out = {};
+    await Promise.all(uids.map((u) => getDoc(doc(db, "chatProfiles", u)).then((d) => {
+      if (d.exists()) out[u] = { nick: d.data().nick || "", photo: d.data().photo || "" };
+    }).catch(() => {})));
+    return out;
+  };
   // Reaksiya: chatMessages/{id}.reactions.{kalit} = [uid, uid, ...]
   // Kalitlar: like, love, laugh, wow, sad, fire, clap (qoidalar ham faqat shularni qabul qiladi)
   window.__kanjiChatReact = (id, key, on) => {
