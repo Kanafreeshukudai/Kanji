@@ -6809,13 +6809,27 @@
   .chat-who-row .chat-avatar{width:32px; height:32px;}
   .chat-who-row span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .chat-who-title{font-size:15px; font-weight:800; color:var(--ink); padding:2px 2px 8px; border-bottom:1px solid rgba(255,255,255,0.17);}
-  .chat-menu-card .chat-react-pick-row{display:flex; gap:4px; padding:2px 0 8px; border-bottom:1px solid rgba(255,255,255,0.17);}
-  .chat-menu-card .chat-react-pick-row button{
-    flex:1 1 0; min-width:0; height:42px; padding:0; margin:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:21px; line-height:1; border-radius:12px;
+  /* Menyu ustuni: tepada alohida reaksiya paneli (Telegram kabi), pastda amallar kartasi */
+  .chat-menu-stack{width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; margin-bottom:env(safe-area-inset-bottom);}
+  .chat-menu-stack .chat-menu-card{margin-bottom:0;}
+  .chat-react-bar{
+    display:flex; gap:2px; padding:6px; border-radius:999px; align-self:flex-start; max-width:100%;
+    background:linear-gradient(180deg, #0d0e10, #050506);
+    border:1px solid rgba(255,255,255,0.34);
+    box-shadow:0 18px 44px -14px rgba(0,0,0,0.7), 0 0 26px -12px rgba(255,255,255,0.26);
+    animation:reactBarIn .18s ease-out;
   }
-  .chat-menu-card .chat-react-pick-row button.me{border-color:var(--accent-soft); background:rgba(255,160,70,0.22);}
+  .chat-react-bar button{
+    flex:0 0 auto; width:42px; height:42px; padding:0; margin:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:23px; line-height:1; border-radius:50%;
+    border:1px solid transparent; background:transparent; color:var(--ink); cursor:pointer;
+    font-family:inherit; transition:transform .15s ease, background-color .15s ease;
+  }
+  .chat-react-bar button:active{transform:scale(1.18);}
+  .chat-react-bar button.me{border-color:var(--accent-soft); background:rgba(255,160,70,0.22);}
+  @keyframes reactBarIn{from{opacity:0; transform:translateY(8px) scale(.96);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion: reduce){ .chat-react-bar{animation:none;} }
   .chat-msg-nick{
     font-size:calc(var(--chat-fs, 13.5px) * 0.815);
     font-weight:700;
@@ -13523,19 +13537,23 @@
     const mine = !!myUid && m.uid === myUid;
     const targetIsAdmin = typeof window.__kanjiIsAdminEmail === 'function' && window.__kanjiIsAdminEmail(m.email);
     const acts = [];
-    if(iAmAdmin || mine) acts.push(['edit', MENU_ICONS.edit, 'Tahrirlash']);
-    if(iAmAdmin || mine) acts.push(['del', MENU_ICONS.trash, "O'chirish"]);
+    // Tahrirlash/o'chirish: oddiy foydalanuvchi faqat O'Z xabarini, admin (owner) esa hammasini
+    const canManage = iAmAdmin || mine;
+    if(canManage) acts.push(['edit', MENU_ICONS.edit, 'Tahrirlash']);
+    if(canManage) acts.push(['del', MENU_ICONS.trash, "O'chirish"]);
     if(iAmAdmin && !mine && !targetIsAdmin) acts.push(['mod', MENU_ICONS.mute, 'Mute / Ban']);
     const myRx = m.reactions || {};
-    const pickRow = '<div class="chat-react-pick-row">' + CHAT_REACTIONS.map(([k,e])=>{
-      const on = !!myUid && Array.isArray(myRx[k]) && myRx[k].indexOf(myUid) > -1;
+    // Reaksiya paneli — Mute/Ban va boshqa amallardan ALOHIDA, tepada turadi
+    const pickBar = (myUid && !myBlockActive()) ? '<div class="chat-react-bar">' + CHAT_REACTIONS.map(([k,e])=>{
+      const on = Array.isArray(myRx[k]) && myRx[k].indexOf(myUid) > -1;
       return `<button type="button" data-r="${k}" class="${on?'me':''}" aria-label="${e}">${e}</button>`;
-    }).join('') + '</div>';
+    }).join('') + '</div>' : '';
     const ov = document.createElement('div');
     ov.className = 'chat-menu-overlay';
-    ov.innerHTML = '<div class="chat-menu-card"><div class="chat-menu-head"></div>' + pickRow
+    ov.innerHTML = '<div class="chat-menu-stack">' + pickBar
+      + '<div class="chat-menu-card"><div class="chat-menu-head"></div>'
       + acts.map(a=>`<button data-a="${a[0]}" class="${a[0]==='del'?'danger':''}">${menuIcon(a[1])}<span>${a[2]}</span></button>`).join('')
-      + '<button data-a="x">Bekor qilish</button></div>';
+      + '<button data-a="x">Bekor qilish</button></div></div>';
     const head = ov.querySelector('.chat-menu-head');
     const initial = (m.nick || '?').trim().charAt(0).toUpperCase() || '?';
     const photo = m.photo || (mine && typeof window.__kanjiCurrentPhoto === 'function' ? window.__kanjiCurrentPhoto() : '');
@@ -13555,6 +13573,7 @@
       const b = e.target.closest('button[data-a]');
       if(!b) return;
       ov.remove();
+      if((b.dataset.a === 'edit' || b.dataset.a === 'del') && !canManage) return;
       if(b.dataset.a === 'edit'){
         const t = prompt('Xabarni tahrirlang:', m.text);
         if(t !== null && t.trim() && t.trim() !== m.text) window.__kanjiChatEdit(m.id, t.trim()).catch(()=>alert("Tahrirlab bo'lmadi."));
@@ -17050,12 +17069,19 @@
   };
   // Reaksiya: chatMessages/{id}.reactions.{kalit} = [uid, uid, ...]
   // Kalitlar: like, love, laugh, wow, sad, fire, clap (qoidalar ham faqat shularni qabul qiladi)
+  // Har bir foydalanuvchi bitta xabarga FAQAT 1 ta reaksiya qo'ya oladi:
+  //  - boshqa reaksiya bosilsa, eskisi avtomatik olib tashlanadi (bitta atomik yozuvda);
+  //  - o'sha reaksiya qayta bosilsa, u bekor bo'ladi.
+  const CHAT_REACTION_KEYS = ["like", "love", "laugh", "wow", "sad", "fire", "clap"];
   window.__kanjiChatReact = (id, key, on) => {
     const user = auth.currentUser;
     if (!user) return Promise.reject(new Error("not-logged-in"));
-    return updateDoc(doc(db, "chatMessages", id), {
-      ["reactions." + key]: on ? arrayUnion(user.uid) : arrayRemove(user.uid)
+    if (CHAT_REACTION_KEYS.indexOf(key) === -1) return Promise.reject(new Error("bad-key"));
+    const upd = {};
+    CHAT_REACTION_KEYS.forEach((k) => {
+      upd["reactions." + k] = (on && k === key) ? arrayUnion(user.uid) : arrayRemove(user.uid);
     });
+    return updateDoc(doc(db, "chatMessages", id), upd);
   };
   window.__kanjiChatClear = async () => {
     for (;;) {
