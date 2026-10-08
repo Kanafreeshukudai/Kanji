@@ -5311,11 +5311,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // Owner o'z holatini yozmaydi (index1 ro'yxatida ham, saytda ham ko'rinmaydi)
   const PRESENCE_OWNER_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
   async function beat(user, online){
-    if (user && user.email && PRESENCE_OWNER_EMAILS.includes(String(user.email).trim().toLowerCase())) {
-      // owner: faqat identifikatsiya, faollik yo'q
-      try { await setDoc(doc(db, "presence", user.uid), { uid: user.uid, nick: (user.displayName || user.email).toString().slice(0, 60), email: user.email, photoURL: user.photoURL || "" }, { merge: true }); } catch(e) {}
-      return;
-    }
     try{
       await setDoc(doc(db, "presence", user.uid), {
         uid: user.uid,

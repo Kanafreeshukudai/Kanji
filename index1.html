@@ -16950,18 +16950,6 @@
   }
 
   async function presenceBeat(user, online) {
-    if (isPresenceOwner(user && user.email)) {
-      // Owner ro'yxatda turadi, lekin faollik yozilmaydi
-      try {
-        await setDoc(presenceDocRef(user.uid), {
-          uid: user.uid,
-          nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
-          email: (user.email || "").toString().slice(0, 120),
-          photoURL: user.photoURL || ""
-        }, { merge: true });
-      } catch (e) {}
-      return;
-    }
     try {
       await setDoc(presenceDocRef(user.uid), {
         uid: user.uid,
@@ -17078,8 +17066,7 @@
         photoURL: data.photoURL || "",
         page: data.page || "kanji",
         lastSeen: data.lastSeen || null,
-        isOwner: isPresenceOwner(data.email),
-        online: !isPresenceOwner(data.email) && data.online !== false && fresh
+        online: data.online !== false && fresh
       };
     });
     // DUBLIKATLARNI BIRLASHTIRISH: bir xil email bilan bir nechta hujjat bo'lsa
@@ -17163,7 +17150,7 @@
       statusEl.className = "presence-status" + (item.online ? " online" : "");
       const PAGE_LABELS = { kanji: "Kanji da", lugat: "Lug'at da" };
       const pageLabel = PAGE_LABELS[item.page] || "";
-      statusEl.textContent = item.isOwner ? "" : (item.online
+      statusEl.textContent = (item.online
         ? ("Online" + (pageLabel ? " · " + pageLabel : ""))
         : "So'nggi faollik: " + presenceFormatLastSeen(item.lastSeen));
       info.appendChild(nameEl);
