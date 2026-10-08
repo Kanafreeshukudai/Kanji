@@ -7932,6 +7932,39 @@
     main button{ -webkit-transform:translateZ(0); transform:translateZ(0); }
   }
 </style>
+<style id="home-nav-style">
+  /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
+  #pageCurtain{
+    position:fixed; inset:0; background:#000;
+    z-index:2147483600; pointer-events:none;
+    opacity:1; animation:pageCurtainOpen .9s ease .05s forwards;
+  }
+  #pageCurtain.leaving{ pointer-events:auto; animation:pageCurtainClose .35s ease forwards; }
+  @keyframes pageCurtainOpen{ from{opacity:1;} to{opacity:0; visibility:hidden;} }
+  @keyframes pageCurtainClose{ from{opacity:0; visibility:visible;} to{opacity:1;} }
+
+  /* bosh sahifaga qaytish tugmasi (chapda, yuqorida) */
+  .home-back{
+    position:fixed;
+    top:calc(10px + env(safe-area-inset-top,0px));
+    left:12px;
+    z-index:2147483000;
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 13px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(20,22,26,0.72);
+    color:#ECE7DC;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:12px; font-weight:800; letter-spacing:0.02em;
+    text-decoration:none;
+    box-shadow:0 6px 18px -8px rgba(0,0,0,0.7);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .home-back:active{ transform:scale(0.95); }
+  .home-back:focus-visible{ outline:2px solid #E9C27D; outline-offset:2px; }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
@@ -17359,6 +17392,25 @@
     return u ? (u.displayName || u.email || "") : "";
   };
 
+</script>
+<div id="pageCurtain" aria-hidden="true"></div>
+<a class="home-back" id="homeBack" href="index.html" aria-label="Bosh sahifaga qaytish">&larr; Bosh sahifa</a>
+<script id="home-nav-script">
+  (function(){
+    var curtain = document.getElementById('pageCurtain');
+    var back = document.getElementById('homeBack');
+    if(back){
+      back.addEventListener('click', function(e){
+        e.preventDefault();
+        if(curtain) curtain.classList.add('leaving');
+        setTimeout(function(){ window.location.href = 'index.html'; }, 360);
+      });
+    }
+    // orqaga (bfcache) qaytilganda parda qolib ketmasin
+    window.addEventListener('pageshow', function(e){
+      if(e.persisted && curtain){ curtain.classList.remove('leaving'); curtain.style.animation = 'none'; curtain.style.opacity = '0'; }
+    });
+  })();
 </script>
 </body>
 </html>
