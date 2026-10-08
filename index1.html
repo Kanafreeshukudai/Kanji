@@ -8008,6 +8008,14 @@
     0%,100%{ opacity:.78; transform:scale(1); }
     50%{ opacity:1; transform:scale(1.025); }
   }
+
+  /* markazda so'z: "Kanji" / "Lug'at" — sayt sarlavhasi shriftida */
+  #pageCurtain .pc-glyph.pc-word{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:34px; font-weight:900; letter-spacing:0.05em;
+    color:#ECE7DC;
+    text-shadow:0 0 16px rgba(217,105,79,0.18);
+  }
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
@@ -17488,7 +17496,7 @@
   };
 
 </script>
-<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph">漢</div><div class="pc-bar"><i></i></div><div class="pc-cap">Yuklanmoqda</div></div></div>
+<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word">Kanji</div><div class="pc-bar"><i></i></div><div class="pc-cap">Yuklanmoqda</div></div></div>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
