@@ -828,6 +828,37 @@
   .login-group .login-btn svg{ width:16px; height:16px; }
   .login-group .fb-btn{ background:#1877F2; color:#fff; border-color:rgba(255,255,255,0.25); }
   .login-group .fb-btn:active{ transform:scale(0.96); }
+
+  /* ---------- Telefon orqali kirish ---------- */
+  .login-group .phone-btn{ background:#2E7D4F; color:#fff; border-color:rgba(255,255,255,0.25); }
+  .login-group .phone-btn:active{ transform:scale(0.96); }
+  .phone-modal{ position:fixed; inset:0; z-index:2147483500; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .phone-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.7); }
+  .phone-card{
+    position:relative; width:100%; max-width:320px;
+    padding:22px 20px 20px; border-radius:20px;
+    background:#16181C; border:1px solid rgba(255,255,255,0.14);
+    box-shadow:0 20px 50px -10px rgba(0,0,0,0.8);
+    color:#ECE7DC; text-align:left;
+  }
+  .phone-close{ position:absolute; top:8px; right:10px; background:none; border:none; color:#9BA1A6; font-size:24px; cursor:pointer; line-height:1; }
+  .phone-title{ font-size:17px; font-weight:900; margin-bottom:14px; text-align:center; }
+  .phone-step{ display:flex; flex-direction:column; gap:10px; }
+  .phone-step[hidden]{ display:none !important; }
+  .phone-label{ display:flex; flex-direction:column; gap:5px; font-size:12px; font-weight:700; color:#9BA1A6; }
+  .phone-input{
+    padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.18);
+    background:#0E1014; color:#ECE7DC; font-family:inherit; font-size:15px; outline:none;
+  }
+  .phone-input:focus{ border-color:#E9C27D; }
+  .phone-code{ letter-spacing:0.3em; text-align:center; font-size:18px; }
+  .phone-hint{ font-size:12px; color:#9BA1A6; text-align:center; }
+  .phone-err{ min-height:16px; font-size:12px; color:#ff8a80; }
+  .phone-submit{
+    padding:11px; border-radius:999px; border:none; cursor:pointer;
+    background:#E9C27D; color:#1d1209; font-family:inherit; font-size:14px; font-weight:800;
+  }
+  .phone-submit:disabled{ opacity:.6; cursor:wait; }
 </style>
 </head>
 <body>
@@ -869,9 +900,9 @@
       </svg>
         Google
       </button>
-      <button class="login-btn fb-btn" id="fbLoginBtn" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v2.9h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>
-        Facebook
+      <button class="login-btn phone-btn" id="phoneBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+        Telefon
       </button>
     </div>
 
@@ -1442,7 +1473,8 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
-    getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+    RecaptchaVerifier, signInWithPhoneNumber, updateProfile
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
   // Asosiy sahifa (index.html) bilan bir xil loyiha. Auth holati bir xil
@@ -1465,8 +1497,19 @@
 
   const loginBtn  = document.getElementById("loginBtn");
   const loginGroup = document.getElementById("loginGroup");
-  const fbBtn    = document.getElementById("fbLoginBtn");
-  const fbProvider = new FacebookAuthProvider();
+  const phoneBtn = document.getElementById("phoneBtn");
+  const phoneModal = document.getElementById("phoneModal");
+  const phoneStep1 = document.getElementById("phoneStep1");
+  const phoneStep2 = document.getElementById("phoneStep2");
+  const phoneName = document.getElementById("phoneName");
+  const phoneNumber = document.getElementById("phoneNumber");
+  const phoneCode = document.getElementById("phoneCode");
+  const phoneErr1 = document.getElementById("phoneErr1");
+  const phoneErr2 = document.getElementById("phoneErr2");
+  const phoneSentTo = document.getElementById("phoneSentTo");
+  const phoneSend = document.getElementById("phoneSend");
+  const phoneVerify = document.getElementById("phoneVerify");
+  let recaptcha = null, confirmation = null, pendingName = "";
   const userLine  = document.getElementById("userLine");
   const userName  = document.getElementById("userName");
   const userEmail = document.getElementById("userEmail");
@@ -1506,12 +1549,73 @@
     });
   });
 
-  fbBtn.addEventListener("click", () => {
-    signInWithPopup(auth, fbProvider).catch((err) => {
-      console.error("Facebook kirishda xatolik:", err.message);
-      menuHint.textContent = "Facebook bilan kirishda xatolik. Qayta urinib ko'ring.";
-    });
+  // ---------- Telefon orqali kirish (SMS kod) ----------
+  const PHONE_ERRORS = {
+    "auth/invalid-phone-number": "Telefon raqami noto'g'ri. +998 bilan boshlang.",
+    "auth/missing-phone-number": "Telefon raqamini kiriting.",
+    "auth/too-many-requests": "Juda ko'p urinish. Keyinroq qayta urinib ko'ring.",
+    "auth/invalid-verification-code": "SMS kod noto'g'ri.",
+    "auth/code-expired": "Kod muddati tugagan. Qayta kod yuboring.",
+    "auth/missing-verification-code": "SMS kodni kiriting.",
+    "auth/captcha-check-failed": "Xavfsizlik tekshiruvi o'tmadi. Sahifani yangilab qayta urinib ko'ring.",
+    "auth/operation-not-allowed": "Telefon orqali kirish yoqilmagan (Firebase sozlamasi).",
+    "auth/quota-exceeded": "SMS limiti tugagan. Keyinroq urinib ko'ring."
+  };
+  function phoneErrText(e){ return PHONE_ERRORS[e && e.code] || ("Xatolik: " + ((e && e.message) || "noma'lum")); }
+  function getRecaptcha(){
+    if(!recaptcha){ recaptcha = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" }); }
+    return recaptcha;
+  }
+  function openPhone(){
+    phoneModal.hidden = false;
+    phoneStep1.hidden = false; phoneStep2.hidden = true;
+    phoneErr1.textContent = ""; phoneErr2.textContent = "";
+    setTimeout(() => phoneName.focus(), 50);
+  }
+  function closePhone(){ phoneModal.hidden = true; }
+  phoneBtn.addEventListener("click", openPhone);
+  document.getElementById("phoneClose").addEventListener("click", closePhone);
+  document.getElementById("phoneBackdrop").addEventListener("click", closePhone);
+
+  phoneStep1.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = phoneName.value.trim();
+    const num = phoneNumber.value.replace(/[\s-]/g, "");
+    phoneErr1.textContent = "";
+    if(!name){ phoneErr1.textContent = "Ismingizni kiriting."; return; }
+    if(!/^\+\d{9,15}$/.test(num)){ phoneErr1.textContent = "Raqamni +998 bilan to'liq kiriting."; return; }
+    phoneSend.disabled = true;
+    signInWithPhoneNumber(auth, num, getRecaptcha()).then((cr) => {
+      confirmation = cr;
+      pendingName = name;
+      phoneSentTo.textContent = num + " raqamiga kod yuborildi";
+      phoneStep1.hidden = true; phoneStep2.hidden = false;
+      setTimeout(() => phoneCode.focus(), 50);
+    }).catch((err) => {
+      phoneErr1.textContent = phoneErrText(err);
+      // reCAPTCHA buzilgan bo'lsa, keyingi urinish uchun qayta yaratamiz
+      try{ if(recaptcha){ recaptcha.clear(); } }catch(_){}
+      recaptcha = null;
+    }).finally(() => { phoneSend.disabled = false; });
   });
+
+  phoneStep2.addEventListener("submit", (e) => {
+    e.preventDefault();
+    phoneErr2.textContent = "";
+    const code = phoneCode.value.trim();
+    if(!confirmation){ phoneErr2.textContent = "Avval kod yuboring."; return; }
+    phoneVerify.disabled = true;
+    confirmation.confirm(code).then((res) => {
+      // chatda ko'rinadigan ism: kiritilgan ismni saqlaymiz
+      return updateProfile(res.user, { displayName: pendingName }).catch(() => {}).then(() => {
+        userName.textContent = pendingName;
+        closePhone();
+      });
+    }).catch((err) => {
+      phoneErr2.textContent = phoneErrText(err);
+    }).finally(() => { phoneVerify.disabled = false; });
+  });
+
   logoutBtn.addEventListener("click", () => { signOut(auth).catch(() => {}); });
 
   setSectionsEnabled(false);
@@ -1520,7 +1624,7 @@
     if (window.__splashLoader) window.__splashLoader.done("auth");
     if (user) {
       userName.textContent = user.displayName || "Foydalanuvchi";
-      userEmail.textContent = user.email || "";
+      userEmail.textContent = user.email || user.phoneNumber || "";
       if (user.photoURL) {
         avatarImg.src = user.photoURL;
         avatarImg.hidden = false;
@@ -1539,5 +1643,31 @@
     refreshMenu();
   });
 </script>
+<div id="recaptcha-container"></div>
+<div class="phone-modal" id="phoneModal" hidden>
+  <div class="phone-backdrop" id="phoneBackdrop"></div>
+  <div class="phone-card" role="dialog" aria-modal="true" aria-labelledby="phoneTitle">
+    <button class="phone-close" id="phoneClose" type="button" aria-label="Yopish">&times;</button>
+    <div class="phone-title" id="phoneTitle">Telefon orqali kirish</div>
+    <form class="phone-step" id="phoneStep1" novalidate>
+      <label class="phone-label">Ismingiz (chatda ko'rinadi)
+        <input class="phone-input" id="phoneName" type="text" maxlength="40" placeholder="Masalan: Ali" autocomplete="name">
+      </label>
+      <label class="phone-label">Telefon raqam
+        <input class="phone-input" id="phoneNumber" type="tel" value="+998" autocomplete="tel" inputmode="tel">
+      </label>
+      <div class="phone-err" id="phoneErr1"></div>
+      <button class="phone-submit" id="phoneSend" type="submit">Kod yuborish</button>
+    </form>
+    <form class="phone-step" id="phoneStep2" novalidate hidden>
+      <div class="phone-hint" id="phoneSentTo"></div>
+      <label class="phone-label">SMS kod
+        <input class="phone-input phone-code" id="phoneCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
+      </label>
+      <div class="phone-err" id="phoneErr2"></div>
+      <button class="phone-submit" id="phoneVerify" type="submit">Tasdiqlash</button>
+    </form>
+  </div>
+</div>
 </body>
 </html>
