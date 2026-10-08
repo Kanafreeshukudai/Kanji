@@ -242,13 +242,19 @@
     position:relative;
     margin-top:30px;
     width:var(--bar-w);
-    height:30px;
+    height:18px;
     border-radius:999px;
     background:linear-gradient(180deg, #f6f3ec, #d8d2c4);
     border:1px solid rgba(255,255,255,0.7);
     box-shadow:inset 0 2px 5px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.35), 0 10px 26px -12px rgba(0,0,0,0.75);
     overflow:hidden;
-    transition:opacity .45s ease, transform .45s ease, box-shadow .45s ease;
+    transition:opacity .5s ease, visibility .5s ease, transform .5s ease, box-shadow .5s ease;
+    /* paydo bo'lish: fade bilan (backwards — yakunlangach class bilan boshqariladi) */
+    animation:splashBarIn .6s ease backwards;
+  }
+  @keyframes splashBarIn{
+    from{ opacity:0; transform:translateY(-4px) scale(0.97); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
   }
   .splash-bar-track.splash-bar-fade{opacity:0; transform:translateY(-4px) scale(0.97); pointer-events:none;}
   .splash-bar-track.is-done{box-shadow:inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.4), 0 0 24px rgba(201,166,107,0.5);}
@@ -256,8 +262,8 @@
     position:absolute; inset:0; z-index:2;
     display:flex; align-items:center; justify-content:center;
     font-family:'Zen Maru Gothic', sans-serif;
-    font-size:12px; font-weight:800; letter-spacing:0.06em;
-    white-space:nowrap; font-variant-numeric:tabular-nums;
+    font-size:10px; font-weight:800; letter-spacing:0.06em;
+    white-space:nowrap; font-variant-numeric:tabular-nums; line-height:1;
     user-select:none; pointer-events:none;
   }
   .splash-bar-label.base{color:#000;}
@@ -764,8 +770,8 @@
   .splash-artwork{ width:124px; height:124px; border-radius:24px; }
 
   /* yuklash chizig'i 100% bo'lgach yig'iladi — musiqa va tugmalar yuqoriga ko'tariladi */
-  .splash-bar-track{ margin-top:12px; max-height:40px; overflow:hidden;
-    transition:max-height .6s cubic-bezier(.4,0,.2,1), margin .6s cubic-bezier(.4,0,.2,1), opacity .4s ease, border-width .6s ease; }
+  .splash-bar-track{ margin-top:12px; max-height:18px; height:18px; overflow:hidden;
+    transition:max-height .6s cubic-bezier(.4,0,.2,1), margin .6s cubic-bezier(.4,0,.2,1), opacity .5s ease, visibility .5s ease, border-width .6s ease; }
   .splash-bar-track.collapsed{ max-height:0; margin-top:0; opacity:0; border-width:0; pointer-events:none; }
 
   /* Google bilan kirgan foydalanuvchi kartochkasi */
@@ -832,7 +838,7 @@
   /* ---------- INDEX v10: hamma kontent sahifa markazida; yuklash chizig'i tugagach joyi bo'sh qoladi ---------- */
   body{ align-items:center; justify-content:center; padding-top:env(safe-area-inset-top,0px); }
   .splash-content{ margin:0 auto; }
-  .splash-bar-track.faded{ opacity:0; visibility:hidden; pointer-events:none; }
+  .splash-bar-track.faded{ opacity:0; visibility:hidden; pointer-events:none; transition:opacity .5s ease, visibility .5s ease; }
 
   /* ---------- Google + Facebook: bitta kirish guruhi (o'zgarmas joyda) ---------- */
   .login-group{ display:flex; gap:10px; justify-content:center; align-items:center; }
@@ -1344,6 +1350,14 @@
     color:#ECE7DC !important;
     text-shadow:0 1px 2px rgba(0,0,0,0.75);
   }
+  /* Sarlavha va izoh musiqa maydoniga nisbatan kattaroq ko'rinadi (oxirgi qoida — boshqa breakpointlarni bekor qiladi) */
+  .splash-content .splash-title{
+    font-size:clamp(28px, 7vw, 38px);
+    line-height:1.15;
+  }
+  .splash-content .splash-sub{
+    font-size:clamp(11px, 2.9vw, 14px);
+  }
 </style>
 </head>
 <body>
@@ -1355,13 +1369,6 @@
         <img src="splash-art.jpg" alt="" draggable="false">
       </div>
     </div>
-    <div class="splash-title">Kanji va Lug'at</div>
-    <div class="splash-sub">Bo'limni tanlang</div>
-    <div class="splash-bar-track" id="splashBarTrack" role="progressbar" aria-label="Yuklanmoqda" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-      <span class="splash-bar-label base" id="splashBarLabelBase">Yuklanmoqda… 0%</span>
-      <div class="splash-bar-fill" id="splashBarFill"><span class="splash-bar-label top" id="splashBarLabelTop">Yuklanmoqda… 0%</span></div>
-    </div>
-
     <audio id="splashPhonkAudio" src="song.m4a" preload="auto" loop playsinline></audio>
     <div class="splash-music-wrap" id="splashMusicWrap">
       <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
@@ -1372,6 +1379,13 @@
         <span class="splash-music-label"><span class="splash-music-title">Mustang (Spirit)</span><span class="splash-music-state"></span></span>
         <span class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
       </button>
+    </div>
+    <div class="splash-title">Kanji va Lug'at</div>
+    <div class="splash-sub">Bo'limni tanlang</div>
+
+    <div class="splash-bar-track" id="splashBarTrack" role="progressbar" aria-label="Yuklanmoqda" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <span class="splash-bar-label base" id="splashBarLabelBase">Yuklanmoqda… 0%</span>
+      <div class="splash-bar-fill" id="splashBarFill"><span class="splash-bar-label top" id="splashBarLabelTop">Yuklanmoqda… 0%</span></div>
     </div>
 
     <div class="auth-slot" id="authSlot">
