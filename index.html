@@ -1280,6 +1280,46 @@
     50%{ box-shadow:0 0 18px rgba(139,124,246,0.7); }
   }
   :root{ --moss:#7C9A6B; --moss-soft:#93b17f; }
+
+  /* ---------- Kanji tugmasidagi AI logotip: Kanji ilovasidagi animatsiya bilan ---------- */
+  .kanji-ai-badge{ overflow:visible; }
+  .kanji-ai-badge .ai-star-svg{
+    position:absolute; left:50%; top:50%;
+    width:16px; height:16px; margin:-8px 0 0 -8px; overflow:visible;
+  }
+  .kanji-ai-badge svg.ai-star-svg{ display:block; }
+  .kanji-ai-badge .ai-orbit{ transform-box:view-box; transform-origin:15.5px 13.75px; will-change:transform; }
+  .kanji-ai-badge .ai-star{ transform-box:view-box; vector-effect:non-scaling-stroke; stroke-width:1.4px; fill:currentColor; fill-opacity:.14; }
+  .kanji-ai-badge .ai-star-big{ transform-origin:12px 9.5px; animation:aiStarBig 5.4s cubic-bezier(.65,0,.3,1) infinite; will-change:transform,opacity; }
+  .kanji-ai-badge .ai-star-small{ transform-origin:19px 18px; animation:aiStarSmall 5.4s cubic-bezier(.65,0,.3,1) infinite; will-change:transform; }
+  .kanji-ai-badge .ai-orbit{ animation:aiOrbit 5.4s cubic-bezier(.65,0,.3,1) infinite; }
+  .kanji-ai-badge .ai-star-big-svg{ z-index:2; animation:aiStarBigZ 5.4s step-end infinite; }
+  .kanji-ai-badge .ai-star-small-svg{ z-index:1; animation:aiStarSmallZ 5.4s step-end infinite; }
+@keyframes aiOrbit{
+    0%,8%    { transform:rotate(0deg); }
+    38%,58%  { transform:rotate(180deg); }
+    88%,100% { transform:rotate(360deg); }
+  }
+@keyframes aiStarBig{
+    0%,8%    { transform:rotate(0deg)    scale(1);   opacity:1; }
+    38%,58%  { transform:rotate(-90deg)  scale(.46); opacity:.7; }
+    88%,100% { transform:rotate(-180deg) scale(1);   opacity:1; }
+  }
+@keyframes aiStarBigZ{
+    0%  { z-index:2; }
+    23% { z-index:1; }
+    73% { z-index:2; }
+  }
+@keyframes aiStarSmall{
+    0%,8%    { transform:rotate(0deg)    scale(1); }
+    38%,58%  { transform:rotate(-90deg)  scale(2.17); }
+    88%,100% { transform:rotate(-180deg) scale(1); }
+  }
+@keyframes aiStarSmallZ{
+    0%  { z-index:1; }
+    23% { z-index:2; }
+    73% { z-index:1; }
+  }
 </style>
 </head>
 <body>
@@ -1341,7 +1381,7 @@
 
     <nav class="menu">
       <a class="menu-btn kanji kanji-dark locked" id="kanjiBtn" href="index1.html" aria-disabled="true">
-        <span class="kanji-ai-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg></span>
+        <span class="kanji-ai-badge" aria-hidden="true"><svg class="ai-star-svg ai-star-big-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="ai-orbit"><path class="ai-star ai-star-big" d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"></path></g></svg><svg class="ai-star-svg ai-star-small-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="ai-orbit"><path class="ai-star ai-star-small" d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"></path></g></svg></span>
         <span class="glyph-ink">漢</span><span class="kanji-label">Kanji</span>
       </a>
       <a class="menu-btn vocab locked" id="vocabBtn" href="index2.html" aria-disabled="true">
