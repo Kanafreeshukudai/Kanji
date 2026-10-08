@@ -1566,6 +1566,18 @@
     if(!recaptcha){ recaptcha = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" }); }
     return recaptcha;
   }
+  // xato bo'lsa: eski verifier'ni tozalab, konteynerni yangisi bilan almashtiramiz
+  // (bir konteynerga ikki marta render qilish "already been rendered" xatosini beradi)
+  function resetRecaptcha(){
+    try{ if(recaptcha){ recaptcha.clear(); } }catch(_){}
+    recaptcha = null;
+    const old = document.getElementById("recaptcha-container");
+    if(old){
+      const fresh = document.createElement("div");
+      fresh.id = "recaptcha-container";
+      old.replaceWith(fresh);
+    }
+  }
   function openPhone(){
     phoneModal.hidden = false;
     phoneStep1.hidden = false; phoneStep2.hidden = true;
@@ -1594,8 +1606,7 @@
     }).catch((err) => {
       phoneErr1.textContent = phoneErrText(err);
       // reCAPTCHA buzilgan bo'lsa, keyingi urinish uchun qayta yaratamiz
-      try{ if(recaptcha){ recaptcha.clear(); } }catch(_){}
-      recaptcha = null;
+      resetRecaptcha();
     }).finally(() => { phoneSend.disabled = false; });
   });
 
