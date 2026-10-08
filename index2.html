@@ -1559,13 +1559,107 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
   filter:drop-shadow(0 0 10px rgba(157,78,221,0.4));
 }
 
+
+  /* ---------- KIRISH PARDASI v2: iliq yorug'lik, nozik soyalar, Boshlash effekti ---------- */
+  #pageCurtain{
+    background:radial-gradient(ellipse at 50% 42%, #2b1b14 0%, #0d0a09 42%, #000 78%);
+    overflow:hidden;
+  }
+  #pageCurtain .pc-core{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:16px; }
+  #pageCurtain .pc-glyph{
+    font-size:64px;
+    color:#F3EDE2;
+    text-shadow:0 0 22px rgba(217,105,79,0.55), 0 0 6px rgba(233,194,125,0.35);
+    animation:pcPulse 1.8s ease-in-out infinite;
+  }
+  #pageCurtain .pc-bar{ width:150px; height:3px; background:rgba(255,255,255,0.10); box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset; }
+  #pageCurtain .pc-bar i{
+    background:linear-gradient(90deg, rgba(124,154,107,0), #7C9A6B 35%, #E9C27D 60%, #D9694F 85%, rgba(217,105,79,0));
+    box-shadow:0 0 10px rgba(233,194,125,0.5);
+    animation:pcSlide 1.3s cubic-bezier(.45,0,.55,1) infinite;
+  }
+  #pageCurtain .pc-cap{
+    font-family:'Zen Maru Gothic', sans-serif; font-size:10.5px; font-weight:700;
+    letter-spacing:0.32em; text-transform:uppercase; color:rgba(236,231,220,0.55);
+    margin-top:-4px;
+  }
+  /* Boshlash effekti: bosilgan nuqtadan (markazdan) iliq to'lqin yoyiladi */
+  #pageCurtain::after{
+    content:""; position:absolute; left:50%; top:50%;
+    width:0; height:0; border-radius:50%;
+    transform:translate(-50%,-50%); opacity:0; pointer-events:none;
+    background:radial-gradient(circle, rgba(240,214,175,0.65) 0%, rgba(217,105,79,0.32) 36%, rgba(217,105,79,0.10) 60%, transparent 74%);
+  }
+  #pageCurtain.burst::after{ animation:pcBurst 1.05s cubic-bezier(.16,.84,.44,1) forwards; }
+  @keyframes pcBurst{
+    0%{ width:0; height:0; opacity:.95; }
+    45%{ opacity:.6; }
+    100%{ width:200vmax; height:200vmax; opacity:0; }
+  }
+  #pageCurtain.done{ animation:pageCurtainOpen .75s ease forwards; pointer-events:none; }
+  @media (prefers-reduced-motion: reduce){
+    #pageCurtain .pc-glyph, #pageCurtain .pc-bar i{ animation:none; }
+    #pageCurtain.burst::after{ animation:none; }
+  }
+
+  /* ---------- KIRISH PARDASI v3: sayt dizayniga mos (ovozsiz, yumshoq) ---------- */
+  #pageCurtain{
+    background:radial-gradient(ellipse at 50% 45%, #1D2126 0%, #0b0d10 46%, #000 80%);
+  }
+  #pageCurtain .pc-core{ gap:14px; }
+  #pageCurtain .pc-glyph{
+    font-family:'Shippori Mincho', serif;
+    font-size:54px; font-weight:600; letter-spacing:0.02em;
+    color:#ECE7DC;
+    text-shadow:0 0 16px rgba(217,105,79,0.22);
+    animation:pcBreath 2.4s ease-in-out infinite;
+  }
+  #pageCurtain .pc-bar{
+    width:132px; height:2px; border-radius:2px;
+    background:rgba(236,231,220,0.08); box-shadow:none;
+  }
+  #pageCurtain .pc-bar i{
+    width:42%; border-radius:2px;
+    background:linear-gradient(90deg, rgba(124,154,107,0), #7C9A6B 40%, #C9A66B 75%, rgba(201,166,107,0));
+    box-shadow:none;
+    animation:pcSlide 1.6s cubic-bezier(.45,0,.55,1) infinite;
+  }
+  #pageCurtain .pc-cap{
+    font-family:'Zen Maru Gothic', sans-serif; font-size:10px; font-weight:700;
+    letter-spacing:0.28em; color:#9BA1A6; margin-top:0;
+  }
+  /* to'lqin: sayt palitrasidagi yumshoq iliq nur */
+  #pageCurtain::after{
+    background:radial-gradient(circle, rgba(236,231,220,0.30) 0%, rgba(217,105,79,0.16) 40%, rgba(217,105,79,0.05) 62%, transparent 74%);
+  }
+  @keyframes pcBreath{
+    0%,100%{ opacity:.78; transform:scale(1); }
+    50%{ opacity:1; transform:scale(1.025); }
+  }
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
   #pageCurtain{
     position:fixed; inset:0; background:#000;
     z-index:2147483600; pointer-events:none;
-    opacity:1; animation:pageCurtainOpen .9s ease .05s forwards;
+    opacity:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    pointer-events:auto;
+  }
+  /* yuklanish tugagach parda sekin ochiladi */
+  #pageCurtain.done{ animation:pageCurtainOpen .7s ease forwards; pointer-events:none; }
+  #pageCurtain .pc-glyph{
+    font-family:'Shippori Mincho', serif; font-size:56px; font-weight:600; line-height:1;
+    color:#ECE7DC; animation:pcPulse 1.6s ease-in-out infinite;
+  }
+  #pageCurtain .pc-bar{ position:relative; width:120px; height:3px; border-radius:3px; background:rgba(255,255,255,0.12); overflow:hidden; }
+  #pageCurtain .pc-bar i{
+    position:absolute; top:0; left:0; height:100%; width:40%;
+    border-radius:3px; background:linear-gradient(90deg, #7C9A6B, #8b7cf6);
+    animation:pcSlide 1.2s ease-in-out infinite;
+  }
+  @keyframes pcPulse{ 0%,100%{ opacity:.55; transform:scale(.97);} 50%{ opacity:1; transform:scale(1.03);} }
+  @keyframes pcSlide{ 0%{ transform:translateX(-100%);} 100%{ transform:translateX(300%);} }
+  @media (prefers-reduced-motion: reduce){ #pageCurtain .pc-glyph, #pageCurtain .pc-bar i{ animation:none; } }
   }
   #pageCurtain.leaving{ pointer-events:auto; animation:pageCurtainClose .35s ease forwards; }
   @keyframes pageCurtainOpen{ from{opacity:1;} to{opacity:0; visibility:hidden;} }
@@ -4873,7 +4967,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     </div>
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
 
-<div id="pageCurtain" aria-hidden="true"></div>
+<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph">語</div><div class="pc-bar"><i></i></div><div class="pc-cap">Yuklanmoqda</div></div></div>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
@@ -4914,6 +5008,22 @@ window.addEventListener('DOMContentLoaded', ()=>{
         going = false;
       }
     });
+  })();
+</script>
+<script id="page-load-script">
+  (function(){
+    var c = document.getElementById('pageCurtain');
+    if(!c) return;
+    var t0 = Date.now(), finished = false;
+    function finish(){
+      if(finished) return; finished = true;
+      c.classList.add('burst');                                 // iliq to'lqin markazdan yoyiladi
+      setTimeout(function(){ c.classList.add('done'); }, 520); // parda sekin ochiladi
+    }
+    function ready(){ setTimeout(finish, Math.max(0, 900 - (Date.now() - t0))); }
+    if(document.readyState === 'complete') ready();
+    else window.addEventListener('load', ready);
+    setTimeout(finish, 5000); // zaxira: hech qachon qotib qolmasin
   })();
 </script>
 </body>
