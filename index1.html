@@ -16950,6 +16950,17 @@
   }
 
   async function presenceBeat(user, online) {
+    if (isPresenceOwner(user && user.email)) {
+      try {
+        await setDoc(presenceDocRef(user.uid), {
+          uid: user.uid,
+          nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
+          email: (user.email || "").toString().slice(0, 120),
+          photoURL: user.photoURL || ""
+        }, { merge: true });
+      } catch (e) {}
+      return;
+    }
     try {
       await setDoc(presenceDocRef(user.uid), {
         uid: user.uid,
@@ -16968,17 +16979,11 @@
   function handlePresenceVisibility() {
     const user = auth.currentUser;
     if (!user) return;
-    if (document.visibilityState === "hidden") {
-      presenceBeat(user, false);
-    } else {
-      presenceBeat(user, true);
-    }
+    if (document.visibilityState !== "hidden") presenceBeat(user, true);
   }
 
   function handlePresenceUnload() {
-    const user = auth.currentUser;
-    if (!user) return;
-    presenceBeat(user, false);
+    // offline yozilmaydi: faollik muddati o'tishi bilan o'zi offline bo'ladi
   }
 
   function startPresenceHeartbeat(user) {
@@ -17066,7 +17071,8 @@
         photoURL: data.photoURL || "",
         page: data.page || "kanji",
         lastSeen: data.lastSeen || null,
-        online: data.online !== false && fresh
+        isOwner: isPresenceOwner(data.email),
+        online: !isPresenceOwner(data.email) && data.online !== false && fresh
       };
     });
     // DUBLIKATLARNI BIRLASHTIRISH: bir xil email bilan bir nechta hujjat bo'lsa
@@ -17150,7 +17156,7 @@
       statusEl.className = "presence-status" + (item.online ? " online" : "");
       const PAGE_LABELS = { kanji: "Kanji da", lugat: "Lug'at da" };
       const pageLabel = PAGE_LABELS[item.page] || "";
-      statusEl.textContent = (item.online
+      statusEl.textContent = item.isOwner ? "" : (item.online
         ? ("Online" + (pageLabel ? " · " + pageLabel : ""))
         : "So'nggi faollik: " + presenceFormatLastSeen(item.lastSeen));
       info.appendChild(nameEl);
