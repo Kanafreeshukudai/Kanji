@@ -1101,6 +1101,21 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
   top:40px;
   background:rgba(157,78,221,0.35);
 }
+/* ---------- MOCHI YO'QOLISH / PAYDO BO'LISH ----------
+   Flashcard'da uxlasa, Mochi asta shaffoflashib yo'qoladi; faqat "Mochi" tugmasi bosilganda qaytadi */
+@keyframes mochiFadeOut{from{opacity:1;} to{opacity:0;}}
+@keyframes mochiFadeIn{from{opacity:0;} to{opacity:1;}}
+.mochi-wrap.mochi-fade-out{animation:mochiFadeOut 2.5s ease-in-out forwards;}
+.mochi-wrap.mochi-fade-in{animation:mochiFadeIn .6s ease both;}
+body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{display:none !important;}
+.mochi-toggle-btn{
+  position:fixed; left:16px; bottom:16px; z-index:9998;
+  border:1px solid rgba(45,212,191,0.45); background:rgba(20,184,166,0.14); color:#2dd4bf;
+  border-radius:999px; padding:8px 16px; font-family:var(--font-body); font-weight:700;
+  font-size:12.5px; letter-spacing:.04em; cursor:pointer; transition:background .2s, color .2s;
+}
+.mochi-toggle-btn.on{background:rgba(45,212,191,0.28); color:#e6fffb;}
+
 /* ---------- MOCHI SLEEP: Flashcard'da uxlaydi ---------- */
 .mochi-body.sleep{
   background:radial-gradient(circle at 32% 28%, #d0c0e8 0%, #b0a0d0 35%, #9080b8 70%, #706098 100%);
@@ -1220,11 +1235,11 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
    MOCHI AI — Aqlli yordamchi uslublari
    ============================================================ */
 .mochi-bubble{
-  position:absolute;
+  position:fixed;
   bottom:86px;
   left:50%;
   transform:translateX(-50%) scale(0.85);
-  width:260px;
+  width:min(400px, calc(100vw - 32px));
   background:linear-gradient(145deg, rgba(20,24,30,0.98), rgba(12,14,18,0.98));
   border:1px solid rgba(157,78,221,0.4);
   border-radius:18px;
@@ -4275,12 +4290,16 @@ window.addEventListener('DOMContentLoaded', function(){
   function checkSleepState(){
     const viewFlash = document.getElementById('viewFlash');
     const isFlashActive = viewFlash && viewFlash.classList.contains('active');
-    const shouldSleep = isFlashActive && !dragging;
+    // Flashcard'dan chiqilsa, tugma bilan uyg'otilgan holat tugaydi
+    if(!isFlashActive) window.mochiAwakeOverride = false;
+    const shouldSleep = isFlashActive && !dragging && !window.mochiAwakeOverride;
 
     if(shouldSleep && !isSleeping){
       isSleeping = true;
       body.classList.add('sleep');
       startZzz();
+      // Uxlashga o'tganda asta yo'qolsin (faqat ko'rinib turgan bo'lsa)
+      if(window.mochiShown && window.mochiFadeOut) window.mochiFadeOut();
     } else if(!shouldSleep && isSleeping){
       isSleeping = false;
       body.classList.remove('sleep');
@@ -4311,6 +4330,27 @@ window.addEventListener('DOMContentLoaded', function(){
   function stopZzz(){
     if(zzzTimer){ clearInterval(zzzTimer); zzzTimer = null; }
     body.querySelectorAll('.mochi-zzz').forEach(z=>z.remove());
+  }
+
+  /* --- Chat oynasi ochiq bo'lganda Mochi uning ORTIGA o'tmaydi: oyna chegarasidan
+     tashqariga itarib chiqariladi va shu tomonga qaytadi --- */
+  const chatBubble = document.getElementById('mochiBubble');
+  function avoidChatWindow(){
+    if(!chatBubble || !chatBubble.classList.contains('show')) return;
+    const r = chatBubble.getBoundingClientRect();
+    const gap = 10;
+    const L = r.left - gap, R = r.right + gap, T = r.top - gap, B = r.bottom + gap;
+    const size = 72;
+    if(x + size <= L || x >= R || y + size <= T || y >= B) return; // ustida emas
+    const pushLeft = (x + size) - L;
+    const pushRight = R - x;
+    const pushUp = (y + size) - T;
+    const pushDown = B - y;
+    const min = Math.min(pushLeft, pushRight, pushUp, pushDown);
+    if(min === pushLeft){ x = L - size; vx = -Math.abs(vx) - 0.2; targetVx = -Math.abs(targetVx) - 0.2; }
+    else if(min === pushRight){ x = R; vx = Math.abs(vx) + 0.2; targetVx = Math.abs(targetVx) + 0.2; }
+    else if(min === pushUp){ y = T - size; vy = -Math.abs(vy) - 0.2; targetVy = -Math.abs(targetVy) - 0.2; }
+    else { y = B; vy = Math.abs(vy) + 0.2; targetVy = Math.abs(targetVy) + 0.2; }
   }
 
   function updateMochi(){
@@ -4345,6 +4385,7 @@ window.addEventListener('DOMContentLoaded', function(){
       if(y > maxY){ y = maxY; targetVy = -Math.abs(targetVy) * 0.8 - 0.1; }
     }
 
+    avoidChatWindow();
     mochi.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
     requestAnimationFrame(updateMochi);
   }
@@ -4522,9 +4563,9 @@ class MochiAI {
     this.greeted = false;
 
     // ============================================
-    // GROQ API KALIT (FAQAT SHAXSIY FOYDALANISH UCHUN!)
+    // AI BACKEND MANZILI: kalit saytda emas, serverda (Cloudflare Worker) saqlanadi
     // ============================================
-    this.GROQ_API_KEY = localStorage.getItem('mochi_groq_key') || '';
+    this.API_URL = 'https://mochi-ai.vestatvmistick.workers.dev/chat';
     this.askedForKey = false;
 
     this.setupSpeechRecognition();
@@ -4694,7 +4735,7 @@ class MochiAI {
     this.stopSpeaking();
 
     // API kalit mavjudligini tekshirish
-    const hasKey = !!(this.GROQ_API_KEY && this.GROQ_API_KEY.startsWith('gsk_'));
+    const hasKey = !!this.API_URL && !this.API_URL.includes('YOUR-WORKER');
 
     // Avval local javobni sinab ko'ramiz — tez va ishonchli
     const localReply = this.getLocalReply(text);
@@ -4706,18 +4747,6 @@ class MochiAI {
       } else {
         // API kalit yo'q — local javob + kalit so'rash
         reply = localReply || this.getDefaultLocalReply(text);
-        // Bir marta so'raymiz
-        if(!this.askedForKey){
-          this.askedForKey = true;
-          setTimeout(()=>{
-            const key = prompt("Groq API kalitini kiriting (gsk_...):\n\nKalitni https://console.groq.com saytidan olishingiz mumkin.\n\nLocal javoblar ishlashda davom etadi, lekin AI javoblari uchun kalit kerak.");
-            if(key && key.startsWith('gsk_')){
-              localStorage.setItem('mochi_groq_key', key);
-              this.GROQ_API_KEY = key;
-              this.addMessage("✅ API kalit saqlandi! Endi to'liq AI javoblarni olishingiz mumkin.", 'system');
-            }
-          }, 1200);
-        }
       }
 
       this.typing.classList.remove('show');
@@ -4834,18 +4863,10 @@ class MochiAI {
 
     let response;
     try{
-      response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      response = await fetch(this.API_URL, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "openai/gpt-oss-20b",
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 1024
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: messages })
       });
     }catch(networkErr){
       // CORS yoki network xatosi
@@ -5037,6 +5058,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       </div>
     </div>
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
+<button type="button" class="mochi-toggle-btn on" id="mochiToggleBtn">Mochi</button>
 
 <div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word">Lug'at</div><div class="pc-bar"><i></i></div><div class="pc-cap">Yuklanmoqda</div></div></div>
 <script id="home-nav-script">
@@ -5096,6 +5118,66 @@ window.addEventListener('DOMContentLoaded', ()=>{
     else window.addEventListener('load', ready);
     setTimeout(finish, 5000); // zaxira: hech qachon qotib qolmasin
   })();
+</script>
+<script>
+(function(){
+  const mochi = document.getElementById('mochi');
+  const btn = document.getElementById('mochiToggleBtn');
+  if(!mochi || !btn) return;
+  window.mochiShown = true;
+  window.mochiAwakeOverride = true;   // sahifa yuklanganda Mochi aktiv (uxlamaydi)
+  function setBtn(){ btn.classList.toggle('on', !!window.mochiShown); }
+  let hideTimer = null;
+  const chatWindow = document.getElementById('mochiBubble');
+  // Faqat ishlatilmagan holatda yo'qoladi: 20 soniya davomida hech qanday harakat bo'lmasa
+  function onIdle(){
+    if(chatWindow && chatWindow.classList.contains('show')){ armHide(); return; }
+    window.mochiAwakeOverride = false;
+    if(window.mochiShown) window.mochiFadeOut();
+  }
+  function armHide(){
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(onIdle, 20000);
+  }
+  // Har qanday harakat (bosish, yozish, sudrash) taymerni yangilaydi
+  ['pointerdown','keydown','input','touchstart'].forEach(function(ev){
+    document.addEventListener(ev, function(){ if(window.mochiShown) armHide(); }, true);
+  });
+  window.mochiFadeOut = function(){
+    window.mochiShown = false;
+    clearTimeout(hideTimer);
+    setBtn();
+    mochi.classList.remove('mochi-fade-in');
+    mochi.classList.add('mochi-fade-out');
+    setTimeout(function(){
+      if(!window.mochiShown){
+        document.body.classList.add('mochi-off');
+        mochi.classList.remove('mochi-fade-out');
+      }
+    }, 2500);
+  };
+  function showMochi(){
+    window.mochiShown = true;
+    window.mochiAwakeOverride = true;   // tugma bosilganda Mochi uyg'oq bo'ladi
+    armHide();
+    setBtn();
+    document.body.classList.remove('mochi-off');
+    mochi.classList.remove('mochi-fade-out');
+    mochi.classList.add('mochi-fade-in');
+    if(window.mochiUpdateState) window.mochiUpdateState();
+  }
+  btn.addEventListener('click', function(){
+    if(window.mochiShown){
+      window.mochiAwakeOverride = false;
+      window.mochiFadeOut();
+    } else {
+      showMochi();
+    }
+  });
+  setBtn();
+  // Yuklanganda Mochi aktiv; agar ishlatilmasa, 20 soniyadan keyin asta yo'qoladi
+  armHide();
+})();
 </script>
 </body>
 </html>
