@@ -237,10 +237,10 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 /* ---------- BILAMAN tugmasi va bo'limi ---------- */
 .know-btn{
   position:relative; z-index:1; margin-top:10px;
-  font-size:10px; font-weight:700; letter-spacing:.02em;
+  font-size:10.5px; font-weight:700; letter-spacing:.02em;
   padding:5px 11px; border-radius:999px; cursor:pointer;
-  border:1px solid rgba(95,155,91,0.4);
-  background:rgba(95,155,91,0.14); color:var(--green);
+  border:1px solid rgba(120,200,115,0.55);
+  background:rgba(95,155,91,0.22); color:#9be896;
   transition:transform .12s, background .15s;
 }
 .know-btn:active{transform:scale(.92);}
@@ -249,7 +249,7 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   background:transparent;
 }
 .card.known-card .know-btn{
-  border-color:rgba(142,163,179,0.4); background:rgba(142,163,179,0.14); color:var(--muted);
+  border-color:rgba(160,180,195,0.55); background:rgba(142,163,179,0.2); color:#c9d6d2;
 }
 .quiz-note{
   text-align:center; color:var(--muted); font-size:13px; margin:20px 0 4px;
@@ -324,14 +324,14 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 }
 .tag{
   position:relative; z-index:1;
-  font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  font-size:10px; letter-spacing:.14em; text-transform:uppercase;
   color:#2dd4bf; font-weight:700; margin-bottom:10px;
 }
 .uz-word{position:relative; z-index:1; font-size:17px; font-weight:700; color:var(--cream); line-height:1.25;}
-.uz-note{position:relative; z-index:1; font-size:11.5px; font-weight:400; color:var(--muted); line-height:1.3; margin-top:4px;}
+.uz-note{position:relative; z-index:1; font-size:12.5px; font-weight:500; color:#c9d6d2; line-height:1.35; margin-top:5px; text-shadow:0 0 6px rgba(0,0,0,0.8);}
 .kana{position:relative; z-index:1; font-family:var(--font-display); font-size:24px; font-weight:700; color:#2dd4bf;}
-.romaji{position:relative; z-index:1; font-size:12px; color:var(--muted); margin-top:6px; font-style:italic;}
-.hint{position:relative; z-index:1; font-size:11px; color:var(--muted); margin-top:10px;}
+.romaji{position:relative; z-index:1; font-size:12.5px; color:#d4dedb; margin-top:6px; font-style:italic; font-weight:500;}
+.hint{position:relative; z-index:1; font-size:12px; color:#d4dedb; margin-top:10px; font-weight:500;}
 
 /* ---------- QUIZ ---------- */
 .progress-row{display:flex; gap:6px; justify-content:center; margin:28px 0 10px; flex-wrap:wrap;}
@@ -598,20 +598,46 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
   border-top:4px solid currentColor; transition:transform .2s;
 }
 .dropdown-btn.active::after{transform:rotate(180deg);}
-.dropdown-panel{
-  display:none; position:absolute; top:calc(100% + 8px); left:0;
-  background:var(--panel); border:1px solid var(--border); border-radius:14px;
-  padding:10px; z-index:10;
-  box-shadow:0 8px 30px rgba(0,0,0,0.5);
-  flex-wrap:wrap; gap:6px; max-width:320px;
+/* Kanji saytidagidek: "Mavzular" tugmasi birinchi, undan keyin asosiy mavzular — hammasi
+   bir qatorda (to'lguncha). Ochilgan ro'yxat ramkasiz, pastga erkin yoyiladi. */
+.dropdown-wrap{display:contents;}
+.subnav > .dropdown-wrap > .dropdown-btn{order:1;}
+.subnav .sub-recent{
+  order:2;
+  border:1px solid rgba(20,184,166,0.4); background:rgba(20,184,166,0.1);
+  color:#2dd4bf; padding:8px 16px; border-radius:999px; font-family:var(--font-body);
+  font-weight:700; font-size:12.5px; cursor:pointer; transition:all .2s; letter-spacing:.04em;
 }
-.dropdown-wrap.open .dropdown-panel{display:flex; animation:dropIn .18s ease both;}
-@keyframes dropIn{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);}}
+.subnav .sub-recent.active{background:linear-gradient(135deg, rgba(45,212,191,0.25), rgba(13,148,136,0.2)); border-color:#2dd4bf; color:#e6fffb;}
+.subnav > div:not(.dropdown-wrap){order:3;}
+.dropdown-panel{
+  order:50; flex-basis:100%; width:100%;
+  display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px;
+  max-height:0; overflow:hidden; opacity:0; padding:0; margin:0;
+  background:none; border:none; box-shadow:none; border-radius:0;
+  transition:max-height .45s cubic-bezier(.4,0,.2,1), opacity .3s ease, padding .3s ease;
+}
+.dropdown-wrap.open .dropdown-panel{max-height:1400px; opacity:1; padding:12px 0 6px;}
+@keyframes dropIn{from{opacity:0; transform:translate(-14px,-14px) scale(.96);} to{opacity:1; transform:translate(0,0) scale(1);}}
+/* Mavzular diagonal bo'ylab yoyiladi: har bir tugma yuqori-chapdan pastga-o'ngga qarab
+   ketma-ket, diagonal yo'nalishda sirpanib joyiga keladi */
+@keyframes topicFan{
+  from{opacity:0; transform:translate(-26px,-26px) scale(.7);}
+  to{opacity:1; transform:translate(0,0) scale(1);}
+}
+.dropdown-wrap.open .dropdown-panel .sub-btn{
+  animation:topicFan .42s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay:calc(var(--d,0) * 45ms);
+}
+@media (prefers-reduced-motion: reduce){
+  .dropdown-panel{transition:none;}
+  .dropdown-wrap.open .dropdown-panel .sub-btn{animation:none;}
+}
 .dropdown-panel .sub-btn{
-  display:inline-block; width:auto; text-align:center; border-radius:999px; margin:0;
+  display:block; width:100%; text-align:center; border-radius:999px; margin:0;
   border:1px solid var(--border); background:transparent; color:var(--muted);
-  padding:7px 14px; font-family:var(--font-body); font-weight:700;
-  font-size:12px; cursor:pointer; transition:all .15s; white-space:nowrap;
+  padding:7px 4px; font-family:var(--font-body); font-weight:700;
+  font-size:11.5px; cursor:pointer; transition:all .15s; white-space:nowrap; overflow:hidden;
 }
 .dropdown-panel .sub-btn:hover{background:var(--gold-soft); color:#2dd4bf; border-color:#2dd4bf;}
 .dropdown-panel .sub-btn.active{background:var(--gold-soft); color:#2dd4bf; border-color:#2dd4bf;}
@@ -3200,29 +3226,38 @@ const SETS = [
   {key:'numbers', label:"Raqamlar", words:NUMBER_WORDS}
 ];
 
+const RECENT_TOPIC_COUNT = 2; // oxirgi shuncha mavzu asosiy qatorda ko'rinadi (kanjidagidek)
+
 function buildDaySubnav(container, activeKey, onSelect, panelEl, btnEl){
-  if(!panelEl) container.innerHTML = '';
-  if(panelEl) panelEl.innerHTML = '';
+  const wrap = panelEl.closest('.dropdown-wrap');
+  container.querySelectorAll('.sub-recent').forEach(b=>b.remove());
+  panelEl.innerHTML = '';
+  const recentKeys = SETS.slice(-RECENT_TOPIC_COUNT).map(x=>x.key);
+  let olderIdx = 0;
   SETS.forEach(s=>{
+    const isRecent = recentKeys.includes(s.key);
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'sub-btn' + (s.key === activeKey ? ' active' : '');
+    btn.className = 'sub-btn' + (isRecent ? ' sub-recent' : '') + (s.key === activeKey ? ' active' : '');
     btn.textContent = s.label;
+    btn.style.setProperty('--ord', SETS.indexOf(s) + 1);
+    if(!isRecent){
+      btn.style.setProperty('--d', Math.floor(olderIdx/4) + (olderIdx%4)); // diagonal tartib
+      olderIdx++;
+    }
     btn.addEventListener('click', ()=>{
       if(btn.classList.contains('active')) return;
-      const parent = panelEl || container;
-      [...parent.children].forEach(b=>b.classList.remove('active'));
+      container.querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      if(btnEl) btnEl.textContent = s.label;
-      if(panelEl){
-        const wrap = panelEl.closest('.dropdown-wrap');
-        if(wrap) wrap.classList.remove('open');
-        if(btnEl) btnEl.classList.remove('active');
+      if(btnEl){
+        btnEl.textContent = isRecent ? 'Mavzular' : s.label;
+        btnEl.classList.remove('active');
       }
+      if(wrap) wrap.classList.remove('open');
       onSelect(s.key);
     });
-    if(panelEl) panelEl.appendChild(btn);
-    else container.appendChild(btn);
+    if(isRecent) container.insertBefore(btn, wrap);
+    else panelEl.appendChild(btn);
   });
 }
 
@@ -3364,8 +3399,8 @@ function setActiveDropdownBtn(activeBtn){
   [flashSubDaily, flashSubNew, flashSubToday, flashSubToday2, flashSubChorshanba, flashSubPayshanba30, flashSubJuma31, flashSubNumbers, flashSubMavzu8, flashSubMavzu9, flashSubMavzu10, flashSubMavzu11, flashSubMavzu12, flashSubMavzu13, flashSubMavzu14, flashSubMavzu15, flashSubMavzu16, flashSubMavzu17, flashSubMavzu18, flashSubMavzu19, flashSubMavzu20, flashSubMavzu21, flashSubMavzu22, flashSubMavzu23, flashSubMavzu24, flashSubMavzu25, flashSubMavzu26, flashSubMavzu27, flashSubMavzu28, flashSubMavzu29, flashSubMavzu30, flashSubMavzu31, flashSubMavzu32, flashSubMavzu33, flashSubMavzu34, flashSubMavzu35].forEach(b=>b.classList.toggle('active', b===activeBtn));
   flashDropdown.classList.remove('open');
   flashDropdownBtn.classList.remove('active');
-  // Update button text to show current topic
-  flashDropdownBtn.textContent = activeBtn.textContent;
+  // Tugma matni: eski mavzu tanlansa uning nomi, yangi (asosiy qator) mavzu bo'lsa "Mavzular"
+  flashDropdownBtn.textContent = activeBtn.classList.contains('sub-recent') ? 'Mavzular' : activeBtn.textContent;
 }
 
 flashSubToday.addEventListener('click', ()=>{ setActiveDropdownBtn(flashSubToday); renderActiveSet(); });
@@ -3404,6 +3439,34 @@ flashSubMavzu32.addEventListener('click', ()=>{ setActiveDropdownBtn(flashSubMav
 flashSubMavzu33.addEventListener('click', ()=>{ setActiveDropdownBtn(flashSubMavzu33); renderActiveSet(); });
 flashSubMavzu34.addEventListener('click', ()=>{ setActiveDropdownBtn(flashSubMavzu34); renderActiveSet(); });
 flashSubMavzu35.addEventListener('click', ()=>{ setActiveDropdownBtn(flashSubMavzu35); renderActiveSet(); });
+(function(){
+  const flashSubnav = document.getElementById('flashSubnav');
+  const wrapEl = document.getElementById('flashDropdown');
+  // "Raqamlar" alohida tugma bo'lib qoladi — Mavzular ro'yxati ichiga kirmaydi
+  ['flashSubMavzu34','flashSubMavzu35','flashSubNumbers'].forEach(id=>{
+    const b = document.getElementById(id);
+    b.classList.add('sub-recent');
+    flashSubnav.insertBefore(b, wrapEl);
+  });
+  // Desktopda 33-mavzu ham qatorda turadi (Mavzular + 3 ta mavzu), telefonda ro'yxatda qoladi
+  const b33 = flashSubMavzu33, panel = document.getElementById('flashDropdownPanel');
+  const mq = window.matchMedia('(min-width:720px)');
+  function placeTopic33(){
+    if(mq.matches){
+      b33.classList.add('sub-recent');
+      if(b33.parentElement !== flashSubnav) flashSubnav.insertBefore(b33, flashSubMavzu34);
+    } else {
+      b33.classList.remove('sub-recent');
+      if(b33.parentElement !== panel) panel.appendChild(b33);
+    }
+  }
+  placeTopic33();
+  mq.addEventListener('change', placeTopic33);
+  let i = 0;
+  document.querySelectorAll('#flashDropdownPanel .sub-btn').forEach(b=>{
+    b.style.setProperty('--d', Math.floor(i/4) + (i%4)); i++;
+  });
+})();
 
 renderActiveSet();
 
