@@ -513,7 +513,7 @@
     color:#000; font-family:inherit; font-size:17px; font-weight:800;
     text-decoration:none; cursor:pointer;
     box-shadow:0 10px 26px -12px rgba(0,0,0,0.75), inset 0 2px 5px rgba(0,0,0,0.2);
-    transition:transform .2s ease, box-shadow .2s ease, opacity .25s ease, filter .25s ease;
+    transition:transform .2s ease, box-shadow .2s ease, opacity .6s ease, filter .6s ease;
     -webkit-tap-highlight-color:transparent;
   }
   .menu-btn:active{ transform:scale(0.97); }
@@ -525,13 +525,25 @@
     opacity:.38; filter:grayscale(0.7); cursor:not-allowed;
     box-shadow:none; transform:none; pointer-events:none;
   }
-  .menu-btn.ready{ animation:menuPulse 1.9s ease-in-out .5s infinite; }
+  .menu-btn.ready{ animation:menuAuraIn .6s ease-out both, menuPulse 1.9s ease-in-out .6s infinite; }
+  @keyframes menuAuraIn{
+    from{ box-shadow:0 10px 26px -12px rgba(0,0,0,0.75), 0 0 0 rgba(217,105,79,0); }
+    to{ box-shadow:0 10px 26px rgba(217,105,79,0.4), 0 0 0 rgba(217,105,79,0); }
+  }
   @keyframes menuPulse{
     0%,100%{ box-shadow:0 10px 26px rgba(217,105,79,0.4); }
     50%{ box-shadow:0 10px 34px rgba(217,105,79,0.65); }
   }
+  /* Kirish tugmalari va foydalanuvchi kartochkasi: birdan emas, fade bilan chiqadi */
+  @keyframes authFadeIn{
+    from{ opacity:0; transform:translate(-50%,-46%); }
+    to{ opacity:1; transform:translate(-50%,-50%); }
+  }
+  .auth-slot > .user-card:not([hidden]),
+  .auth-slot > .login-group:not([hidden]){ animation:authFadeIn .6s ease-out both; }
   @media (prefers-reduced-motion: reduce){
     .menu-btn.ready{ animation:none; }
+    .auth-slot > .user-card:not([hidden]), .auth-slot > .login-group:not([hidden]){ animation:none; }
   }
   .menu-hint{ margin-top:2px; font-size:13px; color:var(--ink-faint); min-height:18px; text-align:center; }
 
