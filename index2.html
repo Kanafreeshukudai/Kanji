@@ -4874,21 +4874,45 @@ window.addEventListener('DOMContentLoaded', ()=>{
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
 
 <div id="pageCurtain" aria-hidden="true"></div>
-<a class="home-back" id="homeBack" href="index.html" aria-label="Bosh sahifaga qaytish">&larr; Bosh sahifa</a>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
-    var back = document.getElementById('homeBack');
-    if(back){
-      back.addEventListener('click', function(e){
-        e.preventDefault();
-        if(curtain) curtain.classList.add('leaving');
-        setTimeout(function(){ window.location.href = 'index.html'; }, 360);
-      });
+    var startX = 0, startY = 0, active = false, going = false;
+    // ikki barmoq chapdan o'ngga surilsa — bosh sahifaga (index.html) qaytish
+    function goHome(){
+      if(going) return;
+      going = true;
+      if(curtain) curtain.classList.add('leaving');
+      setTimeout(function(){ window.location.href = 'index.html'; }, 360);
     }
+    window.addEventListener('touchstart', function(e){
+      if(e.touches.length === 2){
+        var a = e.touches[0], b = e.touches[1];
+        startX = (a.clientX + b.clientX) / 2;
+        startY = (a.clientY + b.clientY) / 2;
+        active = true;
+      } else {
+        active = false;
+      }
+    }, {passive:true});
+    window.addEventListener('touchmove', function(e){
+      if(!active) return;
+      if(e.touches.length !== 2){ active = false; return; }
+      var a = e.touches[0], b = e.touches[1];
+      var x = (a.clientX + b.clientX) / 2, y = (a.clientY + b.clientY) / 2;
+      var dx = x - startX, dy = y - startY;
+      if(dx > 110 && Math.abs(dy) < 70){ active = false; goHome(); }
+    }, {passive:true});
+    window.addEventListener('touchend', function(){ active = false; }, {passive:true});
+    window.addEventListener('touchcancel', function(){ active = false; }, {passive:true});
     // orqaga (bfcache) qaytilganda parda qolib ketmasin
     window.addEventListener('pageshow', function(e){
-      if(e.persisted && curtain){ curtain.classList.remove('leaving'); curtain.style.animation = 'none'; curtain.style.opacity = '0'; }
+      if(e.persisted && curtain){
+        curtain.classList.remove('leaving');
+        curtain.style.animation = 'none';
+        curtain.style.opacity = '0';
+        going = false;
+      }
     });
   })();
 </script>
