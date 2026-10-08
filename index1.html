@@ -16629,8 +16629,9 @@
   const PRESENCE_ADMIN_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
-  const PRESENCE_STALE_MS = 35000;
-  const PRESENCE_HEARTBEAT_MS = 20000;
+  // Orqa fonda brauzer taymerlarni sekinlashtiradi (har ~60s), shuning uchun muddat keng
+  const PRESENCE_STALE_MS = 100000;
+  const PRESENCE_HEARTBEAT_MS = 25000;
 
   const firebaseConfig = {
     apiKey: "AIzaSyALayFF0xGeWLUTO-96Kf8wUgOVldEFS1w",
