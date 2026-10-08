@@ -2396,6 +2396,19 @@
     overflow:hidden;
     font-size:clamp(11px, 3.3vw, 13px);
   }
+  /* Kunlar ochilganda kunlar diagonal bo'ylab yoyiladi: har bir tugma yuqori-chapdan
+     sirpanib, navbat bilan o'z joyiga keladi */
+  @keyframes olderDayFan{
+    from{opacity:0; transform:translate(-22px,-22px) scale(.75);}
+    to{opacity:1; transform:translate(0,0) scale(1);}
+  }
+  .tabs-older-collapse.open .tabs-older-grid .tab-btn{
+    animation:olderDayFan .42s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:calc(var(--d,0) * 45ms);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tabs-older-collapse.open .tabs-older-grid .tab-btn{ animation:none; }
+  }
   .tabs-older-grid .tab-btn .badge{
     flex:none;
     margin-left:0;
@@ -10996,8 +11009,11 @@
       tabsNav.appendChild(dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
     });
 
-    olderDays.forEach(d=>{
-      tabsOlderGrid.appendChild(dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
+    olderDays.forEach((d,i)=>{
+      const ob = dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); });
+      // diagonal tartib: yuqori-chapdan pastga-o'ngga (qator + ustun) — shunga qarab kechikish
+      ob.style.setProperty('--d', Math.floor(i/4) + (i%4));
+      tabsOlderGrid.appendChild(ob);
     });
     tabsOlderCollapse.classList.toggle('open', kunlarOpen && olderDays.length>0);
 
