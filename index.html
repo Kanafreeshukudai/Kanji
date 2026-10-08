@@ -863,6 +863,416 @@
   /* reCAPTCHA tekshiruvi (rasm belgilash) telefon oynasi ustida ko'rinsin */
   .grecaptcha-badge{ z-index:2000000001 !important; }
   iframe[src*="recaptcha"][src*="bframe"]{ z-index:2000000002 !important; }
+
+  /* ---------- MOCHI (Lug'at tugmasi burchagida) + KANJI tugmasi (kanji oynasi uslubida) ---------- */
+  /* ---------- MOCHI: Erkin suzib yuruvchi sferik personaj ---------- */
+.mochi-wrap{
+  position:fixed;
+  z-index:9999;
+  top:0;
+  left:0;
+  pointer-events:auto;
+  will-change:transform;
+  cursor:grab;
+  transition:transform .08s linear;
+  touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.mochi-body{
+  width:72px; height:72px;
+  border-radius:50%;
+  background:radial-gradient(circle at 32% 28%, #e0aaff 0%, #c77dff 25%, #9d4edd 50%, #7b2cbf 75%, #5a189a 100%);
+  box-shadow:
+    inset -4px -4px 12px rgba(0,0,0,0.25),
+    inset 4px 4px 10px rgba(224,170,255,0.25),
+    0 6px 24px rgba(123,44,191,0.55),
+    0 2px 8px rgba(90,24,154,0.45),
+    0 0 40px rgba(157,78,221,0.2);
+  position:relative;
+  animation:mochiBreathe 3s ease-in-out infinite;
+}
+.mochi-shine{
+  position:absolute;
+  top:10px; left:14px;
+  width:18px; height:10px;
+  border-radius:50%;
+  background:rgba(224,170,255,0.6);
+  filter:blur(2px);
+  transform:rotate(-25deg);
+}
+.mochi-face{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.mochi-eye{
+  position:absolute;
+  top:26px;
+  width:14px; height:16px;
+  border-radius:50%;
+  background:#2d1b4e;
+  overflow:hidden;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.5), 0 0 4px rgba(157,78,221,0.3);
+}
+.mochi-eye.left{left:18px;}
+.mochi-eye.right{right:18px;}
+.mochi-pupil{
+  position:absolute;
+  top:3px; left:3px;
+  width:6px; height:6px;
+  border-radius:50%;
+  background:#f3e5ff;
+  transition:transform .15s ease-out;
+}
+.mochi-blush{
+  position:absolute;
+  top:40px;
+  width:10px; height:5px;
+  border-radius:50%;
+  background:rgba(157,78,221,0.35);
+  filter:blur(2px);
+}
+.mochi-blush.left{left:14px;}
+.mochi-blush.right{right:14px;}
+.mochi-mouth{
+  position:absolute;
+  top:44px; left:50%; transform:translateX(-50%);
+  width:8px; height:4px;
+  border-radius:0 0 8px 8px;
+  border:1.5px solid #2d1b4e;
+  border-top:none;
+  background:transparent;
+}
+.mochi-shadow{
+  position:absolute;
+  bottom:-10px; left:50%; transform:translateX(-50%);
+  width:50px; height:10px;
+  border-radius:50%;
+  background:rgba(60,20,100,0.25);
+  filter:blur(4px);
+  animation:mochiShadow 3s ease-in-out infinite;
+}
+/* Mochi hover reaction */
+.mochi-wrap:hover .mochi-body{
+  animation:mochiExcited .5s ease-in-out infinite;
+}
+.mochi-wrap:hover .mochi-shadow{
+  animation:none;
+  transform:translateX(-50%) scale(0.6);
+  opacity:0.4;
+}
+/* Blink */
+.mochi-eye.blink{
+  animation:mochiBlink .25s ease-in-out;
+}
+/* ---------- MOCHI EXPRESSIONS: xursand & hafa ---------- */
+/* Asosiy elementlarga silliq qaytish uchun transition */
+.mochi-body{
+  transition:background 0.8s ease, box-shadow 0.8s ease, filter 0.5s ease;
+}
+.mochi-eye{
+  transition:height 0.55s ease, top 0.55s ease, border-radius 0.55s ease;
+}
+.mochi-mouth{
+  transition:width 0.5s ease, height 0.5s ease, top 0.5s ease, border-radius 0.5s ease, border 0.5s ease, background 0.5s ease, opacity 0.5s ease, border-bottom 0.5s ease, border-top 0.5s ease;
+}
+.mochi-pupil{
+  transition:transform 0.15s ease-out, top 0.45s ease, opacity 0.45s ease, left 0.45s ease;
+}
+.mochi-blush{
+  transition:opacity 0.55s ease, width 0.55s ease, height 0.55s ease, top 0.55s ease, background 0.55s ease;
+}
+/* ---- HAPPY ---- */
+.mochi-body.happy{
+  background:radial-gradient(circle at 32% 28%, #f3e5ff 0%, #d8b4fe 30%, #c77dff 55%, #9d4edd 80%, #7b2cbf 100%);
+  box-shadow:
+    inset -4px -4px 12px rgba(0,0,0,0.15),
+    inset 4px 4px 14px rgba(224,170,255,0.35),
+    0 8px 32px rgba(157,78,221,0.65),
+    0 3px 12px rgba(90,24,154,0.5),
+    0 0 50px rgba(199,125,255,0.3);
+  animation:mochiHappy .55s cubic-bezier(.34,1.56,.64,1) both;
+}
+.mochi-body.happy .mochi-mouth{
+  width:14px; height:10px;
+  border-radius:0 0 14px 14px;
+  border:2px solid #2d1b4e;
+  border-top:none;
+  background:#9d4edd;
+  top:42px;
+  animation:mochiMouthHappy .4s ease both;
+}
+.mochi-body.happy .mochi-eye{
+  height:18px;
+  top:22px;
+  animation:mochiEyeHappy .4s ease both;
+}
+.mochi-body.happy .mochi-blush{
+  width:14px; height:7px;
+  background:rgba(157,78,221,0.6);
+  top:38px;
+}
+/* ---- SAD: jozibali, och kulrang-oltin, yoqimli ---- */
+.mochi-body.sad{
+  background:radial-gradient(circle at 32% 28%, #c8b8d8 0%, #a080c0 35%, #8060a8 70%, #604888 100%);
+  box-shadow:
+    inset -4px -4px 12px rgba(0,0,0,0.15),
+    inset 4px 4px 14px rgba(200,180,255,0.15),
+    0 6px 20px rgba(100,60,160,0.3),
+    0 2px 6px rgba(0,0,0,0.2);
+  animation:mochiSad .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+/* Yoqimli kichik tushkun og'iz: pastga egilgan yumaloq chiziq */
+.mochi-body.sad .mochi-mouth{
+  width:10px;
+  height:5px;
+  border-radius:50%;
+  background:transparent;
+  border:none;
+  border-bottom:2.5px solid #2d1b4e;
+  top:46px;
+  opacity:0.85;
+  animation:mochiMouthSad .5s ease both;
+}
+/* Katta, yoqimli, biroz tushkun ko'zlar (puppy eyes) */
+.mochi-body.sad .mochi-eye{
+  height:14px;
+  top:26px;
+  border-radius:50% 50% 48% 48%;
+  animation:mochiEyeSad .5s ease both;
+}
+/* Qorachiq biroz pastga qarab turadi */
+.mochi-body.sad .mochi-pupil{
+  top:5px;
+  left:2px;
+  opacity:0.75;
+}
+/* Xijolat blush biroz xira */
+.mochi-body.sad .mochi-blush{
+  opacity:0.30;
+  width:11px;
+  height:5px;
+  top:40px;
+  background:rgba(157,78,221,0.35);
+}
+/* ---------- MOCHI SLEEP: Flashcard'da uxlaydi ---------- */
+.mochi-body.sleep{
+  background:radial-gradient(circle at 32% 28%, #d0c0e8 0%, #b0a0d0 35%, #9080b8 70%, #706098 100%);
+  box-shadow:
+    inset -4px -4px 12px rgba(0,0,0,0.12),
+    inset 4px 4px 14px rgba(200,180,255,0.12),
+    0 6px 18px rgba(100,70,160,0.22),
+    0 2px 5px rgba(0,0,0,0.15);
+  animation:mochiSleep 0.8s ease both;
+}
+/* Yumiq ko'zlar — oddiy, chiroyli, xotirjam uyqu */
+.mochi-body.sleep .mochi-eye{
+  width:14px;
+  height:14px;
+  top:26px;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+  border:none;
+}
+.mochi-body.sleep .mochi-eye.left{ left:16px; }
+.mochi-body.sleep .mochi-eye.right{ right:16px; }
+/* Yumshoq, yuqoriga egilgan qovoq chizig'i — xursandchilik bilan */
+.mochi-body.sleep .mochi-eye::before{
+  content:'';
+  position:absolute;
+  top:6px; left:0; right:0;
+  height:2px;
+  background:#2d1b4e;
+  border-radius:999px;
+  opacity:0.7;
+}
+/* Pupil yashirin */
+.mochi-body.sleep .mochi-pupil{
+  opacity:0;
+}
+.mochi-body.sleep .mochi-pupil{
+  opacity:0;
+}
+.mochi-body.sleep .mochi-mouth{
+  width:6px; height:3px;
+  border-radius:0 0 6px 6px;
+  border:1.2px solid #2d1b4e;
+  border-top:none;
+  top:46px;
+  opacity:0.7;
+}
+.mochi-body.sleep .mochi-blush{
+  opacity:0.20;
+  width:9px; height:4px;
+  top:40px;
+}
+.mochi-body.sleep .mochi-shine{
+  opacity:0.25;
+}
+/* Mochi speaking animation */
+.mochi-body.speaking .mochi-mouth{
+  width:10px; height:8px;
+  border-radius:50%;
+  background:#2d1b4e;
+  border:none;
+  animation:speakMouth 0.25s ease-in-out infinite alternate;
+}
+.mochi-body.speaking .mochi-eye{
+  height:16px;
+  animation:speakEye 2s ease-in-out infinite;
+}
+/* Mochi thinking */
+.mochi-body.thinking .mochi-eye{
+  background:transparent;
+  border:2px solid #2d1b4e;
+  border-radius:50%;
+  box-shadow:none;
+  height:14px;
+}
+.mochi-body.thinking .mochi-eye::before{
+  content:'';
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:8px; height:2px;
+  background:#2d1b4e;
+  border-radius:999px;
+}
+.mochi-body.thinking .mochi-pupil{opacity:0;}
+.mochi-body.thinking .mochi-mouth{
+  width:6px; height:3px;
+  border-radius:50%;
+  background:#2d1b4e;
+  border:none;
+  top:48px;
+}
+.mochi-body{
+  animation:mochiBreathe 3s ease-in-out infinite, neonPulse 4s ease-in-out infinite;
+}
+/* Override for states that have their own animations */
+.mochi-body.happy{
+  animation:mochiHappy .55s cubic-bezier(.34,1.56,.64,1) both, neonPulse 2s ease-in-out infinite;
+}
+.mochi-body.sad{
+  animation:mochiSad .6s cubic-bezier(.34,1.56,.64,1) both;
+  filter:grayscale(0.3) brightness(0.85);
+}
+.mochi-body.sleep{
+  animation:mochiSleep 0.8s ease both;
+  filter:brightness(0.75) saturate(0.7);
+}
+.mochi-body.speaking{
+  filter:drop-shadow(0 0 15px rgba(157,78,221,0.6)) drop-shadow(0 0 40px rgba(123,44,191,0.3));
+}
+.mochi-body.thinking{
+  filter:drop-shadow(0 0 10px rgba(157,78,221,0.4));
+}
+@keyframes mochiBlink{
+  0%,100%{transform:scaleY(1);}
+  50%{transform:scaleY(0.1);}
+}
+@keyframes mochiBreathe{
+  0%,100%{transform:scale(1) translateY(0);}
+  50%{transform:scale(1.04) translateY(-3px);}
+}
+@keyframes mochiExcited{
+  0%,100%{transform:scale(1.08) translateY(-4px); filter: brightness(1.1);}
+  50%{transform:scale(1.12) translateY(-8px); filter: brightness(1.25) drop-shadow(0 0 20px rgba(157,78,221,0.6));}
+}
+@keyframes mochiEyeHappy{
+  from{height:16px; top:26px;}
+  to{height:18px; top:22px;}
+}
+@keyframes mochiEyeSad{
+  from{height:16px; top:26px; border-radius:50%;}
+  to{height:14px; top:26px; border-radius:50% 50% 48% 48%;}
+}
+@keyframes mochiHappy{
+  0%{transform:scale(1) translateY(0);}
+  40%{transform:scale(1.18) translateY(-14px);}
+  70%{transform:scale(1.08) translateY(-6px);}
+  100%{transform:scale(1.1) translateY(-8px);}
+}
+@keyframes mochiMouthHappy{
+  from{width:8px; height:4px; border-radius:0 0 8px 8px;}
+  to{width:14px; height:10px; border-radius:0 0 14px 14px;}
+}
+@keyframes mochiMouthSad{
+  from{width:8px; height:4px; border-bottom:1.5px solid #1a1208; top:44px; opacity:0.4;}
+  to{width:10px; height:5px; border-bottom:2.5px solid #2d1b4e; top:46px; opacity:0.85;}
+}
+@keyframes mochiSad{
+  0%{transform:scale(1) translateY(0);}
+  40%{transform:scale(0.96) translateY(3px);}
+  100%{transform:scale(0.97) translateY(2px);}
+}
+@keyframes mochiShadow{
+  0%,100%{transform:translateX(-50%) scale(1); opacity:1;}
+  50%{transform:translateX(-50%) scale(0.75); opacity:0.55;}
+}
+@keyframes mochiSleep{
+  0%{transform:scale(1) translateY(0);}
+  100%{transform:scale(0.98) translateY(2px);}
+}
+@keyframes neonPulse{
+  0%,100%{filter:drop-shadow(0 0 8px rgba(157,78,221,0.3)) drop-shadow(0 0 20px rgba(123,44,191,0.15));}
+  50%{filter:drop-shadow(0 0 12px rgba(157,78,221,0.5)) drop-shadow(0 0 30px rgba(123,44,191,0.25));}
+}
+@keyframes speakEye{
+  0%,100%{transform:scaleY(1);}
+  50%{transform:scaleY(1.05);}
+}
+@keyframes speakMouth{
+  from{transform:translateX(-50%) scaleY(0.6);}
+  to{transform:translateX(-50%) scaleY(1.2);}
+}
+  .mochi-wrap.in-btn{
+    position:absolute !important; left:auto !important; top:auto !important;
+    right:-9px; bottom:-12px;
+    transform:scale(.36); transform-origin:bottom right;
+    animation:none !important; pointer-events:none;
+    z-index:2;
+  }
+  .mochi-wrap.in-btn .mochi-body{ animation:mochiBreathe 3.2s ease-in-out infinite; }
+  /* Mochi butun tanasi bilan yuqori-chap burchakka qayrilgan */
+  .mochi-wrap.in-btn{ transform:scale(.4) rotate(-22deg) !important; transform-origin:bottom right; }
+  .mochi-wrap.in-btn .mochi-body{ transform:rotate(-8deg); }
+  .mochi-wrap.in-btn .mochi-face{ transform:translate(-7px,-5px); }
+  .mochi-wrap.in-btn .mochi-pupil{ transform:translate(-4px,-4px) !important; }
+  .mochi-wrap.in-btn .mochi-blush, .mochi-wrap.in-btn .mochi-mouth{ transform:translate(-3px,-2px); }
+  .menu-btn.vocab{ position:relative; overflow:visible; }
+  .menu-btn.kanji-dark{
+    background:var(--panel-1, #1D2126);
+    color:#ECE7DC;
+    border:1px solid rgba(255,255,255,0.32);
+    box-shadow:0 10px 26px -12px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .menu-btn.kanji-dark:hover{ box-shadow:0 12px 30px -12px rgba(0,0,0,0.9), 0 0 18px -6px rgba(236,231,220,0.25); }
+  .kanji-dark .glyph-ink{
+    font-family:'Shippori Mincho', serif;
+    font-weight:600;
+    font-size:19px;
+    line-height:1;
+    color:#ECE7DC;
+    letter-spacing:0.02em;
+  }
+  .kanji-dark .kanji-label{ color:#ECE7DC; font-weight:800; }
+  .menu-btn.kanji-dark{ position:relative; overflow:visible; }
+  .kanji-ai-badge{
+    position:absolute; bottom:-7px; left:-7px;
+    width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--moss), var(--moss-soft));
+    color:#0F130C; font-family:'Zen Maru Gothic', sans-serif;
+    font-size:9px; font-weight:900; letter-spacing:0.02em;
+    box-shadow:0 2px 8px rgba(124,154,107,0.55);
+    pointer-events:none; z-index:2;
+  }
+  :root{ --moss:#7C9A6B; --moss-soft:#93b17f; }
 </style>
 </head>
 <body>
@@ -923,11 +1333,26 @@
     </div>
 
     <nav class="menu">
-      <a class="menu-btn kanji locked" id="kanjiBtn" href="index1.html" aria-disabled="true">
-        <span class="glyph">漢</span><span>Kanji</span>
+      <a class="menu-btn kanji kanji-dark locked" id="kanjiBtn" href="index1.html" aria-disabled="true">
+        <span class="kanji-ai-badge" aria-hidden="true">AI</span>
+        <span class="glyph-ink">漢</span><span class="kanji-label">Kanji</span>
       </a>
       <a class="menu-btn vocab locked" id="vocabBtn" href="index2.html" aria-disabled="true">
         <span class="glyph">語</span><span>Lug'at</span>
+        <div class="mochi-wrap in-btn" aria-hidden="true">
+          <div class="mochi-body">
+            <div class="mochi-shine"></div>
+            <div class="mochi-face">
+              <div class="mochi-eye left"><div class="mochi-pupil"></div></div>
+              <div class="mochi-eye right"><div class="mochi-pupil"></div></div>
+              <div class="mochi-blush left"></div>
+              <div class="mochi-blush right"></div>
+              <div class="mochi-mouth"></div>
+            </div>
+          </div>
+          <div class="mochi-shadow"></div>
+        </div>
+        
       </a>
     </nav>
     <div class="menu-hint" id="menuHint">Davom etish uchun avval Google hisobingizga kiring</div>
