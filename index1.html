@@ -8080,7 +8080,7 @@
   .home-back:active{ transform:scale(0.95); }
   .home-back:focus-visible{ outline:2px solid #E9C27D; outline-offset:2px; }
 
-  /* ---------- KIRISH: qop qora fon, markazdan tilla aura (qatlamli, yumshoq) ---------- */
+  /* ---------- KIRISH: qop qora fon, markazdan tilla aura ---------- */
   #enterIntro{
     position:fixed; inset:0; z-index:99999; background:#000; overflow:hidden;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -8090,17 +8090,9 @@
     opacity:0; visibility:hidden; pointer-events:none;
     transition:opacity .7s ease .35s, visibility 0s linear 1.1s;
   }
-  #enterIntro.leave .aura{ animation:auraSpread 1s cubic-bezier(.45,0,.2,1) forwards; }
-  #enterIntro.leave .aura.a2{ animation-delay:.08s; }
-  #enterIntro.leave .aura.a3{ animation-delay:.16s; }
-  @keyframes auraSpread{
-    0%{ opacity:.9; transform:translate(-50%,-50%) scale(1); }
-    100%{ opacity:0; transform:translate(-50%,-50%) scale(6); }
-  }
   #enterIntro .aura{
     position:absolute; left:50%; top:50%; border-radius:50%;
-    transform:translate(-50%,-50%) scale(.15); opacity:0;
-    filter:blur(28px);
+    transform:translate(-50%,-50%) scale(.15); opacity:0; filter:blur(28px);
     animation:auraBloom 2.2s cubic-bezier(.22,.8,.26,1) forwards, auraBreathe 4.2s ease-in-out 2.2s infinite;
   }
   #enterIntro .aura.a1{ width:80vmin; height:80vmin;
@@ -8109,6 +8101,9 @@
     background:radial-gradient(circle, rgba(255,240,200,.5) 0%, rgba(233,194,125,.28) 40%, rgba(201,166,107,0) 72%); }
   #enterIntro .aura.a3{ width:36vmin; height:36vmin; animation-delay:.5s, 2.8s;
     background:radial-gradient(circle, rgba(255,250,235,.6) 0%, rgba(246,227,176,.25) 45%, rgba(201,166,107,0) 75%); }
+  #enterIntro.leave .aura{ animation:auraSpread 1s cubic-bezier(.45,0,.2,1) forwards; }
+  #enterIntro.leave .aura.a2{ animation-delay:.08s; }
+  #enterIntro.leave .aura.a3{ animation-delay:.16s; }
   @keyframes auraBloom{
     0%{ transform:translate(-50%,-50%) scale(.15); opacity:0; }
     60%{ opacity:1; }
@@ -8117,6 +8112,10 @@
   @keyframes auraBreathe{
     0%,100%{ transform:translate(-50%,-50%) scale(1); opacity:.9; }
     50%{ transform:translate(-50%,-50%) scale(1.07); opacity:.7; }
+  }
+  @keyframes auraSpread{
+    0%{ opacity:.9; transform:translate(-50%,-50%) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(6); }
   }
   @media (prefers-reduced-motion: reduce){
     #enterIntro .aura{ animation:none; opacity:.8; transform:translate(-50%,-50%) scale(1); }
@@ -8128,9 +8127,10 @@
     background-size:250% 100%;
     -webkit-background-clip:text; background-clip:text;
     -webkit-text-fill-color:transparent; color:transparent;
-    text-shadow:none;
-    animation:pcShine 2.2s linear infinite;
+    text-shadow:none; animation:pcShine 2.2s linear infinite;
+    display:inline-block; line-height:1.35; padding:0.08em 0.12em 0.28em; overflow:visible;
   }
+  #pageCurtain .pc-core, #pageCurtain .pc-glyph{ overflow:visible; }
   @keyframes pcShine{ 0%{ background-position:120% 0; } 100%{ background-position:-120% 0; } }
   #pageCurtain .pc-dots{
     position:relative; width:34px; height:34px; margin:14px auto 0;
@@ -8147,13 +8147,6 @@
   @media (prefers-reduced-motion: reduce){
     #pageCurtain .pc-glyph.pc-word, #pageCurtain .pc-dots{ animation:none; }
   }
-
-  /* pastki harflar (j, g') kesilmasin: gradient matn uchun bo'sh joy */
-  #pageCurtain .pc-glyph.pc-word{
-    display:inline-block; line-height:1.35; padding:0.08em 0.12em 0.28em;
-    overflow:visible;
-  }
-  #pageCurtain .pc-core, #pageCurtain .pc-glyph{ overflow:visible; }
 </style>
 </head>
 <script>
@@ -16629,9 +16622,8 @@
   const PRESENCE_ADMIN_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
-  // Orqa fonda brauzer taymerlarni sekinlashtiradi (har ~60s), shuning uchun muddat keng
-  const PRESENCE_STALE_MS = 100000;
-  const PRESENCE_HEARTBEAT_MS = 25000;
+  const PRESENCE_STALE_MS = 35000;
+  const PRESENCE_HEARTBEAT_MS = 20000;
 
   const firebaseConfig = {
     apiKey: "AIzaSyALayFF0xGeWLUTO-96Kf8wUgOVldEFS1w",
@@ -16945,23 +16937,7 @@
     return doc(db, "presence", uid);
   }
 
-  // Owner (admin) o'zi haqida hech narsa yozilmaydi va ro'yxatda ko'rinmaydi
-  function isPresenceOwner(email) {
-    return !!email && PRESENCE_ADMIN_EMAILS.includes(String(email).trim().toLowerCase());
-  }
-
   async function presenceBeat(user, online) {
-    if (isPresenceOwner(user && user.email)) {
-      try {
-        await setDoc(presenceDocRef(user.uid), {
-          uid: user.uid,
-          nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
-          email: (user.email || "").toString().slice(0, 120),
-          photoURL: user.photoURL || ""
-        }, { merge: true });
-      } catch (e) {}
-      return;
-    }
     try {
       await setDoc(presenceDocRef(user.uid), {
         uid: user.uid,
@@ -16969,7 +16945,6 @@
         email: (user.email || "").toString().slice(0, 120),
         photoURL: user.photoURL || "",
         online: online,
-        page: "kanji",
         lastSeen: serverTimestamp()
       }, { merge: true });
     } catch (e) {
@@ -16980,11 +16955,17 @@
   function handlePresenceVisibility() {
     const user = auth.currentUser;
     if (!user) return;
-    if (document.visibilityState !== "hidden") presenceBeat(user, true);
+    if (document.visibilityState === "hidden") {
+      presenceBeat(user, false);
+    } else {
+      presenceBeat(user, true);
+    }
   }
 
   function handlePresenceUnload() {
-    // offline yozilmaydi: faollik muddati o'tishi bilan o'zi offline bo'ladi
+    const user = auth.currentUser;
+    if (!user) return;
+    presenceBeat(user, false);
   }
 
   function startPresenceHeartbeat(user) {
@@ -17070,10 +17051,8 @@
         nick: data.nick || "Foydalanuvchi",
         email: data.email || "",
         photoURL: data.photoURL || "",
-        page: data.page || "kanji",
         lastSeen: data.lastSeen || null,
-        isOwner: isPresenceOwner(data.email),
-        online: !isPresenceOwner(data.email) && data.online !== false && fresh
+        online: data.online !== false && fresh
       };
     });
     // DUBLIKATLARNI BIRLASHTIRISH: bir xil email bilan bir nechta hujjat bo'lsa
@@ -17155,11 +17134,9 @@
       nameEl.textContent = item.nick;
       const statusEl = document.createElement("div");
       statusEl.className = "presence-status" + (item.online ? " online" : "");
-      const PAGE_LABELS = { kanji: "Kanji da", lugat: "Lug'at da" };
-      const pageLabel = PAGE_LABELS[item.page] || "";
-      statusEl.textContent = item.isOwner ? "" : (item.online
-        ? ("Online" + (pageLabel ? " · " + pageLabel : ""))
-        : "So'nggi faollik: " + presenceFormatLastSeen(item.lastSeen));
+      statusEl.textContent = item.online
+        ? "Online"
+        : "So'nggi faollik: " + presenceFormatLastSeen(item.lastSeen);
       info.appendChild(nameEl);
       info.appendChild(statusEl);
 
