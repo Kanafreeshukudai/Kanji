@@ -1263,14 +1263,21 @@
   .kanji-dark .kanji-label{ color:#ECE7DC; font-weight:800; }
   .menu-btn.kanji-dark{ position:relative; overflow:visible; }
   .kanji-ai-badge{
-    position:absolute; bottom:-7px; left:-7px;
-    width:22px; height:22px; border-radius:50%;
+    position:absolute; bottom:-8px; left:-8px;
+    width:26px; height:26px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg, var(--moss), var(--moss-soft));
-    color:#0F130C; font-family:'Zen Maru Gothic', sans-serif;
-    font-size:9px; font-weight:900; letter-spacing:0.02em;
-    box-shadow:0 2px 8px rgba(124,154,107,0.55);
+    background:linear-gradient(150deg, rgba(139,124,246,0.42), rgba(111,92,230,0.2));
+    border:1px solid rgba(139,124,246,0.55);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    color:#cfc7ff;
+    box-shadow:0 0 12px rgba(139,124,246,0.45);
     pointer-events:none; z-index:2;
+    animation:kanjiAiGlow 3.2s ease-in-out infinite;
+  }
+  .kanji-ai-badge svg{ width:15px; height:15px; display:block; }
+  @keyframes kanjiAiGlow{
+    0%,100%{ box-shadow:0 0 10px rgba(139,124,246,0.35); }
+    50%{ box-shadow:0 0 18px rgba(139,124,246,0.7); }
   }
   :root{ --moss:#7C9A6B; --moss-soft:#93b17f; }
 </style>
@@ -1334,7 +1341,7 @@
 
     <nav class="menu">
       <a class="menu-btn kanji kanji-dark locked" id="kanjiBtn" href="index1.html" aria-disabled="true">
-        <span class="kanji-ai-badge" aria-hidden="true">AI</span>
+        <span class="kanji-ai-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg></span>
         <span class="glyph-ink">漢</span><span class="kanji-label">Kanji</span>
       </a>
       <a class="menu-btn vocab locked" id="vocabBtn" href="index2.html" aria-disabled="true">
