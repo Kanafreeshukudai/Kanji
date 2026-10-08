@@ -832,7 +832,7 @@
   /* ---------- Telefon orqali kirish ---------- */
   .login-group .phone-btn{ background:#2E7D4F; color:#fff; border-color:rgba(255,255,255,0.25); }
   .login-group .phone-btn:active{ transform:scale(0.96); }
-  .phone-modal{ position:fixed; inset:0; z-index:2147483500; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .phone-modal{ position:fixed; inset:0; z-index:1999999000;  /* reCAPTCHA challenge (2000000000) ustida tursin */ display:flex; align-items:center; justify-content:center; padding:20px; }
   .phone-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.7); }
   .phone-card{
     position:relative; width:100%; max-width:320px;
@@ -859,6 +859,10 @@
     background:#E9C27D; color:#1d1209; font-family:inherit; font-size:14px; font-weight:800;
   }
   .phone-submit:disabled{ opacity:.6; cursor:wait; }
+
+  /* reCAPTCHA tekshiruvi (rasm belgilash) telefon oynasi ustida ko'rinsin */
+  .grecaptcha-badge{ z-index:2000000001 !important; }
+  iframe[src*="recaptcha"][src*="bframe"]{ z-index:2000000002 !important; }
 </style>
 </head>
 <body>
