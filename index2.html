@@ -5184,7 +5184,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       if(going) return;
       going = true;
       if(curtain) curtain.classList.add('leaving');
-      setTimeout(function(){ window.kanjiGoHome(); }, 360);
+      setTimeout(function(){ window.kanjiGoHome(); going = false; }, 360);
     }
     window.addEventListener('touchstart', function(e){
       if(e.touches.length === 2){
@@ -5313,9 +5313,18 @@ window.kanjiGoHome = function(){
     if(going) return; going = true;
     const curtain = document.getElementById('pageCurtain');
     if(curtain) curtain.classList.add('leaving');
-    setTimeout(()=>{ window.kanjiGoHome(); }, 360);
+    setTimeout(()=>{ window.kanjiGoHome(); going = false; }, 360);
   });
 })();
+</script>
+<script>
+// Ilova qayta ko'ringanda qora pardani yopiq holatdan chiqarish (tugmalar bosilishi uchun)
+window.addEventListener('message', function(e){
+  if(e.data && e.data.type === 'kanji-app-show'){
+    var cu = document.getElementById('pageCurtain');
+    if(cu){ cu.classList.remove('leaving'); cu.classList.add('done'); }
+  }
+});
 </script>
 </body>
 </html>
