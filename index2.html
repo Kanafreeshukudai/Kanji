@@ -187,6 +187,13 @@ h1 span{
 .tab-btn.active{color:#1a1208;}
 .tab-btn-known{color:var(--green);}
 .tab-btn-known.active{color:#12220f;}
+/* Viktorina tugmasi: Bilaman kabi o'z rangiga ega (faol holatda indikator ham shu rangda) */
+.tab-btn-quiz{color:#e08a6a;}
+.tab-btn-quiz.active{color:#2a0f08;}
+.tabs.pos-quiz .indicator{
+  background:linear-gradient(135deg,#d0714b,#8f3a22);
+  box-shadow:0 3px 14px rgba(196,98,62,0.30);
+}
 
 section.view{display:none;}
 section.view.active{display:block;}
@@ -256,6 +263,21 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 }
 .quiz-note b{color:#2dd4bf;}
 
+/* ---------- KARTOCHKA RANGLARI (old va orqa tomon alohida) ----------
+   Ranglarni shu yerda o'zgartiring. */
+:root{
+  /* OLD TOMON (so'z: guruh + o'zbekcha tarjima) */
+  --front-border: rgba(236,231,220,0.16);   /* ramka */
+  --front-glow:   rgba(236,231,220,0.03);   /* yengil nur */
+  --front-accent: #9aa9a4;                  /* guruh nomi va kichik chiziq */
+  --front-text:   #ECE7DC;                  /* o'zbekcha so'z */
+
+  /* ORQA TOMON (yapon yozuvi + romaji) */
+  --back-border:  rgba(45,212,191,0.24);    /* ramka */
+  --back-glow:    rgba(45,212,191,0.05);    /* yengil nur */
+  --back-accent:  #6fbfb2;                  /* yapon yozuvi */
+  --back-text:    #cfd9d6;                  /* romaji */
+}
 /* ---------- FLASHCARDS ---------- */
 .grid{
   margin-top:28px;
@@ -322,6 +344,20 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   width:20px; height:4px; border-radius:2px;
   background:#2dd4bf; opacity:.35;
 }
+.face.front{
+  border-color:var(--front-border);
+  box-shadow: inset 0 0 0 1px var(--front-glow), 0 0 20px var(--front-glow);
+}
+.face.back{
+  border-color:var(--back-border);
+  box-shadow: inset 0 0 0 1px var(--back-glow), 0 0 24px var(--back-glow);
+}
+.face.front::before{ background:var(--front-accent); opacity:.5; }
+.face.front .tag{ color:var(--front-accent); }
+.face.front .uz-word{ color:var(--front-text); }
+.face.back .kana{ color:var(--back-accent); }
+.face.back .romaji{ color:var(--back-text); }
+
 .tag{
   position:relative; z-index:1;
   font-size:10px; letter-spacing:.14em; text-transform:uppercase;
@@ -1108,13 +1144,28 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
 .mochi-wrap.mochi-fade-out{animation:mochiFadeOut 2.5s ease-in-out forwards;}
 .mochi-wrap.mochi-fade-in{animation:mochiFadeIn .6s ease both;}
 body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{display:none !important;}
+/* Mochi AI tugmasi: bosh menyu tugmasi yonida, Mochi maskotining binafsha rangida */
 .mochi-toggle-btn{
-  position:fixed; left:16px; bottom:16px; z-index:9998;
-  border:1px solid rgba(45,212,191,0.45); background:rgba(20,184,166,0.14); color:#2dd4bf;
-  border-radius:999px; padding:8px 16px; font-family:var(--font-body); font-weight:700;
-  font-size:12.5px; letter-spacing:.04em; cursor:pointer; transition:background .2s, color .2s;
+  position:fixed;
+  top:calc(12px + env(safe-area-inset-top,0px));
+  left:56px;                     /* bosh menyu tugmasidan keyin (12 + 36 + 8) */
+  height:36px;
+  z-index:9998;
+  display:inline-flex; align-items:center;
+  border:1px solid rgba(199,125,255,0.45);
+  background:rgba(123,44,191,0.16);
+  color:#d9b8ff;
+  border-radius:999px; padding:0 14px; font-family:var(--font-body); font-weight:800;
+  font-size:12.5px; letter-spacing:.04em; cursor:pointer;
+  box-shadow:0 0 14px rgba(157,78,221,0.18);
+  transition:background .2s, color .2s, box-shadow .2s;
 }
-.mochi-toggle-btn.on{background:rgba(45,212,191,0.28); color:#e6fffb;}
+.mochi-toggle-btn.on{
+  background:linear-gradient(135deg,#c77dff,#7b2cbf 70%,#5a189a);
+  border-color:rgba(224,170,255,0.6);
+  color:#faf2ff;
+  box-shadow:0 6px 18px -6px rgba(123,44,191,0.7), inset 0 1px 0 rgba(255,255,255,0.18);
+}
 
 /* ---------- MOCHI SLEEP: Flashcard'da uxlaydi ---------- */
 .mochi-body.sleep{
@@ -1706,6 +1757,221 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   .menu-home-btn:active{ transform:scale(0.92); }
   .menu-home-btn svg{ width:19px; height:19px; display:block; }
   .menu-home-btn:focus-visible{ outline:2px solid rgba(255,255,255,0.4); outline-offset:3px; }
+  /* ---------- SARLAVHA: index1 bilan bir xil joylashuv va uslub ---------- */
+  header{
+    padding:26px 20px 8px;
+    text-align:center;
+    margin-bottom:24px;
+  }
+  .header-title-block{
+    width:100%;
+    text-align:center;
+  }
+  header h1{
+    font-family:'Shippori Mincho', serif;
+    font-size:28px;
+    margin:4px 0 0;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:var(--cream);
+    line-height:1.2;
+    text-shadow:0 0 24px rgba(20,184,166,0.22);
+  }
+  header h1 span{
+    font-weight:700;
+    background:linear-gradient(135deg, #5eead4, #14b8a6 55%, #c9a66b);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 0 10px rgba(45,212,191,0.35));
+  }
+  header .header-title-block::after{
+    content:"";
+    display:block;
+    width:56px; height:2px;
+    margin:12px auto 0;
+    border-radius:2px;
+    background:linear-gradient(90deg, transparent, #14b8a6, transparent);
+    opacity:.8;
+  }
+/* ---------- VIKTORINA BO'LIMI: barcha tugmalar Viktorina rangiga moslashadi ---------- */
+#viewQuiz{
+  --qz: #d0714b;                        /* asosiy rang */
+  --qz-text: #e08a6a;                   /* matn */
+  --qz-soft: rgba(208,113,75,0.14);     /* yengil fon */
+  --qz-line: rgba(208,113,75,0.42);     /* ramka */
+}
+#viewQuiz .dropdown-btn:hover{ background:var(--qz-soft); border-color:var(--qz-line); }
+#viewQuiz .dropdown-btn.active{ background:var(--qz-soft); color:var(--qz-text); border-color:var(--qz); }
+#viewQuiz .dropdown-panel .sub-btn:hover{ background:var(--qz-soft); color:var(--qz-text); border-color:var(--qz); }
+#viewQuiz .dropdown-panel .sub-btn.active{ background:var(--qz-soft); color:var(--qz-text); border-color:var(--qz); }
+#viewQuiz .dropdown-panel .sub-btn .dot{ background:var(--qz); }
+#viewQuiz .mode-btn.active{
+  background:linear-gradient(135deg,#d0714b,#8f3a22);
+  color:#2a0f08;
+  box-shadow:0 2px 10px rgba(196,98,62,0.28);
+}
+#viewQuiz .option-btn:hover:not(:disabled){ border-color:var(--qz); background:var(--qz-soft); }
+#viewQuiz .quiz-note b{ color:var(--qz-text); }
+#viewQuiz .done-card h2{ color:var(--qz-text); }
+#viewQuiz .action-row .submit-btn{ background:linear-gradient(135deg,#d0714b,#8f3a22); color:#2a0f08; }
+#viewQuiz .action-row .btn-clear:hover{ border-color:var(--qz-line); color:var(--qz-text); }
+#viewQuiz .scale-fill{ background:linear-gradient(90deg,#8f3a22,#d0714b); }
+#viewQuiz .dropdown-btn{ border-color:var(--qz-line); background:var(--qz-soft); color:var(--qz-text); }
+#viewQuiz .sub-recent{ border-color:var(--qz-line); background:var(--qz-soft); color:var(--qz-text); }
+#viewQuiz .sub-recent.active{
+  background:linear-gradient(135deg, rgba(208,113,75,0.30), rgba(143,58,34,0.22));
+  border-color:var(--qz); color:#fff3ec;
+}
+/* ---------- BILAMAN BO'LIMI: barcha tugmalar yashil rangga moslashadi ---------- */
+#viewKnown{
+  --kn: #5f9b5b;                        /* asosiy yashil */
+  --kn-text: #9be896;                   /* matn */
+  --kn-soft: rgba(95,155,91,0.14);      /* yengil fon */
+  --kn-line: rgba(95,155,91,0.42);      /* ramka */
+}
+#viewKnown .dropdown-btn{ border-color:var(--kn-line); background:var(--kn-soft); color:var(--kn-text); }
+#viewKnown .dropdown-btn:hover{ background:var(--kn-soft); border-color:var(--kn); }
+#viewKnown .dropdown-btn.active{ background:var(--kn-soft); color:var(--kn-text); border-color:var(--kn); }
+#viewKnown .dropdown-panel .sub-btn:hover{ background:var(--kn-soft); color:var(--kn-text); border-color:var(--kn); }
+#viewKnown .dropdown-panel .sub-btn.active{ background:var(--kn-soft); color:var(--kn-text); border-color:var(--kn); }
+#viewKnown .dropdown-panel .sub-btn .dot{ background:var(--kn); }
+#viewKnown .sub-recent{ border-color:var(--kn-line); background:var(--kn-soft); color:var(--kn-text); }
+#viewKnown .sub-recent.active{
+  background:linear-gradient(135deg, rgba(95,155,91,0.30), rgba(74,138,70,0.22));
+  border-color:var(--kn); color:#eefbea;
+}
+#viewKnown .card.known-card .face.front{ border-color:var(--kn); }
+#viewKnown .face.front .tag{ color:var(--kn-text); }
+#viewKnown .know-btn{ border-color:var(--kn-line); background:var(--kn-soft); color:var(--kn-text); }
+#viewKnown .know-btn:hover{ border-color:var(--kn); }
+/* ---------- FLASHCARD BO'LIMI: tugmalar va tab ko'k rangga moslashadi ---------- */
+#viewFlash{
+  --fc: #5b87c9;                        /* asosiy ko'k */
+  --fc-text: #9dbcf0;                   /* matn */
+  --fc-soft: rgba(91,135,201,0.14);     /* yengil fon */
+  --fc-line: rgba(91,135,201,0.42);     /* ramka */
+}
+@media (min-width:720px){ #flashSubnav{ justify-content:space-between; } #flashSubnav > div[style*="flex:1"]{ display:none; } }
+#viewFlash .dropdown-btn{ border-color:var(--fc-line); background:var(--fc-soft); color:var(--fc-text); }
+#viewFlash .dropdown-btn:hover{ background:var(--fc-soft); border-color:var(--fc); }
+#viewFlash .dropdown-btn.active{ background:var(--fc-soft); color:var(--fc-text); border-color:var(--fc); }
+/* Desktop: ustki qator va Mavzular ro'yxati bir xil o'lchamdagi tugmalar (8 ustun), bir xil oraliq (18px) */
+@media (min-width:720px){
+  #viewFlash #flashSubnav{ gap:18px; justify-content:space-between; }
+  #viewFlash #flashSubnav > .dropdown-wrap > .dropdown-btn,
+  #viewFlash #flashSubnav > .sub-btn{
+    width:calc((100% - 126px) / 8); height:44px; padding:0 8px; box-sizing:border-box;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  #viewFlash .dropdown-panel{
+    grid-template-columns:repeat(8, minmax(0,1fr));
+    column-gap:18px; row-gap:12px;
+  }
+  #viewFlash .dropdown-panel .sub-btn{ width:100%; }
+}
+/* Pastdagi mavzu tugmalari ustki qator tugmalari bilan bir xil ko'rinishda */
+#viewFlash .dropdown-panel .sub-btn{
+  height:44px; padding:0 14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700;
+  background:var(--fc-soft); border:1px solid var(--fc-line); color:var(--fc-text);
+}
+#viewFlash .dropdown-panel .sub-btn:hover{ background:var(--fc-soft); color:var(--fc-text); border-color:var(--fc); }
+#viewFlash .dropdown-panel .sub-btn.active{ background:var(--fc-soft); color:var(--fc-text); border-color:var(--fc); }
+#viewFlash .dropdown-panel .sub-btn .dot{ background:var(--fc); }
+#viewFlash .sub-recent{ border-color:var(--fc-line); background:var(--fc-soft); color:var(--fc-text); }
+#viewFlash .sub-recent.active{
+  background:linear-gradient(135deg, rgba(91,135,201,0.30), rgba(47,93,158,0.22));
+  border-color:var(--fc); color:#f2f7ff;
+}
+#viewFlash .sub-btn.active{ background:var(--fc-soft); color:var(--fc-text); border-color:var(--fc); }
+/* Flashcard tab: indikator ko'k, faol matn oq */
+.tabs:not(.pos-quiz):not(.pos-known) .indicator{
+  background:linear-gradient(135deg,#5b87c9,#2f5d9e);
+  box-shadow:0 3px 14px rgba(91,135,201,0.30);
+}
+#tabFlash.active{ color:#f2f7ff; }
+/* ---------- MAVZU TUGMALARI: barcha bo'limlarda (Flashcard, Viktorina, Bilaman) bir xil o'lcham va oraliq ---------- */
+/* Telefon: 4 ustun, 10px oraliq */
+@media (max-width:719px){
+  #viewFlash .subnav, #viewQuiz .subnav, #viewKnown .subnav{ gap:10px; }
+  #viewFlash .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewFlash .subnav > .sub-btn,
+  #viewQuiz .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewQuiz .subnav > .sub-btn,
+  #viewKnown .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewKnown .subnav > .sub-btn{
+    width:calc((100% - 30px) / 4); height:44px; padding:0 6px; box-sizing:border-box;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  #viewFlash .dropdown-panel, #viewQuiz .dropdown-panel, #viewKnown .dropdown-panel{
+    grid-template-columns:repeat(4, minmax(0,1fr)); column-gap:10px; row-gap:10px;
+  }
+}
+/* Desktop: 8 ustun, 18px oraliq (Flashcard bilan bir xil) */
+@media (min-width:720px){
+  #viewQuiz .subnav, #viewKnown .subnav{ gap:18px; }
+  #viewQuiz .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewQuiz .subnav > .sub-btn,
+  #viewKnown .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewKnown .subnav > .sub-btn{
+    width:calc((100% - 126px) / 8); height:44px; padding:0 8px; box-sizing:border-box;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  #viewQuiz .dropdown-panel, #viewKnown .dropdown-panel{
+    grid-template-columns:repeat(8, minmax(0,1fr)); column-gap:18px; row-gap:12px;
+  }
+}
+/* Ro'yxat ichidagi tugmalar hamma bo'limda bir xil balandlik */
+#viewQuiz .dropdown-panel .sub-btn, #viewKnown .dropdown-panel .sub-btn,
+#viewFlash .dropdown-panel .sub-btn{ width:100%; height:44px; }
+/* ---------- MAVZU TUGMALARI: kichikroq o'lcham, zich oraliq (barcha bo'limlarda bir xil) ---------- */
+@media (min-width:720px){
+  #viewFlash #flashSubnav, #viewQuiz .subnav, #viewKnown .subnav{ gap:10px; justify-content:flex-start; }
+  #viewFlash #flashSubnav > .dropdown-wrap > .dropdown-btn,
+  #viewFlash #flashSubnav > .sub-btn,
+  #viewQuiz .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewQuiz .subnav > .sub-btn,
+  #viewKnown .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewKnown .subnav > .sub-btn{
+    width:80px; height:34px; padding:0 6px; font-size:11.5px; box-sizing:border-box;
+  }
+  #viewFlash .dropdown-panel, #viewQuiz .dropdown-panel, #viewKnown .dropdown-panel{
+    grid-template-columns:repeat(auto-fill, 80px); column-gap:10px; row-gap:8px; justify-content:start;
+  }
+  #viewFlash .dropdown-panel .sub-btn, #viewQuiz .dropdown-panel .sub-btn, #viewKnown .dropdown-panel .sub-btn{
+    width:80px; height:34px; font-size:11.5px;
+  }
+}
+@media (max-width:719px){
+  #viewFlash .subnav, #viewQuiz .subnav, #viewKnown .subnav{ gap:8px; }
+  #viewFlash .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewFlash .subnav > .sub-btn,
+  #viewQuiz .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewQuiz .subnav > .sub-btn,
+  #viewKnown .subnav > .dropdown-wrap > .dropdown-btn,
+  #viewKnown .subnav > .sub-btn{
+    width:calc((100% - 24px) / 4); height:34px; font-size:11.5px;
+  }
+  #viewFlash .dropdown-panel, #viewQuiz .dropdown-panel, #viewKnown .dropdown-panel{
+    column-gap:8px; row-gap:8px;
+  }
+  #viewFlash .dropdown-panel .sub-btn, #viewQuiz .dropdown-panel .sub-btn, #viewKnown .dropdown-panel .sub-btn{
+    height:34px; font-size:11.5px;
+  }
+}
+/* Viktorina va Bilaman: ro'yxatdagi mavzu tugmalari o'z bo'limi rangida */
+#viewQuiz .dropdown-panel .sub-btn{ background:var(--qz-soft); border-color:var(--qz-line); color:var(--qz-text); }
+#viewKnown .dropdown-panel .sub-btn{ background:var(--kn-soft); border-color:var(--kn-line); color:var(--kn-text); }
+#viewQuiz .subnav > .sub-btn:not(.sub-recent), #viewKnown .subnav > .sub-btn:not(.sub-recent){ background:var(--qz-soft); }
+#viewKnown .subnav > .sub-btn:not(.sub-recent){ background:var(--kn-soft); }
+/* Viktorina: rejim tugmalari yuqori qatordan keyin, o'ngda */
+/* Viktorina: "4 variant / Vaqt sinovi" mavzu ro'yxatidan oldin, alohida qatorda (tepa qismda) */
+#viewQuiz .subnav::before, #viewQuiz .subnav::after{ content:""; flex:0 0 100%; height:0; }
+#viewQuiz .subnav::before{ order:-2; }
+#viewQuiz .subnav::after{ order:0; }
+#viewQuiz #modeSwitch{ order:-1; }
+#viewQuiz .subnav > div[style*="flex:1"]{ display:none; }
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
@@ -1856,14 +2122,14 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
   </button>
   <header>
-    <h1>Uyga vazifa <span>so'zlari</span></h1>
-    <p class="subtitle">Uyga vazifa qilib berilgan yapon so'zlari &mdash; kartochka bilan yodlang, viktorina bilan tekshiring</p>
-    <div class="title-wave" aria-hidden="true"></div>
+    <div class="header-title-block">
+      <h1>Lug'at <span>Flashcard</span></h1>
+    </div>
 
     <div class="tabs" id="tabs">
       <div class="indicator"></div>
       <button class="tab-btn active" id="tabFlash">Flashcard</button>
-      <button class="tab-btn" id="tabQuiz">Viktorina</button>
+      <button class="tab-btn tab-btn-quiz" id="tabQuiz">Viktorina</button>
       <button class="tab-btn tab-btn-known" id="tabKnown">✓ Bilaman <span id="knownCount"></span></button>
     </div>
   </header>
@@ -3362,7 +3628,17 @@ function buildDaySubnav(container, activeKey, onSelect, panelEl, btnEl){
   const wrap = panelEl.closest('.dropdown-wrap');
   container.querySelectorAll('.sub-recent').forEach(b=>b.remove());
   panelEl.innerHTML = '';
-  const recentKeys = SETS.slice(-RECENT_TOPIC_COUNT).map(x=>x.key);
+  const DESK_RECENT = ['mavzu28','mavzu29','mavzu30','mavzu31','mavzu32','mavzu33','mavzu34','mavzu35','numbers'];
+  const MOB_RECENT  = ['mavzu34','mavzu35','numbers'];
+  const recentKeys = window.matchMedia('(min-width:720px)').matches ? DESK_RECENT : MOB_RECENT;
+  // Ekran o'lchami o'zgarganda yuqori qatorni qayta quramiz
+  if(!panelEl._topicsMq){
+    panelEl._topicsMq = window.matchMedia('(min-width:720px)');
+    panelEl._topicsMq.addEventListener('change', ()=>{
+      const a = container.querySelector('.sub-btn.active') || panelEl.querySelector('.sub-btn.active');
+      buildDaySubnav(container, a ? a.dataset.key : activeKey, onSelect, panelEl, btnEl);
+    });
+  }
   let olderIdx = 0;
   SETS.forEach(s=>{
     const isRecent = recentKeys.includes(s.key);
@@ -3370,6 +3646,7 @@ function buildDaySubnav(container, activeKey, onSelect, panelEl, btnEl){
     btn.type = 'button';
     btn.className = 'sub-btn' + (isRecent ? ' sub-recent' : '') + (s.key === activeKey ? ' active' : '');
     btn.textContent = s.label;
+    btn.dataset.key = s.key;
     btn.style.setProperty('--ord', SETS.indexOf(s) + 1);
     if(!isRecent){
       btn.style.setProperty('--d', Math.floor(olderIdx/4) + (olderIdx%4)); // diagonal tartib
@@ -3578,20 +3855,25 @@ flashSubMavzu35.addEventListener('click', ()=>{ setActiveDropdownBtn(flashSubMav
     b.classList.add('sub-recent');
     flashSubnav.insertBefore(b, wrapEl);
   });
-  // Desktopda 33-mavzu ham qatorda turadi (Mavzular + 3 ta mavzu), telefonda ro'yxatda qoladi
-  const b33 = flashSubMavzu33, panel = document.getElementById('flashDropdownPanel');
+  // Desktopda 28–33-mavzular ham qatorda turadi (Mavzular + 28..35 + Raqamlar),
+  // telefonda ro'yxatda qoladi
+  const topicsInRow = [flashSubMavzu28, flashSubMavzu29, flashSubMavzu30, flashSubMavzu31, flashSubMavzu32, flashSubMavzu33], panel = document.getElementById('flashDropdownPanel');
   const mq = window.matchMedia('(min-width:720px)');
-  function placeTopic33(){
+  function placeTopicsInRow(){
     if(mq.matches){
-      b33.classList.add('sub-recent');
-      if(b33.parentElement !== flashSubnav) flashSubnav.insertBefore(b33, flashSubMavzu34);
+      topicsInRow.forEach(function(b){
+        b.classList.add('sub-recent');
+        if(b.parentElement !== flashSubnav) flashSubnav.insertBefore(b, flashSubMavzu34);
+      });
     } else {
-      b33.classList.remove('sub-recent');
-      if(b33.parentElement !== panel) panel.appendChild(b33);
+      topicsInRow.forEach(function(b){
+        b.classList.remove('sub-recent');
+        if(b.parentElement !== panel) panel.appendChild(b);
+      });
     }
   }
-  placeTopic33();
-  mq.addEventListener('change', placeTopic33);
+  placeTopicsInRow();
+  mq.addEventListener('change', placeTopicsInRow);
   let i = 0;
   document.querySelectorAll('#flashDropdownPanel .sub-btn').forEach(b=>{
     b.style.setProperty('--d', Math.floor(i/4) + (i%4)); i++;
@@ -3676,8 +3958,10 @@ function setQuizMode(mode){
   quizMode = mode;
   modeOptions.classList.toggle('active', mode === 'options');
   modeTime.classList.toggle('active', mode === 'timetrial');
+  document.getElementById('viewQuiz').classList.toggle('timetrial', mode === 'timetrial');
   startQuiz(currentQuizWords);
 }
+
 modeOptions.addEventListener('click', ()=> setQuizMode('options'));
 modeTime.addEventListener('click', ()=> setQuizMode('timetrial'));
 
@@ -3832,6 +4116,8 @@ function startQuizTimer(){
   text.classList.remove('urgent');
   fill.style.transition = 'none';
   fill.style.transform = 'scaleX(1)';
+  void fill.offsetWidth;                              // boshlang'ich holatni qayd etamiz
+  fill.style.transition = 'transform 0.1s linear';    // har tikda silliq ortga siljish
   text.textContent = '10';
   timerState.remaining = 10;
   timerState.paused = false;
@@ -5173,7 +5459,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       </div>
     </div>
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
-<button type="button" class="mochi-toggle-btn on" id="mochiToggleBtn">Mochi</button>
+<button type="button" class="mochi-toggle-btn on" id="mochiToggleBtn">Mochi AI</button>
 
 <div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word">Lug'at</div><div class="pc-dots"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span></div></div></div>
 <script id="home-nav-script">
