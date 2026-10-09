@@ -77,6 +77,17 @@
     --sat-2:160%;
     --blob-blur:70px;
   }
+  /* ---------- YUQORI KONTRAST (akkaunt menyusidagi kalit orqali) ----------
+     Matn va chegaralar aniqroq ko'rinadi — past yorug'likda va ko'z charchaganda qulay. */
+  html.hicontrast{
+    --ink:#ffffff;
+    --ink-soft:#d6dadf;
+    --ink-faint:#b4bac0;
+    --glass-border:rgba(255,255,255,0.7);
+    --glass-border-soft:rgba(255,255,255,0.4);
+  }
+  html.hicontrast .card .kanji-display{ text-shadow:0 0 1px rgba(255,255,255,0.4); }
+
   /* ---------- LITE MODE (auto-detected weak/low-end devices) ----------
      Lowering blur radius (not disabling it) keeps the glassy look intact
      while cutting the GPU compositing cost dramatically on cheap Android
@@ -938,7 +949,8 @@
   .bug-report-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:3px; }
 
   /* Qo'ng'iz — akkaunt menyusi ichidagi alohida tugma (Qaydlar tugmasi ko'rinishida) */
-  .auth-dropdown .bug-report-menu-btn{ display:flex; align-items:center; gap:8px; width:100%; text-align:left; }
+  .auth-dropdown .bug-report-menu-btn, .auth-dropdown .menu-row-btn{ display:flex; align-items:center; gap:8px; width:100%; text-align:left; }
+  .auth-dropdown .menu-row-btn svg{ width:16px; height:16px; flex:none; display:block; color:var(--ink); }
   .auth-dropdown .bug-report-menu-btn svg{ width:16px; height:16px; flex:none; display:block; color:var(--moss-soft); }
 
   /* ---------- ASOSIY MENYUGA QAYTISH — yumaloq tugma (qo'ng'iz o'rnida) ---------- */
@@ -2524,7 +2536,7 @@
   /* ---------- YANGI KARTOCHKA: pastdan fade bilan chiqish ----------
      Eski kartochka uchib ketgach, keyingisi birdan emas, yumshoq paydo bo'ladi. */
   .card.card-enter{
-    animation:cardEnterFade .55s cubic-bezier(.2,.7,.2,1) .12s backwards;
+    animation:cardEnterFade .55s cubic-bezier(.2,.7,.2,1) backwards;
   }
   @keyframes cardEnterFade{
     from{ opacity:0; transform:translateY(34px) scale(.96); }
@@ -2535,6 +2547,12 @@
   }
   @keyframes cardEnterFadeSimple{ from{opacity:0;} to{opacity:1;} }
 
+  /* uchib ketayotgan kartochka (ghost) — yangi kartochka ustida, o'z joyida uchadi */
+  .stage{ position:relative; }
+  .card.card-ghost{
+    position:absolute; left:0; right:0; top:0; bottom:0; margin:auto;
+    pointer-events:none; z-index:2;
+  }
   /* ---------- STAGE / SWIPE CARD ---------- */
   .stage{
     width:100%;
@@ -6864,7 +6882,7 @@
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior:contain;
-    padding:14px 16px;
+    padding:14px 6px;
     display:flex;
     flex-direction:column;
     gap:10px;
@@ -7045,7 +7063,7 @@
   /* ---------- JAVOB BERISH: chapga surib javob yozish (Telegram uslubida) ---------- */
   .chat-msg{ position:relative; touch-action:pan-y; }
   /* ikki tomonda bir xil bo'sh joy (chapda ham, o'ngda ham) — strelka o'ng gutter'ga sig'adi */
-  .chat-msg{ padding:0 30px; }
+  .chat-msg{ padding:0; }
   .chat-msg-body{ transition:transform .18s ease; will-change:transform; }
   .chat-msg-body.swiping{ transition:none; }
   .chat-swipe-ico{
@@ -8390,12 +8408,23 @@
         <span>Yengil rejim</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
+      <!-- Yuqori kontrast: matn va chegaralarni aniqroq qiladi (qurilmada eslab qolinadi) -->
+      <button id="contrastToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" aria-label="Yuqori kontrast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"></path></svg>
+        <span>Yuqori kontrast</span>
+        <i class="bgfx-switch" aria-hidden="true"></i>
+      </button>
       <!-- Ovoz: butun saytdagi tovushlarni (effektlar + qo'shiq) o'chirish/yoqish (holat qurilmada eslab qolinadi) -->
       <button id="soundToggleBtn" class="auth-bgfx-btn auth-sound-btn" type="button" role="switch" aria-checked="true" aria-label="Ovoz">
         <svg class="snd-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg>
         <svg class="snd-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path></svg>
         <span>Ovoz</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
+      </button>
+      <!-- Ilovani do'stlarga ulashish: telefonda ulashish oynasi, aks holda havola nusxalanadi -->
+      <button id="shareAppBtn" class="auth-notes-btn menu-row-btn" type="button" aria-label="Ilovani ulashish">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg>
+        <span>Ilovani ulashish</span>
       </button>
       <button id="logout-btn" class="auth-logout-btn" type="button">Chiqish</button>
     </div>
@@ -11484,7 +11513,7 @@
   const stage = document.getElementById('stage');
   const progressNote = document.getElementById('progressNote');
 
-  function renderStage(enter){
+  function renderStage(enter, ghost){
     // eski faol kartochkaga bog'langan window-darajasidagi (mousemove/mouseup)
     // event listenerlar - agar tozalanmasa, har yangi kartochka chiqqanda
     // yig'ilib boraveradi (memory leak) va uzoq foydalanishda sekinlashuvga
@@ -11494,6 +11523,15 @@
 
     stage.innerHTML = "";
     updateCounts();
+    // uchib ketayotgan kartochka (ghost) stage'da qolib, o'z uchishini tugatadi
+    const keepGhost = ()=>{
+      if(!ghost) return;
+      ghost.removeAttribute('id');
+      ghost.classList.add('card-ghost');
+      ghost.setAttribute('aria-hidden', 'true');
+      stage.appendChild(ghost);
+      setTimeout(()=>{ ghost.remove(); }, 700);
+    };
     const queue = queues[currentDay];
     if(queue.length === 0){
       stage.innerHTML = `<div class="empty-state">
@@ -11502,6 +11540,7 @@
         <p>${DAY_LABELS[currentDay]} bo'limidagi so'zlar "Bilganlarim" bo'limiga o'tdi. Endi Viktorina bilan mustahkamlang.</p>
       </div>`;
       progressNote.textContent = "";
+      keepGhost();
       return;
     }
 
@@ -11541,6 +11580,7 @@
       </div>
     `;
     if(enter) card.classList.add('card-enter');
+    keepGhost();
     stage.appendChild(card);
     attachCardEvents(card);
     updateHintCounts();
@@ -11806,6 +11846,10 @@
       lastY = startY; scrolledManually = false;
       inner.style.transition = 'none';
       inner.style.willChange = 'transform'; // qatlam aylanishdan OLDIN tayyor bo'ladi
+      // Kartochkaning o'zi: oldingi "qaytish" yoki "kirish" animatsiyasi tugamagan bo'lsa ham,
+      // barmoq darhol ta'sir qilsin — kechikish (sekin siljish) va animatsiya to'sig'i yo'q bo'lsin
+      card.classList.remove('card-enter');
+      card.style.transition = 'none';
     }
     function applyTransform(dx){
       const rot = dx / 18;
@@ -11930,7 +11974,9 @@
       card.style.transform = `translateX(${dir*560}px) translateY(-14px) rotate(${dir*24}deg) scale(.93)`;
       card.style.opacity = '0';
       edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
-      setTimeout(()=>{ card.style.willChange=''; cb(); }, DUR);
+      // Keyingi kartochka darhol (surish bilan birga) fade bilan chiqadi;
+      // uchayotgan kartochka esa o'z yo'nalishida ustida uchib ketadi (ghost)
+      cb(card);
     }
     function flip(){
       lastFlipAt = Date.now();
@@ -12004,7 +12050,7 @@
     card._cleanupEvents = () => controller.abort();
   }
 
-  function markKnown(){
+  function markKnown(ghost){
     const wasCustom = currentDay === CUSTOM_DAY_ID;
     const id = queues[currentDay].shift();
     const wasAlreadyKnown = known.indexOf(id) !== -1; // maxsus kartochka orqali ikki marta qo'shilib ketmasin
@@ -12013,7 +12059,7 @@
       customKnownSet.add(id); // Maxsus Flashcarddan bilinganlar alohida guruhlanadi
     }
     saveState();
-    renderStage(true);
+    renderStage(true, ghost);
     updateCounts(); // joriy kun tugmasidagi son (badge) darhol yangilansin — aks holda "muzlab" qolib, tab almashtirilgunicha eski son ko'rinaverar edi
     // pulse yangi kartochka chizilgandan keyingi kadrda boshlansin — shunda ikkalasi bir kadrda og'irlashmaydi
     requestAnimationFrame(pulseKnownBanner);
@@ -12057,11 +12103,11 @@
       renderTabs();
     }, 480 + 340);
   }
-  function markLater(){
+  function markLater(ghost){
     const id = queues[currentDay].shift();
     queues[currentDay].push(id);
     saveState();
-    renderStage(true);
+    renderStage(true, ghost);
     updateCounts();
   }
 
@@ -14290,7 +14336,7 @@
       // yashirin belgi: arrow xabarning yonida turadi (o'ngdagi bubble yoki avatar yonida)
       if(ico && body){
         const mine = row.classList.contains('mine');
-        const x = mine ? (row.offsetWidth - 28) : (body.offsetLeft + body.offsetWidth + 8);
+        const x = Math.max(0, Math.min(row.offsetWidth - 26, body.offsetLeft + body.offsetWidth + 8));
         ico.style.left = x + 'px';
       }
     });
@@ -15977,6 +16023,42 @@
       if(ban) window.__kanjiChatUnblock(ban.email).catch(()=>alert("Ochib bo'lmadi."));
     });
     setInterval(()=>{ applyChatBlock(); renderBans(); }, 15000);
+  })();
+
+  // ---------- Yuqori kontrast kaliti ----------
+  (function initHiContrast(){
+    const btn = document.getElementById('contrastToggleBtn');
+    const root = document.documentElement;
+    let on = false;
+    try{ on = localStorage.getItem('kanji-hicontrast') === '1'; }catch(_){}
+    function paint(){
+      root.classList.toggle('hicontrast', on);
+      if(btn) btn.setAttribute('aria-checked', on ? 'true' : 'false');
+    }
+    paint();
+    if(!btn) return;
+    btn.addEventListener('click', ()=>{
+      on = !on; paint();
+      try{ localStorage.setItem('kanji-hicontrast', on ? '1' : '0'); }catch(_){}
+    });
+  })();
+
+  // ---------- Ilovani ulashish ----------
+  (function initShareApp(){
+    const btn = document.getElementById('shareAppBtn');
+    if(!btn) return;
+    btn.addEventListener('click', async ()=>{
+      const data = { title: 'Kanji Flashcard', text: "Kanjilarni birga o'rganamiz!", url: window.location.href.split('#')[0] };
+      try{
+        if(navigator.share){ await navigator.share(data); return; }
+      }catch(_){ return; } // foydalanuvchi ulashishni bekor qildi
+      try{
+        await navigator.clipboard.writeText(data.url);
+        alert("Havola nusxalandi. Do'stlaringizga yuboring!");
+      }catch(_){
+        prompt("Havolani nusxalang:", data.url);
+      }
+    });
   })();
 
   // ---------- Asosiy menyuga qaytish tugmasi ----------
