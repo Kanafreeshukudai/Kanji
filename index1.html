@@ -8329,6 +8329,26 @@
     #pageCurtain .pc-glyph.pc-word, #pageCurtain .pc-dots{ animation:none; }
   }
 </style>
+<style id="smooth-flip-patch">
+  /* Aylanish paytida og'ir soya va maskali nur qatlamlari vaqtincha o'chadi — kadrlar silliq bo'ladi */
+  .card.flipping .face{ box-shadow:none !important; }
+  .card.flipping .face::after, .card.flipping .face.front::after{ display:none !important; }
+  /* Aylanish tugagach yashirin yuz render qilinmaydi — qatlamlar kamayadi, scroll barqaror bo'ladi */
+  .card.flipped:not(.flipping) .face.front{ display:none; }
+  .card:not(.flipped):not(.flipping) .face.back{ display:none; }
+  /* Orqa tomondagi matn tabiiy scroll bo'ladi, momentum bilan */
+  .card.flipped:not(.flipping) .face-back-scroll{ -webkit-overflow-scrolling:touch; touch-action:pan-y; }
+  /* Kartochka sahifa scroll paytida qatlam sifatida barqaror tursin */
+  .card, .card-inner{ -webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0); }
+  .card.flipped .card-inner{ transform:rotateY(180deg) translate3d(0,0,0); -webkit-transform:rotateY(180deg) translate3d(0,0,0); }
+  /* Aylanish paytida "ko'tarilib qaytish" (lift) — yumshoq, qotmaydigan variant */
+  @keyframes cardFlipLiftSoft{
+    0%{ scale:1; }
+    45%{ scale:1.035; }
+    100%{ scale:1; }
+  }
+  .card.flipping .card-inner{ animation:cardFlipLiftSoft var(--flip-dur) cubic-bezier(.37,0,.63,1) both; }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
@@ -11944,7 +11964,7 @@
           // brauzerning o'zi sahifani momentum bilan scroll qilsin.
           const innerScrollable = backScroll && card.classList.contains('flipped') &&
                                   backScroll.scrollHeight > backScroll.clientHeight + 1;
-          if(!innerScrollable){
+          if(true){ // vertikal surish — native scroll
             dragging = false;
             inner.style.transition = '';
             if(!card.classList.contains('flipping')) inner.style.willChange = '';
@@ -12016,7 +12036,7 @@
     function flyOut(dir, cb){
       // Yumshoq uchish: animatsiya tugagunga qadar kartochka almashtirilmaydi.
       // Sekin boshlanadi, tekis uchadi, oxirida nozik tushib yo'qoladi.
-      const DUR = 640;
+      const DUR = 560;
       // Silliq uchish: tezlik birdan (tiqilmasdan) boshlanadi va tekis sekinlashadi.
       // Kartochka oxirigacha to'liq ko'rinib turadi, faqat so'nggi qismida yumshoq so'nadi.
       card.style.willChange = 'transform, opacity';
@@ -12038,7 +12058,6 @@
       dots('pause');
       clearTimeout(flipTimer);
       flipTimer = setTimeout(finishFlip, 820); // transitionend kelmasa ham holat albatta tozalanadi
-      sampleFlipJank();
       if(showingBack) playFlipSound();
     }
     function finishFlip(){
