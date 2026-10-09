@@ -937,6 +937,35 @@
   .bug-report-btn svg{ width:21px; height:21px; display:block; }
   .bug-report-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:3px; }
 
+  /* Qo'ng'izcha akkaunt avatarining chap-yuqori burchagida kichik belgi bo'lib turadi */
+  .auth-profile .bug-report-badge{
+    position:absolute; left:-5px; top:-5px; z-index:3;
+    width:20px; height:20px; margin:0;
+    background:#000; border:1px solid rgba(147,177,127,0.8);
+    box-shadow:0 2px 6px rgba(0,0,0,0.6);
+    backdrop-filter:none; -webkit-backdrop-filter:none;
+  }
+  .auth-profile .bug-report-badge svg{ width:12px; height:12px; }
+
+  /* ---------- ASOSIY MENYUGA QAYTISH — yumaloq tugma (qo'ng'iz o'rnida) ---------- */
+  .menu-home-btn{
+    display:flex; align-items:center; justify-content:center;
+    flex:none; width:36px; height:36px; padding:0; margin-right:8px;
+    border-radius:50%;
+    border:1px solid var(--glass-border-soft);
+    background:linear-gradient(150deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
+    backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    -webkit-backdrop-filter:var(--blur-1) saturate(var(--sat-1));
+    color:var(--ink);
+    box-shadow:0 0 10px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.12);
+    cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .menu-home-btn:active{ transform:scale(0.92); }
+  .menu-home-btn svg{ width:19px; height:19px; display:block; }
+  .menu-home-btn:focus-visible{ outline:2px solid var(--glass-border); outline-offset:3px; }
+  .auth-box .menu-home-btn{ order:-2; }
+
   /* ---------- CHAT tugmasi — foydalanuvchilar ro'yxati tugmasi yonida (qora + orange) ---------- */
   .chat-bar-btn{
     display:none; align-items:center; justify-content:center;
@@ -7021,7 +7050,8 @@
 
   /* ---------- JAVOB BERISH: chapga surib javob yozish (Telegram uslubida) ---------- */
   .chat-msg{ position:relative; touch-action:pan-y; }
-  .chat-msg.mine{ padding-right:34px; }
+  /* ikki tomonda bir xil bo'sh joy (chapda ham, o'ngda ham) — strelka o'ng gutter'ga sig'adi */
+  .chat-msg{ padding:0 30px; }
   .chat-msg-body{ transition:transform .18s ease; will-change:transform; }
   .chat-msg-body.swiping{ transition:none; }
   .chat-swipe-ico{
@@ -8303,19 +8333,9 @@
     </i>
     <span>AI yordamchi</span>
   </button>
-  <!-- Qo'ng'izcha: shikoyat / xatolik / taklif — bosilganda banner sahifasi (video + Telegram kartochkasi) ochiladi -->
-  <button class="bug-report-btn" id="bugReportBtn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M10 5.2 8.4 3M14 5.2 15.6 3"></path>
-      <path d="M9.3 7.7a2.9 2.9 0 0 1 5.4 0"></path>
-      <path d="M6.6 14.4C6.6 10.6 9 8 12 8s5.4 2.6 5.4 6.4S15 21 12 21s-5.4-2.8-5.4-6.6z"></path>
-      <path d="M12 8.2V21"></path>
-      <path d="M6.9 12.4 4 11M6.6 15.6H3.4M7.5 18.6 5 20.6M17.1 12.4 20 11M17.4 15.6h3.2M16.5 18.6 19 20.6"></path>
-      <circle cx="9.2" cy="12.6" r="1" fill="currentColor" stroke="none"></circle>
-      <circle cx="14.8" cy="12.6" r="1" fill="currentColor" stroke="none"></circle>
-      <circle cx="9.4" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
-      <circle cx="14.6" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
-    </svg>
+  <!-- Asosiy menyuga qaytish (yumaloq tugma) -->
+  <button class="menu-home-btn" id="menuHomeBtn" type="button" aria-label="Asosiy menyuga qaytish" title="Asosiy menyu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
   </button>
   <!-- Chat: faqat kirilganda ko'rinadi (skript), foydalanuvchilar ro'yxati tugmasi yonida -->
   <button class="chat-bar-btn" id="chatBarBtn" type="button" aria-label="Chat" title="Chat">
@@ -8332,6 +8352,20 @@
     <button class="auth-avatar-btn" id="authAvatarBtn" type="button" aria-label="Profil">
       <img id="userAvatarImg" src="" alt="" style="display:none;">
       <span id="userAvatarInitial"></span>
+    </button>
+    <!-- Qo'ng'izcha: shikoyat / xatolik / taklif — akkaunt avatari burchagida -->
+    <button class="bug-report-btn bug-report-badge" id="bugReportBtn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 5.2 8.4 3M14 5.2 15.6 3"></path>
+      <path d="M9.3 7.7a2.9 2.9 0 0 1 5.4 0"></path>
+      <path d="M6.6 14.4C6.6 10.6 9 8 12 8s5.4 2.6 5.4 6.4S15 21 12 21s-5.4-2.8-5.4-6.6z"></path>
+      <path d="M12 8.2V21"></path>
+      <path d="M6.9 12.4 4 11M6.6 15.6H3.4M7.5 18.6 5 20.6M17.1 12.4 20 11M17.4 15.6h3.2M16.5 18.6 19 20.6"></path>
+      <circle cx="9.2" cy="12.6" r="1" fill="currentColor" stroke="none"></circle>
+      <circle cx="14.8" cy="12.6" r="1" fill="currentColor" stroke="none"></circle>
+      <circle cx="9.4" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
+      <circle cx="14.6" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
+    </svg>
     </button>
     <!-- Ovoz o'chirilganda avatar burchagida chiqadigan belgi (ovoz yoqilganda yo'qoladi) -->
     <span class="auth-sound-badge" id="authSoundBadge" aria-hidden="true">
@@ -15948,6 +15982,19 @@
       if(ban) window.__kanjiChatUnblock(ban.email).catch(()=>alert("Ochib bo'lmadi."));
     });
     setInterval(()=>{ applyChatBlock(); renderBans(); }, 15000);
+  })();
+
+  // ---------- Asosiy menyuga qaytish tugmasi ----------
+  (function initMenuHome(){
+    const btn = document.getElementById('menuHomeBtn');
+    if(!btn) return;
+    let going = false;
+    btn.addEventListener('click', ()=>{
+      if(going) return; going = true;
+      const curtain = document.getElementById('pageCurtain');
+      if(curtain) curtain.classList.add('leaving');
+      setTimeout(()=>{ window.location.href = 'index.html'; }, 360);
+    });
   })();
 
   // ---------- Banner bosilganda: to'liq video (ovozsiz) alohida sahifada, markazda ----------
