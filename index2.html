@@ -1685,6 +1685,27 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     color:#ECE7DC;
     text-shadow:0 0 16px rgba(217,105,79,0.18);
   }
+  /* ---------- ASOSIY MENYUGA QAYTISH — index1 bilan bir xil yumaloq tugma ---------- */
+  .menu-home-btn{
+    position:fixed;
+    top:calc(12px + env(safe-area-inset-top,0px));
+    left:12px;
+    z-index:2147483000;
+    display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; padding:0;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.18);
+    background:linear-gradient(150deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
+    -webkit-backdrop-filter:blur(18px) saturate(150%); backdrop-filter:blur(18px) saturate(150%);
+    color:#ECE7DC;
+    box-shadow:0 0 10px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.12);
+    cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .menu-home-btn:active{ transform:scale(0.92); }
+  .menu-home-btn svg{ width:19px; height:19px; display:block; }
+  .menu-home-btn:focus-visible{ outline:2px solid rgba(255,255,255,0.4); outline-offset:3px; }
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
@@ -1829,6 +1850,10 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
 </script>
 <div class="wrap">
 
+  <!-- Asosiy menyuga qaytish (yumaloq tugma) -->
+  <button class="menu-home-btn" id="menuHomeBtn" type="button" aria-label="Asosiy menyuga qaytish" title="Asosiy menyu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
+  </button>
   <header>
     <h1>Uyga vazifa <span>so'zlari</span></h1>
     <p class="subtitle">Uyga vazifa qilib berilgan yapon so'zlari &mdash; kartochka bilan yodlang, viktorina bilan tekshiring</p>
@@ -5277,6 +5302,20 @@ window.kanjiGoHome = function(){
   }
   window.location.href = 'index.html';
 };
+</script>
+<script>
+// Asosiy menyuga qaytish tugmasi (index1 bilan bir xil xatti-harakat)
+(function(){
+  const btn = document.getElementById('menuHomeBtn');
+  if(!btn) return;
+  let going = false;
+  btn.addEventListener('click', ()=>{
+    if(going) return; going = true;
+    const curtain = document.getElementById('pageCurtain');
+    if(curtain) curtain.classList.add('leaving');
+    setTimeout(()=>{ window.kanjiGoHome(); }, 360);
+  });
+})();
 </script>
 </body>
 </html>

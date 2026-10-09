@@ -18109,5 +18109,21 @@ window.kanjiGoHome = function(){
   window.location.href = 'index.html';
 };
 </script>
+<script>
+/* Ilova menyu ustida ko'rinmay qolganda musiqa to'xtaydi, qaytib ochilganda davom etadi */
+window.addEventListener('message', function(e){
+  if(!e.data) return;
+  var a = document.getElementById('splashPhonkAudio');
+  if(!a) return;
+  if(e.data.type === 'kanji-app-hide'){
+    window.__phonkWasPlaying = !a.paused;
+    try{ a.pause(); }catch(err){}
+  }
+  if(e.data.type === 'kanji-app-show'){
+    if(window.__phonkWasPlaying){ var p = a.play(); if(p && p.catch) p.catch(function(){}); }
+    window.__phonkWasPlaying = false;
+  }
+});
+</script>
 </body>
 </html>

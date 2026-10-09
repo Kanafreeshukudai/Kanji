@@ -1365,6 +1365,18 @@
   #appOverlay{position:fixed;inset:0;z-index:2147483000;background:#000;display:none}
   #appOverlay.open{display:block}
   #appOverlay iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+
+  /* Kanji tugmasi ham Lug'at bilan bir xil oq ko'rinishda */
+  .menu-btn.kanji-dark{
+    background:linear-gradient(180deg, #f6f3ec, #d8d2c4);
+    color:#000;
+    border:1px solid rgba(255,255,255,0.16);
+    box-shadow:0 10px 26px -12px rgba(0,0,0,0.75), inset 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .menu-btn.kanji-dark:hover{ box-shadow:0 10px 26px -12px rgba(0,0,0,0.75), inset 0 2px 5px rgba(0,0,0,0.2); }
+  .kanji-dark .glyph-ink{ color:var(--accent); }
+  .kanji-dark .kanji-label{ color:#000; font-weight:800; }
+  .menu-btn.kanji-dark.ready{ animation:menuAuraIn .6s ease-out both, menuPulse 1.9s ease-in-out .6s infinite; }
 </style>
 </head>
 <body>
@@ -1878,12 +1890,12 @@
   // klipni pastdan yuqoriga sekin ovoz bilan chalamiz; brauzer avtomatik
   // ijroni bloklasa, birinchi teginish/bosishda o'zi ishga tushadi.
   // "Boshlash" bosilganda musiqa asta pasayib to'xtaydi.
-  const PhonkFX = (function(){
+  const PhonkFX = window.PhonkFX = (function(){
     const audio = document.getElementById('splashPhonkAudio');
     const toggle = document.getElementById('splashMusicToggle');
     const wrap = document.getElementById('splashMusicWrap');
     const artwork = document.getElementById('splashArtwork');
-    if(!audio || !toggle) return {fadeOutAndStop(){}};
+    if(!audio || !toggle) return {fadeOutAndStop(){}, pauseForApp(){}, resumeFromApp(){}};
 
     const TARGET_VOLUME = 0.55;
     let userPaused = false; // foydalanuvchi tugma bilan to'xtatganmi
@@ -1893,6 +1905,7 @@
     // audio.play() ning kechikib kelgan (async) va'dasi ham qo'shiqni qayta
     // yoqib yubormasligi uchun kerak (aks holda ba'zida musiqa "qolib ketardi")
     let stopped = false;
+    let pausedByApp = false; // kanji/lug'at ochilganda vaqtincha to'xtatilganmi
 
     audio.volume = 0;
 
@@ -1969,6 +1982,22 @@
     setToggleState();
 
     return {
+      pauseForApp(){
+        if(audio.paused){ pausedByApp = false; return; }
+        pausedByApp = true;
+        if(fadeTimer) clearInterval(fadeTimer);
+        fadeTo(0, 250, ()=>{ try{ audio.pause(); }catch(e){} BeatSync.stop(); });
+      },
+      resumeFromApp(){
+        if(!pausedByApp) return;
+        pausedByApp = false;
+        if(userPaused || stopped) return;
+        const p = audio.play();
+        if(p && p.catch) p.catch(()=>{});
+        fadeTo(TARGET_VOLUME, 600);
+        setToggleState();
+        BeatSync.start();
+      },
       fadeOutAndStop(ms){
         stopped = true;
         userPaused = true;
@@ -2070,10 +2099,25 @@
       appOverlay.appendChild(fr);
       appFrames[href] = fr;
     }
-    Object.keys(appFrames).forEach((k) => { appFrames[k].style.display = (appFrames[k] === fr) ? "block" : "none"; });
+    // boshqa ilovalar (masalan, Kanji) yashirilishidan oldin ularga "yashirildi" signalini yuboramiz,
+    // shunda ularning musiqasi ham to'xtaydi
+    Object.keys(appFrames).forEach((k) => {
+      if(appFrames[k] !== fr){
+        try{ appFrames[k].contentWindow.postMessage({ type: "kanji-app-hide" }, "*"); }catch(e){}
+      }
+      appFrames[k].style.display = (appFrames[k] === fr) ? "block" : "none";
+    });
+    if(window.PhonkFX) window.PhonkFX.pauseForApp();
+    try{ fr.contentWindow.postMessage({ type: "kanji-app-show" }, "*"); }catch(e){}
     appOverlay.classList.add("open");
   }
-  function closeApp(){ appOverlay.classList.remove("open"); }
+  function closeApp(){
+    appOverlay.classList.remove("open");
+    Object.keys(appFrames).forEach((k) => {
+      try{ appFrames[k].contentWindow.postMessage({ type: "kanji-app-hide" }, "*"); }catch(e){}
+    });
+    if(window.PhonkFX) window.PhonkFX.resumeFromApp();
+  }
   window.addEventListener("message", (e) => {
     if(!e.data || e.data.type !== "kanji-home") return;
     const known = Object.keys(appFrames).some((k) => appFrames[k].contentWindow === e.source);
