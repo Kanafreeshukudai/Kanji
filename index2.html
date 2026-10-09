@@ -5159,7 +5159,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       if(going) return;
       going = true;
       if(curtain) curtain.classList.add('leaving');
-      setTimeout(function(){ window.location.href = 'index.html'; }, 360);
+      setTimeout(function(){ window.kanjiGoHome(); }, 360);
     }
     window.addEventListener('touchstart', function(e){
       if(e.touches.length === 2){
@@ -5267,6 +5267,16 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // Yuklanganda Mochi aktiv; agar ishlatilmasa, 20 soniyadan keyin asta yo'qoladi
   armHide();
 })();
+</script>
+<script>
+/* Asosiy menyuga qaytish: iframe ichida bo'lsa menyuga signal yuboramiz (menyu qayta yuklanmaydi),
+   aks holda oddiy sahifa almashtirish. */
+window.kanjiGoHome = function(){
+  if(window.parent && window.parent !== window){
+    try{ window.parent.postMessage({ type: 'kanji-home' }, '*'); return; }catch(e){}
+  }
+  window.location.href = 'index.html';
+};
 </script>
 </body>
 </html>

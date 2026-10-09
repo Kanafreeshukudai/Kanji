@@ -16126,7 +16126,7 @@
       if(going) return; going = true;
       const curtain = document.getElementById('pageCurtain');
       if(curtain) curtain.classList.add('leaving');
-      setTimeout(()=>{ window.location.href = 'index.html'; }, 360);
+      setTimeout(()=>{ window.kanjiGoHome(); }, 360);
     });
   })();
 
@@ -17114,7 +17114,7 @@
       // tugmasi) qaytadi va keyingi safar kirish uchun foydalanuvchi
       // qaytadan Google hisobini tanlashi kerak bo'ladi.
       // chiqqandan keyin bosh sahifaga (index.html) qaytamiz
-      window.location.replace('index.html');
+      window.kanjiGoHome();
     });
   }
 
@@ -18050,7 +18050,7 @@
       if(going) return;
       going = true;
       if(curtain) curtain.classList.add('leaving');
-      setTimeout(function(){ window.location.href = 'index.html'; }, 360);
+      setTimeout(function(){ window.kanjiGoHome(); }, 360);
     }
     window.addEventListener('touchstart', function(e){
       if(e.touches.length === 2){
@@ -18098,6 +18098,16 @@
     else window.addEventListener('load', ready);
     setTimeout(finish, 5000); // zaxira: hech qachon qotib qolmasin
   })();
+</script>
+<script>
+/* Asosiy menyuga qaytish: iframe ichida bo'lsa menyuga signal yuboramiz (menyu qayta yuklanmaydi),
+   aks holda oddiy sahifa almashtirish. */
+window.kanjiGoHome = function(){
+  if(window.parent && window.parent !== window){
+    try{ window.parent.postMessage({ type: 'kanji-home' }, '*'); return; }catch(e){}
+  }
+  window.location.href = 'index.html';
+};
 </script>
 </body>
 </html>
