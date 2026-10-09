@@ -937,15 +937,9 @@
   .bug-report-btn svg{ width:21px; height:21px; display:block; }
   .bug-report-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:3px; }
 
-  /* Qo'ng'izcha akkaunt avatarining chap-yuqori burchagida kichik belgi bo'lib turadi */
-  .auth-profile .bug-report-badge{
-    position:absolute; left:-5px; top:-5px; z-index:3;
-    width:20px; height:20px; margin:0;
-    background:#000; border:1px solid rgba(147,177,127,0.8);
-    box-shadow:0 2px 6px rgba(0,0,0,0.6);
-    backdrop-filter:none; -webkit-backdrop-filter:none;
-  }
-  .auth-profile .bug-report-badge svg{ width:12px; height:12px; }
+  /* Qo'ng'iz — akkaunt menyusi ichidagi alohida tugma (Qaydlar tugmasi ko'rinishida) */
+  .auth-dropdown .bug-report-menu-btn{ display:flex; align-items:center; gap:8px; width:100%; text-align:left; }
+  .auth-dropdown .bug-report-menu-btn svg{ width:16px; height:16px; flex:none; display:block; color:var(--moss-soft); }
 
   /* ---------- ASOSIY MENYUGA QAYTISH — yumaloq tugma (qo'ng'iz o'rnida) ---------- */
   .menu-home-btn{
@@ -8353,9 +8347,19 @@
       <img id="userAvatarImg" src="" alt="" style="display:none;">
       <span id="userAvatarInitial"></span>
     </button>
-    <!-- Qo'ng'izcha: shikoyat / xatolik / taklif — akkaunt avatari burchagida -->
-    <button class="bug-report-btn bug-report-badge" id="bugReportBtn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <!-- Ovoz o'chirilganda avatar burchagida chiqadigan belgi (ovoz yoqilganda yo'qoladi) -->
+    <span class="auth-sound-badge" id="authSoundBadge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path></svg>
+    </span>
+    <div class="auth-dropdown" id="authDropdown">
+      <button id="user-name" class="auth-name" type="button" aria-haspopup="dialog" aria-label="Akkaunt ma'lumotlari"></button>
+      <button id="notes-btn" class="auth-notes-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+        <span>Qaydlar</span>
+      </button>
+      <!-- Qo'ng'iz: shikoyat / xatolik / taklif — akkaunt menyusi ichida alohida tugma -->
+      <button id="bugReportBtn" class="auth-notes-btn bug-report-menu-btn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M10 5.2 8.4 3M14 5.2 15.6 3"></path>
       <path d="M9.3 7.7a2.9 2.9 0 0 1 5.4 0"></path>
       <path d="M6.6 14.4C6.6 10.6 9 8 12 8s5.4 2.6 5.4 6.4S15 21 12 21s-5.4-2.8-5.4-6.6z"></path>
@@ -8366,16 +8370,7 @@
       <circle cx="9.4" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
       <circle cx="14.6" cy="17" r="0.9" fill="currentColor" stroke="none"></circle>
     </svg>
-    </button>
-    <!-- Ovoz o'chirilganda avatar burchagida chiqadigan belgi (ovoz yoqilganda yo'qoladi) -->
-    <span class="auth-sound-badge" id="authSoundBadge" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path></svg>
-    </span>
-    <div class="auth-dropdown" id="authDropdown">
-      <button id="user-name" class="auth-name" type="button" aria-haspopup="dialog" aria-label="Akkaunt ma'lumotlari"></button>
-      <button id="notes-btn" class="auth-notes-btn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-        <span>Qaydlar</span>
+        <span>Xatolik / shikoyat</span>
       </button>
       <!-- Orqa fon animatsiyasini yoqish/o'chirish (holat qurilmada eslab qolinadi) -->
       <!-- Orqa fon qatlamlarini yoqish/o'chirish (holat qurilmada eslab qolinadi) -->
