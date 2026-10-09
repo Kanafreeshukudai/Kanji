@@ -1378,8 +1378,40 @@
   .kanji-dark .kanji-label{ color:#000; font-weight:800; }
   .menu-btn.kanji-dark.ready{ animation:menuAuraIn .6s ease-out both, menuPulse 1.9s ease-in-out .6s infinite; }
 </style>
+<style id="jp-progress-style">
+  /* Yuqori qismdagi yupqa sahifa ko'rsatkichi — Yaponiya bayrog'i (hinomaru) sahifa bo'ylab siljiydi */
+  #jpProgress{
+    position:fixed; left:0; right:0; top:0; z-index:9000;
+    height:14px; pointer-events:none;
+    padding-top:env(safe-area-inset-top, 0px);
+  }
+  #jpProgress .jp-track{
+    position:absolute; left:0; right:0; top:50%; height:2px; margin-top:-1px;
+    background:rgba(255,255,255,0.12);
+  }
+  #jpProgress .jp-fill{
+    position:absolute; left:0; top:0; height:100%; width:0;
+    background:linear-gradient(90deg, rgba(188,0,45,0.0), rgba(188,0,45,0.85));
+  }
+  #jpProgress .jp-flag{
+    position:absolute; top:50%; left:0; width:14px; height:14px;
+    margin:-7px 0 0 -7px; transform:translate3d(0,0,0);
+    will-change:transform;
+    filter:drop-shadow(0 0 3px rgba(0,0,0,0.6));
+  }
+  #jpProgress.at-end .jp-flag{ animation:jpPulse 1.6s ease-in-out infinite; }
+  @keyframes jpPulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.25);} }
+  @media (prefers-reduced-motion: reduce){ #jpProgress.at-end .jp-flag{ animation:none; } }
+</style>
 </head>
 <body>
+<div id="jpProgress" aria-hidden="true">
+  <div class="jp-track"><div class="jp-fill" id="jpFill"></div></div>
+  <svg class="jp-flag" id="jpFlag" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="7" cy="7" r="6.5" fill="#ffffff" stroke="rgba(0,0,0,0.35)" stroke-width="0.5"/>
+    <circle cx="7" cy="7" r="3.6" fill="#BC002D"/>
+  </svg>
+</div>
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
   <div class="splash-content" id="splashContent">
     <div class="splash-artwork-wrap">
@@ -2271,5 +2303,29 @@
   </div>
 </div>
 <div id="appOverlay" aria-hidden="false"></div>
+<script id="jp-progress-script">
+(function(){
+  var bar = document.getElementById('jpProgress');
+  var fill = document.getElementById('jpFill');
+  var flag = document.getElementById('jpFlag');
+  if(!bar || !fill || !flag) return;
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var el = document.scrollingElement || document.documentElement;
+    var max = el.scrollHeight - el.clientHeight;
+    var p = max > 0 ? Math.min(1, Math.max(0, el.scrollTop / max)) : 0;
+    var w = bar.clientWidth;
+    var x = p * w;
+    flag.style.transform = 'translate3d(' + x + 'px,0,0)';
+    fill.style.width = x + 'px';
+    if(p >= 0.985){ bar.classList.add('at-end'); } else { bar.classList.remove('at-end'); }
+  }
+  function req(){ if(!ticking){ ticking = true; requestAnimationFrame(update); } }
+  window.addEventListener('scroll', req, {passive:true});
+  window.addEventListener('resize', req);
+  update();
+})();
+</script>
 </body>
 </html>
