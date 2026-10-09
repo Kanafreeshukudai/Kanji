@@ -53,7 +53,7 @@
     /* Simmetrik ease-in-out: avvalgi egri chiziq (.3,.8,.2,1) burilishning ~75% ini birinchi
        ~170ms da bajarib, qolganini sekin tinchlantirardi — old yuz bir zumda "uzilib" ketib,
        tepa/pastki chetlar sakrab, oxirida qotib qolgandek ko'rinardi. */
-    --flip-ease: cubic-bezier(.37,0,.2,1);
+    --flip-ease: cubic-bezier(.3,.7,.25,1);
     /* umumiy kontent kengligi — kichik ekranda 480px, katta ekranlarda
        pastdagi @media qoidalari orqali kengayadi, shu bilan kartochkalar
        katta ekranda markazdagi tor ustunga siqilib qolmaydi */
@@ -159,7 +159,11 @@
   @supports (overflow:clip){
     html,body{overflow-x:clip;}
   }
-  html{scrollbar-gutter:stable; overscroll-behavior-y:none; overscroll-behavior-x:none;}
+  html{scrollbar-gutter:auto; overscroll-behavior-y:none; overscroll-behavior-x:none;}
+  /* Desktopda sahifa scrollbar'i ko'rinmaydi: kartochka o'ng chetdan ham xuddi chapdagidek
+     ekran chetigacha chiqadi (scrollbar joyi kartochkani kesib qo'ymaydi). Scroll ishlashda davom etadi. */
+  html{scrollbar-width:none;}
+  html::-webkit-scrollbar{ width:0; height:0; display:none; }
   body{
     margin:0;
     min-height:100vh;
@@ -2493,6 +2497,20 @@
   @media (min-width:1400px){
     :root{ --content-max: 1180px; }
   }
+
+  /* ---------- YANGI KARTOCHKA: pastdan fade bilan chiqish ----------
+     Eski kartochka uchib ketgach, keyingisi birdan emas, yumshoq paydo bo'ladi. */
+  .card.card-enter{
+    animation:cardEnterFade .55s cubic-bezier(.2,.7,.2,1) .12s backwards;
+  }
+  @keyframes cardEnterFade{
+    from{ opacity:0; transform:translateY(34px) scale(.96); }
+    to{ opacity:1; transform:none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card.card-enter{ animation:cardEnterFadeSimple .3s ease backwards; }
+  }
+  @keyframes cardEnterFadeSimple{ from{opacity:0;} to{opacity:1;} }
 
   /* ---------- STAGE / SWIPE CARD ---------- */
   .stage{
@@ -6350,6 +6368,17 @@
     font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
   }
   .chat-admin-open-btn:active{transform:scale(0.94);}
+  .chat-rules-overlay{position:fixed; inset:0; z-index:10650; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(6,7,9,0.7);}
+  .chat-rules-overlay.show{display:flex;}
+  .chat-rules-card{width:100%; max-width:380px; max-height:88vh; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:20px; padding:18px; background:var(--panel-1); border:1px solid var(--glass-border-soft); display:flex; flex-direction:column; gap:12px;}
+  .chat-rules-card h4{margin:0; font-size:17px; font-weight:800; color:var(--ink);}
+  .chat-rules-intro{margin:0; font-size:13px; line-height:1.5; color:var(--ink-soft);}
+  .chat-rules-list{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:13px; line-height:1.5; color:var(--ink);}
+  .chat-rules-list b{font-weight:700; color:var(--ink);}
+  .chat-rules-warn{padding:10px 12px; border-radius:12px; font-size:12.5px; line-height:1.5; color:var(--ink); background:rgba(217,105,79,0.14); border:1px solid rgba(229,135,111,0.45);}
+  .chat-rules-warn b{color:var(--accent-soft);}
+  .chat-rules-ok{border:1px solid var(--glass-border-soft); background:linear-gradient(135deg, var(--accent), var(--gold)); color:#fff8ef; border-radius:12px; padding:11px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;}
+  .chat-rules-ok:active{transform:scale(0.98);}
   .chat-admin-overlay{position:fixed; inset:0; z-index:10600; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(6,7,9,0.62);}
   .chat-admin-overlay.show{display:flex;}
   .chat-admin-card{width:100%; max-width:340px; border-radius:20px; padding:16px; background:var(--panel-1); border:1px solid var(--glass-border-soft); display:flex; flex-direction:column; gap:10px;}
@@ -6921,6 +6950,12 @@
     padding:0 4px;
   }
   .chat-msg.mine .chat-msg-nick{color:var(--accent-soft);}
+  .chat-owner-badge{
+    display:inline-block; margin-left:6px; padding:1px 6px;
+    border-radius:6px; font-size:9.5px; font-weight:800; letter-spacing:.6px; line-height:1.5;
+    color:#1a1206; background:linear-gradient(135deg, var(--gold), #e8c98f);
+    vertical-align:1px;
+  }
   .chat-bubble{
     padding:9px 13px;
     border-radius:16px;
@@ -6983,6 +7018,61 @@
   .chat-send-btn svg{width:17px; height:17px;}
   .chat-send-btn:active{transform:scale(0.9);}
   .chat-send-btn:disabled{opacity:0.45; cursor:default;}
+
+  /* ---------- JAVOB BERISH: chapga surib javob yozish (Telegram uslubida) ---------- */
+  .chat-msg{ position:relative; touch-action:pan-y; }
+  .chat-msg.mine{ padding-right:34px; }
+  .chat-msg-body{ transition:transform .18s ease; will-change:transform; }
+  .chat-msg-body.swiping{ transition:none; }
+  .chat-swipe-ico{
+    position:absolute; top:50%; left:0;
+    width:26px; height:26px; margin-top:-13px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border-soft);
+    color:var(--moss-soft);
+    opacity:0; pointer-events:none;
+    transform:scale(.6);
+  }
+  .chat-swipe-ico svg{ width:14px; height:14px; }
+  .chat-msg.mine .chat-swipe-ico{ color:var(--accent-soft); }
+  .chat-quote{
+    display:flex; flex-direction:column; gap:1px;
+    border-left:3px solid var(--moss-soft);
+    background:rgba(0,0,0,0.18);
+    border-radius:8px;
+    padding:4px 8px;
+    margin-bottom:5px;
+    font-size:calc(var(--chat-fs, 13.5px) * 0.82);
+    line-height:1.3;
+    cursor:pointer;
+    white-space:normal;
+    min-width:0;
+  }
+  .chat-msg.mine .chat-quote{ border-left-color:#fff8ef; }
+  .chat-quote b{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chat-quote span{ opacity:.85; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; max-width:100%; }
+  .chat-msg.flash .chat-bubble{ box-shadow:0 0 0 2px var(--gold); }
+  .chat-reply-bar{
+    flex:none;
+    display:flex; align-items:center; gap:10px;
+    margin:0 14px;
+    padding:8px 10px 8px 12px;
+    border-top:1px solid var(--glass-border-soft);
+    border-left:3px solid var(--moss-soft);
+    background:rgba(0,0,0,0.12);
+  }
+  .chat-reply-bar[hidden]{ display:none; }
+  .chat-reply-bar-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .chat-reply-bar-body b{ font-size:12.5px; font-weight:800; color:var(--moss-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chat-reply-bar-body span{ font-size:12.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chat-reply-cancel{
+    flex:none; width:26px; height:26px; border-radius:50%;
+    border:none; background:var(--glass-bg-strong); color:var(--ink-soft);
+    font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
 
   /* ---------- AI YORDAMCHI oynasi — oddiy Chat'dan farqli, violat rangda ---------- */
   .ai-assist-overlay{
@@ -8783,6 +8873,7 @@
       </div>
     </div>
     <div class="chat-header-actions">
+      <button class="chat-nick-edit-btn" id="chatRulesBtn" type="button" aria-label="Chat qoidalari"><svg class="chat-btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Qoidalar</button>
       <button class="chat-admin-open-btn" id="chatAdminOpenBtn" type="button"><svg class="chat-btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin</button>
       <button class="chat-nick-edit-btn" id="chatNickEditBtn" type="button" aria-label="Nickname'ni tahrirlash"><svg class="chat-btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Nickname</button>
       <button class="chat-font-btn" id="chatFontBtn" type="button" aria-label="Shrift o'lchamini sozlash" aria-expanded="false" aria-controls="chatFontPop">A<small>A</small></button>
@@ -8806,11 +8897,35 @@
       <span>Yangi xabar</span><em class="chat-unread-badge" id="chatPillBadge">0</em>
     </button>
   </div>
+  <div class="chat-reply-bar" id="chatReplyBar" hidden>
+    <div class="chat-reply-bar-body"><b id="chatReplyNick"></b><span id="chatReplyText"></span></div>
+    <button type="button" class="chat-reply-cancel" id="chatReplyCancel" aria-label="Javobni bekor qilish">&times;</button>
+  </div>
   <div class="chat-input-bar">
     <input id="chatInput" type="text" maxlength="500" placeholder="Xabar yozing..." autocomplete="off" autocorrect="off">
     <button class="chat-send-btn" id="chatSendBtn" type="button" aria-label="Yuborish">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
     </button>
+  </div>
+</div>
+
+<!-- ---------- CHAT QOIDALARI ---------- -->
+<div class="chat-rules-overlay" id="chatRulesOverlay" aria-hidden="true" role="dialog" aria-label="Chat qoidalari">
+  <div class="chat-rules-card">
+    <h4>📜 Chat qoidalari</h4>
+    <p class="chat-rules-intro">Chatda hamma uchun qulay va hurmatli muhit saqlanadi. Iltimos, yozishdan oldin quyidagi qoidalar bilan tanishib chiqing.</p>
+    <ol class="chat-rules-list">
+      <li><b>Hurmat bilan yozing.</b> Haqorat, so'kinish va boshqalarni kamsitish (millati, tili, jinsi, dini, yoshi yoki jismoniy holati uchun) qat'iyan taqiqlanadi.</li>
+      <li><b>Spam va reklama yo'q.</b> Bir xil xabarni takrorlash, reklama va begona havolalar yuborish taqiqlanadi.</li>
+      <li><b>Tahdid va shaxsiy ma'lumot yo'q.</b> Boshqalarni tahdid qilish hamda telefon raqami, manzil yoki parol kabi shaxsiy ma'lumotlarni oshkor qilish man etiladi.</li>
+      <li><b>Mavzuga rioya qiling.</b> Kanji o'rganish va foydali suhbatga e'tibor bering. Ataylab chalg'itish va yolg'on ma'lumot tarqatish mumkin emas.</li>
+      <li><b>Qoidani buzgan xabarlar</b> o'chirilishi mumkin.</li>
+      <li><b>Takroriy buzilishlar.</b> Qoidalar qayta-qayta buzilsa, bu ilovadan foydalanishning cheklanishigacha olib kelishi mumkin.</li>
+    </ol>
+    <div class="chat-rules-warn">
+      <b>⚠️ Ogohlantirish:</b> Qoidalar buzilsa, administrator qaroriga ko'ra foydalanuvchiga <b>vaqtincha mute</b> (yozish cheklovi) yoki <b>chatdan doimiy ban</b> beriladi. Ban berilgan foydalanuvchi chatga xabar yoza olmaydi.
+    </div>
+    <button class="chat-rules-ok" id="chatRulesOk" type="button">Tushunarli</button>
   </div>
 </div>
 
@@ -11340,7 +11455,7 @@
   const stage = document.getElementById('stage');
   const progressNote = document.getElementById('progressNote');
 
-  function renderStage(){
+  function renderStage(enter){
     // eski faol kartochkaga bog'langan window-darajasidagi (mousemove/mouseup)
     // event listenerlar - agar tozalanmasa, har yangi kartochka chiqqanda
     // yig'ilib boraveradi (memory leak) va uzoq foydalanishda sekinlashuvga
@@ -11396,6 +11511,7 @@
         </div>
       </div>
     `;
+    if(enter) card.classList.add('card-enter');
     stage.appendChild(card);
     attachCardEvents(card);
     updateHintCounts();
@@ -11778,7 +11894,10 @@
       // Yumshoq uchish: animatsiya tugagunga qadar kartochka almashtirilmaydi.
       // Sekin boshlanadi, tekis uchadi, oxirida nozik tushib yo'qoladi.
       const DUR = 640;
-      card.style.transition = `transform ${DUR}ms cubic-bezier(.33,0,.18,1), opacity ${DUR}ms cubic-bezier(.45,0,.7,.6)`;
+      // Silliq uchish: tezlik birdan (tiqilmasdan) boshlanadi va tekis sekinlashadi.
+      // Kartochka oxirigacha to'liq ko'rinib turadi, faqat so'nggi qismida yumshoq so'nadi.
+      card.style.willChange = 'transform, opacity';
+      card.style.transition = `transform ${DUR}ms cubic-bezier(.22,.7,.3,1), opacity ${Math.round(DUR*0.55)}ms ease-in ${Math.round(DUR*0.45)}ms`;
       card.style.transform = `translateX(${dir*560}px) translateY(-14px) rotate(${dir*24}deg) scale(.93)`;
       card.style.opacity = '0';
       edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
@@ -11865,7 +11984,7 @@
       customKnownSet.add(id); // Maxsus Flashcarddan bilinganlar alohida guruhlanadi
     }
     saveState();
-    renderStage();
+    renderStage(true);
     updateCounts(); // joriy kun tugmasidagi son (badge) darhol yangilansin — aks holda "muzlab" qolib, tab almashtirilgunicha eski son ko'rinaverar edi
     // pulse yangi kartochka chizilgandan keyingi kadrda boshlansin — shunda ikkalasi bir kadrda og'irlashmaydi
     requestAnimationFrame(pulseKnownBanner);
@@ -11913,7 +12032,7 @@
     const id = queues[currentDay].shift();
     queues[currentDay].push(id);
     saveState();
-    renderStage();
+    renderStage(true);
     updateCounts();
   }
 
@@ -13850,13 +13969,15 @@
       const avatar = photo
         ? `<img class="chat-avatar" src="${escAttr(photo)}" alt="" referrerpolicy="no-referrer" draggable="false" onerror="this.outerHTML='<div class=&quot;chat-avatar chat-avatar-fallback&quot;>${initial}</div>'">`
         : `<div class="chat-avatar chat-avatar-fallback">${initial}</div>`;
-      return `<div class="chat-msg ${mine?'mine':'theirs'}" data-i="${i}">
+      const quote = m.replyTo ? `<div class="chat-quote" data-rid="${escAttr(m.replyTo.id)}"><b>${esc(m.replyTo.nick)}</b><span>${esc(m.replyTo.text)}</span></div>` : '';
+      return `<div class="chat-msg ${mine?'mine':'theirs'}" data-i="${i}" data-id="${escAttr(m.id)}">
         ${avatar}
         <div class="chat-msg-body">
-          <div class="chat-msg-nick">${esc(m.nick)}</div>
-          <div class="chat-bubble">${esc(m.text)}${reactChipsHtml(m, i, myUid)}</div>
+          <div class="chat-msg-nick">${esc(m.nick)}${(typeof window.__kanjiIsOwnerEmail === 'function' && window.__kanjiIsOwnerEmail(m.email)) ? '<span class="chat-owner-badge">OWNER</span>' : ''}</div>
+          <div class="chat-bubble">${quote}${esc(m.text)}${reactChipsHtml(m, i, myUid)}</div>
           <div class="chat-msg-time">${formatChatTime(m.time)}${m.edited?' · tahrirlangan':''}</div>
         </div>
+        <span class="chat-swipe-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></span>
       </div>`;
     }).join('');
     if(!wrap._rendered || nearBottom || (grew && lastMine)) wrap.scrollTop = wrap.scrollHeight;
@@ -14097,6 +14218,116 @@
       if(m) toggleChatReaction(m, chip.dataset.k);
     });
   })();
+  // ---------- JAVOB BERISH (chapga surib, Telegram uslubida) ----------
+  let chatReplyTo = null;
+  function setChatReply(m){
+    chatReplyTo = { id: m.id, nick: m.nick || 'Foydalanuvchi', text: String(m.text || '').slice(0, 120) };
+    const bar = document.getElementById('chatReplyBar');
+    const nk = document.getElementById('chatReplyNick');
+    const tx = document.getElementById('chatReplyText');
+    if(nk) nk.textContent = chatReplyTo.nick;
+    if(tx) tx.textContent = chatReplyTo.text;
+    if(bar) bar.hidden = false;
+    const input = document.getElementById('chatInput');
+    if(input && !input.disabled) input.focus();
+  }
+  function clearChatReply(){
+    chatReplyTo = null;
+    const bar = document.getElementById('chatReplyBar');
+    if(bar) bar.hidden = true;
+  }
+  (function initChatSwipeReply(){
+    const wrap = document.getElementById('chatMessages');
+    if(!wrap) return;
+    const TRIGGER = 56, MAX = 72;
+    let el = null, body = null, ico = null, sx = 0, sy = 0, dx = 0, locked = null;
+    const cancelBtn = document.getElementById('chatReplyCancel');
+    if(cancelBtn) cancelBtn.addEventListener('click', clearChatReply);
+    function reset(){
+      if(body){ body.classList.remove('swiping'); body.style.transform = ''; }
+      if(ico){ ico.style.opacity = ''; ico.style.transform = ''; ico.style.left = ''; }
+      el = null; body = null; ico = null; locked = null; dx = 0;
+    }
+    wrap.addEventListener('pointerdown', (e)=>{
+      if(e.pointerType === 'mouse' && e.button !== 0) return;
+      if(e.target.closest('.chat-react-chip') || e.target.closest('.chat-quote')) return;
+      if(myBlockActive()) return;
+      const row = e.target.closest('.chat-msg');
+      if(!row || !row.dataset.id) return;
+      el = row;
+      body = row.querySelector('.chat-msg-body');
+      ico = row.querySelector('.chat-swipe-ico');
+      sx = e.clientX; sy = e.clientY; dx = 0; locked = null;
+      // yashirin belgi: arrow xabarning yonida turadi (o'ngdagi bubble yoki avatar yonida)
+      if(ico && body){
+        const mine = row.classList.contains('mine');
+        const x = mine ? (row.offsetWidth - 28) : (body.offsetLeft + body.offsetWidth + 8);
+        ico.style.left = x + 'px';
+      }
+    });
+    wrap.addEventListener('pointermove', (e)=>{
+      if(!el) return;
+      const mx = e.clientX - sx, my = e.clientY - sy;
+      if(locked === null){
+        if(Math.abs(mx) < 6 && Math.abs(my) < 6) return;
+        // faqat chapga (manfiy) gorizontal harakat — vertikal scroll bilan adashtirmaslik uchun
+        locked = (mx < 0 && Math.abs(mx) > Math.abs(my) * 1.2) ? 'h' : 'v';
+        if(locked === 'v'){ reset(); return; }
+        body.classList.add('swiping');
+      }
+      if(locked !== 'h') return;
+      dx = Math.max(-MAX, Math.min(0, mx));
+      body.style.transform = 'translateX(' + dx + 'px)';
+      const p = Math.min(1, -dx / TRIGGER);
+      ico.style.opacity = String(p);
+      ico.style.transform = 'scale(' + (0.6 + 0.4 * p).toFixed(2) + ')';
+    });
+    function finish(){
+      if(!el) return;
+      const row = el;
+      const fire = locked === 'h' && dx <= -TRIGGER;
+      reset();
+      if(!fire) return;
+      const id = row.dataset.id;
+      const m = lastChatMsgs.find(x => x.id === id);
+      if(!m) return;
+      try{ if(navigator.vibrate) navigator.vibrate(10); }catch(_){}
+      setChatReply(m);
+    }
+    wrap.addEventListener('pointerup', finish);
+    wrap.addEventListener('pointercancel', ()=>{ if(el) reset(); });
+    // javob olingan xabar (quote) bosilsa — asl xabarga o'tish
+    wrap.addEventListener('click', (e)=>{
+      const q = e.target.closest('.chat-quote');
+      if(!q) return;
+      const target = wrap.querySelector('.chat-msg[data-id="' + q.dataset.rid + '"]');
+      if(!target) return;
+      target.scrollIntoView({ behavior:'smooth', block:'center' });
+      target.classList.add('flash');
+      setTimeout(()=>target.classList.remove('flash'), 1200);
+    });
+  })();
+  // ---------- CHAT QOIDALARI oynasi ----------
+  (function initChatRules(){
+    const ov = document.getElementById('chatRulesOverlay');
+    const btn = document.getElementById('chatRulesBtn');
+    const ok = document.getElementById('chatRulesOk');
+    if(!ov) return;
+    window.__kanjiShowChatRules = function(){
+      if(ov.classList.contains('show')) return;
+      ov.classList.add('show'); ov.setAttribute('aria-hidden', 'false');
+      lockPageScroll();
+    };
+    function hideRules(){
+      if(!ov.classList.contains('show')) return;
+      ov.classList.remove('show'); ov.setAttribute('aria-hidden', 'true');
+      unlockPageScroll();
+      try{ localStorage.setItem('kanjiChatRulesSeen', '1'); }catch(_){}
+    }
+    if(btn) btn.addEventListener('click', ()=>window.__kanjiShowChatRules());
+    if(ok) ok.addEventListener('click', hideRules);
+    ov.addEventListener('click', (e)=>{ if(e.target === ov) hideRules(); });
+  })();
   function sendChatMessage(){
     const input = document.getElementById('chatInput');
     if(!input) return;
@@ -14107,9 +14338,11 @@
       return;
     }
     const customNick = getNickname();
+    const replyTarget = chatReplyTo;
     input.value = '';
     input.disabled = true;
-    Promise.resolve(window.__kanjiSendChatMessage(text, customNick || null))
+    clearChatReply();
+    Promise.resolve(window.__kanjiSendChatMessage(text, customNick || null, replyTarget))
       .catch(()=>{ alert("Xabar yuborilmadi. Internet aloqasini tekshiring yoki hisobingizga qaytadan kiring."); })
       .then(()=>{ input.disabled = false; input.focus(); applyChatBlock(); });
   }
@@ -14151,6 +14384,8 @@
     // Chat ochilganda eng pastga tushamiz va barcha xabarlar o'qilgan hisoblanadi
     const mw = document.getElementById('chatMessages'); if(mw) mw.scrollTop = mw.scrollHeight;
     markChatRead(); updateChatUnread();
+    // Qoidalar: birinchi marta chat ochilganda avtomatik ko'rsatiladi
+    try{ if(!localStorage.getItem('kanjiChatRulesSeen') && window.__kanjiShowChatRules) window.__kanjiShowChatRules(); }catch(_){}
     // Klaviatura oyna ochilishi bilan birga chiqmaydi — faqat yozish maydoniga bosilganda ochiladi
   }
   function closeChatPanel(){
@@ -17432,6 +17667,9 @@
   const isAdminEmail = (e) => !!e && PRESENCE_ADMIN_EMAILS.some((a) => a.toLowerCase() === String(e).toLowerCase());
   window.__kanjiIsAdmin = () => !!auth.currentUser && isAdminEmail(auth.currentUser.email);
   window.__kanjiIsAdminEmail = isAdminEmail;
+  // Chat'da OWNER belgisi — faqat egasi (adminlar ro'yxatiga kirmaydi; admin belgisi keyinroq qo'shiladi)
+  const CHAT_OWNER_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
+  window.__kanjiIsOwnerEmail = (e) => !!e && CHAT_OWNER_EMAILS.some((a) => a.toLowerCase() === String(e).toLowerCase());
   const chatRefresh = () => { if (typeof window.__kanjiChatRefresh === "function") window.__kanjiChatRefresh(); };
 
   // ---------- Avatarlar: xabardagi rasm -> shu foydalanuvchining boshqa xabarlari -> chatProfiles/{uid} ----------
@@ -17494,6 +17732,7 @@
             email: data.email || "",
             photo: data.photo || "",
             text: data.text || "",
+            replyTo: (data.replyTo && data.replyTo.id) ? data.replyTo : null,
             edited: !!data.editedAt,
             reactions: (data.reactions && typeof data.reactions === "object") ? data.reactions : {},
             time: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().getTime() : Date.now()
@@ -17578,7 +17817,7 @@
   window.__kanjiChatUnblock = (email) => deleteDoc(doc(db, "chatBans", email));
 
   // Asosiy (module bo'lmagan) skriptdagi chat UI shu funksiyalarni chaqiradi.
-  window.__kanjiSendChatMessage = function (text, customNick) {
+  window.__kanjiSendChatMessage = function (text, customNick, replyTo) {
     const user = auth.currentUser;
     if (!user) return Promise.reject(new Error("not-logged-in"));
     const nick = (customNick || user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 40);
@@ -17588,6 +17827,11 @@
       email: (user.email || "").toLowerCase(),
       photo: user.photoURL || "",
       text: String(text).slice(0, 500),
+      ...(replyTo && replyTo.id ? { replyTo: {
+        id: String(replyTo.id).slice(0, 100),
+        nick: String(replyTo.nick || "").slice(0, 60),
+        text: String(replyTo.text || "").slice(0, 120)
+      } } : {}),
       createdAt: serverTimestamp()
     });
   };
