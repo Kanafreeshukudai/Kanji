@@ -11977,6 +11977,12 @@
 
     card.style.pointerEvents = 'none';
     card.classList.add('card-forming');
+    setTimeout(()=>{   // zaxira: animatsiya o'chiq bo'lsa kartochka qotib qolmasin
+      if(card.classList.contains('card-forming')){
+        card.classList.remove('card-forming');
+        card.style.pointerEvents = '';
+      }
+    }, 1500);
 
     try{
       const ctx = getCreationAudioCtx();
@@ -14016,6 +14022,13 @@
     }
     if(shell){
       shell.classList.add('app-shell-reveal');
+      // animatsiyalar o'chiq bo'lsa animationend kelmaydi — zaxira vaqt bilan ham ochiladi
+      setTimeout(function(){
+        if(!shell.classList.contains('app-shell-ready')){
+          shell.classList.remove('app-shell-reveal');
+          shell.classList.add('app-shell-ready');
+        }
+      }, 1300);
       // animationend ichidagi elementlardan ham ko'tarilib keladi (bubbling),
       // shuning uchun faqat shell'ning o'zi tugatganini tekshiramiz
       shell.addEventListener('animationend', function onShellRevealEnd(e){
