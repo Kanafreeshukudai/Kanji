@@ -2090,6 +2090,28 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     #pageCurtain .pc-glyph.pc-word, #pageCurtain .pc-dots{ animation:none; }
   }
 </style>
+<style id="mochi-gaze-style">
+  /* Qarash: butun bosh (tana) biroz buriladi, yuz qismlari va qorachiqlar yo'nalishga siljiydi.
+     Qiymatlar JS tomonidan --gx (-1..1, chap/o'ng) va --gy (-1..1, yuqori/past) sifatida beriladi */
+  .mochi-body{ rotate: calc(var(--gx,0) * 5deg); transition: rotate .45s ease; }
+  .mochi-eye, .mochi-blush, .mochi-mouth{
+    translate: calc(var(--gx,0) * 4px) calc(var(--gy,0) * 3px);
+    transition: translate .45s ease;
+  }
+  .mochi-pupil{ translate: calc(var(--gx,0) * 2.5px) calc(var(--gy,0) * 2px); }
+
+  /* Xato javob: joyida turib, boshni chapga-o'ngga "yo'q" degandek tez-tez burish (translate emas, faqat rotate) */
+  @keyframes mochiNo{
+    0%,100%{ rotate:0deg; }
+    12%{ rotate:-9deg; }
+    28%{ rotate:9deg; }
+    44%{ rotate:-7deg; }
+    60%{ rotate:6deg; }
+    76%{ rotate:-3deg; }
+    90%{ rotate:1.5deg; }
+  }
+  #mochi.no-shake{ animation:mochiNo .75s ease both; transform-origin:50% 50%; }
+</style>
 </head>
 <body>
 <div id="enterIntro" aria-hidden="true">
@@ -4593,6 +4615,7 @@ function spawnConfetti(anchorEl){
 function mochiHappy(){
   const body = document.querySelector('.mochi-body');
   if(!body) return;
+  if(window.mochiLook) window.mochiLook(0, -0.6, 1500); // quvnoq, yuqoriga qarash
   body.classList.remove('sad');
   body.classList.add('happy');
   // Sparkles
@@ -4615,6 +4638,14 @@ function mochiHappy(){
 function mochiSad(){
   const body = document.querySelector('.mochi-body');
   if(!body) return;
+  window.mochiFreezeUntil = Date.now() + 1300; // joyida turib "yo'q" deydi
+  const wrapEl = document.getElementById('mochi');
+  if(wrapEl){
+    wrapEl.classList.remove('no-shake'); void wrapEl.offsetWidth;
+    wrapEl.classList.add('no-shake');
+    setTimeout(()=>wrapEl.classList.remove('no-shake'), 800);
+  }
+  if(window.mochiLook) window.mochiLook(0, 1, 2200); // pastga, xijolat qarash
   body.classList.remove('happy');
   body.classList.add('sad');
   // Tears
@@ -4764,7 +4795,10 @@ window.addEventListener('DOMContentLoaded', function(){
     const quizCard = document.querySelector('.quiz-card');
     quizModeActive = isQuizVisible && quizCard;
 
-    if(quizModeActive){
+    const mochiFrozen = Date.now() < (window.mochiFreezeUntil || 0);
+    if(mochiFrozen){
+      /* xato javob: joyida turib "yo'q" deydi, boshqa joyga ketmaydi */
+    } else if(quizModeActive){
       const target = getQuizTargetPos();
       if(target){
         x += (target.x - x) * 0.07;
@@ -4786,28 +4820,43 @@ window.addEventListener('DOMContentLoaded', function(){
       if(y > maxY){ y = maxY; targetVy = -Math.abs(targetVy) * 0.8 - 0.1; }
     }
 
-    avoidChatWindow();
+    if(!mochiFrozen) avoidChatWindow();
     mochi.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
     requestAnimationFrame(updateMochi);
   }
 
   setInterval(()=>{ if(!quizModeActive && !dragging && !isSleeping && Math.random() < 0.35) pickNewDirection(); }, 2500);
 
-  /* --- Ko'z qorachig'i sichqonchaga qarab turadi (uxlamaganda) --- */
-  const pupils = mochi.querySelectorAll('.mochi-pupil');
+  /* --- Qarash: sichqoncha yo'nalishi, tasodifiy qarashlar (chap, o'ng, yuqori, past) --- */
+  let gazeLockUntil = 0;
+  let lastMouseLook = 0;
+  function setGaze(gx, gy){
+    mochi.style.setProperty('--gx', gx);
+    mochi.style.setProperty('--gy', gy);
+  }
+  window.mochiLook = function(gx, gy, ms){
+    gazeLockUntil = Date.now() + ms;
+    setGaze(gx, gy);
+    setTimeout(()=>{ if(Date.now() >= gazeLockUntil) setGaze(0, 0); }, ms + 30);
+  };
   document.addEventListener('mousemove', (e)=>{
-    if(isSleeping) return;
+    if(isSleeping || Date.now() < gazeLockUntil) return;
     const rect = mochi.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    const dx = e.clientX - cx;
-    const dy = e.clientY - cy;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    const maxOff = 3.5;
-    const offX = dist > 0 ? (dx/dist)*maxOff : 0;
-    const offY = dist > 0 ? (dy/dist)*maxOff : 0;
-    pupils.forEach(p=>{ p.style.transform = `translate(${offX}px, ${offY}px)`; });
+    const dx = e.clientX - (rect.left + rect.width/2);
+    const dy = e.clientY - (rect.top + rect.height/2);
+    const clamp = v => Math.max(-1, Math.min(1, v));
+    lastMouseLook = Date.now();
+    setGaze(clamp(dx/220), clamp(dy/220));
   });
+  setInterval(()=>{
+    if(isSleeping || dragging || quizModeActive) return;
+    if(Date.now() < gazeLockUntil || Date.now() - lastMouseLook < 3000) return;
+    if(Math.random() < 0.6){
+      const dirs = [[-1,0],[1,0],[0,-1],[0,1],[0,0]];
+      const d = dirs[Math.floor(Math.random()*dirs.length)];
+      window.mochiLook(d[0], d[1], 1200 + Math.random()*900);
+    }
+  }, 2800);
 
   /* --- Ko'z yumib ochish: AFK vaqtida tez-tez (uxlamaganda) --- */
   let lastActivity = Date.now();
