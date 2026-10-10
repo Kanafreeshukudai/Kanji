@@ -8417,20 +8417,39 @@
 </style>
 <style id="account-menu-order">
   /* Akkaunt menyusi tartibi: 1 ism/akkaunt, 2 fon chiziqlari, 3 fon zarralari, 4 yengil rejim,
-     5 yuqori kontrast, 6 qaydlar, 7 ovoz, 8 xatolik/shikoyat, 9 ilovani ulashish, 10 chiqish */
+     5 yuqori kontrast, 6 ovoz, 7 qaydlar, 8 xatolik/shikoyat, 9 ilovani ulashish, 10 chiqish */
   .auth-dropdown{ display:flex; flex-direction:column; }
   #user-name{ order:1; --i:0; }
   #bgFxToggleBtn{ order:2; --i:1; }
   #bgDotsToggleBtn{ order:3; --i:2; }
-  #perfModeBtn{ order:4; --i:3; }
-  #contrastToggleBtn{ order:5; --i:4; }
-  #notes-btn{ order:6; --i:5; }
-  #soundToggleBtn{ order:7; --i:6; }
-  #bugReportBtn{ order:8; --i:7; }
-  #shareAppBtn{ order:9; --i:8; }
-  #logout-btn{ order:10; --i:9; }
+  #mossBgBtn{ order:4; --i:3; }
+  #perfModeBtn{ order:5; --i:4; }
+  #contrastToggleBtn{ order:6; --i:5; }
+  #animToggleBtn{ order:7; --i:6; }
+  #soundToggleBtn{ order:8; --i:7; }
+  #notes-btn{ order:9; --i:8; }
+  #bugReportBtn{ order:10; --i:9; }
+  #shareAppBtn{ order:11; --i:10; }
+  #logout-btn{ order:12; --i:11; }
   /* Barcha on/off tugmalar bir ustunda: nomi chapda, kaliti hamma uchun o'ngda bir chiziqda */
   .auth-dropdown .auth-bgfx-btn{ justify-content:space-between; }
+</style>
+<style id="no-anim-all">
+  /* "Animatsiyalar" o'chirilganda: barcha animatsiya va o'tishlar (transition) to'xtaydi */
+  html.no-anim *, html.no-anim *::before, html.no-anim *::after{
+    animation:none !important;
+    transition:none !important;
+    scroll-behavior:auto !important;
+  }
+</style>
+<style id="moss-bg-style">
+  .moss-bg{
+    position:fixed; top:0; left:0; width:100%; height:100vh;
+    pointer-events:none; opacity:0; transition:opacity .4s ease;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='none' stroke='%237c9a6b' stroke-opacity='0.22' stroke-width='1.2'%3E%3Cpath d='M0 40 C40 10 80 70 120 40 S160 40 160 40'/%3E%3Cpath d='M0 100 C40 70 80 130 120 100 S160 100 160 100'/%3E%3Cpath d='M0 160 C40 130 80 190 120 160'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+  html.moss-bg .moss-bg{ opacity:1; }
 </style>
 </head>
 <script>
@@ -8453,7 +8472,7 @@
       var veryWeak = (nav.hardwareConcurrency && nav.hardwareConcurrency <= 2) ||
                      (nav.deviceMemory && nav.deviceMemory <= 2) || saveData;
       var root = document.documentElement;
-      if(perfPref === '1' || (perfPref !== '0' && veryWeak)){
+      if(perfPref === '1' || perfPref === null || perfPref !== '0'){   // standart: yengil rejim yoqilgan
         root.classList.add('lite'); root.classList.add('perf');
       } else if(perfPref === '0'){
         if(reduceMotion) root.classList.add('lite');   // foydalanuvchi to'liq sifatni tanladi
@@ -8555,6 +8574,11 @@
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
       <!-- Yengil rejim: kuchsiz qurilmalar uchun (shisha xiralashtirish, og'ir animatsiyalar o'chadi; holat qurilmada eslab qolinadi) -->
+      <button id="mossBgBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" aria-label="Fon naqshi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 7c3 0 3 3 6 3s3-3 6-3 3 3 6 3"/><path d="M3 13c3 0 3 3 6 3s3-3 6-3 3 3 6 3"/><path d="M3 19c3 0 3 3 6 3"/></svg>
+        <span>Fon naqshi</span>
+        <i class="bgfx-switch" aria-hidden="true"></i>
+      </button>
       <button id="perfModeBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" aria-label="Yengil rejim">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"></path></svg>
         <span>Yengil rejim</span>
@@ -8564,6 +8588,11 @@
       <button id="contrastToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" aria-label="Yuqori kontrast">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"></path></svg>
         <span>Yuqori kontrast</span>
+        <i class="bgfx-switch" aria-hidden="true"></i>
+      </button>
+      <button id="animToggleBtn" class="auth-bgfx-btn" type="button" role="switch" aria-checked="false" aria-label="Animatsiyalar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v4M3 5h4"/><path d="M19 17v4M17 19h4"/><path d="M11 17l2 4 2-6 4 2-2-4"/></svg>
+        <span>Animatsiyalar</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
       <!-- Ovoz: butun saytdagi tovushlarni (effektlar + qo'shiq) o'chirish/yoqish (holat qurilmada eslab qolinadi) -->
@@ -8698,6 +8727,7 @@
 <div class="intro-ripple" id="introRipple" aria-hidden="true"></div>
 <div class="intro-flare" id="introFlare" aria-hidden="true"></div>
 
+<div class="moss-bg" aria-hidden="true"></div>
 <div class="bg-scene" aria-hidden="true">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
@@ -13522,23 +13552,18 @@
     let worker = null, scope = null, resizeTimer = null, wasLite = false, wasPerf = false;
     // Yengil rejimda ikkala fon qatlami (chiziqlar va zarrachalar) vaqtincha butunlay o'chiriladi —
     // foydalanuvchining saqlangan tanlovi (fx) o'zgarmaydi, rejim o'chirilganda qayta tiklanadi.
-    let suppressed = document.documentElement.classList.contains('perf');
+    let suppressed = false;   // yengil rejimda ham fon chiziqlari va zarrachalar ochiq turadi
     // foydalanuvchi tanlovi shu qurilmada eslab qolinadi ('0' = o'chiq). Standart — chiziqlar yoqilgan.
     const KEYS = { lines:'kanji-bgfx', dots:'kanji-bgdots' };
-    const fx = { lines:false, dots:false };   // standart: ikkalasi ham O'CHIQ (og'ir — foydalanuvchi o'zi yoqadi)
+    const liteDefault = document.documentElement.classList.contains('perf');
+    const fx = { lines:false, dots:false };   // standart: ikkalasi ham o'chiq — foydalanuvchi o'zi yoqadi
     try{
-      // bir martalik tiklash: avval standart bo'yicha yoqiq bo'lib qolgan hammada fon o'chiriladi,
-      // shundan keyin foydalanuvchining o'z tanlovi eslab qolinadi
-      if(localStorage.getItem('kanji-bgfx-v2') !== '1'){
-        localStorage.setItem(KEYS.lines, '0');
-        localStorage.setItem(KEYS.dots, '0');
-        localStorage.setItem('kanji-bgfx-v2', '1');
-      }
-      fx.lines = localStorage.getItem(KEYS.lines) === '1';
-      fx.dots  = localStorage.getItem(KEYS.dots)  === '1';
-      // ikkala fon BIR VAQTDA ishlamaydi: ikkalasi yoqiq bo'lib qolsa, chiziqlar qoladi
-      if(fx.lines && fx.dots){ fx.dots = false; localStorage.setItem(KEYS.dots, '0'); }
-    }catch(_){ /* saqlash mumkin emas — ikkalasi o'chiq */ }
+      const userSetBg = localStorage.getItem('kanji-bgfx-user') === '1';
+      fx.lines = userSetBg ? localStorage.getItem(KEYS.lines) === '1' : false;
+      fx.dots  = userSetBg ? localStorage.getItem(KEYS.dots)  === '1' : false;
+      // oddiy rejimda ikkala fon bir vaqtda ishlamaydi (yengil rejimda ikkalasi ham ochiq)
+      if(!liteDefault && fx.lines && fx.dots){ fx.dots = false; }
+    }catch(_){ fx.lines = fx.dots = false; }
 
     function send(msg, transfer){
       if(mode === 'worker') worker.postMessage(msg, transfer || []);
@@ -13651,7 +13676,8 @@
       if(v === fx[name]) return;
       // Ikkala qatlam BIR VAQTDA ishlamaydi: biri yoqilsa, ikkinchisi avtomatik o'chadi
       // (u tez so'nadi, yangisi esa silliq paydo bo'ladi — o'tish yumshoq bo'ladi).
-      if(v){
+      const liteNow = document.documentElement.classList.contains('perf');
+      if(v && !liteNow){
         const other = (name === 'lines') ? 'dots' : 'lines';
         if(fx[other]){
           fx[other] = false;
@@ -13660,7 +13686,7 @@
         }
       }
       fx[name] = v;
-      try{ localStorage.setItem(KEYS[name], v ? '1' : '0'); }catch(_){}
+      try{ localStorage.setItem(KEYS[name], v ? '1' : '0'); localStorage.setItem('kanji-bgfx-user','1'); }catch(_){}
       if(!started) return;                               // "Boshlash" bosilmagan — start() o'zi hisobga oladi
       if(suppressed) return;                             // yengil rejim: tanlov saqlanadi, lekin qatlam ishga tushmaydi
       if(v && !booted) boot();
@@ -13669,7 +13695,7 @@
     function getLayer(name){ return !!fx[name]; }
     // Yengil rejim yoqilganda qatlamlar so'nadi (hisob-kitob to'xtaydi), o'chirilganda silliq qaytadi
     function setSuppressed(v){
-      v = !!v;
+      v = false;   // yengil rejim fon qatlamlarini o'chirmaydi
       if(v === suppressed) return;
       suppressed = v;
       if(!started) return;
@@ -18296,6 +18322,37 @@ window.addEventListener('message', function(e){
   }
   if(document.readyState === 'complete') start();
   else window.addEventListener('load', start);
+})();
+</script>
+<script id="anim-toggle-js">
+(function(){
+  var root = document.documentElement;
+  var btn = document.getElementById('animToggleBtn');
+  var off = false;
+  try{ off = localStorage.getItem('kanji-noanim') === '1'; }catch(e){}
+  function paint(){
+    root.classList.toggle('no-anim', off);
+    if(btn) btn.setAttribute('aria-checked', off ? 'false' : 'true');
+  }
+  paint();
+  if(!btn) return;
+  btn.addEventListener('click', function(){
+    off = !off; paint();
+    try{ localStorage.setItem('kanji-noanim', off ? '1' : '0'); }catch(e){}
+  });
+})();
+</script>
+<script id="moss-bg-js">
+(function(){
+  var root = document.documentElement, btn = document.getElementById('mossBgBtn'), on = false;
+  try{ on = localStorage.getItem('kanji-mossbg') === '1'; }catch(e){}
+  function paint(){ root.classList.toggle('moss-bg', on); if(btn) btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
+  paint();
+  if(!btn) return;
+  btn.addEventListener('click', function(){
+    on = !on; paint();
+    try{ localStorage.setItem('kanji-mossbg', on ? '1' : '0'); }catch(e){}
+  });
 })();
 </script>
 </body>
