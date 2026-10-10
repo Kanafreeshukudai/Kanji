@@ -8334,6 +8334,42 @@
 <style id="hidden-tab-perf">
   html.tab-hidden *, html.tab-hidden *::before, html.tab-hidden *::after{ animation-play-state:paused !important; }
 </style>
+<style id="hide-all-scrollbars">
+  /* Barcha scrollbarlar (sahifa va ichki ro'yxatlar) ko'rinmaydi; scroll ishlashda davom etadi */
+  *{ scrollbar-width:none !important; -ms-overflow-style:none !important; }
+  *::-webkit-scrollbar{ display:none !important; width:0 !important; height:0 !important; }
+</style>
+<style id="lite-no-glass">
+  /* YENGIL REJIM: barcha shisha (backdrop-filter) effektlar o'chiriladi — sayt tezroq ishlaydi.
+     Shisha tugmalar shaffof qoladi, chetlari esa tugmaning o'z rangida ko'rinadi (border shaffof,
+     fon chetgacha cho'ziladi). */
+  html.lite *,
+  html.lite *::before,
+  html.lite *::after{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  html.lite button,
+  html.lite [class*="btn"],
+  html.lite [class*="banner"],
+  html.lite [class*="chip"],
+  html.lite [class*="opt"],
+  html.lite [class*="tab-"],
+  html.lite [class*="row"],
+  html.lite [class*="item"],
+  html.lite [class*="result"],
+  html.lite [class*="panel"],
+  html.lite [class*="input"],
+  html.lite [class*="total"],
+  html.lite [class*="badge"],
+  html.lite .card .face,
+  html.lite .quiz-card{
+    border-color:transparent !important;
+    background-clip:border-box !important;
+  }
+  html.lite .card .face::before,
+  html.lite .card .face::after{ display:none !important; }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
