@@ -8449,7 +8449,12 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='none' stroke='%237c9a6b' stroke-opacity='0.22' stroke-width='1.2'%3E%3Cpath d='M0 40 C40 10 80 70 120 40 S160 40 160 40'/%3E%3Cpath d='M0 100 C40 70 80 130 120 100 S160 100 160 100'/%3E%3Cpath d='M0 160 C40 130 80 190 120 160'/%3E%3C/g%3E%3C/svg%3E");
     background-size:160px 160px;
   }
-  html.moss-bg .moss-bg{ opacity:1; }
+  .moss-bg.is-on{ opacity:1; }
+</style>
+<style id="no-anim-curtain">
+  /* Animatsiyalar o'chiq bo'lganda sahifa pardasi animatsiya tugashini kutmasdan darhol ochiladi */
+  html.no-anim #pageCurtain.done{ opacity:0 !important; visibility:hidden !important; pointer-events:none !important; }
+  html.no-anim #pageCurtain.burst::after{ display:none !important; }
 </style>
 </head>
 <script>
@@ -18359,7 +18364,8 @@ window.addEventListener('message', function(e){
 (function(){
   var root = document.documentElement, btn = document.getElementById('mossBgBtn'), on = false;
   try{ on = localStorage.getItem('kanji-mossbg') === '1'; }catch(e){}
-  function paint(){ root.classList.toggle('moss-bg', on); if(btn) btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
+  var layer = document.querySelector('.moss-bg');
+  function paint(){ if(layer) layer.classList.toggle('is-on', on); if(btn) btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
   paint();
   if(!btn) return;
   btn.addEventListener('click', function(){
