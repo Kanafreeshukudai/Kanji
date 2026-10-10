@@ -2591,15 +2591,6 @@
     -webkit-transform:rotateY(0deg);
   }
   .card.flipped .card-inner{transform:rotateY(180deg); -webkit-transform:rotateY(180deg);}
-  /* Burilish paytida kartochka yengil "ko'tarilib" (kattalashib) qaytadi — havoda
-     aylanayotgandek tuyuladi. Alohida `scale` xossasi ishlatiladi, shuning uchun
-     rotateY transitioniga xalaqit bermaydi. */
-  @keyframes cardFlipLift{
-    0%{ scale:1; }
-    50%{ scale:1.03; }
-    100%{ scale:1; }
-  }
-  .card.flipping .card-inner{ animation:cardFlipLift var(--flip-dur) ease-in-out; }
 
   /* ---- aylanish paytida GPU yukini yengillatish ----
      backdrop-filter (blur+saturate) 3D rotateY bilan birga animatsiya qilinganda
@@ -2615,7 +2606,6 @@
   .card.flipping .face.back{ animation:none !important; }
   /* aylanish paytida old chet nuri (drop-shadow filter) alohida render-sirt talab qilib,
      kadrlarni og'irlashtirardi — vaqtincha o'chiriladi (juda nozik 2px nur, sezilmaydi) */
-  .card.flipping .face.front::after{ filter:none; }
 
   /* ---- maxsus kartochka hosil bo'lish animatsiyasi ---- */
   @keyframes cardFormSpin{
@@ -8331,8 +8321,7 @@
 </style>
 <style id="smooth-flip-patch">
   /* Aylanish paytida og'ir soya va maskali nur qatlamlari vaqtincha o'chadi — kadrlar silliq bo'ladi */
-  .card.flipping .face{ box-shadow:none !important; }
-  .card.flipping .face::after, .card.flipping .face.front::after{ display:none !important; }
+  /* chet nuri aylanish davomida uzilmasin: soya va ::after nurlari o'chirilmaydi */
   /* Aylanish tugagach yashirin yuz render qilinmaydi — qatlamlar kamayadi, scroll barqaror bo'ladi */
   .card.flipped:not(.flipping) .face.front{ display:none; }
   .card:not(.flipped):not(.flipping) .face.back{ display:none; }
@@ -8341,13 +8330,9 @@
   /* Kartochka sahifa scroll paytida qatlam sifatida barqaror tursin */
   .card, .card-inner{ -webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0); }
   .card.flipped .card-inner{ transform:rotateY(180deg) translate3d(0,0,0); -webkit-transform:rotateY(180deg) translate3d(0,0,0); }
-  /* Aylanish paytida "ko'tarilib qaytish" (lift) — yumshoq, qotmaydigan variant */
-  @keyframes cardFlipLiftSoft{
-    0%{ scale:1; }
-    45%{ scale:1.035; }
-    100%{ scale:1; }
-  }
-  .card.flipping .card-inner{ animation:cardFlipLiftSoft var(--flip-dur) cubic-bezier(.37,0,.63,1) both; }
+</style>
+<style id="hidden-tab-perf">
+  html.tab-hidden *, html.tab-hidden *::before, html.tab-hidden *::after{ animation-play-state:paused !important; }
 </style>
 </head>
 <script>
@@ -12036,11 +12021,11 @@
     function flyOut(dir, cb){
       // Yumshoq uchish: animatsiya tugagunga qadar kartochka almashtirilmaydi.
       // Sekin boshlanadi, tekis uchadi, oxirida nozik tushib yo'qoladi.
-      const DUR = 560;
+      const DUR = 900; // sekinroq uchish (oldin 560ms)
       // Silliq uchish: tezlik birdan (tiqilmasdan) boshlanadi va tekis sekinlashadi.
       // Kartochka oxirigacha to'liq ko'rinib turadi, faqat so'nggi qismida yumshoq so'nadi.
       card.style.willChange = 'transform, opacity';
-      card.style.transition = `transform ${DUR}ms cubic-bezier(.22,.7,.3,1), opacity ${Math.round(DUR*0.55)}ms ease-in ${Math.round(DUR*0.45)}ms`;
+      card.style.transition = `transform ${DUR}ms cubic-bezier(.33,.12,.25,1), opacity ${Math.round(DUR*0.55)}ms ease-in ${Math.round(DUR*0.45)}ms`;
       card.style.transform = `translateX(${dir*560}px) translateY(-14px) rotate(${dir*24}deg) scale(.93)`;
       card.style.opacity = '0';
       edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0;
@@ -18148,6 +18133,13 @@ window.addEventListener('message', function(e){
     window.__phonkWasPlaying = false;
   }
 });
+</script>
+<script id="hidden-tab-perf-js">
+(function(){
+  function sync(){ document.documentElement.classList.toggle('tab-hidden', document.hidden); }
+  document.addEventListener('visibilitychange', sync);
+  sync();
+})();
 </script>
 </body>
 </html>
