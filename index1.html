@@ -1137,6 +1137,10 @@
   .auth-dropdown > :nth-child(6){ --i:5; }
   .auth-dropdown > :nth-child(7){ --i:6; }
   .auth-dropdown > :nth-child(8){ --i:7; }
+  .auth-dropdown > :nth-child(9){ --i:8; }
+  .auth-dropdown > :nth-child(10){ --i:9; }
+  .auth-dropdown > :nth-child(11){ --i:10; }
+  .auth-dropdown > :nth-child(12){ --i:11; }
   .auth-dropdown > *{
     --from:calc(-1 * (26px + var(--i, 0) * 44px));     /* avatar markazigacha masofa */
     box-sizing:border-box;
@@ -1155,8 +1159,8 @@
     transform:translateY(var(--from)) scale(0.35);
     /* yopilish: tez, teskari tartibda */
     transition:
-      transform .18s cubic-bezier(.4,0,.8,.4) calc((8 - var(--i, 0)) * 25ms),
-      opacity .14s ease calc((8 - var(--i, 0)) * 25ms),
+      transform .18s cubic-bezier(.4,0,.8,.4) calc((12 - var(--i, 0)) * 25ms),
+      opacity .14s ease calc((12 - var(--i, 0)) * 25ms),
       background-color .2s ease, border-color .2s ease, color .2s ease;
   }
   .auth-dropdown.open > *{
@@ -1273,10 +1277,6 @@
   .acc-msg{ min-height:16px; margin:10px 0 0; font-size:12px; color:rgba(255,255,255,0.85); }
   .acc-msg.err{ color:#ffb4a8; }
   @media (prefers-reduced-motion: reduce){ .acc-card{ transition:none; } }
-  @media (prefers-reduced-motion: reduce){
-    .auth-dropdown > *,
-    .auth-dropdown.open > *{ transform:none; transition:opacity .2s ease; }
-  }
 
   /* ---------- CHIQISH / FON YOQISH TASDIQLASH oynalari (qora + qizil) ---------- */
   .logout-confirm-overlay{
@@ -8340,35 +8340,80 @@
   *::-webkit-scrollbar{ display:none !important; width:0 !important; height:0 !important; }
 </style>
 <style id="lite-no-glass">
-  /* YENGIL REJIM: barcha shisha (backdrop-filter) effektlar o'chiriladi — sayt tezroq ishlaydi.
-     Shisha tugmalar shaffof qoladi, chetlari esa tugmaning o'z rangida ko'rinadi (border shaffof,
-     fon chetgacha cho'ziladi). */
+  /* YENGIL REJIM: faqat shisha (backdrop-filter) blur effektlari o'chiriladi.
+     Hoshiyalar, ranglar va boshqa ko'rinish o'zgarmaydi. */
   html.lite *,
   html.lite *::before,
   html.lite *::after{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
   }
-  html.lite button,
-  html.lite [class*="btn"],
-  html.lite [class*="banner"],
-  html.lite [class*="chip"],
-  html.lite [class*="opt"],
-  html.lite [class*="tab-"],
-  html.lite [class*="row"],
-  html.lite [class*="item"],
-  html.lite [class*="result"],
-  html.lite [class*="panel"],
-  html.lite [class*="input"],
-  html.lite [class*="total"],
-  html.lite [class*="badge"],
-  html.lite .card .face,
-  html.lite .quiz-card{
-    border-color:transparent !important;
-    background-clip:border-box !important;
+</style>
+<style id="lite-flat-banners">
+  /* YENGIL REJIM: "Bilganlarim" va "Hammasi" tugmalari — og'ir blur o'chadi, oddiy shaffof fon qoladi,
+     chetki hoshiyasi esa tugmaning o'z rangida ko'rinadi */
+  html.lite .known-banner{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    box-shadow:none !important;
   }
-  html.lite .card .face::before,
-  html.lite .card .face::after{ display:none !important; }
+  html.lite .known-banner::before,
+  html.lite .known-banner::after{ display:none !important; }
+  html.lite .known-banner:not(.all-banner){
+    background:linear-gradient(165deg, rgba(124,154,107,0.24), rgba(124,154,107,0.10)) !important;
+    border:1px solid rgba(124,154,107,0.75) !important;
+  }
+  html.lite .known-banner.all-banner{
+    background:linear-gradient(165deg, rgba(201,166,107,0.24), rgba(201,166,107,0.10)) !important;
+    border:1px solid rgba(201,166,107,0.75) !important;
+  }
+  html.lite .tab-btn{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+</style>
+<style id="lite-flat-back-and-counter">
+  /* YENGIL REJIM: "Ortga" tugmasi va tanlangan kanjilar soni ramkasi — blur/shisha o'chiriladi,
+     oddiy shaffof fon qoladi, chetki hoshiya saqlanadi */
+  html.lite .view-back-btn,
+  html.lite #view-all .all-bar-info,
+  html.lite #view-all [class*="all-bar"]{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    box-shadow:none !important;
+  }
+  html.lite .view-back-btn::before, html.lite .view-back-btn::after,
+  html.lite #view-all .all-bar-info::before, html.lite #view-all .all-bar-info::after{ display:none !important; }
+  html.lite .view-back-btn{
+    background:rgba(255,255,255,0.07) !important;
+  }
+  html.lite #view-all .all-bar-info:not(.is-empty){
+    background:rgba(0,0,0,0.40) !important;
+  }
+</style>
+<style id="perf-ask-style">
+  #perfAsk{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+    width:min(92vw,380px); z-index:99999;
+    background:#000; color:#ECE7DC;
+    border:1px solid rgba(124,154,107,0.7); border-radius:16px;
+    padding:16px 16px 14px; box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    font-family:'Zen Maru Gothic', sans-serif; font-size:13px; line-height:1.5;
+    animation:paIn .35s ease-out both;
+  }
+  @keyframes paIn{ from{ opacity:0; transform:translate(-50%,14px);} to{ opacity:1; transform:translate(-50%,0);} }
+  #perfAsk .pa-title{ font-weight:800; font-size:15px; color:#b9d3a6; margin-bottom:6px; }
+  #perfAsk p{ margin:0 0 6px; }
+  #perfAsk ul{ margin:4px 0 8px; padding-left:18px; }
+  #perfAsk .pa-note{ opacity:.75; font-size:12px; }
+  #perfAsk .pa-btns{ display:flex; gap:8px; margin-top:10px; }
+  #perfAsk button{
+    flex:1; border-radius:12px; padding:9px 10px; cursor:pointer;
+    font-family:inherit; font-weight:700; font-size:13px;
+    border:1px solid rgba(124,154,107,0.75); background:#000; color:#ECE7DC;
+  }
+  #perfAsk button.pa-yes{ background:rgba(124,154,107,0.3); }
+  @media (prefers-reduced-motion: reduce){ #perfAsk{ animation:none; } }
 </style>
 </head>
 <script>
@@ -18175,6 +18220,66 @@ window.addEventListener('message', function(e){
   function sync(){ document.documentElement.classList.toggle('tab-hidden', document.hidden); }
   document.addEventListener('visibilitychange', sync);
   sync();
+})();
+</script>
+<script id="perf-ask-js">
+(function(){
+  var root = document.documentElement;
+  function eligible(){
+    if(root.classList.contains('perf')) return false;
+    try{
+      if(localStorage.getItem('kanji-perf') !== null) return false;   // tanlov allaqachon qilingan
+      if(localStorage.getItem('kanji-perf-ask') === '0') return false; // "yo'q" degan edi
+    }catch(e){}
+    return true;
+  }
+  function removeAsk(){ var el = document.getElementById('perfAsk'); if(el) el.remove(); }
+  function ask(){
+    if(document.getElementById('perfAsk')) return;
+    var box = document.createElement('div');
+    box.id = 'perfAsk';
+    box.setAttribute('role','dialog');
+    box.innerHTML =
+      '<div class="pa-title">Sayt sekin ishlayapti</div>' +
+      '<p>Bu qurilmada sayt og\'irlik qilyapti. Yengil rejimga o\'tsangiz:</p>' +
+      '<ul><li>shisha (blur) effektlar o\'chadi</li>' +
+      '<li>ortiqcha animatsiyalar kamayadi</li>' +
+      '<li>sayt yumshoq va tez ishlaydi</li></ul>' +
+      '<p class="pa-note">Kartochkalar, ranglar va barcha funksiyalar saqlanadi. Istalgan vaqt akkaunt menyusidan qaytarishingiz mumkin.</p>' +
+      '<div class="pa-btns"><button type="button" class="pa-yes" id="paYes">Ha, yengil rejim</button>' +
+      '<button type="button" id="paNo">Yo\'q, shunday qolsin</button></div>';
+    document.body.appendChild(box);
+    document.getElementById('paYes').addEventListener('click', function(){
+      if(window.KanjiPerf && typeof window.KanjiPerf.set === 'function'){
+        window.KanjiPerf.set(true);
+      } else {
+        root.classList.add('lite'); root.classList.add('perf');
+        try{ localStorage.setItem('kanji-perf','1'); }catch(e){}
+      }
+      removeAsk();
+    });
+    document.getElementById('paNo').addEventListener('click', function(){
+      try{ localStorage.setItem('kanji-perf-ask','0'); }catch(e){}
+      removeAsk();
+    });
+  }
+  // Tashrif paytida 2.5 soniya kadrlar tezligini o'lchaymiz: ko'p kadr 34ms dan uzoq bo'lsa — sayt og'ir
+  function probe(){
+    var last = performance.now(), start = last, frames = 0, slow = 0;
+    function f(now){
+      var d = now - last; last = now; frames++;
+      if(frames > 1 && d > 34 && d < 500) slow++;
+      if(now - start < 2500){ requestAnimationFrame(f); return; }
+      if(frames > 60 && slow / frames > 0.2) ask();
+    }
+    requestAnimationFrame(f);
+  }
+  function start(){
+    if(!eligible()) return;
+    setTimeout(probe, 3000); // intro tugagach o'lchaymiz
+  }
+  if(document.readyState === 'complete') start();
+  else window.addEventListener('load', start);
 })();
 </script>
 </body>
