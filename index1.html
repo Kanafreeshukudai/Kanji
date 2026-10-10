@@ -8415,6 +8415,23 @@
   #perfAsk button.pa-yes{ background:rgba(124,154,107,0.3); }
   @media (prefers-reduced-motion: reduce){ #perfAsk{ animation:none; } }
 </style>
+<style id="account-menu-order">
+  /* Akkaunt menyusi tartibi: 1 ism/akkaunt, 2 fon chiziqlari, 3 fon zarralari, 4 yengil rejim,
+     5 yuqori kontrast, 6 qaydlar, 7 ovoz, 8 xatolik/shikoyat, 9 ilovani ulashish, 10 chiqish */
+  .auth-dropdown{ display:flex; flex-direction:column; }
+  #user-name{ order:1; --i:0; }
+  #bgFxToggleBtn{ order:2; --i:1; }
+  #bgDotsToggleBtn{ order:3; --i:2; }
+  #perfModeBtn{ order:4; --i:3; }
+  #contrastToggleBtn{ order:5; --i:4; }
+  #notes-btn{ order:6; --i:5; }
+  #soundToggleBtn{ order:7; --i:6; }
+  #bugReportBtn{ order:8; --i:7; }
+  #shareAppBtn{ order:9; --i:8; }
+  #logout-btn{ order:10; --i:9; }
+  /* Barcha on/off tugmalar bir ustunda: nomi chapda, kaliti hamma uchun o'ngda bir chiziqda */
+  .auth-dropdown .auth-bgfx-btn{ justify-content:space-between; }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
@@ -16417,7 +16434,7 @@
       if(overlay){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
       if(btn) btn.classList.add('in-use');
       lockPageScroll();
-      setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 260);
+      // Klaviatura avtomatik ochilmaydi: foydalanuvchi yozish maydoniga bossagina
     }
     function closePanel(){
       panel.classList.remove('open'); panel.setAttribute('aria-hidden','true');
@@ -16574,7 +16591,6 @@
         try{ recognition.stop(); } catch(err){}
         recognition = null;
       }
-      if(input) input.focus();
     }
 
     if(micBtn){
