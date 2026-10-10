@@ -4,14 +4,14 @@
 // ishonchli bo'ladi. Lug'at ma'lumotlari index.html ichida saqlangani
 // uchun alohida keshlashning hojati yo'q.
 
-const CACHE_NAME = 'kanji-flashcard-v1';
+const CACHE_NAME = 'kanji-flashcard-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-any-192.png',
-  './icons/icon-any-512.png',
-  './icons/apple-touch-icon.png',
+  './icon-any-192.png',
+  './icon-any-512.png',
+  './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {
