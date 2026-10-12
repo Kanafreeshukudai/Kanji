@@ -2123,6 +2123,63 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   .card .face.front,
   .card.known-card .face.front,
   #viewKnown .card.known-card .face.front{ border:1px solid #2a2f36 !important; }
+  /* ---------- MAVZU TUGMALARI: nom va raqam bir-biriga siqilmasin ---------- */
+  .subnav .sub-btn{
+    display:inline-flex !important;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    white-space:nowrap !important;
+    line-height:1;
+  }
+  .subnav .sub-btn .sub-count{
+    margin-left:0 !important;
+    flex:none;
+    min-width:20px;
+    padding:2px 6px;
+    font-size:11px;
+  }
+  /* Desktop: nom to'liq ko'rinadi, tugma kengligi tarkibga moslashadi */
+  @media (min-width:720px){
+    .subnav .sub-btn{ width:auto !important; padding:0 14px !important; }
+  }
+  /* Telefon: nom va raqam yonma-yon, orasida kichik masofa */
+  @media (max-width:719px){
+    .subnav .sub-btn{
+      gap:4px;
+      padding:0 4px !important;
+      font-size:11.5px;
+    }
+    .subnav .sub-btn .sub-count{
+      min-width:0;
+      padding:1px 5px;
+      font-size:10px;
+    }
+  }
+  /* mavzu tanlanganda kartochkalar: oddiy fade */
+  @keyframes topicCardFade{ from{ opacity:0; } to{ opacity:1; } }
+  .card.topic-enter{ animation:topicCardFade .35s ease-out backwards; }
+  @media (prefers-reduced-motion: reduce){ .card.topic-enter{ animation:none; } }
+  /* ---------- SARLAVHA: "Lug'at Flashcard" — toza, ko'k gradient (Flashcard tugmasi bilan bir xil ohang) ---------- */
+  h1, header h1{
+    color:#f3efe6;
+    text-shadow:none;
+    letter-spacing:0.02em;
+  }
+  h1 span, header h1 span{
+    background:linear-gradient(120deg, #d6e4fa 0%, #9dbcf0 45%, #5b87c9 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:none;
+    text-shadow:none;
+    font-weight:700;
+    letter-spacing:0.03em;
+  }
+  /* sahifaning o'ng tomonidagi scroll paneli yashirin (scroll ishlashda davom etadi) */
+  html{ scrollbar-width:none; -ms-overflow-style:none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:0; }
+  body{ scrollbar-width:none; -ms-overflow-style:none; }
 </style>
 </head>
 <body>
@@ -3738,7 +3795,9 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   words.forEach((w,i)=>{
     const card = document.createElement('div');
     card.className = 'card' + (isKnownView ? ' known-card' : '');
-    // kartochkalar darhol ko'rinadi (scroll bilan kechiktirilgan animatsiyasiz)
+    if(gridAnimate && !reduced){
+      card.classList.add('topic-enter');
+    }
     card.innerHTML = `
       <div class="card-inner">
         <div class="face front">
@@ -3765,6 +3824,7 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
     });
     targetGrid.appendChild(card);
   });
+  gridAnimate = false;
   updateKnownCount();
   if(toReveal.length) observeCardReveal(toReveal);
 }
@@ -3803,6 +3863,10 @@ function observeCardReveal(cards){
   }, { root:null, rootMargin:'70px 0px 100px 0px', threshold:0.01 });
   cards.forEach(c=>cardRevealObserver.observe(c));
 }
+
+/* mavzu o'zgarganda kartochkalar fade bilan chiqsin (Bilaman bosilganda qayta animatsiya bo'lmasin) */
+let lastFlashSet = null;
+let gridAnimate = false;
 
 /* ---------- HAR BIR KUN: QOLGAN (bilmaganlar) SO'Z SONI ---------- */
 const SET_WORDS = {
@@ -3860,6 +3924,8 @@ function updateSetCounts(){
 function renderActiveSet(){
   updateSetCounts();
   const set = document.querySelector('.sub-btn.active').dataset.set;
+  gridAnimate = (lastFlashSet !== null && set !== lastFlashSet);
+  lastFlashSet = set;
   if(set === 'today') renderFlashGrid(TODAY_WORDS.filter(w=>!knownIds.has(w.id)));
   else if(set === 'today2') renderFlashGrid(TODAY2_WORDS.filter(w=>!knownIds.has(w.id)));
   else if(set === 'chorshanba') renderFlashGrid(CHORSHANBA_WORDS.filter(w=>!knownIds.has(w.id)));
