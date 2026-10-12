@@ -8564,6 +8564,29 @@
     border:1px solid rgba(255,255,255,0.5) !important;
     box-shadow:none !important;
   }
+  /* ---------- MARKAZIY KARTOCHKA: asl fon saqlanadi; old tomoni ingichka oq, orqa (ma'no) tomoni ingichka tillarang hoshiya ---------- */
+  .face.front{
+    border:1px solid #ffffff !important;
+  }
+  .face.back{
+    border:1px solid #C9A66B !important;
+  }
+  /* orqa tomondagi oq yorug' hoshiya qatlami (::after) tillarang hoshiyani yopib qo'ymasin */
+  .card .face.back::after,
+  .card .face.back::before{ display:none !important; }
+  /* ovoz tugmasi: faqat karnay belgisi (halqasiz), kattaroq, bosilganda ezilib turadi */
+  .speak-jp-btn{
+    width:auto; height:auto;
+    padding:4px;
+    margin:12px auto 10px;
+    border:none;
+    background:none;
+    color:#E04848;
+    transition:transform .12s ease, opacity .2s ease;
+  }
+  .speak-jp-btn:hover{ opacity:.8; background:none; }
+  .speak-jp-btn:active{ transform:scale(0.86); }
+  .speak-jp-btn svg{ width:30px; height:30px; display:block; }
 </style>
 </head>
 <script>
