@@ -2612,14 +2612,16 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     box-shadow:0 0 0 3px rgba(255,255,255,0.06);
   }
   .mochi-quiz-bubble.ok::before{
-    content:'✓';
+    content:'';
     background:radial-gradient(circle at 30% 25%, #bbf7d0, #22c55e 55%, #15803d);
-    color:#052e16;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23052e16' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.2 4.2L19 7'/%3E%3C/svg%3E");
+    background-size:13px 13px; background-position:center; background-repeat:no-repeat;
   }
   .mochi-quiz-bubble.bad::before{
-    content:'✕';
+    content:'';
     background:radial-gradient(circle at 30% 25%, #fecaca, #ef4444 55%, #b91c1c);
-    color:#2a0505;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a0505' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
+    background-size:12px 12px; background-position:center; background-repeat:no-repeat;
   }
   .mochi-quiz-bubble.ok{
     border-color:rgba(34,197,94,0.7);
@@ -2917,9 +2919,184 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   @media (prefers-reduced-motion: reduce){
     #viewQuiz.timetrial .revealed-kana, #viewQuiz.timetrial .revealed-romaji{ animation:none; }
   }
+  /* ---------- BILDIRISHNOMA (emoji bilan, chiroyli) ---------- */
+  #appToast{
+    position:fixed;
+    left:50%;
+    top:calc(72px + env(safe-area-inset-top,0px));
+    transform:translate(-50%,-14px) scale(.96);
+    opacity:0;
+    z-index:2147483100;
+    pointer-events:none;
+    width:min(92vw,400px);
+    padding:14px 18px;
+    border-radius:18px;
+    display:flex; gap:12px; align-items:flex-start;
+    background:linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 60%), rgba(10,12,16,0.94);
+    border:1px solid rgba(201,166,107,0.6);
+    box-shadow:0 18px 40px -16px rgba(0,0,0,0.9), 0 0 24px rgba(201,166,107,0.18);
+    transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
+  }
+  #appToast.show{ opacity:1; transform:translate(-50%,0) scale(1); }
+  #appToast .at-emoji{ font-size:28px; line-height:1; flex:none; margin-top:2px; }
+  #appToast .at-title{ font-family:'Shippori Mincho', serif; font-size:15px; font-weight:700; color:#f6ecd9; margin-bottom:4px; letter-spacing:.01em; }
+  #appToast .at-text{ font-size:13px; color:#d9cfbd; line-height:1.5; }
+
+  /* ---------- BARCHA SCROLL PANELLARI YASHIRIN (scroll ishlashda davom etadi) ---------- */
+  *{ scrollbar-width:none !important; -ms-overflow-style:none !important; }
+  *::-webkit-scrollbar{ display:none !important; width:0 !important; height:0 !important; }
+  /* ---------- BO'SH HOLAT KARTOCHKASI (emoji + chiroyli matn) ---------- */
+  .empty-state{
+    grid-column:1 / -1;
+    width:min(480px,100%);
+    margin:24px auto 0;
+    padding:30px 24px;
+    text-align:center;
+    border-radius:22px;
+    border:1px solid rgba(201,166,107,0.35);
+    background:linear-gradient(170deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 55%), rgba(12,14,18,0.78);
+    box-shadow:0 14px 34px -18px rgba(0,0,0,0.9);
+    animation:emptyFadeIn .5s ease-out both;
+  }
+  .empty-state .es-emoji{ font-size:46px; line-height:1; margin-bottom:12px; }
+  .empty-state .es-title{
+    font-family:'Shippori Mincho', serif;
+    font-size:21px; font-weight:700;
+    color:#f6ecd9;
+    letter-spacing:.01em;
+    margin-bottom:10px;
+  }
+  .empty-state .es-text{
+    font-family:var(--font-body);
+    font-size:14px;
+    line-height:1.6;
+    color:#d6ccb8;
+    max-width:360px;
+    margin:0 auto;
+  }
+  @keyframes emptyFadeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .empty-state{ animation:none; } }
+
+  /* yakuniy kartochkalar: sarlavha oq, chiroyli shrift */
+  .done-card h2{ color:#f6ecd9 !important; font-family:'Shippori Mincho', serif !important; font-size:26px !important; }
+  /* sarlavha ichidagi chizilgan ikonka */
+  .ttl-ico{ display:inline-flex; vertical-align:-4px; margin-right:8px; color:#d9b77a; }
+  .ttl-ico svg{ width:22px; height:22px; }
+  .empty-state .es-emoji{ color:#d9b77a; }
+  .empty-state .es-emoji svg{ width:48px; height:48px; display:block; margin:0 auto; }
+  #appToast .at-emoji{ color:#d9b77a; }
+  #appToast .at-emoji svg{ width:26px; height:26px; display:block; }
+  .know-btn svg{ width:12px; height:12px; vertical-align:-1px; }
+  /* "Mavzu bo'sh" maydoni: sof qora fon (bildirishnomalar o'zgarmagan) */
+  .empty-state{ background:#000 !important; box-shadow:none !important; }
+  /* ---------- MOCHI: bosh aylanishi — ustida yulduzchalar (chizilgan) ---------- */
+  .mochi-body.dizzy{ animation:mochiDizzyWobble .7s ease-in-out infinite !important; }
+  @keyframes mochiDizzyWobble{
+    0%,100%{ transform:rotate(-6deg); }
+    50%{ transform:rotate(6deg); }
+  }
+  .mochi-dizzy{
+    position:absolute;
+    left:50%; top:-14px;
+    width:0; height:0;
+    pointer-events:none;
+    z-index:3;
+    transition:opacity .45s ease;
+    opacity:1;
+  }
+  .mochi-dizzy.out{ opacity:0; }
+  .mochi-dizzy .dz-star{
+    position:absolute;
+    left:-8px; top:-8px;
+    width:16px; height:16px;
+    color:#ffe9a8;
+    animation:dizzyOrbit 1.6s linear infinite;
+  }
+  .mochi-dizzy .dz-star svg{ width:16px; height:16px; display:block; fill:currentColor; }
+  @keyframes dizzyOrbit{
+    0%  { transform:translate(46px,0); }
+    25% { transform:translate(0,14px); }
+    50% { transform:translate(-46px,0); }
+    75% { transform:translate(0,-14px); }
+    100%{ transform:translate(46px,0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .mochi-body.dizzy{ animation:none !important; }
+    .mochi-dizzy .dz-star{ animation:none; }
+  }
+  /* bosh aylanganda ko'zlar yumilgan (chiziq), qorachiq yashirin */
+  .mochi-body.dizzy .mochi-eye{
+    height:2.5px !important;
+    top:30px !important;
+    border-radius:999px !important;
+    background:#2d1b4e !important;
+    box-shadow:none !important;
+    animation:none !important;
+    transition:none;
+  }
+  .mochi-body.dizzy .mochi-eye::before{ display:none; }
+  .mochi-body.dizzy .mochi-pupil,
+  .mochi-body.dizzy .mochi-shine{ opacity:0 !important; }
+  /* bosh aylanganda tabassum yo'q: og'iz kichik, xavotirli "o" shaklida */
+  .mochi-body.dizzy .mochi-mouth{
+    width:6px !important;
+    height:6px !important;
+    top:43px !important;
+    border:1.5px solid #2d1b4e !important;
+    border-radius:50% !important;
+    background:transparent !important;
+    opacity:0.8 !important;
+    animation:none !important;
+    transform:translateX(-50%) !important;
+  }
+  .mochi-body.dizzy .mochi-blush{ opacity:0.15 !important; }
+  /* ushlab ko'tarilganda: og'iz ochilgan (yumaloq, qorong'i) — tabassum yo'q */
+  .mochi-body.grabbed .mochi-mouth{
+    width:9px !important;
+    height:9px !important;
+    top:41px !important;
+    border:2px solid #2d1b4e !important;
+    border-radius:50% !important;
+    background:#2d1b4e !important;
+    animation:none !important;
+    transform:translateX(-50%) !important;
+  }
 </style>
 </head>
 <body>
+<script>
+/* Chizilgan ikonkalar (emoji o'rniga) — rangi joriy matn rangiga mos (currentColor) */
+window.ICON = {
+  empty: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l2.6-7.2A1.5 1.5 0 0 1 7 4.8h10a1.5 1.5 0 0 1 1.4 1L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/><path d="M3 13h5.2l1.3 2.2h5l1.3-2.2H21"/></svg>',
+  party: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5.5a2.5 2.5 0 0 0 2.5 4"/><path d="M16 6h2.5a2.5 2.5 0 0 1-2.5 4"/><path d="M12 13v4"/><path d="M9 21h6"/><path d="M9.5 17h5"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>',
+  cross: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8 6.8 19.5l1-5.8-4.2-4.1 5.8-.8z"/></svg>'
+};
+</script>
+<script>
+/* Mochi boshi aylanganda: uning ustida 3 ta yulduzcha aylanadi (chizilgan SVG) */
+window.mochiDizzy = function(){
+  const body = document.querySelector('.mochi-body');
+  if(!body || !window.ICON) return;
+  let w = body.querySelector('.mochi-dizzy');
+  if(!w){
+    w = document.createElement('div');
+    w.className = 'mochi-dizzy';
+    const N = 5, PERIOD = 1.6;   // yulduzchalar soni va aylanish davri (CSS dagi dizzyOrbit bilan mos)
+    w.innerHTML = Array.from({length: N}, (_, i) => `<span class="dz-star" style="animation-delay:${(-i*PERIOD/N).toFixed(2)}s">${window.ICON.star}</span>`).join('');
+    body.appendChild(w);
+  }
+  w.classList.remove('out');
+  body.classList.add('dizzy');
+  clearTimeout(window._dizzyT);
+  window._dizzyT = setTimeout(()=>{
+    w.classList.add('out');
+    body.classList.remove('dizzy');
+  }, 2600);
+};
+</script>
 <!-- Doimiy yuqori panel: bosh sahifa va Mochi AI tugmalari scroll paytida joyida turadi -->
 <div class="fixed-top-bar" id="fixedTopBar">
   <!-- Asosiy menyuga qaytish (yumaloq tugma) -->
@@ -2962,7 +3139,7 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
       <div class="indicator"></div>
       <button class="tab-btn active" id="tabFlash">Flashcard</button>
       <button class="tab-btn tab-btn-quiz" id="tabQuiz">Viktorina</button>
-      <button class="tab-btn tab-btn-known" id="tabKnown">✓ Bilaman <span id="knownCount"></span></button>
+      <button class="tab-btn tab-btn-known" id="tabKnown"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Bilaman <span id="knownCount"></span></button>
     </div>
   </header>
 
@@ -4301,7 +4478,10 @@ const viewKnown = document.getElementById('viewKnown');
 
 function switchView(showEl, hideEl, onShown){
   if(hideEl && hideEl.id === 'viewQuiz') clearQuizTimer();
-  if(showEl && showEl.id === 'viewQuiz' && window.mochiShowFn && !window.mochiShown) window.mochiShowFn();
+  if(showEl && showEl.id === 'viewQuiz' && window.mochiShowFn && !window.mochiShown){
+    window.mochiShowFn();
+    if(window.mochiSnapQuiz) window.mochiSnapQuiz();   // Mochi bir joydan chiqadi (tasodifiy joydan emas)
+  }
   if(showEl && showEl.id === 'viewQuiz' && quizMode === 'timetrial'){
     const qs = document.getElementById('quizStage');
     if(qs && qs.style.display !== 'none' && document.getElementById('timerFill')){
@@ -4539,6 +4719,11 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   targetGrid = targetGrid || flashGrid;
   refresh = refresh || renderActiveSet;
   targetGrid.innerHTML = '';
+  if(words.length === 0 && !isKnownView){
+    targetGrid.innerHTML = emptyStateHtml();
+    updateKnownCount();
+    return;
+  }
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const toReveal = [];
   words.forEach((w,i)=>{
@@ -4554,7 +4739,7 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
           <div class="uz-word">${w.uz}</div>
           ${splitNote(w.note).kanji ? `<div class="uz-kanji">${splitNote(w.note).kanji}</div>` : ''}
           ${splitNote(w.note).rest ? `<div class="uz-note">${splitNote(w.note).rest}</div>` : ''}
-          <button type="button" class="know-btn">${isKnownView ? '↺ Qaytarish' : '✓ Bilaman'}</button>
+          <button type="button" class="know-btn">${isKnownView ? '↺ Qaytarish' : ICON.check + ' Bilaman'}</button>
         </div>
         <div class="face back">
           <div class="kana">${w.kana}</div>
@@ -4615,6 +4800,7 @@ function observeCardReveal(cards){
 
 /* mavzu o'zgarganda kartochkalar fade bilan chiqsin (Bilaman bosilganda qayta animatsiya bo'lmasin) */
 let lastFlashSet = null;
+let lastRemainingSet = null, lastRemaining = 0;
 let gridAnimate = false;
 
 /* ---------- HAR BIR KUN: QOLGAN (bilmaganlar) SO'Z SONI ---------- */
@@ -4685,8 +4871,17 @@ function updateDropdownBtnCount(){
 function renderActiveSet(){
   updateSetCounts();
   const set = document.querySelector('.sub-btn.active').dataset.set;
-  gridAnimate = (lastFlashSet !== null && set !== lastFlashSet);
+  const prevSet = lastFlashSet;
+  gridAnimate = (prevSet !== null && set !== prevSet);
   lastFlashSet = set;
+  // mavzudagi so'zlar tugadi: mavzu tanlanganda yoki so'nggi so'z "Bilaman" qilinganda xabar
+  const remainingNow = (SET_WORDS[set] || []).filter(w=>!knownIds.has(w.id)).length;
+  const wasRemaining = (lastRemainingSet === set) ? lastRemaining : null;
+  if(remainingNow === 0 && (gridAnimate || (wasRemaining !== null && wasRemaining > 0))){
+    showAppToast(ICON.party, "Mavzudagi so'zlar tugadi", "Bu mavzudagi barcha so'zlar «Bilganlarim» ro'yxatiga o'tdi. Ularni Viktorina bo'limida tekshirishingiz mumkin.");
+  }
+  lastRemainingSet = set;
+  lastRemaining = remainingNow;
   if(set === 'today') renderFlashGrid(TODAY_WORDS.filter(w=>!knownIds.has(w.id)));
   else if(set === 'today2') renderFlashGrid(TODAY2_WORDS.filter(w=>!knownIds.has(w.id)));
   else if(set === 'chorshanba') renderFlashGrid(CHORSHANBA_WORDS.filter(w=>!knownIds.has(w.id)));
@@ -4842,7 +5037,7 @@ function renderKnownGrid(){
   const set = SETS.find(s=>s.key===knownActiveKey) || SETS[SETS.length-1];
   const words = set.words.filter(w=>knownIds.has(w.id));
   if(words.length === 0){
-    knownGrid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13.5px;padding:18px 0;">Bu kunda hali "Bilaman" deb belgilangan so'z yo'q.</p>`;
+    knownGrid.innerHTML = emptyStateHtml();
     updateKnownCount();
     return;
   }
@@ -4863,7 +5058,7 @@ document.addEventListener('click', ()=>{
   knownDropdownBtn.classList.remove('active');
 });
 
-buildDaySubnav(knownSubnav, knownActiveKey, (key)=>{ knownActiveKey = key; renderKnownGrid(); }, knownDropdownPanel, knownDropdownBtn);
+buildDaySubnav(knownSubnav, knownActiveKey, (key)=>{ knownActiveKey = key; notifyIfNoKnown(key); renderKnownGrid(); }, knownDropdownPanel, knownDropdownBtn);
 
 
 /* ---------------- QUIZ (4 VARIANT) ---------------- */
@@ -4880,6 +5075,40 @@ let quizMode = 'options'; // 'options' | 'timetrial'
 let timerId = null;
 let timerStart = 0;
 const TIME_LIMIT = 10000; // 10 seconds
+
+// Chiroyli bo'sh holat (emoji + matn) — barcha bo'limlarda bir xil ko'rinish
+function emptyStateHtml(){
+  return `<div class="empty-state"><div class="es-emoji">${ICON.empty}</div><div class="es-title">Mavzu bo'sh</div></div>`;
+}
+
+// Chiroyli bildirishnoma (emoji bilan)
+let appToastTimer = null;
+function showAppToast(emoji, title, text){
+  let el = document.getElementById('appToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'appToast';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<div class="at-emoji">${emoji}</div><div><div class="at-title">${title}</div><div class="at-text">${text}</div></div>`;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(appToastTimer);
+  appToastTimer = setTimeout(()=> el.classList.remove('show'), 4200);
+}
+
+// Viktorina / Bilganlarim: tanlangan mavzuda "Bilaman" so'z yo'q bo'lsa xabar
+function notifyIfNoKnown(key){
+  const set = SETS.find(x => x.key === key);
+  if(!set) return;
+  const cnt = set.words.filter(w => knownIds.has(w.id)).length;
+  if(cnt === 0){
+    showAppToast(ICON.empty, "Bu mavzuda hali so'z yo'q", "Bu mavzuda hali «Bilaman» deb belgilangan so'z yo'q. So'zlarni Flashcard bo'limida «Bilaman» qilib belgilang.");
+  }
+}
 
 // Viktorina va Bilganlarim mavzularida: shu mavzudagi "Bilaman" so'zlar soni
 function refreshDaySubCounts(){
@@ -4933,7 +5162,7 @@ function setQuizMode(mode){
 modeOptions.addEventListener('click', ()=> setQuizMode('options'));
 modeTime.addEventListener('click', ()=> setQuizMode('timetrial'));
 
-buildDaySubnav(quizSubnav, quizActiveKey, (key)=>{ quizActiveKey = key; startQuiz(getQuizWords()); }, quizDropdownPanel, quizDropdownBtn);
+buildDaySubnav(quizSubnav, quizActiveKey, (key)=>{ quizActiveKey = key; notifyIfNoKnown(key); startQuiz(getQuizWords()); }, quizDropdownPanel, quizDropdownBtn);
 
 function shuffle(arr){
   const a = arr.slice();
@@ -5033,11 +5262,7 @@ function startQuiz(sourceWords){
     if(scaleWrap) scaleWrap.style.display = 'none';
     quizStage.style.display = 'none';
     doneStage.style.display = 'block';
-    doneStage.innerHTML = `
-      <div class="done-card" style="margin-top:28px;">
-        <h2>Bu kunda hali so'z yo'q</h2>
-        <p style="color:var(--muted);font-size:13px;">Viktorina faqat "✓ Bilaman" bo'limiga qo'shilgan so'zlar bilan ishlaydi.<br>Avval Flashcard bo'limida shu kundagi so'zlarni "✓ Bilaman" deb belgilang.</p>
-      </div>`;
+    doneStage.innerHTML = emptyStateHtml();
     return;
   }
   if(scaleWrap) scaleWrap.style.display = 'block';
@@ -5425,7 +5650,7 @@ function showDone(){
     // Time trial: simple completion message
     doneStage.innerHTML = `
       <div class="done-card" style="margin-top:28px;">
-        <h2>So'zlar ko'rib chiqildi</h2>
+        <h2><span class="ttl-ico">${ICON.flag}</span>So'zlar ko'rib chiqildi</h2>
         <p style="color:var(--muted);font-size:13px;">Barcha ${total} ta so'z vaqt sinovida ko'rib chiqildi</p>
         <button id="btnRestart" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-soft);color:var(--cream);font-weight:700;cursor:pointer;margin-top:20px;">Qaytadan boshlash (${total} ta)</button>
       </div>`;
@@ -5438,7 +5663,7 @@ function showDone(){
     }
     doneStage.innerHTML = `
       <div class="done-card">
-        <h2>Viktorina tugadi</h2>
+        <h2><span class="ttl-ico">${ICON.party}</span>Viktorina tugadi</h2>
         <p style="color:var(--muted);font-size:13px;">Barcha ${total} ta so'z ko'rib chiqildi</p>
         <div class="done-stats">
           <div><span class="num g">${correctCount}</span><span class="lbl">To'g'ri</span></div>
@@ -5719,6 +5944,19 @@ window.addEventListener('DOMContentLoaded', function(){
     return {x: tx, y: ty};
   }
 
+  // Viktorina ochilganda Mochi har doim bir joydan (kartochka tepasidan) chiqsin — tasodifiy joydan emas
+  window.mochiSnapQuiz = function(){
+    const qc = document.querySelector('.quiz-card');
+    const usable = qc && qc.getBoundingClientRect().height > 0;
+    const t = (usable && getQuizTargetPos()) || { x: window.innerWidth/2 - 36, y: Math.max(140, window.innerHeight*0.38) };
+    x = t.x; y = t.y;
+    vx = 0; vy = 0; targetVx = 0; targetVy = 0;
+    mochi.style.transition = 'none';
+    mochi.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    void mochi.offsetWidth;
+    mochi.style.transition = '';
+  };
+
   /* --- Uxlash / Uyg'onish --- */
   function checkSleepState(){
     const viewFlash = document.getElementById('viewFlash');
@@ -5994,9 +6232,13 @@ window.addEventListener('DOMContentLoaded', function(){
   const TAP_THRESHOLD = 10;
   let touchStartX = 0, touchStartY = 0;
 
+  // sudrash tezligini o'lchash (boshi aylanish effekti uchun)
+  let dragPath = 0, dragLastX = null, dragLastY = null, dragT0 = 0;
   function onDragStart(clientX, clientY){
     dragging = true;
     hasMoved = false;
+    document.querySelector('.mochi-body')?.classList.add('grabbed');
+    dragPath = 0; dragLastX = clientX; dragLastY = clientY; dragT0 = Date.now();
     touchStartX = clientX;
     touchStartY = clientY;
     mochi.style.cursor = 'grabbing';
@@ -6013,6 +6255,8 @@ window.addEventListener('DOMContentLoaded', function(){
   }
   function onDragMove(clientX, clientY){
     if(!dragging) return;
+    if(dragLastX !== null){ dragPath += Math.hypot(clientX - dragLastX, clientY - dragLastY); }
+    dragLastX = clientX; dragLastY = clientY;
     const dx = clientX - touchStartX;
     const dy = clientY - touchStartY;
     if(Math.abs(dx) > TAP_THRESHOLD || Math.abs(dy) > TAP_THRESHOLD){
@@ -6028,6 +6272,7 @@ window.addEventListener('DOMContentLoaded', function(){
   function onDragEnd(){
     if(!dragging) return;
     dragging = false;
+    document.querySelector('.mochi-body')?.classList.remove('grabbed');
     mochi.style.cursor = 'grab';
     mochi.style.transition = 'transform .08s linear';
     // Agar siljimaganga o'xshasa — bu tap (bosish)
@@ -6035,6 +6280,9 @@ window.addEventListener('DOMContentLoaded', function(){
       window.mochiAI.toggle();
     } else if(hasMoved) {
       pickNewDirection();
+      // tez-tez, uzoq sudrab qo'yilsa — Mochi boshi aylangandek bo'ladi
+      const dur = Math.max(1, Date.now() - dragT0);
+      if(dragPath > 260 && dragPath / dur > 0.55 && window.mochiDizzy) window.mochiDizzy();
     }
     // Qo'yilgandan keyin 1 soniyadan keyin uxlash holatini tekshirsin
     setTimeout(checkSleepState, 1000);
@@ -6575,7 +6823,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     <!-- MOCHI AI CHAT BUBBLE -->
     <div class="mochi-bubble" id="mochiBubble">
       <div class="mochi-bubble-header">
-        <div class="mochi-bubble-avatar">🌟</div>
+        <div class="mochi-bubble-avatar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8 6.8 19.5l1-5.8-4.2-4.1 5.8-.8z"/></svg></div>
         <div class="mochi-bubble-name">Mochi AI</div>
         <div class="mochi-bubble-status">Onlayn</div>
       </div>
@@ -6710,6 +6958,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
     window.mochiAwakeOverride = true;   // tugma bosilganda Mochi uyg'oq bo'ladi
     armHide();
     setBtn();
+    const vq = document.getElementById('viewQuiz');
+    if(vq && vq.classList.contains('active') && window.mochiSnapQuiz) window.mochiSnapQuiz();
     document.body.classList.remove('mochi-off');
     mochi.classList.remove('mochi-fade-out');
     mochi.classList.add('mochi-fade-in');
