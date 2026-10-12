@@ -2300,7 +2300,8 @@
   .kunlar-arrow{
     display:inline-block;
     margin-left:3px;
-    font-size:10px;
+    font-size:13px;
+    line-height:1;
     transition:transform .25s ease;
   }
   .tab-btn.kunlar-btn.open .kunlar-arrow{
@@ -2854,6 +2855,7 @@
   .back-center{
     flex:1;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
     min-height:0;
@@ -2898,6 +2900,21 @@
     border-radius:8px;
     margin:2px 3px;
   }
+  .speak-jp-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:14px auto 12px;
+    padding:4px;
+    background:none;
+    border:none;
+    color:#E04848;
+    cursor:pointer;
+    transition:transform .2s ease, opacity .2s ease;
+  }
+  .speak-jp-btn:hover{ opacity:.8; }
+  .speak-jp-btn:active{ transform:scale(0.92); }
+  .speak-jp-btn svg{ display:block; }
   .back-reading-full{
     margin-top:8px;
     font-family:'Shippori Mincho', serif;
@@ -3544,28 +3561,16 @@
       0 10px 24px -10px rgba(0,0,0,0.7);
   }
   #view-all .all-bar-info .all-clear-btn{
-    background:
-      radial-gradient(130% 150% at 10% 0%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 42%, rgba(255,255,255,0) 64%),
-      linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0) 50%, rgba(217,105,79,0.12) 100%),
-      rgba(217,105,79,0.16);
-    border:1px solid rgba(229,135,111,0.42);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.40),
-      inset 0 -1px 0 rgba(255,255,255,0.07),
-      inset 0 0 12px rgba(255,255,255,0.05),
-      0 6px 14px -8px rgba(0,0,0,0.7);
-    transition:opacity .2s ease, transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.18);
+    color:var(--ink-soft);
+    box-shadow:none;
+    transition:opacity .2s ease, transform .2s ease, background-color .2s ease, border-color .2s ease;
   }
   @media (hover:hover) and (pointer:fine){
     #view-all .all-bar-info .all-clear-btn:hover{
-      transform:translateY(-2px);
-      border-color:rgba(229,135,111,0.7);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.5),
-        inset 0 -1px 0 rgba(255,255,255,0.09),
-        inset 0 0 14px rgba(255,255,255,0.07),
-        0 10px 16px -8px rgba(0,0,0,0.75),
-        0 0 14px rgba(217,105,79,0.28);
+      background:rgba(255,255,255,0.10);
+      border-color:rgba(255,255,255,0.28);
     }
   }
   #view-all .all-bar-info .all-clear-btn:active{ transform:scale(0.95); }
@@ -11861,6 +11866,7 @@
               <div class="translation">${word.uz}</div>
             </div>
             <div class="back-bottom">
+              <button class="speak-jp-btn" type="button" aria-label="Yaponcha o'qish"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
               <div class="divider"></div>
               <div class="reading-label">Kun'yomi / On'yomi</div>
               <div class="back-reading"><span class="rk">${word.reading}</span></div>
@@ -11873,8 +11879,15 @@
     `;
     if(enter) card.classList.add('card-enter');
     keepGhost();
+    if('speechSynthesis' in window) speechSynthesis.cancel();
     stage.appendChild(card);
     attachCardEvents(card);
+    // yapon o'qilishini o'qish tugmasi (kartochka aylantirish/surish bilan adashmasligi uchun hodisani to'xtatamiz)
+    const spk = card.querySelector('.speak-jp-btn');
+    if(spk){
+      ['pointerdown','touchstart','mousedown'].forEach(ev=>spk.addEventListener(ev, e=>e.stopPropagation()));
+      spk.addEventListener('click', e=>{ e.stopPropagation(); speakJP(romajiToKana(word.romaji)); });
+    }
     updateHintCounts();
   }
 
@@ -12106,6 +12119,68 @@
         card.style.pointerEvents = '';
       }, 180);
     }, {once:true});
+  }
+
+  // ---------- YAPONCHA O'QILISH: romaji -> hiragana, so'ng ja-JP ovozi bilan o'qish ----------
+  function romajiToKana(src){
+    const s = String(src || '').toLowerCase().replace(/[^a-z]/g, '');
+    const V = 'aiueo';
+    const ROWS = {
+      '':'あいうえお', k:'かきくけこ', g:'がぎぐげご', s:'さしすせそ', z:'ざじずぜぞ',
+      t:'たちつてと', d:'だぢづでど', n:'なにぬねの', h:'はひふへほ', b:'ばびぶべぼ',
+      p:'ぱぴぷぺぽ', m:'まみむめも', y:'やいゆいよ', r:'らりるれろ', w:'わいうえを'
+    };
+    const SMALL = { a:'ゃ', u:'ゅ', o:'ょ' };
+    const YO = { ky:'き', gy:'ぎ', sh:'し', j:'じ', ch:'ち', ny:'に', hy:'ひ', by:'び', py:'ぴ', my:'み', ry:'り' };
+    const SP = { shi:'し', chi:'ち', tsu:'つ', fu:'ふ', ji:'じ' };
+    function syl(c){
+      if(SP[c]) return SP[c];
+      const last = c.slice(-1), stem = c.slice(0, -1);
+      if(!V.includes(last)) return null;
+      if(stem === '') return ROWS[''][V.indexOf(last)];
+      if(YO[stem] && 'aou'.includes(last)) return YO[stem] + SMALL[last];
+      if(ROWS[stem]) return ROWS[stem][V.indexOf(last)];
+      return null;
+    }
+    let out = '', i = 0;
+    while(i < s.length){
+      const c = s[i];
+      // "n" — undosh (ん): keyingi harf unli yoki "y" bo'lmasa
+      if(c === 'n' && (i + 1 >= s.length || (!V.includes(s[i+1]) && s[i+1] !== 'y'))){ out += 'ん'; i++; continue; }
+      // ikki undosh (tt, kk, ...) — kichik っ (ikki undoshdan oldin qisqa pauza)
+      if(c === s[i+1] && !V.includes(c) && c !== 'n'){ out += 'っ'; i++; continue; }
+      let done = false;
+      for(const len of [3, 2, 1]){
+        const chunk = s.substr(i, len);
+        if(chunk.length !== len) continue;
+        const k = syl(chunk);
+        if(k){ out += k; i += len; done = true; break; }
+      }
+      if(!done) i++;
+    }
+    return out;
+  }
+
+  function speakJP(text){
+    if(!text || !('speechSynthesis' in window)) return;
+    // butun saytdagi "Ovoz" tugmasi o'chiq bo'lsa, o'qimaymiz
+    const soundOff = document.getElementById('soundToggleBtn')?.getAttribute('aria-checked') === 'false';
+    if(soundOff) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = 0.85;
+    // qurilmadagi yapon ovozlaridan eng yaxshisini tanlaymiz (afzallik tartibi bo'yicha)
+    const jaVoices = speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+    const PREF = ['Kyoko', 'Otoya', 'Google 日本語', 'O-Ren', 'Hattori'];
+    let jv = null;
+    for(const name of PREF){
+      jv = jaVoices.find(v => v.name.includes(name));
+      if(jv) break;
+    }
+    if(!jv) jv = jaVoices[0] || null;
+    if(jv) u.voice = jv;
+    speechSynthesis.speak(u);
   }
 
   function attachCardEvents(card){
