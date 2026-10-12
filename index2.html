@@ -482,23 +482,13 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 #viewQuiz .option-btn.correct{
   --neon:61,255,160;
   box-shadow:0 0 0 1px rgba(var(--neon),.9), 0 0 12px rgba(var(--neon),.7), 0 0 30px rgba(var(--neon),.35) !important;
-  animation:qbtnIgnite .9s linear both;
 }
 #viewQuiz .option-btn.wrong{
   --neon:255,46,99;
   box-shadow:0 0 0 1px rgba(var(--neon),.9), 0 0 12px rgba(var(--neon),.7), 0 0 30px rgba(var(--neon),.35) !important;
-  animation:qbtnIgnite .9s linear both;
-}
-@keyframes qbtnIgnite{
-  0%  { filter:brightness(1); }
-  20% { filter:brightness(.6); }
-  30% { filter:brightness(1.35); }
-  40% { filter:brightness(.8); }
-  55%, 100% { filter:brightness(1.1); }
 }
 @media (prefers-reduced-motion: reduce){
-  .quiz-card.flash-correct, .quiz-card.flash-wrong,
-  #viewQuiz .option-btn.correct, #viewQuiz .option-btn.wrong{ animation:none; }
+  .quiz-card.flash-correct, .quiz-card.flash-wrong{ animation:none; }
 }
 /* Viktorina boshqa bo'limga o'tganda: savol ramkasidagi nur va portlash effektlari to'xtaydi, boshqa sahifada qolmaydi */
 #viewQuiz:not(.active) .quiz-card{ animation:none !important; box-shadow:none !important; }
@@ -6309,6 +6299,9 @@ window.addEventListener('DOMContentLoaded', function(){
   function scheduleMochi(){ if(!mochiRaf) mochiRaf = requestAnimationFrame(updateMochiFrame); }
   function updateMochiFrame(){ mochiRaf = 0; if(document.hidden) return; updateMochi(); }
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) scheduleMochi(); });
+  // Scroll paytida Mochi qotib qolmasin: sahifa (yoki ichki konteyner) siljisa, joyi darhol qayta hisoblanadi
+  document.addEventListener('scroll', ()=> scheduleMochi(), { capture:true, passive:true });
+  window.addEventListener('resize', ()=> scheduleMochi(), { passive:true });
   function updateMochi(){
     if(dragging || isSleeping){
       scheduleMochi();
@@ -7307,6 +7300,13 @@ window.addEventListener('message', function(e){
     lastIdx = idx;
     window.showQuizMochiNote('info', lines[idx]);
   });
+})();
+</script>
+<script>
+/* Optimizatsiya: kuchsiz qurilmada (4 yadrodan kam yoki 4 GB dan kam xotira) engil rejim yoqiladi */
+(function(){
+  const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+  if(weak) document.documentElement.classList.add('perf');
 })();
 </script>
 </body>
