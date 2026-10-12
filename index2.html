@@ -2923,8 +2923,8 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   #appToast{
     position:fixed;
     left:50%;
-    top:calc(72px + env(safe-area-inset-top,0px));
-    transform:translate(-50%,-14px) scale(.96);
+    bottom:calc(18px + env(safe-area-inset-bottom,0px));
+    transform:translate(-50%,14px) scale(.96);
     opacity:0;
     z-index:2147483100;
     pointer-events:none;
@@ -2938,6 +2938,7 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
   }
   #appToast.show{ opacity:1; transform:translate(-50%,0) scale(1); }
+  /* bildirishnoma menyu tugmalarini to'smasin: pastda chiqadi */
   #appToast .at-emoji{ font-size:28px; line-height:1; flex:none; margin-top:2px; }
   #appToast .at-title{ font-family:'Shippori Mincho', serif; font-size:15px; font-weight:700; color:#f6ecd9; margin-bottom:4px; letter-spacing:.01em; }
   #appToast .at-text{ font-size:13px; color:#d9cfbd; line-height:1.5; }
