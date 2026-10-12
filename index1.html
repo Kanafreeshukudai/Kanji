@@ -8515,6 +8515,29 @@
     background:none !important;
   }
 </style>
+<style>
+  /* KARTOCHKA CHETI: oq, ingichka */
+  .card .face, .card .face.front, .card .face.back{
+    border:1px solid #ffffff !important;
+  }
+
+  /* AKKAUNT MENYUSI: tugmalar birin-ketin emas, butun menyu o'ngdan chapga siljib chiqadi */
+  .auth-dropdown{
+    opacity:0;
+    transform:translateX(28px);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease;
+  }
+  .auth-dropdown.open{
+    opacity:1;
+    transform:translateX(0);
+  }
+  .auth-dropdown > *,
+  .auth-dropdown.open > *{
+    opacity:1 !important;
+    transform:none !important;
+    transition:background-color .2s ease, border-color .2s ease, color .2s ease !important;
+  }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
