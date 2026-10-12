@@ -281,6 +281,68 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   --back-accent:  #6fbfb2;                  /* yapon yozuvi */
   --back-text:    #cfd9d6;                  /* romaji */
 }
+/* ---------- YAPONCHA ESHITISH TUGMASI (karta ustida) ---------- */
+.speak-btn{
+  position:absolute; top:8px; right:8px; z-index:3;
+  width:34px; height:34px; padding:0; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(45,212,191,0.35);
+  background:rgba(45,212,191,0.08);
+  color:#2dd4bf; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+.speak-btn svg{width:16px; height:16px; pointer-events:none;}
+.speak-btn:hover{background:rgba(45,212,191,0.18);}
+.speak-btn:active{transform:scale(.92);}
+.speak-btn.playing{box-shadow:0 0 0 4px rgba(45,212,191,0.20);}
+.speak-btn:focus-visible{outline:2px solid #2dd4bf; outline-offset:2px;}
+
+/* ---------- ESHITISH REJIMI: katta karnay tugmasi ---------- */
+.listen-play-btn{
+  width:88px; height:88px; margin:8px auto 4px; padding:0;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(201,166,107,0.55);
+  background:rgba(201,166,107,0.10);
+  color:#e3c48a; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+.listen-play-btn svg{width:38px; height:38px; pointer-events:none;}
+.listen-play-btn:hover{background:rgba(201,166,107,0.2);}
+.listen-play-btn:active{transform:scale(.94);}
+.listen-play-btn.playing{box-shadow:0 0 0 8px rgba(201,166,107,0.18);}
+.listen-play-btn:focus-visible{outline:2px solid #c9a66b; outline-offset:3px;}
+
+/* Viktorina javob tugmalari: yumshoq ketma-ket chiqish — pastdan sekin ko'tarilib, asta aniqlashadi */
+#viewQuiz .options-grid{ gap:8px; }
+@keyframes optFadeUp{
+  from{ opacity:0; translate:0 38px; }
+  to{ opacity:1; translate:0 0; }
+}
+#viewQuiz .options-grid .option-btn{
+  animation:optFadeUp .55s cubic-bezier(.22,1,.36,1) backwards;
+  animation-delay:calc(var(--i, 0) * 130ms);
+}
+#viewQuiz .options-grid .option-btn:nth-child(1){ --i:0; }
+#viewQuiz .options-grid .option-btn:nth-child(2){ --i:1; }
+#viewQuiz .options-grid .option-btn:nth-child(3){ --i:2; }
+#viewQuiz .options-grid .option-btn:nth-child(4){ --i:3; }
+@media (prefers-reduced-motion: reduce){
+  #viewQuiz .options-grid .option-btn{ animation:none; }
+}
+
+/* Eshitish rejimi: ko'rsatma matni — o'qilishi oson shrift */
+.listen-hint{
+  font-family:'Shippori Mincho', serif;
+  font-size:14.5px; font-weight:500;
+  letter-spacing:.04em; line-height:1.5;
+  color:#f6ecd9;
+  text-align:center;
+  margin:10px auto 22px;
+  max-width:360px;
+}
+
 /* ---------- FLASHCARDS ---------- */
 .grid{
   margin-top:28px;
@@ -397,8 +459,49 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   position:relative;
   transition:transform .4s ease, opacity .4s ease, border-color .3s, box-shadow .3s, background .3s;
 }
-.quiz-card.flash-correct{border-color:var(--green);}
-.quiz-card.flash-wrong{border-color:var(--red);}
+/* Neon yorug'lik: to'g'ri javobda yashil, xatoda qizil neon chiroq yonadi —
+   avval bir necha marta "uchqunlanib" yonadi (xuddi neon yoqilgandek), keyin barqaror porlaydi */
+.quiz-card.flash-correct{ --neon:61,255,160; --neon-core:#d6ffe9; }
+.quiz-card.flash-wrong{ --neon:255,46,99; --neon-core:#ffd6e0; }
+/* Ramka rangi va nur faqat qisqa vaqt yonib, keyin o'zi asl holatiga qaytadi (qolib ketmaydi) */
+.quiz-card.flash-correct, .quiz-card.flash-wrong{
+  animation:qcNeonIgnite 2.2s linear both;
+}
+@keyframes qcNeonIgnite{
+  0%   { box-shadow:none; border-color:var(--border); }
+  9%   { box-shadow:0 0 0 1px rgba(var(--neon),.35), 0 0 6px rgba(var(--neon),.3); border-color:rgba(var(--neon),.5); }
+  13%  { box-shadow:none; border-color:var(--border); }
+  17%  { box-shadow:0 0 0 1px rgba(var(--neon),.9), 0 0 10px rgba(var(--neon),.8), 0 0 28px rgba(var(--neon),.5), 0 0 60px rgba(var(--neon),.25), inset 0 0 24px rgba(var(--neon),.25); border-color:rgba(var(--neon),.95); }
+  21%  { box-shadow:0 0 0 1px rgba(var(--neon),.4), 0 0 6px rgba(var(--neon),.35), inset 0 0 8px rgba(var(--neon),.08); border-color:rgba(var(--neon),.6); }
+  25%  { box-shadow:0 0 0 1px rgba(var(--neon),.95), 0 0 10px rgba(var(--neon),.8), 0 0 28px rgba(var(--neon),.5), 0 0 60px rgba(var(--neon),.25), inset 0 0 24px rgba(var(--neon),.25); border-color:rgba(var(--neon),.95); }
+  55%  { box-shadow:0 0 0 1px rgba(var(--neon),.8), 0 0 9px rgba(var(--neon),.6), 0 0 22px rgba(var(--neon),.3), inset 0 0 14px rgba(var(--neon),.14); border-color:rgba(var(--neon),.8); }
+  80%  { box-shadow:0 0 0 1px rgba(var(--neon),.2), 0 0 6px rgba(var(--neon),.15); border-color:rgba(var(--neon),.3); }
+  100% { box-shadow:none; border-color:var(--border); }
+}
+/* To'g'ri/xato tugma ham shu neon rangda yonadi */
+#viewQuiz .option-btn.correct{
+  --neon:61,255,160;
+  box-shadow:0 0 0 1px rgba(var(--neon),.9), 0 0 12px rgba(var(--neon),.7), 0 0 30px rgba(var(--neon),.35) !important;
+  animation:qbtnIgnite .9s linear both;
+}
+#viewQuiz .option-btn.wrong{
+  --neon:255,46,99;
+  box-shadow:0 0 0 1px rgba(var(--neon),.9), 0 0 12px rgba(var(--neon),.7), 0 0 30px rgba(var(--neon),.35) !important;
+  animation:qbtnIgnite .9s linear both;
+}
+@keyframes qbtnIgnite{
+  0%  { filter:brightness(1); }
+  20% { filter:brightness(.6); }
+  30% { filter:brightness(1.35); }
+  40% { filter:brightness(.8); }
+  55%, 100% { filter:brightness(1.1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .quiz-card.flash-correct, .quiz-card.flash-wrong,
+  #viewQuiz .option-btn.correct, #viewQuiz .option-btn.wrong{ animation:none; }
+}
+/* Viktorina boshqa bo'limga o'tganda: savol ramkasidagi nur va portlash effektlari to'xtaydi, boshqa sahifada qolmaydi */
+#viewQuiz:not(.active) .quiz-card{ animation:none !important; box-shadow:none !important; }
 .quiz-card.leaving{opacity:0; transform:scale(.92) translateY(-6px);}
 
 .q-tag{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#2dd4bf; font-weight:900; text-align:center; opacity:.9;}
@@ -585,19 +688,6 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
   0%{opacity:0; transform:scale(0.5) translateY(20px);}
   60%{opacity:1; transform:scale(1.15) translateY(-4px);}
   100%{opacity:1; transform:scale(1) translateY(0);}
-}
-.success-ring{
-  position:absolute;
-  inset:10px;
-  border-radius:16px;
-  border:2px solid var(--green);
-  opacity:0;
-  animation:ringExpand .7s ease-out forwards;
-  pointer-events:none;
-}
-@keyframes ringExpand{
-  0%{opacity:0.8; transform:scale(0.96);}
-  100%{opacity:0; transform:scale(1.04);}
 }
 
 /* Stamp only for wrong answers */
@@ -1972,6 +2062,45 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
 #viewQuiz .subnav::after{ order:0; }
 #viewQuiz #modeSwitch{ order:-1; }
 #viewQuiz .subnav > div[style*="flex:1"]{ display:none; }
+/* Rejim tugmalari: aktiv fon endi bitta yurgizilgan indikatorda — bosilganda birdan emas, siljib o'tadi */
+#viewQuiz .mode-switch{ position:relative; }
+#viewQuiz .mode-switch .mode-indicator{
+  position:absolute; top:4px; bottom:4px; left:0; width:0;
+  border-radius:999px;
+  background:linear-gradient(135deg,#d0714b,#8f3a22);
+  box-shadow:0 2px 10px rgba(196,98,62,0.28);
+  transition:left .38s cubic-bezier(.65,.05,.36,1), width .38s cubic-bezier(.65,.05,.36,1);
+  pointer-events:none; z-index:0;
+}
+#viewQuiz .mode-switch .mode-btn{ position:relative; z-index:1; }
+#viewQuiz .mode-switch .mode-btn.active{ background:transparent; box-shadow:none; }
+@media (prefers-reduced-motion: reduce){
+  #viewQuiz .mode-switch .mode-indicator{ transition:none; }
+}
+/* Savol kartasi: tepadan sekin tushib, fade bilan paydo bo'ladi (variantlardan oldin) */
+@keyframes qcDropIn{
+  from{ opacity:0; translate:0 -36px; }
+  to{ opacity:1; translate:0 0; }
+}
+#viewQuiz .quiz-card:not(.flash-correct):not(.flash-wrong){
+  animation:qcDropIn .6s cubic-bezier(.22,1,.36,1) backwards;
+}
+@media (prefers-reduced-motion: reduce){
+  #viewQuiz .quiz-card:not(.flash-correct):not(.flash-wrong){ animation:none; }
+}
+/* Faqat 4 ta variant tugmasida yengil tovlanish: tugma ustidan oq yorug'lik sekin o'tadi (savol va boshqa tugmalarda yo'q) */
+#viewQuiz .options-grid .option-btn{ position:relative; isolation:isolate; }
+#viewQuiz .options-grid .option-btn:not(.correct):not(.wrong){ overflow:hidden; }
+#viewQuiz .options-grid .option-btn:not(.correct):not(.wrong)::after{
+  content:''; position:absolute; top:-10%; bottom:-10%; left:-60%; width:40%; z-index:1;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.16), transparent);
+  transform:skewX(-20deg); pointer-events:none;
+  animation:optSweep 5.5s ease-in-out infinite;
+}
+@keyframes optSweep{ 0%,50%{ left:-60%; } 100%{ left:130%; } }
+@media (prefers-reduced-motion: reduce){
+  #viewQuiz .options-grid .option-btn:not(.correct):not(.wrong)::after{ animation:none; }
+}
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
@@ -3199,9 +3328,10 @@ window.mochiDizzy = function(){
         <div class="dropdown-panel" id="quizDropdownPanel"></div>
       </div>
       <div style="flex:1;"></div>
-      <div class="mode-switch" id="modeSwitch">
+      <div class="mode-switch" id="modeSwitch"><span class="mode-indicator" id="modeIndicator" aria-hidden="true"></span>
         <button class="mode-btn active" data-mode="options" id="modeOptions" type="button">4 variant</button>
         <button class="mode-btn" data-mode="timetrial" id="modeTime" type="button">Vaqt sinovi</button>
+        <button class="mode-btn" data-mode="listen" id="modeListen" type="button">Eshitish</button>
       </div>
     </div>
 
@@ -4514,7 +4644,7 @@ function selectTab(btn, posClass, view, onShown){
   activeView = view;
 }
 tabFlash.addEventListener('click', ()=> selectTab(tabFlash, null, viewFlash));
-tabQuiz.addEventListener('click', ()=> selectTab(tabQuiz, 'pos-quiz', viewQuiz, ()=>{ if(!quizStarted) startQuiz(getQuizWords()); }));
+tabQuiz.addEventListener('click', ()=>{ selectTab(tabQuiz, 'pos-quiz', viewQuiz, ()=>{ if(!quizStarted) startQuiz(getQuizWords()); }); setTimeout(()=>moveModeIndicator(true), 60); });
 tabKnown.addEventListener('click', ()=> selectTab(tabKnown, 'pos-known', viewKnown, renderKnownGrid));
 
 /* ---------------- FLASHCARDS ---------------- */
@@ -4716,6 +4846,29 @@ function splitNote(n){
   return { kanji, rest: t };
 }
 
+const ICON_SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+
+/* Yapon tilida o'qish: kana matnini ja-JP ovozi bilan aytadi */
+function speakJapanese(text, btn){
+  if(!('speechSynthesis' in window) || !text) return;
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(String(text));
+  u.lang = 'ja-JP';
+  u.rate = 0.9;
+  u.pitch = 1;
+  u.volume = 1;
+  const jaVoice = synth.getVoices().find(v => /^ja/i.test(v.lang));
+  if(jaVoice) u.voice = jaVoice;
+  if(btn){
+    btn.classList.add('playing');
+    const done = ()=> btn.classList.remove('playing');
+    u.onend = done;
+    u.onerror = done;
+  }
+  synth.speak(u);
+}
+
 function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   targetGrid = targetGrid || flashGrid;
   refresh = refresh || renderActiveSet;
@@ -4743,6 +4896,7 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
           <button type="button" class="know-btn">${isKnownView ? '↺ Qaytarish' : ICON.check + ' Bilaman'}</button>
         </div>
         <div class="face back">
+          <button type="button" class="speak-btn" aria-label="Yaponcha eshitish">${ICON_SPEAK}</button>
           <div class="kana">${w.kana}</div>
           <div class="romaji">${w.romaji}</div>
           <div class="hint">${w.uz}</div>
@@ -4750,6 +4904,12 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
       </div>`;
     card.addEventListener('click', ()=>{
       card.classList.toggle('flipped');
+    });
+    card.querySelectorAll('.speak-btn').forEach(sb=>{
+      sb.addEventListener('click', (e)=>{
+        e.stopPropagation();   // karta aylanib ketmasin
+        speakJapanese(w.kana, sb);
+      });
     });
     card.querySelector('.know-btn').addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -5072,7 +5232,7 @@ let mistakes = [];
 let busy = false;
 let resultLog = [];
 let currentQuizWords = [];
-let quizMode = 'options'; // 'options' | 'timetrial'
+let quizMode = 'options'; // 'options' | 'timetrial' | 'listen'
 let timerId = null;
 let timerStart = 0;
 const TIME_LIMIT = 10000; // 10 seconds
@@ -5151,17 +5311,44 @@ document.addEventListener('click', ()=>{
 /* ---------- MODE SWITCHER ---------- */
 const modeOptions = document.getElementById('modeOptions');
 const modeTime = document.getElementById('modeTime');
+const modeListen = document.getElementById('modeListen');
 function setQuizMode(mode){
   clearQuizTimer();            // vaqt sinovi taymeri to'xtaydi (4 variant yoki boshqa rejimga o'tilganda)
   quizMode = mode;
   modeOptions.classList.toggle('active', mode === 'options');
   modeTime.classList.toggle('active', mode === 'timetrial');
+  modeListen.classList.toggle('active', mode === 'listen');
+  moveModeIndicator();
   document.getElementById('viewQuiz').classList.toggle('timetrial', mode === 'timetrial');
   startQuiz(currentQuizWords);
 }
+// Aktiv rejim indikatorini tanlangan tugma ostiga siljitadi (instant=true — animatsiyasiz joylash)
+function moveModeIndicator(instant){
+  const ind = document.getElementById('modeIndicator');
+  const sw = document.getElementById('modeSwitch');
+  const b = sw && sw.querySelector('.mode-btn.active');
+  if(!ind || !b || !b.offsetWidth) return;   // ko'rinmas holatda (viktorina ochilmagan) o'lchab bo'lmaydi
+  if(instant) ind.style.transition = 'none';
+  ind.style.width = b.offsetWidth + 'px';
+  ind.style.left = b.offsetLeft + 'px';
+  if(instant){ void ind.offsetWidth; ind.style.transition = ''; }
+}
+window.addEventListener('resize', ()=> moveModeIndicator(true));
+// Viktorina ochilganda indikator darhol to'g'ri tugma ostida tursin (chapdan siljimasin):
+// bo'lim ko'rinadigan bo'lgach, animatsiyasiz joylanadi
+(function(){
+  const vq = document.getElementById('viewQuiz');
+  if(!vq) return;
+  const place = ()=> requestAnimationFrame(()=> moveModeIndicator(true));
+  new MutationObserver(()=>{
+    if(vq.classList.contains('active')){ place(); setTimeout(()=>moveModeIndicator(true), 120); }
+  }).observe(vq, { attributes:true, attributeFilter:['class'] });
+  if(vq.classList.contains('active')) place();
+})();
 
 modeOptions.addEventListener('click', ()=> setQuizMode('options'));
 modeTime.addEventListener('click', ()=> setQuizMode('timetrial'));
+modeListen.addEventListener('click', ()=> setQuizMode('listen'));
 
 buildDaySubnav(quizSubnav, quizActiveKey, (key)=>{ quizActiveKey = key; notifyIfNoKnown(key); startQuiz(getQuizWords()); }, quizDropdownPanel, quizDropdownBtn);
 
@@ -5514,6 +5701,35 @@ function renderQuestion(){
     if(btnShow) btnShow.addEventListener('click', ()=> showAnswerTimeTrial());
 
     startQuizTimer();
+  } else if(quizMode === 'listen'){
+    // Eshitish rejimi: so'z yapon tilida aytiladi, o'zbekcha ma'nosini topish kerak
+    const options = generateOptions(w, currentQuizWords);
+    const optionsHtml = options.map((opt, i) =>
+      `<button class="option-btn" data-idx="${i}" data-correct="${opt.correct}" type="button">${opt.word.uz}</button>`
+    ).join('');
+
+    quizStage.innerHTML = `
+      <div class="quiz-card" id="qCard"><div class="qc-bg" aria-hidden="true"><i class="qc-dust far"></i><i class="qc-dust mid"></i><i class="qc-dust near"></i></div>
+        <button type="button" class="listen-play-btn" id="listenPlayBtn" aria-label="Qayta eshitish">${ICON_SPEAK}</button>
+        <div class="listen-hint">Tinglang va to'g'ri ma'noni tanlang</div>
+        <div class="options-grid" id="optionsGrid">
+          ${optionsHtml}
+        </div>
+        <div class="reveal-answer" id="revealAnswer" style="margin-top:10px;"></div>
+      </div>`;
+
+    const playBtn = document.getElementById('listenPlayBtn');
+    playBtn.addEventListener('click', ()=> speakJapanese(w.kana, playBtn));
+    // savol ochilishi bilan avtomatik eshittiradi
+    setTimeout(()=> speakJapanese(w.kana, playBtn), 300);
+
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(busy) return;
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        submitAnswer(btn.dataset.correct === 'true', btn);
+      });
+    });
   } else {
     // 4-variant mode
     const options = generateOptions(w, currentQuizWords);
@@ -5609,10 +5825,6 @@ function submitAnswer(isCorrect, selectedBtn){
     const dots = document.querySelectorAll('.dot-pill');
     if(dots[idx]){ dots[idx].classList.remove('current'); dots[idx].classList.add('correct'); }
     // Success animation overlay
-    const burst = document.createElement('div');
-    burst.className = 'success-burst';
-    burst.innerHTML = `<div class="success-ring"></div>`;
-    card.appendChild(burst);
   } else {
     wrongCount++;
     mistakes.push(w);
