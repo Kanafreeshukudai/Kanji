@@ -8571,6 +8571,10 @@
   .face.back{
     border:1px solid #C9A66B !important;
   }
+  /* Ma'no (orqa) tarafining hoshiyasi: ingichka kulrang chiziq (qora fonda ko'rinadi). Old taraf o'zgarmaydi (oq hoshiya). */
+  .card .face.back{
+    border:1px solid #5a5a60 !important;
+  }
   /* orqa tomondagi oq yorug' hoshiya qatlami (::after) tillarang hoshiyani yopib qo'ymasin */
   .card .face.back::after,
   .card .face.back::before{ display:none !important; }
@@ -8587,6 +8591,17 @@
   .speak-jp-btn:hover{ opacity:.8; background:none; }
   .speak-jp-btn:active{ transform:scale(0.86); }
   .speak-jp-btn svg{ width:30px; height:30px; display:block; }
+  /* Karnay ovozi: to'lqinlar ketma-ket yonib-o'chadi, o'qish tugaguncha davom etadi */
+  .speak-jp-btn.speaking .spk-w1{ animation:spkWave 0.9s ease-in-out infinite; }
+  .speak-jp-btn.speaking .spk-w2{ animation:spkWave 0.9s ease-in-out .3s infinite; }
+  .speak-jp-btn.speaking svg{ filter:drop-shadow(0 0 4px rgba(224,72,72,.55)); }
+  @keyframes spkWave{
+    0%,100%{ opacity:.2; }
+    50%{ opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .speak-jp-btn.speaking .spk-w1, .speak-jp-btn.speaking .spk-w2{ animation:none; opacity:1; }
+  }
 </style>
 </head>
 <script>
@@ -11889,7 +11904,7 @@
               <div class="translation">${word.uz}</div>
             </div>
             <div class="back-bottom">
-              <button class="speak-jp-btn" type="button" aria-label="Yaponcha o'qish"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+              <button class="speak-jp-btn" type="button" aria-label="Yaponcha o'qish"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="spk-w1" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="spk-w2" d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
               <div class="divider"></div>
               <div class="reading-label">Kun'yomi / On'yomi</div>
               <div class="back-reading"><span class="rk">${word.reading}</span></div>
@@ -11909,7 +11924,7 @@
     const spk = card.querySelector('.speak-jp-btn');
     if(spk){
       ['pointerdown','touchstart','mousedown'].forEach(ev=>spk.addEventListener(ev, e=>e.stopPropagation()));
-      spk.addEventListener('click', e=>{ e.stopPropagation(); speakJP(romajiToKana(word.romaji)); });
+      spk.addEventListener('click', e=>{ e.stopPropagation(); speakJP(romajiToKana(word.romaji), spk); });
     }
     updateHintCounts();
   }
@@ -12184,7 +12199,7 @@
     return out;
   }
 
-  function speakJP(text){
+  function speakJP(text, btn){
     if(!text || !('speechSynthesis' in window)) return;
     // butun saytdagi "Ovoz" tugmasi o'chiq bo'lsa, o'qimaymiz
     const soundOff = document.getElementById('soundToggleBtn')?.getAttribute('aria-checked') === 'false';
@@ -12203,6 +12218,19 @@
     }
     if(!jv) jv = jaVoices[0] || null;
     if(jv) u.voice = jv;
+    // karnay tugmasi: so'z to'liq o'qib bo'lingunicha to'lqinlar animatsiyasi davom etadi
+    let spkTimer = null;
+    const stopWaves = ()=>{
+      clearTimeout(spkTimer);
+      if(btn) btn.classList.remove('speaking');
+    };
+    u.onstart = ()=>{ if(btn) btn.classList.add('speaking'); };
+    u.onend = stopWaves;
+    u.onerror = stopWaves;
+    if(btn){
+      btn.classList.add('speaking');
+      spkTimer = setTimeout(stopWaves, text.length * 700 + 2500); // zaxira: onend kelmasa ham to'xtaydi
+    }
     speechSynthesis.speak(u);
   }
 
