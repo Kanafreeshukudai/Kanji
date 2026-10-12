@@ -8538,6 +8538,28 @@
     transition:background-color .2s ease, border-color .2s ease, color .2s ease !important;
   }
 </style>
+<style>
+  /* FLASHCARD TANLASH OYNASI: markazda kichik, scroll bo'ladigan oyna;
+     barcha tugma va chegaralar ustida turadi */
+  .ct-table-center-hint.picker-open{
+    position:fixed !important;
+    left:50% !important;
+    top:50% !important;
+    transform:translate(-50%,-50%) !important;
+    width:min(86vw, 320px) !important;
+    max-width:min(86vw, 320px) !important;
+    max-height:min(68vh, 420px) !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    z-index:10000 !important;
+    padding:12px !important;
+    border-radius:16px !important;
+    background:#0b0d10 !important;
+    border:1px solid rgba(255,255,255,0.5) !important;
+    box-shadow:none !important;
+  }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
