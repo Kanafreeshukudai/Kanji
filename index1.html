@@ -8454,6 +8454,67 @@
   }
   .moss-bg.is-on{ opacity:1; }
 </style>
+<script>
+  /* FON BUTUNLAY O'CHIRILDI: yoqilgan holat eslab qolingan bo'lsa ham yuklanmaydi */
+  try{
+    localStorage.setItem('kanji-bgfx', '0');
+    localStorage.setItem('kanji-bgdots', '0');
+    localStorage.setItem('kanji-mossbg', '0');
+  }catch(e){}
+</script>
+<style>
+  /* 1) Fon qatlamlari va zarralar — yashirilib, chizilmaydi */
+  .moss-bg,
+  .bg-scene,
+  .dots-canvas, #dotsCanvas,
+  #ctRoomParticles,
+  .swipe-edge-glow,
+  .ripple-overlay,
+  #bgLinesConfirmOverlay{ display:none !important; }
+
+  /* 2) Akkaunt menyusidagi fon tugmalari */
+  #bgFxToggleBtn, #bgDotsToggleBtn, #mossBgBtn{ display:none !important; }
+
+  /* 3) Kartochka: qora fonda ko'rinishi uchun yupqa chegara qoldi (soya va nur yo'q) */
+  .card, .card-inner{
+    border:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background:transparent !important;
+  }
+  .card .face, .card .face.front, .card .face.back{
+    border:1px solid rgba(255,255,255,0.22) !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background:#000 !important;
+  }
+  .card::before, .card::after,
+  .card .face::before, .card .face::after,
+  .card .face.front::after, .card .face.back::before, .card .face.back::after{
+    display:none !important;
+  }
+
+  /* 4) Yengil render: shisha (blur) hech qayerda ishlamaydi, tugma chetlari
+     outline bilan chiziladi (outline — qayta chizish va soya hisoblashni talab qilmaydi) */
+  *, *::before, *::after{
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+  button:not(.card *), [role="button"]:not(.card *){
+    outline:1px solid rgba(255,255,255,0.14);
+    outline-offset:-1px;
+  }
+  </style>
+<style>
+  /* "Bilganlarim" va "Navbatga" matnlari: ramka, chegara va fon yo'q, faqat matn */
+  .swipe-hints .hint,
+  .swipe-hints .hint *{
+    border:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background:none !important;
+  }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
