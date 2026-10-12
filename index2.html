@@ -2088,18 +2088,25 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
 @media (prefers-reduced-motion: reduce){
   #viewQuiz .quiz-card:not(.flash-correct):not(.flash-wrong){ animation:none; }
 }
-/* Faqat 4 ta variant tugmasida yengil tovlanish: tugma ustidan oq yorug'lik sekin o'tadi (savol va boshqa tugmalarda yo'q) */
-#viewQuiz .options-grid .option-btn{ position:relative; isolation:isolate; }
-#viewQuiz .options-grid .option-btn:not(.correct):not(.wrong){ overflow:hidden; }
-#viewQuiz .options-grid .option-btn:not(.correct):not(.wrong)::after{
-  content:''; position:absolute; top:-10%; bottom:-10%; left:-60%; width:40%; z-index:1;
-  background:linear-gradient(100deg, transparent, rgba(255,255,255,.16), transparent);
-  transform:skewX(-20deg); pointer-events:none;
-  animation:optSweep 5.5s ease-in-out infinite;
+/* Xato javob bubble: to'g'ri javob (so'z) qulay o'qilishi uchun kengroq va bo'shliqli */
+.mochi-quiz-bubble.bad{
+  max-width:340px;
+  min-width:220px;
+  padding:12px 18px 12px 14px;
+  font-size:14px;
+  line-height:1.55;
+  border-radius:18px;
 }
-@keyframes optSweep{ 0%,50%{ left:-60%; } 100%{ left:130%; } }
-@media (prefers-reduced-motion: reduce){
-  #viewQuiz .options-grid .option-btn:not(.correct):not(.wrong)::after{ animation:none; }
+.mochi-quiz-bubble.bad b{
+  display:inline-block;
+  margin-top:4px;
+  padding:2px 10px;
+  border-radius:8px;
+  background:rgba(239,68,68,0.18);
+  color:#fff;
+  font-size:15px;
+  letter-spacing:.04em;
+  white-space:nowrap;
 }
 </style>
 <style id="home-nav-style">
@@ -2783,6 +2790,13 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     to{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
   }
   @media (prefers-reduced-motion: reduce){ .mochi-quiz-bubble.show{ animation:none; } }
+  /* bubble yumshoq so'nadi: yuqoriga sekin suzib, xiralashib yo'qoladi */
+  .mochi-quiz-bubble.show.fade-out{ animation:qBubbleOut .5s ease both; }
+  @keyframes qBubbleOut{
+    from{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+    to{ opacity:0; transform:translateX(-50%) translateY(-10px) scale(.94); }
+  }
+  @media (prefers-reduced-motion: reduce){ .mochi-quiz-bubble.show.fade-out{ animation:none; opacity:0; } }
   /* bubble dumi (uchburchak) olib tashlandi — toza ko'rinish */
   .mochi-quiz-bubble::after{ display:none !important; content:none !important; }
   /* gapirganda og'iz harakatlanmaydi (og'iz animatsiyasi o'chirildi) */
@@ -5771,6 +5785,7 @@ function flashScaleTip(){
 
 // Mochi o'zidan bubble chiqaradi (yashil/qizil) va gapirayotgandek effekt beradi
 let quizBubbleTimer = null, quizSpeakTimer = null;
+let quizFadeTimer = null;
 function showQuizMochiNote(type, html){
   const bubble = document.getElementById('mochiQuizBubble');
   const body = document.querySelector('.mochi-body');
@@ -5790,10 +5805,39 @@ function showQuizMochiNote(type, html){
   }
   clearTimeout(quizBubbleTimer);
   clearTimeout(quizSpeakTimer);
-  quizBubbleTimer = setTimeout(()=> bubble.classList.remove('show'), type === 'ok' ? 1500 : 2600);
+  clearTimeout(quizFadeTimer);
+  quizBubbleTimer = setTimeout(()=>{
+    bubble.classList.add('fade-out');              // avval yumshoq so'nadi
+    quizFadeTimer = setTimeout(()=> bubble.classList.remove('show','fade-out'), 500);
+  }, type === 'ok' ? 2200 : 2600);
   quizSpeakTimer = setTimeout(()=> body.classList.remove('speaking'), type === 'ok' ? 1500 : 2600);
 }
 
+// Xato javob hazillari: to'g'ri javob (kana) har doim ko'rinadi
+const badJokes = [
+  k => `Oops! 🙈 To'g'ri javob: <b>${k}</b> — keyingisida ushlaymiz!`,
+  k => `Bu so'z qochib ketdi 🏃💨 Ushlab olish uchun: <b>${k}</b>`,
+  k => `Xotirang dam olayapti 😴 Uyg'otish uchun: <b>${k}</b>`,
+  k => `Yo'l adashdi-ku 🗺️ Asl manzil: <b>${k}</b>`,
+  k => `Hmm, miyang bu safar boshqa xonaga kirib ketdi 🚪 To'g'ri: <b>${k}</b>`,
+  k => `Bu so'z sendan xafa bo'ldi 😜 Yarashish uchun: <b>${k}</b>`,
+  k => `Mochi ham bilmasdi deb o'ylayman 🤭 Lekin to'g'risi: <b>${k}</b>`,
+  k => `Xato bo'lsa ham, qadam qo'yding-ku 👏 Endi eslab qol: <b>${k}</b>`
+];
+const okJokes = [
+  "Bu so'z endi sening cho'ntagingda 😎 Hech qayerga qochib ketolmaydi!",
+  "Bu so'z qochmoqchi edi, lekin sen tutib oldding 🏃💨",
+  "Miyangda bu so'zga alohida xona ochildi 🏠😄",
+  "Bu so'z endi sening qarzdoring 🤝 Qaytarmasa, eslatib turaman!",
+  "Xotirang bu so'zni qulflab qo'ydi 🔐 Kalit ham o'zingda 😉",
+  "Bu so'z hozir tarjimon bo'lib ketdi 🗣️ Endi ustozga gapirib bersa bo'ladi!",
+  "Ajoyib! Mochi bu so'zni daftariga yozib qo'ydi 📒✍️",
+  "Yapon tili ham sening oldingda tiz cho'kdi 🙇😆",
+  "Bu so'zni endi hech kim sendan tortib ololmaydi 🦸",
+  "Bilim ulanmoqda, boshqa so'zlar ham ergashib kelsin 🚂🚃🚃",
+  "Shu so'z uchun yana bir yulduz topildi ⭐ Osmon to'lib boryapti!",
+  "Xotira xonangda yangi mehmon paydo bo'ldi 🎉 Eshigini ochiq qoldiring!"
+];
 function submitAnswer(isCorrect, selectedBtn){
   if(busy) return;
   busy = true;
@@ -5821,7 +5865,7 @@ function submitAnswer(isCorrect, selectedBtn){
     card.classList.add('flash-correct');
     playCorrectSound();
     mochiHappy(1500);
-    showQuizMochiNote('ok', "To'g'ri!");
+    showQuizMochiNote('ok', okJokes[Math.floor(Math.random()*okJokes.length)]);
     const dots = document.querySelectorAll('.dot-pill');
     if(dots[idx]){ dots[idx].classList.remove('current'); dots[idx].classList.add('correct'); }
     // Success animation overlay
@@ -5833,7 +5877,7 @@ function submitAnswer(isCorrect, selectedBtn){
     playWrongSound();
     mochiSad(2600);
     selectedBtn.classList.add('shake-wrong');
-    showQuizMochiNote('bad', `Noto'g'ri · To'g'ri javob: <b>${w.kana}</b>`);
+    showQuizMochiNote('bad', badJokes[Math.floor(Math.random()*badJokes.length)](w.kana));
     const dots = document.querySelectorAll('.dot-pill');
     if(dots[idx]){ dots[idx].classList.remove('current'); dots[idx].classList.add('wrong'); }
   }
@@ -7230,6 +7274,40 @@ window.addEventListener('message', function(e){
     if(cu){ cu.classList.remove('leaving'); cu.classList.add('done'); }
   }
 });
+</script>
+<script>
+/* Bo'sh joyga (tugma bo'lmagan joyga) bosilganda Mochi hazil tariqasida bubble bilan javob beradi */
+(function(){
+  const lines = [
+    "Nimani izlayapsan? 🙂 Bu yerda yashirin tugma yo'q, lekin bosganing uchun men ham kulib qo'ydim 😊",
+    "Yashirin tugma qidiryapsanmi? 😏 Hozircha topilmadi… davom et, balki topilar!",
+    "Hm, bu joy tugma emas 😄 Mening bilan gaplashmoqchi bo'lsang, shunchaki bosaver!",
+    "Biror narsa yashiringanmi deysanmi? 🤭 Yo'q, faqat bo'sh joy. Tugmalarni bos!",
+    "Bo'sh joyga bosding-a? 😅 Ko'zim bor, hammasini ko'raman, lekin hech narsa yo'q 🙂",
+    "Sen meni sinayapsanmi? 🕵️ Mana, men shu yerdaman, yashirinmayman 😜",
+    "Ha, bu yerda hech narsa yo'q! 😂 Lekin sening tirnoqli sabring menga yoqdi 👏",
+    "Pixel-pixel qidiryapsanmi? 🔍 Bu safar topilmadi, keyingisida omad 🍀",
+    "Bo'sh joy ham o'z sirlariga ega 🤫 Tugmani topsang, siri ochiladi 😉",
+    "Ehtiyot bo'l, shu yerda hazil yashiringan bo'lishi mumkin 😸 Yana bos-chi!"
+  ];
+  const interactive = 'button, a, input, textarea, select, label, summary, [role="button"], [onclick], [contenteditable], .option-btn, .mode-btn, .sub-btn, .dropdown-btn, .dot-pill, #mochi, #pageCurtain, .mochi-quiz-bubble';
+  let last = 0, lastIdx = -1;
+  document.addEventListener('click', function(e){
+    const t = e.target;
+    if(!(t instanceof Element)) return;
+    if(t.closest(interactive)) return;          // tugma yoki Mochi bo'lsa — hazil kerak emas
+    if(document.body.classList.contains('mochi-off')) return;  // Mochi o'chiq bo'lsa
+    if(!window.showQuizMochiNote) return;
+    const now = Date.now();
+    if(now - last < 2500) return;               // juda tez-tez chiqmasin
+    const bubble = document.getElementById('mochiQuizBubble');
+    if(bubble && bubble.classList.contains('show') && /ok|bad/.test(bubble.className)) return; // javob xabari ustiga yozilmasin
+    last = now;
+    let idx; do { idx = Math.floor(Math.random()*lines.length); } while(idx === lastIdx && lines.length > 1);
+    lastIdx = idx;
+    window.showQuizMochiNote('info', lines[idx]);
+  });
+})();
 </script>
 </body>
 </html>
