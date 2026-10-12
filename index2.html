@@ -2098,6 +2098,10 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   letter-spacing:.04em;
   white-space:nowrap;
 }
+/* Mochi bubble: ixcham o'lcham, hazil tez o'qilishi uchun */
+.mochi-quiz-bubble.info, .mochi-quiz-bubble.ok{ max-width:200px; font-size:12.5px; padding:7px 12px; }
+.mochi-quiz-bubble.bad{ max-width:240px; font-size:13px; padding:9px 12px; min-width:0; }
+.mochi-quiz-bubble.bad b{ font-size:13.5px; padding:1px 8px; }
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
@@ -5805,28 +5809,21 @@ function showQuizMochiNote(type, html){
 
 // Xato javob hazillari: to'g'ri javob (kana) har doim ko'rinadi
 const badJokes = [
-  k => `Oops! 🙈 To'g'ri javob: <b>${k}</b> — keyingisida ushlaymiz!`,
-  k => `Bu so'z qochib ketdi 🏃💨 Ushlab olish uchun: <b>${k}</b>`,
-  k => `Xotirang dam olayapti 😴 Uyg'otish uchun: <b>${k}</b>`,
-  k => `Yo'l adashdi-ku 🗺️ Asl manzil: <b>${k}</b>`,
-  k => `Hmm, miyang bu safar boshqa xonaga kirib ketdi 🚪 To'g'ri: <b>${k}</b>`,
-  k => `Bu so'z sendan xafa bo'ldi 😜 Yarashish uchun: <b>${k}</b>`,
-  k => `Mochi ham bilmasdi deb o'ylayman 🤭 Lekin to'g'risi: <b>${k}</b>`,
-  k => `Xato bo'lsa ham, qadam qo'yding-ku 👏 Endi eslab qol: <b>${k}</b>`
+  k => `Oops! 🙈 To'g'ri: <b>${k}</b>`,
+  k => `Qochib ketdi 🏃 Ushlang: <b>${k}</b>`,
+  k => `Xotira uxlayapti 😴 <b>${k}</b>`,
+  k => `Yo'l adashdi 🗺️ <b>${k}</b>`,
+  k => `Yarashish uchun: <b>${k}</b> 😜`
 ];
 const okJokes = [
-  "Bu so'z endi sening cho'ntagingda 😎 Hech qayerga qochib ketolmaydi!",
-  "Bu so'z qochmoqchi edi, lekin sen tutib oldding 🏃💨",
-  "Miyangda bu so'zga alohida xona ochildi 🏠😄",
-  "Bu so'z endi sening qarzdoring 🤝 Qaytarmasa, eslatib turaman!",
-  "Xotirang bu so'zni qulflab qo'ydi 🔐 Kalit ham o'zingda 😉",
-  "Bu so'z hozir tarjimon bo'lib ketdi 🗣️ Endi ustozga gapirib bersa bo'ladi!",
-  "Ajoyib! Mochi bu so'zni daftariga yozib qo'ydi 📒✍️",
-  "Yapon tili ham sening oldingda tiz cho'kdi 🙇😆",
-  "Bu so'zni endi hech kim sendan tortib ololmaydi 🦸",
-  "Bilim ulanmoqda, boshqa so'zlar ham ergashib kelsin 🚂🚃🚃",
-  "Shu so'z uchun yana bir yulduz topildi ⭐ Osmon to'lib boryapti!",
-  "Xotira xonangda yangi mehmon paydo bo'ldi 🎉 Eshigini ochiq qoldiring!"
+  "To'g'ri! 😎 Endi bu so'z sening cho'ntagingda",
+  "Bingo! 🎯 Qochib keta olmaydi",
+  "Zo'r! 🙌 Miyangda xona ochildi",
+  "Ajoyib! 🍀 Omading bor ekan",
+  "Topdingiz-ku! 😜 Men ko'z qisib turgandim",
+  "Ha, shu! 🚀 Bilim ulanyapti",
+  "Bu so'z endi sening qarzdoring 🤝",
+  "Yulduz yondi ⭐ Osmon to'lib bormoqda"
 ];
 function submitAnswer(isCorrect, selectedBtn){
   if(busy) return;
@@ -7272,18 +7269,16 @@ window.addEventListener('message', function(e){
 /* Bo'sh joyga (tugma bo'lmagan joyga) bosilganda Mochi hazil tariqasida bubble bilan javob beradi */
 (function(){
   const lines = [
-    "Nimani izlayapsan? 🙂 Bu yerda yashirin tugma yo'q, lekin bosganing uchun men ham kulib qo'ydim 😊",
-    "Yashirin tugma qidiryapsanmi? 😏 Hozircha topilmadi… davom et, balki topilar!",
-    "Hm, bu joy tugma emas 😄 Mening bilan gaplashmoqchi bo'lsang, shunchaki bosaver!",
-    "Biror narsa yashiringanmi deysanmi? 🤭 Yo'q, faqat bo'sh joy. Tugmalarni bos!",
-    "Bo'sh joyga bosding-a? 😅 Ko'zim bor, hammasini ko'raman, lekin hech narsa yo'q 🙂",
-    "Sen meni sinayapsanmi? 🕵️ Mana, men shu yerdaman, yashirinmayman 😜",
-    "Ha, bu yerda hech narsa yo'q! 😂 Lekin sening tirnoqli sabring menga yoqdi 👏",
-    "Pixel-pixel qidiryapsanmi? 🔍 Bu safar topilmadi, keyingisida omad 🍀",
-    "Bo'sh joy ham o'z sirlariga ega 🤫 Tugmani topsang, siri ochiladi 😉",
-    "Ehtiyot bo'l, shu yerda hazil yashiringan bo'lishi mumkin 😸 Yana bos-chi!"
+    "Nimani izlayapsan? 🙂",
+    "Yashirin tugma qidiryapsanmi? 😏",
+    "Bu joy tugma emas 😄",
+    "Bo'sh joyga bosding-a? 😅",
+    "Meni sinayapsanmi? 🕵️",
+    "Hech narsa yashirilmagan 🤫",
+    "Pixel-pixel qidiryapsanmi? 🔍",
+    "Ehtiyot bo'l, hazil yashirin 😸"
   ];
-  const interactive = 'button, a, input, textarea, select, label, summary, [role="button"], [onclick], [contenteditable], .option-btn, .mode-btn, .sub-btn, .dropdown-btn, .dot-pill, #mochi, #pageCurtain, .mochi-quiz-bubble';
+  const interactive = 'button, a, input, textarea, select, label, summary, [role="button"], [onclick], [contenteditable], [class*="card"], [class*="face"], .option-btn, .mode-btn, .sub-btn, .dropdown-btn, .dot-pill, .q-word, .q-note, .quiz-stage, .listen-hint, #mochi, #pageCurtain, .mochi-quiz-bubble';
   let last = 0, lastIdx = -1;
   document.addEventListener('click', function(e){
     const t = e.target;
