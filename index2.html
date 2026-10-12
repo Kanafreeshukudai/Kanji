@@ -66,9 +66,7 @@ body::before{
   position:absolute; border-radius:50%;
   contain:layout paint style;
   background:radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.45) 45%, rgba(255,255,255,0) 78%);
-  opacity:0;
-  will-change:opacity;
-  animation-name:twinkle; animation-iteration-count:infinite; animation-timing-function:ease-in-out;
+  opacity:var(--peak,0.25);
 }
 @keyframes twinkle{0%,100%{opacity:0;} 50%{opacity:var(--peak,0.25);}}
 @media (prefers-reduced-motion: reduce){
@@ -239,6 +237,11 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 }
 .sub-btn:hover{border-color:rgba(45,212,191,0.3); color:var(--cream);}
 .sub-btn.active{background:linear-gradient(135deg, rgba(45,212,191,0.15), rgba(45,212,191,0.05)); color:#2dd4bf; border-color:rgba(45,212,191,0.35);}
+.sub-count{display:inline-block; margin-left:7px; min-width:20px; padding:1px 6px; border-radius:999px; background:rgba(45,212,191,0.14); color:#2dd4bf; font-size:11px; font-weight:800; line-height:1.45; text-align:center; font-variant-numeric:tabular-nums;}
+/* raqamlar tugma ranglariga mos: Flashcard — ko'k, Viktorina — qizil-jigarrang, Bilganlarim — yashil */
+#viewFlash .sub-count{ background:var(--fc-soft); color:var(--fc-text); }
+#viewQuiz .sub-count{ background:var(--qz-soft); color:var(--qz-text); }
+#viewKnown .sub-count{ background:var(--kn-soft); color:var(--kn-text); }
 .sub-btn .dot{display:inline-block; width:5px; height:5px; border-radius:50%; background:#2dd4bf; margin-left:6px; vertical-align:middle;}
 
 /* ---------- BILAMAN tugmasi va bo'limi ---------- */
@@ -333,7 +336,7 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 .face.back{
   transform:rotateY(180deg) translateZ(0.01px);
   -webkit-transform:rotateY(180deg) translateZ(0.01px);
-  background:transparent;
+  background:#000;
   border-color:#2dd4bf;
   box-shadow: inset 0 0 0 1px rgba(45,212,191,0.10), 0 0 24px rgba(45,212,191,0.08);
 }
@@ -364,6 +367,7 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   color:#2dd4bf; font-weight:700; margin-bottom:10px;
 }
 .uz-word{position:relative; z-index:1; font-size:17px; font-weight:700; color:var(--cream); line-height:1.25;}
+.uz-kanji{position:relative; z-index:1; font-family:'Shippori Mincho', serif; font-size:12px; font-weight:600; color:#b8c9c4; margin-top:4px; letter-spacing:.04em; text-shadow:0 0 6px rgba(0,0,0,0.8);}
 .uz-note{position:relative; z-index:1; font-size:12.5px; font-weight:500; color:#c9d6d2; line-height:1.35; margin-top:5px; text-shadow:0 0 6px rgba(0,0,0,0.8);}
 .kana{position:relative; z-index:1; font-family:var(--font-display); font-size:24px; font-weight:700; color:#2dd4bf;}
 .romaji{position:relative; z-index:1; font-size:12.5px; color:#d4dedb; margin-top:6px; font-style:italic; font-weight:500;}
@@ -1001,8 +1005,8 @@ footer.note{text-align:center; color:rgba(255,255,255,0.25); font-size:11.5px; m
   animation:mochiExcited .5s ease-in-out infinite;
 }
 @keyframes mochiExcited{
-  0%,100%{transform:scale(1.08) translateY(-4px); filter: brightness(1.1);}
-  50%{transform:scale(1.12) translateY(-8px); filter: brightness(1.25) drop-shadow(0 0 20px rgba(157,78,221,0.6));}
+  0%,100%{transform:scale(1.08) translateY(-4px);}
+  50%{transform:scale(1.12) translateY(-8px);}
 }
 .mochi-wrap:hover .mochi-shadow{
   animation:none;
@@ -1300,8 +1304,8 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   pointer-events:none;
   transition:opacity .3s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
   z-index:10000;
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+  
+  
 }
 .mochi-bubble.show{
   opacity:1;
@@ -1416,8 +1420,8 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   border-radius:50%;
   border:1px solid rgba(157,78,221,0.35);
   background:linear-gradient(135deg, rgba(157,78,221,0.16), rgba(199,125,255,0.08));
-  -webkit-backdrop-filter:blur(6px);
-  backdrop-filter:blur(6px);
+  
+  
   color:#e0c3ff;
   font-size:14px;
   cursor:pointer;
@@ -1630,26 +1634,22 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   50%{filter:drop-shadow(0 0 12px rgba(157,78,221,0.5)) drop-shadow(0 0 30px rgba(123,44,191,0.25));}
 }
 .mochi-body{
-  animation:mochiBreathe 3s ease-in-out infinite, neonPulse 4s ease-in-out infinite;
+  animation:mochiBreathe 3s ease-in-out infinite;
 }
 /* Override for states that have their own animations */
 .mochi-body.happy{
-  animation:mochiHappy .55s cubic-bezier(.34,1.56,.64,1) both, neonPulse 2s ease-in-out infinite;
+  animation:mochiHappy .55s cubic-bezier(.34,1.56,.64,1) both;
 }
 .mochi-body.sad{
   animation:mochiSad .6s cubic-bezier(.34,1.56,.64,1) both;
-  filter:grayscale(0.3) brightness(0.85);
+
 }
 .mochi-body.sleep{
   animation:mochiSleep 0.8s ease both;
-  filter:brightness(0.75) saturate(0.7);
+
 }
-.mochi-body.speaking{
-  filter:drop-shadow(0 0 15px rgba(157,78,221,0.6)) drop-shadow(0 0 40px rgba(123,44,191,0.3));
-}
-.mochi-body.thinking{
-  filter:drop-shadow(0 0 10px rgba(157,78,221,0.4));
-}
+.mochi-body.speaking{ }
+.mochi-body.thinking{ }
 
 
   /* ---------- KIRISH PARDASI v2: iliq yorug'lik, nozik soyalar, Boshlash effekti ---------- */
@@ -1747,7 +1747,7 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     border-radius:50%;
     border:1px solid rgba(255,255,255,0.18);
     background:linear-gradient(150deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
-    -webkit-backdrop-filter:blur(18px) saturate(150%); backdrop-filter:blur(18px) saturate(150%);
+     
     color:#ECE7DC;
     box-shadow:0 0 10px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.12);
     cursor:pointer;
@@ -2017,7 +2017,7 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     font-size:12px; font-weight:800; letter-spacing:0.02em;
     text-decoration:none;
     box-shadow:0 6px 18px -8px rgba(0,0,0,0.7);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+     
     -webkit-tap-highlight-color:transparent;
   }
   .home-back:active{ transform:scale(0.95); }
@@ -2097,7 +2097,7 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   @keyframes mochiWink{ 0%,100%{ transform:scaleY(1); } 30%,70%{ transform:scaleY(0.1); } }
   .mochi-eye.wink{ animation:mochiWink .6s ease-in-out; }
   @keyframes mochiWinkSmile{ 0%,100%{ width:8px; height:4px; } 30%,70%{ width:13px; height:6px; } }
-  @keyframes mochiWinkBlush{ 0%,100%{ filter:blur(2px) brightness(1); } 30%,70%{ filter:blur(2px) brightness(1.9); } }
+  @keyframes mochiWinkBlush{ 0%,100%{ opacity:1; } 30%,70%{ opacity:.9; } }
   .mochi-mouth.wink{ animation:mochiWinkSmile .6s ease-in-out; }
   .mochi-blush.wink{ animation:mochiWinkBlush .6s ease-in-out; }
   .mochi-heart{
@@ -2118,6 +2118,11 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     box-shadow:inset 0 -1px 3px rgba(0,0,0,0.35), 0 0 5px rgba(199,125,255,0.3);
   }
   .mochi-pupil{ box-shadow:0 0 4px rgba(255,255,255,0.8); }
+  /* kartochka chetki ramkasi: orqa tomoni ingichka oq, old tomoni qoraroq */
+  .card .face.back{ border:1px solid #ffffff !important; }
+  .card .face.front,
+  .card.known-card .face.front,
+  #viewKnown .card.known-card .face.front{ border:1px solid #2a2f36 !important; }
 </style>
 </head>
 <body>
@@ -3608,7 +3613,10 @@ const ALL_WORDS = DAILY_WORDS.concat(NEW_WORDS, NUMBER_WORDS, TODAY_WORDS, TODAY
 const KNOWN_KEY = 'yaponcha_bilaman_sozlar';
 let knownIds = new Set(JSON.parse(localStorage.getItem(KNOWN_KEY) || '[]'));
 function saveKnown(){ localStorage.setItem(KNOWN_KEY, JSON.stringify([...knownIds])); }
-function updateKnownCount(){ knownCountEl.textContent = knownIds.size ? `(${knownIds.size})` : ''; }
+function updateKnownCount(){
+  knownCountEl.textContent = knownIds.size ? `(${knownIds.size})` : '';
+  try{ refreshDaySubCounts(); }catch(e){}
+}
 
 /* ---------------- KUNLAR RO'YXATI ---------------- */
 /* Bilganlarim va Viktorina shu ro'yxat asosida kunlarga ajratilgan holda ishlaydi. */
@@ -3676,6 +3684,10 @@ function buildDaySubnav(container, activeKey, onSelect, panelEl, btnEl){
     btn.className = 'sub-btn' + (isRecent ? ' sub-recent' : '') + (s.key === activeKey ? ' active' : '');
     btn.textContent = s.label;
     btn.dataset.key = s.key;
+    const cntEl = document.createElement('span');
+    cntEl.className = 'sub-count';
+    cntEl.textContent = s.words.filter(w=>knownIds.has(w.id)).length;
+    btn.appendChild(cntEl);
     btn.style.setProperty('--ord', SETS.indexOf(s) + 1);
     if(!isRecent){
       btn.style.setProperty('--d', Math.floor(olderIdx/4) + (olderIdx%4)); // diagonal tartib
@@ -3697,6 +3709,26 @@ function buildDaySubnav(container, activeKey, onSelect, panelEl, btnEl){
   });
 }
 
+// izohdan fe'l guruhi belgisini olib tashlaydi (masalan "(起きます) II guruh fe'li" -> "(起きます)")
+function cleanNote(n){
+  if(!n) return '';
+  // faqat o'zbekcha izohlar (yapon yozuvi yo'q) — ko'rsatilmaydi
+  if(!/[\u3040-\u30ff\u4e00-\u9fff]/.test(String(n))) return '';
+  return String(n).replace(/\s*\b(?:I{1,3})\s+guruh\s+fe['’]li\b\.?/gi, '').trim();
+}
+
+// izohdan kanji shaklini ajratadi: "(起きます)" -> kanji "起きます", qolgan izoh alohida
+function splitNote(n){
+  let t = cleanNote(n);
+  let kanji = '';
+  const m = t.match(/\(([^()]*[\u4e00-\u9fff][^()]*)\)/);
+  if(m){
+    kanji = m[1].replace(/※/g, '').trim();
+    t = (t.slice(0, m.index) + t.slice(m.index + m[0].length)).replace(/\s+/g, ' ').trim();
+  }
+  return { kanji, rest: t };
+}
+
 function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   targetGrid = targetGrid || flashGrid;
   refresh = refresh || renderActiveSet;
@@ -3706,16 +3738,14 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   words.forEach((w,i)=>{
     const card = document.createElement('div');
     card.className = 'card' + (isKnownView ? ' known-card' : '');
-    if(!reduced){
-      card.classList.add('pre-reveal');
-      toReveal.push(card);
-    }
+    // kartochkalar darhol ko'rinadi (scroll bilan kechiktirilgan animatsiyasiz)
     card.innerHTML = `
       <div class="card-inner">
         <div class="face front">
-          <div class="tag">${w.group}</div>
+          
           <div class="uz-word">${w.uz}</div>
-          ${w.note ? `<div class="uz-note">${w.note}</div>` : ''}
+          ${splitNote(w.note).kanji ? `<div class="uz-kanji">${splitNote(w.note).kanji}</div>` : ''}
+          ${splitNote(w.note).rest ? `<div class="uz-note">${splitNote(w.note).rest}</div>` : ''}
           <button type="button" class="know-btn">${isKnownView ? '↺ Qaytarish' : '✓ Bilaman'}</button>
         </div>
         <div class="face back">
@@ -3774,7 +3804,61 @@ function observeCardReveal(cards){
   cards.forEach(c=>cardRevealObserver.observe(c));
 }
 
+/* ---------- HAR BIR KUN: QOLGAN (bilmaganlar) SO'Z SONI ---------- */
+const SET_WORDS = {
+  today: TODAY_WORDS,
+  today2: TODAY2_WORDS,
+  chorshanba: CHORSHANBA_WORDS,
+  payshanba30: PAYSHANBA_WORDS,
+  juma31: JUMA31_WORDS,
+  daily: DAILY_WORDS,
+  new: NEW_WORDS,
+  numbers: NUMBER_WORDS,
+  mavzu8: MAVZU8_WORDS,
+  mavzu9: MAVZU9_WORDS,
+  mavzu10: MAVZU10_WORDS,
+  mavzu11: MAVZU11_WORDS,
+  mavzu12: MAVZU12_WORDS,
+  mavzu13: MAVZU13_WORDS,
+  mavzu14: MAVZU14_WORDS,
+  mavzu15: MAVZU15_WORDS,
+  mavzu16: MAVZU16_WORDS,
+  mavzu17: MAVZU17_WORDS,
+  mavzu18: MAVZU18_WORDS,
+  mavzu19: MAVZU19_WORDS,
+  mavzu20: MAVZU20_WORDS,
+  mavzu21: MAVZU21_WORDS,
+  mavzu22: MAVZU22_WORDS,
+  mavzu23: MAVZU23_WORDS,
+  mavzu24: MAVZU24_WORDS,
+  mavzu25: MAVZU25_WORDS,
+  mavzu26: MAVZU26_WORDS,
+  mavzu27: MAVZU27_WORDS,
+  mavzu28: MAVZU28_WORDS,
+  mavzu29: MAVZU29_WORDS,
+  mavzu30: MAVZU30_WORDS,
+  mavzu31: MAVZU31_WORDS,
+  mavzu32: MAVZU32_WORDS,
+  mavzu33: MAVZU33_WORDS,
+  mavzu34: MAVZU34_WORDS,
+  mavzu35: MAVZU35_WORDS
+};
+function updateSetCounts(){
+  document.querySelectorAll('#flashSubnav .sub-btn[data-set]').forEach(btn=>{
+    const arr = SET_WORDS[btn.dataset.set] || [];
+    const n = arr.filter(w=>!knownIds.has(w.id)).length;
+    let c = btn.querySelector('.sub-count');
+    if(!c){
+      c = document.createElement('span');
+      c.className = 'sub-count';
+      btn.appendChild(c);
+    }
+    c.textContent = n;
+  });
+}
+
 function renderActiveSet(){
+  updateSetCounts();
   const set = document.querySelector('.sub-btn.active').dataset.set;
   if(set === 'today') renderFlashGrid(TODAY_WORDS.filter(w=>!knownIds.has(w.id)));
   else if(set === 'today2') renderFlashGrid(TODAY2_WORDS.filter(w=>!knownIds.has(w.id)));
@@ -3957,6 +4041,21 @@ let quizMode = 'options'; // 'options' | 'timetrial'
 let timerId = null;
 let timerStart = 0;
 const TIME_LIMIT = 10000; // 10 seconds
+
+// Viktorina va Bilganlarim mavzularida: shu mavzudagi "Bilaman" so'zlar soni
+function refreshDaySubCounts(){
+  document.querySelectorAll('#quizSubnav .sub-btn[data-key], #quizDropdownPanel .sub-btn[data-key], #knownSubnav .sub-btn[data-key], #knownDropdownPanel .sub-btn[data-key]').forEach(btn=>{
+    const set = SETS.find(s=>s.key===btn.dataset.key);
+    if(!set) return;
+    let c = btn.querySelector('.sub-count');
+    if(!c){
+      c = document.createElement('span');
+      c.className = 'sub-count';
+      btn.appendChild(c);
+    }
+    c.textContent = set.words.filter(w=>knownIds.has(w.id)).length;
+  });
+}
 
 const quizSubnav = document.getElementById('quizSubnav');
 let quizActiveKey = SETS[SETS.length - 1].key;
@@ -4300,9 +4399,9 @@ function renderQuestion(){
     quizStage.innerHTML = `
       <div style="width:min(480px,100%);">
         <div class="quiz-card" id="qCard" style="width:100%;">
-          <div class="q-tag">${w.group}</div>
+          
           <div class="q-word">${w.uz}</div>
-          ${w.note ? `<div class="q-note">${w.note}</div>` : ''}
+          ${cleanNote(w.note) ? `<div class="q-note">${cleanNote(w.note)}</div>` : ''}
           <div class="timer-bar-wrap show" id="timerWrap">
             <div class="timer-bar-track">
               <div class="timer-bar-fill" id="timerFill"></div>
@@ -4334,9 +4433,9 @@ function renderQuestion(){
 
     quizStage.innerHTML = `
       <div class="quiz-card" id="qCard">
-        <div class="q-tag">${w.group}</div>
+        
         <div class="q-word">${w.uz}</div>
-        ${w.note ? `<div class="q-note">${w.note}</div>` : ''}
+        ${cleanNote(w.note) ? `<div class="q-note">${cleanNote(w.note)}</div>` : ''}
         <div class="options-grid" id="optionsGrid">
           ${optionsHtml}
         </div>
@@ -4486,8 +4585,9 @@ function spawnConfetti(anchorEl){
   setTimeout(()=>{ layer.remove(); }, 2400);
 }
 
-/* ---------------- ORQA FON: MILTILLOVCHI NUQTALAR ---------------- */
+/* ---------------- ORQA FON: MILTILLOVCHI NUQTALAR (o'chirildi) ---------------- */
 (function(){
+  return; /* yulduzlar va meteorlar olib tashlandi — fon animatsiyasiz */
   const layer = document.createElement('div');
   layer.className = 'stars-layer';
   document.body.insertBefore(layer, document.body.firstChild);
@@ -4612,9 +4712,7 @@ function spawnConfetti(anchorEl){
       scheduleMeteor();
     }, delay);
   }
-  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    scheduleMeteor();
-  }
+  /* meteorlar o'chirilgan (render yukini kamaytirish uchun) */
 })();
 
 
@@ -4792,9 +4890,13 @@ window.addEventListener('DOMContentLoaded', function(){
     else { y = B; vy = Math.abs(vy) + 0.2; targetVy = Math.abs(targetVy) + 0.2; }
   }
 
+  let mochiRaf = 0;
+  function scheduleMochi(){ if(!mochiRaf) mochiRaf = requestAnimationFrame(updateMochiFrame); }
+  function updateMochiFrame(){ mochiRaf = 0; if(document.hidden) return; updateMochi(); }
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) scheduleMochi(); });
   function updateMochi(){
     if(dragging || isSleeping){
-      requestAnimationFrame(updateMochi);
+      scheduleMochi();
       return;
     }
     const viewQuiz = document.getElementById('viewQuiz');
@@ -4829,7 +4931,7 @@ window.addEventListener('DOMContentLoaded', function(){
 
     if(!mochiFrozen) avoidChatWindow();
     mochi.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-    requestAnimationFrame(updateMochi);
+    scheduleMochi();
   }
 
   setInterval(()=>{ if(!quizModeActive && !dragging && !isSleeping && Math.random() < 0.35) pickNewDirection(); }, 2500);
@@ -4847,14 +4949,22 @@ window.addEventListener('DOMContentLoaded', function(){
     setGaze(gx * s, gy * s);
     setTimeout(()=>{ if(Date.now() >= gazeLockUntil) setGaze(0, 0); }, ms + 30);
   };
-  document.addEventListener('mousemove', (e)=>{
-    if(isSleeping || Date.now() < gazeLockUntil) return;
-    const rect = mochi.getBoundingClientRect();
-    const dx = e.clientX - (rect.left + rect.width/2);
-    const dy = e.clientY - (rect.top + rect.height/2);
-    const clamp = v => Math.max(-1, Math.min(1, v));
-    lastMouseLook = Date.now();
-    setGaze(clamp(dx/220) * 1.7, clamp(dy/220) * 1.7);
+  let gazeMoveE = null, gazeQueued = false;
+  document.addEventListener('mousemove', (ev)=>{
+    gazeMoveE = ev;
+    if(gazeQueued) return;
+    gazeQueued = true;
+    requestAnimationFrame(()=>{
+      gazeQueued = false;
+      const e = gazeMoveE;
+      if(isSleeping || Date.now() < gazeLockUntil) return;
+      const rect = mochi.getBoundingClientRect();
+      const dx = e.clientX - (rect.left + rect.width/2);
+      const dy = e.clientY - (rect.top + rect.height/2);
+      const clamp = v => Math.max(-1, Math.min(1, v));
+      lastMouseLook = Date.now();
+      setGaze(clamp(dx/220) * 1.7, clamp(dy/220) * 1.7);
+    });
   });
   setInterval(()=>{
     if(isSleeping || dragging || quizModeActive) return;
@@ -5029,7 +5139,7 @@ window.addEventListener('DOMContentLoaded', function(){
     if(e.touches.length !== 1) return;
     const t = e.touches[0];
     onDragMove(t.clientX, t.clientY);
-  }, {passive:false});
+  }, {passive:true});
   document.addEventListener('touchend', onDragEnd);
   document.addEventListener('touchcancel', onDragEnd);
 
@@ -5041,7 +5151,7 @@ window.addEventListener('DOMContentLoaded', function(){
   });
 
   pickNewDirection();
-  requestAnimationFrame(updateMochi);
+  scheduleMochi();
   checkSleepState();
 
   /* Global access for quiz start wake-up */
@@ -5325,7 +5435,7 @@ class MochiAI {
     );
 
     if(foundWord && (t.includes('so\'z') || t.includes('tushun') || t.includes('maq') || t.includes('nim') || t.includes('word'))){
-      return `<b>${foundWord.uz}</b><br>🇯🇵 <b>${foundWord.kana}</b><br>🔊 ${foundWord.romaji}<br>📂 ${foundWord.group}<br><br>${foundWord.note ? '📝 ' + foundWord.note + '<br>' : ''}Bu so'zni yodlash uchun uni ovoz chiqarib 3 marta takrorlang va misol jumlada ishlating! ✨`;
+      return `<b>${foundWord.uz}</b><br>🇯🇵 <b>${foundWord.kana}</b><br>🔊 ${foundWord.romaji}<br>📂 ${foundWord.group}<br><br>${cleanNote(foundWord.note) ? '📝 ' + cleanNote(foundWord.note) + '<br>' : ''}Bu so'zni yodlash uchun uni ovoz chiqarib 3 marta takrorlang va misol jumlada ishlating! ✨`;
     }
 
     if(t.includes('mashq') || t.includes('mashq') || t.includes('practice') || t.includes('exercise')){
