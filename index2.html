@@ -1781,11 +1781,6 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     box-shadow:0 0 10px rgba(233,194,125,0.5);
     animation:pcSlide 1.3s cubic-bezier(.45,0,.55,1) infinite;
   }
-  #pageCurtain .pc-cap{
-    font-family:'Zen Maru Gothic', sans-serif; font-size:10.5px; font-weight:700;
-    letter-spacing:0.32em; text-transform:uppercase; color:rgba(236,231,220,0.55);
-    margin-top:-4px;
-  }
   /* Boshlash effekti: bosilgan nuqtadan (markazdan) iliq to'lqin yoyiladi */
   #pageCurtain::after{
     content:""; position:absolute; left:50%; top:50%;
@@ -1826,10 +1821,6 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     background:linear-gradient(90deg, rgba(124,154,107,0), #7C9A6B 40%, #C9A66B 75%, rgba(201,166,107,0));
     box-shadow:none;
     animation:pcSlide 1.6s cubic-bezier(.45,0,.55,1) infinite;
-  }
-  #pageCurtain .pc-cap{
-    font-family:'Zen Maru Gothic', sans-serif; font-size:10px; font-weight:700;
-    letter-spacing:0.28em; color:#9BA1A6; margin-top:0;
   }
   /* to'lqin: sayt palitrasidagi yumshoq iliq nur */
   #pageCurtain::after{
@@ -2247,6 +2238,157 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     box-shadow:0 0 6px rgba(233,194,125,.6);
   }
   @keyframes pcSpin{ to{ transform:rotate(360deg); } }
+
+
+  /* ---------- TABS QATORI + "HAMMASI" TUGMASI ---------- */
+  .tabs-row{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:26px auto 0; width:100%; }
+  .tabs-row .tabs{ margin:0; flex:0 1 400px; }
+  .hammasi-wrap{ position:relative; }
+  .hammasi-btn{
+    font-family:var(--font-body); font-weight:700; font-size:13px; letter-spacing:.02em;
+    padding:11px 18px; border-radius:999px; cursor:pointer;
+    border:1px solid rgba(233,194,125,0.45);
+    background:linear-gradient(135deg, rgba(233,194,125,0.18), rgba(233,194,125,0.06));
+    color:#F3E3B5; box-shadow:0 0 14px rgba(233,194,125,0.12);
+    transition:transform .12s, border-color .15s;
+  }
+  .hammasi-btn:active{ transform:scale(.95); }
+  .hammasi-btn.open{
+    border-color:#E9C27D; color:#1a1208;
+    background:linear-gradient(135deg,#F3E3B5,#E9C27D); box-shadow:0 0 18px rgba(233,194,125,0.35);
+  }
+  /* Hammasi ochilganda Flashcard / Viktorina / Bilaman o'chiq holatda turadi */
+  body.hammasi-open .tabs .indicator, body.hammasi-ghosting .tabs .indicator{ opacity:0; }
+  .hammasi-ghost{ position:fixed; z-index:60; border-radius:999px; pointer-events:none; }
+  body.hammasi-open .tabs .tab-btn{ color:rgba(255,255,255,0.18) !important; }
+  body.hammasi-open .tabs .tab-btn.active{ color:rgba(255,255,255,0.18) !important; }
+  .hammasi-list{ grid-column:1 / -1; display:flex; flex-direction:column; gap:0; width:100%; max-width:440px; margin:0 auto; padding-bottom:110px; }
+  .hammasi-item{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:7px 6px; background:transparent; border:none;
+    transition:background .2s;
+  }
+  .hammasi-pick{
+    font-family:var(--font-body); font-size:11px; font-weight:700; padding:6px 14px; border-radius:999px; cursor:pointer;
+    border:1px solid rgba(233,194,125,0.45); background:transparent; color:#F3E3B5; flex:none;
+  }
+  .hammasi-item.selected .hammasi-pick{ background:rgba(233,194,125,0.16); border-color:#E9C27D; }
+  .hammasi-dock{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:80;
+    width:min(720px, calc(100vw - 24px)); padding:10px 12px; border-radius:18px;
+    background:rgba(8,8,8,0.78); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(233,194,125,0.3); box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .hammasi-dock[hidden]{ display:none; }
+  /* Hammasi ochilganda ustki "Mavzular" qatori yashiriladi */
+  body.hammasi-open #flashSubnav,
+  body.hammasi-open #viewFlash #flashSubnav{ display:none !important; }
+  /* Hammasi ochilganda ro'yxat va tugmalar fade bilan chiqadi */
+  @keyframes hammasiFade{ from{ opacity:0; } to{ opacity:1; } }
+  .hammasi-enter .hammasi-item{ animation:hammasiFade .3s ease-out both; }
+  .hammasi-dock:not([hidden]){ animation:hammasiFade .3s ease-out both; }
+  /* Hammasi orqali quiz ochilganda: mavzular qatori ustida "orqaga" tugmasi */
+  .hammasi-back{ display:none; justify-content:center; margin:0 auto 10px; width:100%; }
+  body.hammasi-quiz .hammasi-back{ display:flex; }
+  .hammasi-back button{
+    font-family:var(--font-body); font-size:12.5px; font-weight:700; letter-spacing:.02em;
+    padding:7px 16px; border-radius:999px; cursor:pointer; line-height:1.2;
+    display:inline-flex; align-items:center; gap:7px;
+    border:1px solid rgba(45,212,191,0.35);
+    background:linear-gradient(135deg, rgba(45,212,191,0.15), rgba(45,212,191,0.05));
+    color:#2dd4bf;
+  }
+  .hammasi-back button:hover{ border-color:rgba(45,212,191,0.6); color:#5eead4; }
+  .hammasi-back button:focus-visible{ outline:2px solid rgba(45,212,191,0.5); outline-offset:2px; }
+  .hammasi-dock-hint{ font-size:12px; color:var(--muted); text-align:center; }
+  .hammasi-dock-hint b{ color:#F3E3B5; }
+  .hammasi-dock-btns{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .hammasi-dock-btns .hammasi-act{ flex:1 1 140px; }
+  .hammasi-dock-btns .hammasi-act:disabled{ opacity:.4; cursor:default; }
+  .hammasi-head{ font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:#E9C27D; opacity:.8; margin:2px 4px 4px; }
+  .hammasi-name{ font-weight:700; color:#ECE7DC; font-size:14px; }
+  .hammasi-count{ color:var(--muted); font-size:11px; margin-left:8px; }
+  .hammasi-actions{ display:flex; gap:8px; flex:none; }
+  .hammasi-act{
+    font-family:var(--font-body); font-size:11px; font-weight:700; padding:6px 12px; border-radius:999px; cursor:pointer;
+    border:1px solid rgba(233,194,125,0.45); background:rgba(233,194,125,0.10); color:#F3E3B5;
+  }
+  .hammasi-act:disabled{ opacity:.4; cursor:default; }
+
+  /* ---------- YUKLANISH EKRANI: yangi ko'rinish ---------- */
+  #pageCurtain{
+    background:radial-gradient(ellipse at 50% 40%, #2e2107 0%, #0b0803 45%, #000 80%) !important;
+  }
+  #pageCurtain .pc-core{ gap:22px; }
+  #pageCurtain .pc-core::before{
+    content:""; position:absolute; left:50%; top:50%;
+    width:340px; height:340px; margin:-170px 0 0 -170px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,216,128,0.42) 0%, rgba(233,170,70,0.18) 38%, transparent 70%);
+    animation:pcGlowForm 2.6s ease-in-out infinite; pointer-events:none; z-index:0;
+  }
+  @keyframes pcGlowForm{
+    0%{ transform:scale(.45); opacity:0; }
+    50%{ transform:scale(1); opacity:1; }
+    100%{ transform:scale(.45); opacity:0; }
+  }
+  #pageCurtain .pc-ring{
+    position:relative; width:108px; height:108px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #pageCurtain .pc-ring::before{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, transparent 0deg, #e9b44c 110deg, #fff0b8 190deg, transparent 260deg);
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+            mask:radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+    animation:pcOrbit 1.3s linear infinite;
+  }
+  #pageCurtain .pc-ring::after{
+    content:""; position:absolute; inset:16px; border-radius:50%;
+    border:1px solid rgba(255,214,120,0.2);
+    box-shadow:0 0 16px rgba(255,200,90,0.12) inset;
+  }
+  #pageCurtain .pc-kanji{
+    position:relative; z-index:1;
+    font-family:'Shippori Mincho', serif; font-size:40px; font-weight:700; line-height:1;
+    color:#FFF6D6; text-shadow:0 0 18px rgba(255,206,110,0.7);
+    animation:pcBreath 2.2s ease-in-out infinite;
+  }
+  @keyframes pcOrbit{ to{ transform:rotate(360deg); } }
+  @keyframes pcBreath{
+    0%,100%{ opacity:.75; transform:scale(.96); }
+    50%{ opacity:1; transform:scale(1.04); }
+  }
+  #pageCurtain .pc-glyph.pc-word{
+    display:flex; font-family:'Shippori Mincho', serif; font-size:30px; font-weight:700;
+    letter-spacing:.06em; line-height:1.2; padding:0;
+    background:none; -webkit-background-clip:border-box; background-clip:border-box;
+    -webkit-text-fill-color:#FFE7A8; color:#FFE7A8;
+    text-shadow:0 0 14px rgba(255,200,90,0.45);
+    animation:none;
+  }
+  #pageCurtain .pc-glyph.pc-word span{
+    display:inline-block; opacity:0; transform:translateY(14px);
+    animation:pcLetter .55s cubic-bezier(.2,.8,.2,1) forwards;
+    animation-delay:calc(.12s + var(--i) * 0.09s);
+  }
+  @keyframes pcLetter{ to{ opacity:1; transform:translateY(0); } }
+  #pageCurtain .pc-bar{
+    position:relative; width:160px; height:3px; border-radius:3px;
+    background:rgba(255,255,255,0.08); box-shadow:none; overflow:hidden;
+  }
+  #pageCurtain .pc-bar i{
+    position:absolute; top:0; left:0; height:100%; width:40%; border-radius:3px;
+    background:linear-gradient(90deg, rgba(255,214,120,0), #ffd77a, #e9b44c, rgba(255,214,120,0));
+    box-shadow:0 0 10px rgba(255,206,110,0.6);
+    animation:pcSweep 1.3s ease-in-out infinite;
+  }
+  @keyframes pcSweep{ 0%{ transform:translateX(-100%); } 100%{ transform:translateX(260%); } }
+  @media (prefers-reduced-motion: reduce){
+    #pageCurtain .pc-ring::before, #pageCurtain .pc-kanji,
+    #pageCurtain .pc-bar i{ animation:none; }
+    #pageCurtain .pc-glyph.pc-word span{ animation:none; opacity:1; transform:none; }
+  }
   @media (prefers-reduced-motion: reduce){
     #pageCurtain .pc-glyph.pc-word, #pageCurtain .pc-dots{ animation:none; }
   }
@@ -3304,11 +3446,16 @@ window.mochiDizzy = function(){
       <h1>Lug'at <span>Flashcard</span></h1>
     </div>
 
+    <div class="tabs-row">
     <div class="tabs" id="tabs">
       <div class="indicator"></div>
       <button class="tab-btn active" id="tabFlash">Flashcard</button>
       <button class="tab-btn tab-btn-quiz" id="tabQuiz">Viktorina</button>
       <button class="tab-btn tab-btn-known" id="tabKnown"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Bilaman <span id="knownCount"></span></button>
+    </div>
+    <div class="hammasi-wrap" id="hammasiWrap">
+      <button type="button" class="hammasi-btn" id="hammasiBtn" aria-expanded="false">Hammasi</button>
+    </div>
     </div>
   </header>
 
@@ -5372,9 +5519,10 @@ function refreshDaySubCounts(){
 const quizSubnav = document.getElementById('quizSubnav');
 let quizActiveKey = SETS[SETS.length - 1].key;
 
+let quizUseAll = false;   // "Hammasi" orqali kirilganda mavzuning barcha so'zlari olinadi
 function getQuizWords(){
   const set = SETS.find(s=>s.key===quizActiveKey) || SETS[SETS.length-1];
-  return set.words.filter(w=>knownIds.has(w.id));
+  return quizUseAll ? set.words : set.words.filter(w=>knownIds.has(w.id));
 }
 const quizDropdownPanel = document.getElementById('quizDropdownPanel');
 const quizDropdownBtn = document.getElementById('quizDropdownBtn');
@@ -5433,7 +5581,7 @@ modeOptions.addEventListener('click', ()=> setQuizMode('options'));
 modeTime.addEventListener('click', ()=> setQuizMode('timetrial'));
 modeListen.addEventListener('click', ()=> setQuizMode('listen'));
 
-buildDaySubnav(quizSubnav, quizActiveKey, (key)=>{ quizActiveKey = key; notifyIfNoKnown(key); startQuiz(getQuizWords()); }, quizDropdownPanel, quizDropdownBtn);
+buildDaySubnav(quizSubnav, quizActiveKey, (key)=>{ quizActiveKey = key; quizUseAll = false; notifyIfNoKnown(key); startQuiz(getQuizWords()); }, quizDropdownPanel, quizDropdownBtn);
 
 function shuffle(arr){
   const a = arr.slice();
@@ -7176,7 +7324,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
     <div class="mochi-quiz-bubble" id="mochiQuizBubble" role="status" aria-live="polite"></div>
 
-<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word">Lug'at</div><div class="pc-dots"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span></div></div></div>
+<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-ring"><span class="pc-kanji">学</span></div><div class="pc-glyph pc-word"><span style="--i:0">L</span><span style="--i:1">u</span><span style="--i:2">g</span><span style="--i:3">'</span><span style="--i:4">a</span><span style="--i:5">t</span></div><div class="pc-bar"><i></i></div></div>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
@@ -7398,6 +7546,197 @@ window.addEventListener('message', function(e){
     renderActiveSet();
     showAppToast(ICON.check, "Mavzu qaytarildi", ids.length + " ta so'z yana o'rganish ro'yxatiga qaytdi.");
   });
+})();
+</script>
+
+<script>
+/* "Hammasi": mavzular ro'yxati kartochkalar maydonida chiqadi. Bitta mavzu tanlanadi,
+   pastdagi qotib turuvchi panelda quiz turi tanlanadi. */
+(function(){
+  const btn = document.getElementById('hammasiBtn');
+  if(!btn) return;
+  let showing = false;
+  const picked = new Set();   // bir nechta mavzu tanlanishi mumkin
+  let enterPending = false;   // ro'yxat ochilganda bir marta fade qilinadi
+  let lastPicked = [];        // quiz boshlanishidan oldingi tanlovlar (orqaga qaytganda tiklanadi)
+
+  // Viktorina ustidagi "orqaga" tugmasi: Hammasi ro'yxatiga, tanlovlar saqlangan holda qaytadi
+  const backWrap = document.createElement('div');
+  backWrap.className = 'hammasi-back';
+  backWrap.innerHTML = '<button type="button"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Hammasi ro\'yxatiga qaytish</button>';
+  const quizSubnavEl = document.getElementById('quizSubnav');
+  if(quizSubnavEl) quizSubnavEl.parentNode.insertBefore(backWrap, quizSubnavEl);
+  backWrap.querySelector('button').addEventListener('click', ()=>{
+    document.body.classList.remove('hammasi-quiz');
+    tabFlash.click();
+    picked.clear();
+    lastPicked.forEach(k=>picked.add(k));
+    btn.click();                               // ro'yxat ochiladi (showing = false bo'lgani uchun)
+  });
+  // Oddiy mavzu/bo'lim tanlansa yoki boshqa bo'limga o'tilsa, orqaga tugmasi yashiriladi
+  document.addEventListener('click', e=>{
+    const t = e.target;
+    if(!t || !t.closest) return;
+    if(t.closest('#tabFlash, #tabKnown') || t.closest('#viewQuiz .sub-btn')) document.body.classList.remove('hammasi-quiz');
+  });
+
+  const dock = document.createElement('div');
+  dock.className = 'hammasi-dock';
+  dock.hidden = true;
+  dock.innerHTML = '<div class="hammasi-dock-hint"></div><div class="hammasi-dock-btns">'
+    + '<button type="button" class="hammasi-act" data-mode="options">Tarjima test</button>'
+    + '<button type="button" class="hammasi-act" data-mode="listen">Eshitish test</button>'
+    + '<button type="button" class="hammasi-act" data-mode="timetrial">Vaqt sinovi</button>'
+    + '</div>';
+  document.body.appendChild(dock);
+  const hint = dock.querySelector('.hammasi-dock-hint');
+  dock.querySelectorAll('[data-mode]').forEach(b=>{
+    b.addEventListener('click', ()=>{ if(picked.size) startHammasiQuiz([...picked], b.dataset.mode); });
+  });
+
+  function selectedSets(){ return SETS.filter(s=>picked.has(s.key)); }
+  function updateDock(){
+    const sets = selectedSets();
+    const total = sets.reduce((n,s)=>n + s.words.length, 0);
+    hint.innerHTML = sets.length
+      ? 'Tanlangan: <b>' + sets.length + ' ta mavzu</b> (' + total + ' ta so\'z)'
+      : 'Quiz uchun mavzu tanlang';
+    dock.querySelectorAll('[data-mode]').forEach(b=>{ b.disabled = !sets.length; });
+  }
+
+  function renderList(){
+    flashGrid.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'hammasi-list';
+    if(enterPending){ list.classList.add('hammasi-enter'); enterPending = false; }
+    SETS.forEach(s=>{
+      const item = document.createElement('div');
+      item.className = 'hammasi-item' + (picked.has(s.key) ? ' selected' : '');
+      const info = document.createElement('div');
+      info.innerHTML = '<span class="hammasi-name"></span><span class="hammasi-count"></span>';
+      info.querySelector('.hammasi-name').textContent = s.label;
+      info.querySelector('.hammasi-count').textContent = s.words.length + ' ta';
+      const pick = document.createElement('button');
+      pick.type = 'button';
+      pick.className = 'hammasi-pick';
+      pick.textContent = picked.has(s.key) ? 'Tanlangan' : 'Tanlash';
+      pick.addEventListener('click', e=>{
+        e.stopPropagation();
+        if(picked.has(s.key)) picked.delete(s.key); else picked.add(s.key);
+        renderList();
+        updateDock();
+      });
+      item.appendChild(info);
+      item.appendChild(pick);
+      list.appendChild(item);
+    });
+    flashGrid.appendChild(list);
+  }
+
+  function setActive(on){
+    showing = on;
+    btn.classList.toggle('open', on);
+    btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    document.body.classList.toggle('hammasi-open', on);
+    dock.hidden = !on;
+    if(!on) picked.clear();
+  }
+
+  btn.addEventListener('click', ()=>{
+    if(showing){ setActive(false); renderActiveSet(); return; }
+    setActive(true);
+    // Hammasi bosilganda birdan Flashcard bo'limiga o'tiladi (oraliq tab animatsiyasisiz)
+    if(!tabFlash.classList.contains('active')){
+      if(activeView && activeView.id === 'viewQuiz') clearQuizTimer();
+      [tabFlash, tabQuiz, tabKnown].forEach(b=>b.classList.remove('active'));
+      tabFlash.classList.add('active');
+      tabs.classList.remove('pos-quiz','pos-known');
+      document.querySelectorAll('section.view').forEach(v=>{ if(v!==viewFlash) v.classList.remove('active','fade-in','fade-out'); });
+      viewFlash.classList.remove('fade-in','fade-out');
+      viewFlash.classList.add('active');
+      activeView = viewFlash;
+    }
+    enterPending = true;
+    renderList();
+    updateDock();
+  });
+
+  // Flashcard'dagi mavzu tugmasi bosilsa, ro'yxat yopiladi
+  // Hammasi'dan boshqa tabga o'tilganda sariq yoritma Hammasi tugmasidan siljib o'sha tabga boradi
+  const TAB_INDEX = { tabFlash:0, tabQuiz:1, tabKnown:2 };
+  function glideFromHammasi(tabBtn){
+    const idx = TAB_INDEX[tabBtn.id];
+    if(idx === undefined) return;
+    const from = btn.getBoundingClientRect();
+    const tabsEl = document.getElementById('tabs');
+    if(!tabsEl) return;
+    const tr = tabsEl.getBoundingClientRect();
+    const w = (tr.width - 10) / 3;
+    const isKnown = tabBtn.id === 'tabKnown';
+    const g = document.createElement('div');
+    g.className = 'hammasi-ghost';
+    g.style.left = from.left + 'px';
+    g.style.top = from.top + 'px';
+    g.style.width = from.width + 'px';
+    g.style.height = from.height + 'px';
+    g.style.background = isKnown ? 'linear-gradient(135deg,var(--green),#4a8a46)' : 'linear-gradient(135deg,var(--gold),#0d9488)';
+    g.style.boxShadow = isKnown ? '0 3px 14px rgba(74,138,70,0.30)' : '0 3px 14px rgba(45,212,191,0.30)';
+    document.body.appendChild(g);
+    document.body.classList.add('hammasi-ghosting');
+    let done = false;
+    const finish = ()=>{
+      if(done) return; done = true;
+      g.remove();
+      document.body.classList.remove('hammasi-ghosting');
+    };
+    g.addEventListener('transitionend', e=>{ if(e.target === g && e.propertyName === 'left') finish(); });
+    setTimeout(finish, 600);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      g.style.transition = 'left .35s cubic-bezier(.65,.05,.36,1), top .35s cubic-bezier(.65,.05,.36,1), width .35s cubic-bezier(.65,.05,.36,1), height .35s cubic-bezier(.65,.05,.36,1)';
+      g.style.left = (tr.left + 5 + idx * w) + 'px';
+      g.style.top = (tr.top + 5) + 'px';
+      g.style.width = (w) + 'px';
+      g.style.height = (tr.height - 10) + 'px';
+    }));
+  }
+  document.addEventListener('click', e=>{
+    if(!showing || !e.target || !e.target.closest) return;
+    const tb = e.target.closest('#tabs .tab-btn');
+    if(tb) glideFromHammasi(tb);
+  }, true);
+
+  // Hammasi ochiq paytida Flashcard / Viktorina / Bilaman bosilsa, ro'yxat yopiladi va o'sha bo'lim ochiladi
+  document.addEventListener('click', e=>{
+    if(showing && e.target.closest && e.target.closest('#tabs .tab-btn')) setActive(false);
+  });
+  document.addEventListener('click', e=>{
+    if(showing && e.target.closest && e.target.closest('#viewFlash .sub-btn')) setActive(false);
+  });
+
+  function startHammasiQuiz(keys, mode){
+    const sets = SETS.filter(s=>keys.includes(s.key) && s.words.length);
+    if(!sets.length) return;
+    // tanlangan mavzulardagi so'zlar (takrorlanmasdan)
+    const seen = new Set();
+    const words = [];
+    sets.forEach(s=>s.words.forEach(w=>{ if(!seen.has(w.id)){ seen.add(w.id); words.push(w); } }));
+    lastPicked = [...picked];
+    setActive(false);
+    document.body.classList.add('hammasi-quiz');
+    quizActiveKey = sets[0].key;
+    quizUseAll = true;                       // tanlangan mavzulardagi barcha so'zlar, "Bilaman" shart emas
+    currentQuizWords = words;
+    document.querySelectorAll('#quizSubnav .sub-btn, #quizDropdownPanel .sub-btn').forEach(b=>{
+      b.classList.toggle('active', sets.some(s=>s.key===b.dataset.key) && b.dataset.key===sets[0].key);
+    });
+    if(tabQuiz.classList.contains('active')){
+      setQuizMode(mode);                     // quiz shu so'zlar bilan qayta boshlanadi
+    } else {
+      quizStarted = false;
+      setQuizMode(mode);
+      tabQuiz.click();                       // viktorina ochiladi (quiz allaqachon boshlangan)
+    }
+  }
 })();
 </script>
 </body>
