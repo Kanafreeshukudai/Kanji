@@ -8588,7 +8588,7 @@
     margin:12px auto 10px;
     border:none;
     background:none;
-    color:#E04848;
+    color:#ff9d45;
     transition:transform .12s ease, opacity .2s ease;
   }
   .speak-jp-btn:hover{ opacity:.8; background:none; }
@@ -8597,7 +8597,7 @@
   /* Karnay ovozi: to'lqinlar ketma-ket yonib-o'chadi, o'qish tugaguncha davom etadi */
   .speak-jp-btn.speaking .spk-w1{ animation:spkWave 0.9s ease-in-out infinite; }
   .speak-jp-btn.speaking .spk-w2{ animation:spkWave 0.9s ease-in-out .3s infinite; }
-  .speak-jp-btn.speaking svg{ filter:drop-shadow(0 0 4px rgba(224,72,72,.55)); }
+  .speak-jp-btn.speaking svg{ filter:drop-shadow(0 0 4px rgba(255,138,31,.6)); }
   @keyframes spkWave{
     0%,100%{ opacity:.2; }
     50%{ opacity:1; }
@@ -8609,6 +8609,10 @@
   .chat-panel .chat-bubble{
     box-shadow:0 10px 24px -8px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
   }
+  /* Karnay tugmasi: foydalanuvchilar tugmasi kabi yashil neon rang (3D yo'q) */
+  .speak-jp-btn{ color:#34d399 !important; }
+  .speak-jp-btn:hover{ opacity:.85; }
+  .speak-jp-btn.speaking svg{ filter:drop-shadow(0 0 5px rgba(52,211,153,0.85)); }
 </style>
 </head>
 <script>
