@@ -209,13 +209,27 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
    ishga tushiradi — shu sababli mobilda tez svayp qilinganda kartalar na "birdan qotib
    paydo bo'ladi", na "kech, ko'rinmay qolib" chiqadi. */
 .card.pre-reveal{opacity:0; transform:translateY(16px) translateZ(0);}
+/* "Bilaman" bo'limida: hammasini qaytarish tugmasi */
+.known-toolbar{ display:flex; justify-content:center; margin:4px 0 14px; }
+.known-restore-all{
+  font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.03em;
+  padding:6px 14px; border-radius:999px; cursor:pointer;
+  border:1px solid var(--kn-line); background:var(--kn-soft); color:var(--kn-text);
+  transition:background .15s, border-color .15s, transform .12s;
+}
+.known-restore-all:hover{ border-color:var(--kn); }
+.known-restore-all:active{ transform:scale(.95); }
+/* "Bilaman" bosilganda karta silliq yo'qoladi */
+.card.card-leaving{
+  opacity:0; transform:scale(.9); pointer-events:none;
+  transition:opacity .26s ease, transform .26s ease;
+}
 @keyframes cardStagger{
   from{opacity:0; transform:translateY(16px) scale(.97);}
   to{opacity:1; transform:translateY(0) scale(1);}
 }
 .card.stagger-in{
-  animation:cardStagger .62s cubic-bezier(.16,.8,.24,1) both;
-  will-change:transform, opacity;
+  animation:cardStagger .62s cubic-bezier(.16,.8,.24,1) backwards;
 }
 @media (prefers-reduced-motion: reduce){
   .card.pre-reveal{opacity:1; transform:none;}
@@ -254,6 +268,14 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   transition:transform .12s, background .15s;
 }
 .know-btn:active{transform:scale(.92);}
+.know-btn.know-check{
+  position:absolute; left:12px; right:12px; bottom:10px; margin:0; z-index:2;
+  width:auto; height:18px; padding:0 8px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center; gap:4px;
+  font-size:9.5px; line-height:1; letter-spacing:.04em; white-space:nowrap;
+  border-color:rgba(120,200,115,0.7); background:rgba(95,155,91,0.22); color:#9be896;
+}
+.know-btn.know-check svg{ width:9px; height:9px; vertical-align:middle; flex:none; }
 .card.known-card .face.front{
   border-color:var(--green);
   background:transparent;
@@ -297,6 +319,15 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 .speak-btn:active{transform:scale(.92);}
 .speak-btn.playing{box-shadow:0 0 0 4px rgba(45,212,191,0.20);}
 .speak-btn:focus-visible{outline:2px solid #2dd4bf; outline-offset:2px;}
+/* Eshitish tugmasi: kartochka tagida uzun ingichka tugma */
+.speak-btn{
+  top:auto; left:12px; right:12px; bottom:10px;
+  width:auto; height:18px; border-radius:999px;
+}
+.speak-btn svg{ width:9px; height:9px; }
+/* Matn pastki tugma ustiga chiqmasin; uzun so'zlar kartochkadan chiqib ketmasin */
+.face.front, .face.back{ padding-bottom:34px; }
+.uz-word, .uz-note, .uz-kanji, .kana, .romaji, .hint{ overflow-wrap:anywhere; hyphens:auto; }
 
 /* ---------- ESHITISH REJIMI: katta karnay tugmasi ---------- */
 .listen-play-btn{
@@ -355,10 +386,7 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
   -webkit-perspective:1000px;
   height:150px;
   cursor:pointer;
-  contain:layout style;
   transition:transform .25s ease;
-  transform:translateZ(0);
-  -webkit-transform:translateZ(0);
   transform-style:preserve-3d;
   -webkit-transform-style:preserve-3d;
   -webkit-tap-highlight-color:transparent;
@@ -422,6 +450,9 @@ section.view.fade-out{animation:fadeout .22s ease forwards;}
 .face.front .uz-word{ color:var(--front-text); }
 .face.back .kana{ color:var(--back-accent); }
 .face.back .romaji{ color:var(--back-text); }
+/* Orqa/old tomon yashirin bo'lganda uning tugmalari bosilmasin (flip paytida xato bosilmasligi uchun) */
+.card.flipped .face.front{ pointer-events:none; }
+.card:not(.flipped) .face.back{ pointer-events:none; }
 
 .tag{
   position:relative; z-index:1;
@@ -3363,6 +3394,9 @@ window.mochiDizzy = function(){
       </div>
       <div style="flex:1;"></div>
     </div>
+    <div class="known-toolbar">
+      <button type="button" class="known-restore-all" id="knownRestoreAll">↺ Hammasini qaytarish</button>
+    </div>
     <div class="grid" id="knownGrid"></div>
   </section>
 
@@ -4877,6 +4911,22 @@ function speakJapanese(text, btn){
   synth.speak(u);
 }
 
+/* Uzun so'z/tarjima kartochkaga sig'masa, shrift asta kichrayadi (eng kamida ~60%) */
+function fitCardText(card){
+  card.querySelectorAll('.face').forEach(face=>{
+    if(!face.clientHeight) return;   // ko'rinmayotgan (boshqa bo'lim) bo'lsa o'lchamaymiz
+    const els = [...face.querySelectorAll('.uz-word,.uz-kanji,.uz-note,.kana,.romaji,.hint')];
+    if(!els.length) return;
+    els.forEach(e=>{ e.style.fontSize=''; });
+    const base = els.map(e=>parseFloat(getComputedStyle(e).fontSize));
+    let scale = 1;
+    const overflows = ()=> face.scrollHeight > face.clientHeight + 1 || face.scrollWidth > face.clientWidth + 1;
+    while(overflows() && scale > 0.6){
+      scale -= 0.04;
+      els.forEach((e,j)=>{ e.style.fontSize = (base[j]*scale).toFixed(1)+'px'; });
+    }
+  });
+}
 function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   targetGrid = targetGrid || flashGrid;
   refresh = refresh || renderActiveSet;
@@ -4891,6 +4941,7 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
   words.forEach((w,i)=>{
     const card = document.createElement('div');
     card.className = 'card' + (isKnownView ? ' known-card' : '');
+    card.dataset.id = w.id;
     if(gridAnimate && !reduced){
       card.classList.add('topic-enter');
     }
@@ -4901,7 +4952,7 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
           <div class="uz-word">${w.uz}</div>
           ${splitNote(w.note).kanji ? `<div class="uz-kanji">${splitNote(w.note).kanji}</div>` : ''}
           ${splitNote(w.note).rest ? `<div class="uz-note">${splitNote(w.note).rest}</div>` : ''}
-          <button type="button" class="know-btn">${isKnownView ? '↺ Qaytarish' : ICON.check + ' Bilaman'}</button>
+          <button type="button" class="know-btn${isKnownView ? '' : ' know-check'}">${isKnownView ? '↺ Qaytarish' : ICON.check + ' Bilaman'}</button>
         </div>
         <div class="face back">
           <button type="button" class="speak-btn" aria-label="Yaponcha eshitish">${ICON_SPEAK}</button>
@@ -4921,11 +4972,35 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
     });
     card.querySelector('.know-btn').addEventListener('click', (e)=>{
       e.stopPropagation();
-      if(isKnownView) knownIds.delete(w.id); else knownIds.add(w.id);
-      saveKnown();
-      refresh();
+      if(card.classList.contains('card-leaving')) return;
+      card.classList.add('card-leaving');   // avval shu karta silliq yo'qoladi
+      setTimeout(()=>{
+        // qolgan kartalarning hozirgi joylashuvini eslab qolamiz
+        const oldPos = new Map();
+        targetGrid.querySelectorAll('.card').forEach(c=>{
+          if(c !== card && c.dataset.id) oldPos.set(c.dataset.id, c.getBoundingClientRect());
+        });
+        if(isKnownView) knownIds.delete(w.id); else knownIds.add(w.id);
+        saveKnown();
+        refresh();
+        // yangi joylashuvga o'tkazamiz va silliq siljitamiz (FLIP)
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if(reduced) return;
+        targetGrid.querySelectorAll('.card').forEach(c=>{
+          const r0 = oldPos.get(c.dataset.id);
+          if(!r0) return;
+          const r1 = c.getBoundingClientRect();
+          const dx = r0.left - r1.left, dy = r0.top - r1.top;
+          if(Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+          c.animate(
+            [{ transform:`translate(${dx}px, ${dy}px)` }, { transform:'translate(0, 0)' }],
+            { duration:380, easing:'cubic-bezier(.2,.7,.2,1)' }
+          );
+        });
+      }, 260);
     });
     targetGrid.appendChild(card);
+    fitCardText(card);
   });
   gridAnimate = false;
   updateKnownCount();
@@ -7302,6 +7377,27 @@ window.addEventListener('message', function(e){
 (function(){
   const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
   if(weak) document.documentElement.classList.add('perf');
+})();
+</script>
+<script>
+/* "Bilaman" bo'limidagi barcha kartalarni qaytarish */
+(function(){
+  const btn = document.getElementById('knownRestoreAll');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    // faqat hozir tanlangan mavzu uchun ishlaydi
+    const set = SETS.find(s=>s.key===knownActiveKey) || SETS[SETS.length-1];
+    const ids = set.words.filter(w=>knownIds.has(w.id)).map(w=>w.id);
+    if(ids.length === 0){
+      showAppToast(ICON.check, "Qaytariladigan so'z yo'q", "Bu mavzuda «Bilaman» so'zlari yo'q.");
+      return;
+    }
+    ids.forEach(id=>knownIds.delete(id));
+    saveKnown();
+    renderKnownGrid();
+    renderActiveSet();
+    showAppToast(ICON.check, "Mavzu qaytarildi", ids.length + " ta so'z yana o'rganish ro'yxatiga qaytdi.");
+  });
 })();
 </script>
 </body>
