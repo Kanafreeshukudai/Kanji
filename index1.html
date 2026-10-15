@@ -4935,7 +4935,9 @@
   }
   .card-transfer-modal > #ctCreateView,
   .card-transfer-modal > #ctJoinView,
-  .card-transfer-modal > #ctWaitingView{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+  .card-transfer-modal > #ctWaitingView{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none; }
+  .card-transfer-modal > #ctWaitingView::-webkit-scrollbar{ display:none; }
+  .card-transfer-modal > #ctWaitingView > *{ flex:none; }
   .card-transfer-modal > #ctCreateView.hidden,
   .card-transfer-modal > #ctJoinView.hidden,
   .card-transfer-modal > #ctWaitingView.hidden{ display:none; }
@@ -5332,12 +5334,21 @@
     font-weight:700;
     margin-bottom:8px;
   }
-  /* Xona kodi: kazino avtomati kabi — har bir belgi aylanib, ketma-ket to'xtaydi */
-  .ct-slot-ch{ display:inline-block; min-width:.62em; text-align:center; }
-  .ct-slot-ch.roll{ animation:ctSlotRoll .08s ease-out; }
-  .ct-slot-ch.land{ animation:ctSlotLand .42s cubic-bezier(.2,.8,.2,1); }
-  @keyframes ctSlotRoll{ from{ transform:translateY(-38%); opacity:.35; } to{ transform:none; opacity:1; } }
-  @keyframes ctSlotLand{ 0%{ transform:scale(1.3); color:var(--gold); } 100%{ transform:none; color:var(--ink); } }
+  /* Xona kodi: 777 avtomati kabi baraban oynalari */
+  .ct-reel{
+    display:inline-block; position:relative;
+    height:1.2em; line-height:1.2em; overflow:hidden;
+    min-width:.72em; vertical-align:top; text-align:center;
+  }
+  .ct-reel-strip{ display:block; will-change:transform; }
+  .ct-reel-strip > span{ display:block; height:1.2em; line-height:1.2em; }
+  /* baraban oynasining yuqori-pastki chetlari xiraroq: avtomat ko'rinishi */
+  .ct-reel::before, .ct-reel::after{
+    content:""; position:absolute; left:0; right:0; height:32%; z-index:1; pointer-events:none;
+  }
+  .ct-reel::before{ top:0; background:linear-gradient(to bottom, rgba(0,0,0,0.75), transparent); }
+  .ct-reel::after{ bottom:0; background:linear-gradient(to top, rgba(0,0,0,0.75), transparent); }
+  .ct-reel.ct-reel-done{ color:var(--gold); }
   .ct-code-display-value{
     font-family:'Shippori Mincho', serif;
     font-size:30px;
@@ -15506,32 +15517,41 @@
     const waitingTitleEl = document.getElementById('ctWaitingTitle');
     const codeDisplayEl = document.getElementById('ctCodeDisplay');
     const codeValueEl = document.getElementById('ctCodeValue');
-    // Kod kazino avtomati kabi aylanib chiqadi: har bir belgi tasodifiy aylanadi, so'ngra
-    // chapdan o'ngga ketma-ket to'g'ri belgida to'xtaydi. Bir xil kod qayta chiqsa, animatsiya qaytarilmaydi.
+    // Kod 777 avtomati kabi chiqadi: har bir belgi o'z "baraban"ida aylanadi. Barabanlar
+    // navbatma-navbat yo'nalishda: biri tepadan pastga, biri pastdan tepaga. Ketma-ket,
+    // chapdan o'ngga to'xtaydi. Bir xil kod qayta chiqsa, animatsiya takrorlanmaydi.
     const SLOT_ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const SLOT_LEN = 80;      // har bir barabanda belgilar soni
+    const SLOT_FINAL = 50;    // yakuniy belgi shu o'rinda turadi
     function slotRevealCode(el, code){
       if(!el) return;
-      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(el.dataset.revealed === code && el.textContent === code){ return; }
-      (el._slotIds || []).forEach(id => { clearTimeout(id); clearInterval(id); });
-      el._slotIds = [];
+      code = String(code || '');
+      if(el.dataset.revealed === code) return;
+      (el._reelAnims || []).forEach(a => { try{ a.cancel(); }catch(e){} });
+      el._reelAnims = [];
       el.dataset.revealed = code;
-      if(reduce){ el.textContent = code; return; }
-      const chars = String(code).split('');
-      el.innerHTML = chars.map(() => '<span class="ct-slot-ch">' + SLOT_ALPHA[0] + '</span>').join('');
-      const spans = Array.from(el.querySelectorAll('.ct-slot-ch'));
-      spans.forEach((sp, i) => {
-        const spin = setInterval(() => {
-          sp.textContent = SLOT_ALPHA[Math.floor(Math.random() * SLOT_ALPHA.length)];
-          sp.classList.remove('roll'); void sp.offsetWidth; sp.classList.add('roll');
-        }, 55);
-        el._slotIds.push(spin);
-        const stop = setTimeout(() => {
-          clearInterval(spin);
-          sp.textContent = chars[i];
-          sp.classList.remove('roll'); void sp.offsetWidth; sp.classList.add('land');
-        }, 800 + i * 300);
-        el._slotIds.push(stop);
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduce || typeof el.animate !== 'function'){ el.textContent = code; return; }
+      const chars = code.split('');
+      el.innerHTML = chars.map(() => '<span class="ct-reel"><span class="ct-reel-strip"></span></span>').join('');
+      const reels = Array.from(el.querySelectorAll('.ct-reel'));
+      reels.forEach((reel, i) => {
+        const strip = reel.querySelector('.ct-reel-strip');
+        const symbols = [];
+        for(let k = 0; k < SLOT_LEN; k++){
+          symbols.push(k === SLOT_FINAL ? chars[i] : SLOT_ALPHA[Math.floor(Math.random() * SLOT_ALPHA.length)]);
+        }
+        strip.innerHTML = symbols.map(ch => '<span>' + ch + '</span>').join('');
+        const lh = reel.clientHeight || 40;
+        const down = i % 2 === 0;                      // juft: tepadan pastga, toq: pastdan tepaga
+        const fromK = down ? SLOT_FINAL + 22 : SLOT_FINAL - 22;
+        const duration = 1100 + i * 380;
+        const anim = strip.animate([
+          { transform: 'translateY(' + (-fromK * lh) + 'px)' },
+          { transform: 'translateY(' + (-SLOT_FINAL * lh) + 'px)' }
+        ], { duration: duration, easing: 'cubic-bezier(.14,.62,.22,1)', fill: 'forwards' });
+        anim.onfinish = () => { reel.classList.add('ct-reel-done'); };
+        el._reelAnims.push(anim);
       });
     }
     const codeCopyBtn = document.getElementById('ctCodeCopyBtn');
@@ -16592,7 +16612,7 @@
     }
     if(codeCopyBtn){
       codeCopyBtn.addEventListener('click', ()=>{
-        const code = codeValueEl ? codeValueEl.textContent : '';
+        const code = codeValueEl ? (codeValueEl.dataset.revealed || codeValueEl.textContent) : '';
         if(!code) return;
         if(navigator.clipboard && navigator.clipboard.writeText){
           navigator.clipboard.writeText(code).then(()=> showCardTransferToast("Kod nusxalandi")).catch(()=>{});
