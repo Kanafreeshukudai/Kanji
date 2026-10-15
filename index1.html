@@ -7731,6 +7731,13 @@
     word-break:break-word;
     white-space:pre-wrap;
   }
+  /* AI javobi: sarlavhalar kattaligi bilan ajraladi, bo'limlar faqat bo'sh joy bilan ajraladi */
+  .ai-assist-bubble .ai-rich{ display:block; }
+  .ai-assist-bubble .ai-rich > div{ white-space:pre-wrap; }
+  .ai-assist-bubble .ai-gap{ height:.8em; }
+  .ai-assist-bubble .ai-h1{ font-size:1.28em; font-weight:800; line-height:1.3; margin:.5em 0 .25em; }
+  .ai-assist-bubble .ai-h2{ font-size:1.12em; font-weight:700; line-height:1.35; margin:.45em 0 .2em; }
+  .ai-assist-bubble .ai-h3{ font-size:1.02em; font-weight:700; line-height:1.4; margin:.35em 0 .15em; }
   .ai-assist-msg.bot .ai-assist-bubble{
     background:rgba(0,0,0,0.74);
     border:1.5px solid rgba(167,139,250,0.70);
@@ -11706,7 +11713,7 @@
     btn.innerHTML = `<span class="tab-btn-custom-label">${DAY_LABELS[CUSTOM_DAY_ID]} <span class="badge" id="dayCount-${CUSTOM_DAY_ID}">${queues[CUSTOM_DAY_ID].length}</span>`
       + (customDeckShuffled ? `<span class="shuffle-indicator">Aralashtirilgan</span>` : '')
       + `</span><button type="button" class="tab-btn-custom-close" id="btnCloseCustomDeck" aria-label="Maxsus Flashcardni yopish">&#10005;</button>`;
-    const selectDeck = ()=>{ currentDay = CUSTOM_DAY_ID; kunlarOpen = false; saveState(); showTab('learn'); };
+    const selectDeck = ()=>{ currentDay = CUSTOM_DAY_ID; kunlarOpen = false; saveState(); showTab('learn', true); };
     btn.addEventListener('click', selectDeck);
     btn.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectDeck(); }
@@ -11765,11 +11772,11 @@
     }
 
     recentDays.forEach(d=>{
-      tabsNav.appendChild(dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); }));
+      tabsNav.appendChild(dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn', true); }));
     });
 
     olderDays.forEach((d,i)=>{
-      const ob = dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn'); });
+      const ob = dayTabBtn(d, ()=>{ resetDayQueue(d); currentDay = d; kunlarOpen = false; saveState(); showTab('learn', true); });
       // diagonal tartib: yuqori-chapdan pastga-o'ngga (qator + ustun) — shunga qarab kechikish
       ob.style.setProperty('--d', Math.floor(i/4) + (i%4));
       tabsOlderGrid.appendChild(ob);
@@ -12816,7 +12823,7 @@
     all: document.getElementById('view-all'),
     quiz: document.getElementById('view-quiz'),
   };
-  function showTab(tab){
+  function showTab(tab, animateCard){
     currentTab = tab;
     Object.keys(views).forEach(k=>{
       const el = views[k];
@@ -12846,7 +12853,7 @@
     if(tab!=='quiz' && timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
     if(tab!=='quiz' && timedNextInterval){ clearInterval(timedNextInterval); timedNextInterval = null; }
     renderTabs();
-    if(tab==='learn') renderStage();
+    if(tab==='learn') renderStage(!!animateCard);
     if(tab==='known') renderKnown();
     if(tab==='all') renderAll();
     if(window.__iosRepaint){ setTimeout(window.__iosRepaint, 60); setTimeout(window.__iosRepaint, 400); }
@@ -16928,7 +16935,8 @@
       "Faqat quyidagi mavzularga oid savollarga javob ber: yapon tili kanjilari (ma'nosi, o'qilishi — kun'yomi/on'yomi, chizish tartibi), yapon so'zlari va lug'at (leksika, sinonim/antonim, qo'llanilishi, misollar), yapon grammatikasi (gap tuzilishi, zarrachalar, fe'l/sifat shakllari, JLPT darajalariga oid mavzular) va umuman yapon tilini o'rganishga bevosita aloqador savollar.",
       "Agar foydalanuvchi shu mavzulardan tashqari narsa so'rasa (masalan boshqa fanlar, dasturlash, siyosat, shaxsiy maslahat va h.k.), muloyimlik bilan rad et va uni yapon tiliga oid savol berishga taklif qil — lekin boshqa mavzuda batafsil javob berma.",
       "Javoblarni asosan o'zbek tilida yoz, lekin yapon so'z/kanjilarni original shaklda (kanji, hiragana/katakana, romaji) ko'rsat.",
-      "Javoblaringni qisqa, aniq va o'quvchiga tushunarli qil; kerak bo'lsa misollar bilan tushuntir."
+      "Javoblaringni juda qisqa va ixcham qil: faqat asosiy mazmunni ber, ortiqcha tushuntirish, kirish va uzun xulosalar yozma. Muhim ma'lumot va bitta-ikkita misol kifoya.",
+      "Javobda nuqta-chiziq (-, •), yulduzcha (*), '---' chiziqlari va ** belgilarini ishlatma. Muhim qismlarni bo'sh qator bilan ajrat. Sarlavha kerak bo'lsa, uni '## Sarlavha' ko'rinishida yoz."
     ].join(" ");
 
     let history = []; // OpenAI uslubi: {role:'user'|'assistant', content:text}
@@ -16945,6 +16953,52 @@
       return row;
     }
 
+    // AI javobini tozalab, bloklarga ajratish: sarlavha (#, ##, ###, to'liq qalin qator),
+    // bo'sh qator (gap) va oddiy qator. Chiziq, nuqta, yulduzcha va ** belgilari olib tashlanadi.
+    function parseAi(text){
+      const out = [];
+      const lines = String(text || '').replace(/\r/g, '').split('\n');
+      let lastGap = true;
+      for(let raw of lines){
+        if(/^\s*([-*_]\s*){3,}$/.test(raw)){
+          if(!lastGap){ out.push({kind:'gap', text:''}); lastGap = true; }
+          continue;
+        }
+        if(raw.trim() === ''){
+          if(!lastGap){ out.push({kind:'gap', text:''}); lastGap = true; }
+          continue;
+        }
+        let kind = 'p';
+        let t = raw;
+        const hm = t.match(/^\s{0,3}(#{1,6})\s+(.*)$/);
+        if(hm){ kind = hm[1].length === 1 ? 'h1' : (hm[1].length === 2 ? 'h2' : 'h3'); t = hm[2]; }
+        t = t.replace(/^\s*[-*+•–—]\s+/, '');
+        if(kind === 'p' && /^\s*\*\*[^*]+\*\*\s*:?\s*$/.test(t)) kind = 'h3';
+        t = t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/__(.+?)__/g, '$1')
+             .replace(/(^|[^\w*])\*(?!\s)([^*\n]+?)\*(?!\w)/g, '$1$2')
+             .replace(/`/g, '');
+        out.push({kind, text: t.trim()});
+        lastGap = false;
+      }
+      while(out.length && out[out.length-1].kind === 'gap') out.pop();
+      return out;
+    }
+    function cleanAi(text){
+      return parseAi(text).map(b => b.kind === 'gap' ? '' : b.text).join('\n');
+    }
+    function renderAiRich(bubble, text){
+      bubble.textContent = '';
+      const wrap = document.createElement('div');
+      wrap.className = 'ai-rich';
+      for(const b of parseAi(text)){
+        const el = document.createElement('div');
+        if(b.kind === 'gap'){ el.className = 'ai-gap'; }
+        else { el.className = 'ai-' + b.kind; el.textContent = b.text; }
+        wrap.appendChild(el);
+      }
+      bubble.appendChild(wrap);
+    }
+
     // Botning javobini harf-harf, sekin-asta "yozayotgandek" chiqaramiz.
     // Har bir yangi bo'lak alohida <span> bo'lib, shade (fade-in) bilan paydo bo'ladi.
     function typeMsg(text, speedMs){
@@ -16958,7 +17012,8 @@
       // foydalanuvchi o'zi scroll qilib o'qiydi.
 
       return new Promise((resolve)=>{
-        const tokens = text.match(/\S+\s*|\s+/g) || [text];
+        const shown = cleanAi(text);
+        const tokens = shown.match(/\S+\s*|\s+/g) || [shown];
         const total = tokens.length;
         const caret = document.createElement('span');
         caret.className = 'ai-caret';
@@ -16982,7 +17037,7 @@
             bubble.classList.add('ai-aura');
             setTimeout(()=>{ if(bubble.isConnected) bubble.classList.remove('ai-aura'); }, 1700);
             // animatsiyalar tugagach DOM'ni yengillashtiramiz (bitta matn tuguniga yig'amiz)
-            setTimeout(()=>{ if(bubble.isConnected) bubble.textContent = text; }, 800);
+            setTimeout(()=>{ if(bubble.isConnected) renderAiRich(bubble, text); }, 800);
             resolve(row);
           }
         }
@@ -17030,6 +17085,15 @@
       unlockPageScroll();
     }
 
+    // Kesilgan matnni oxirgi to'liq jumla (. ! ? … yoki qator oxiri) bilan tugatadi
+    function trimToCompleteSentence(text){
+      const m = text.match(/^[\s\S]*[.!?…](?=\s|$|["')\]»])/);
+      if(m && m[0].length > text.length * 0.3) return m[0].trim();
+      const nl = text.lastIndexOf('\n');
+      if(nl > text.length * 0.3) return text.slice(0, nl).trim();
+      return text.trim();
+    }
+
     async function sendMsg(){
       const text = (input.value || '').trim();
       if(!text || sendBtn.disabled) return;
@@ -17051,7 +17115,7 @@
             model: GROQ_MODEL,
             messages: [{role:'system', content: SYSTEM_PROMPT}, ...history],
             temperature: 0.6,
-            max_tokens: 900
+            max_tokens: 700
           })
         });
         const data = await res.json();
@@ -17064,9 +17128,11 @@
           throw new Error(rawMsg || `Server xatosi (${res.status})`);
         }
         const choice = data && data.choices && data.choices[0];
-        const reply = choice && choice.message && choice.message.content
+        let reply = choice && choice.message && choice.message.content
           ? String(choice.message.content).trim()
           : '';
+        // Javob limitga yetib kesilgan bo'lsa — oxirgi TUGALLANGAN jumlagacha qisqartiramiz
+        if(choice && choice.finish_reason === 'length') reply = trimToCompleteSentence(reply);
 
         if(!reply){
           await typeMsg("Kechirasiz, javob ololmadim. Savolni boshqacharoq qayta yozib ko'ring.");
