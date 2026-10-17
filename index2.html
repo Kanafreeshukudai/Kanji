@@ -2124,6 +2124,37 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
 .mochi-quiz-bubble.info, .mochi-quiz-bubble.ok{ max-width:200px; font-size:12.5px; padding:7px 12px; }
 .mochi-quiz-bubble.bad{ max-width:240px; font-size:13px; padding:9px 12px; min-width:0; }
 .mochi-quiz-bubble.bad b{ font-size:13.5px; padding:1px 8px; }
+/* ---------- VIKTORINA NATIJASI: Mochi ustida foiz bubble ---------- */
+.mochi-result-bubble{
+  position:absolute; bottom:calc(100% + 14px); left:50%;
+  transform:translateX(-50%) translateY(8px) scale(.9);
+  width:max-content; min-width:150px; padding:11px 18px 12px;
+  border-radius:18px; text-align:center; pointer-events:none;
+  background:linear-gradient(165deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 55%), rgba(12,14,18,0.94);
+  border:1px solid rgba(201,166,107,0.6);
+  box-shadow:0 14px 28px -12px rgba(0,0,0,0.9), 0 0 22px rgba(201,166,107,0.22), inset 0 1px 0 rgba(255,255,255,0.14);
+  opacity:0;
+  transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
+  z-index:9999;
+}
+.mochi-result-bubble.below{ bottom:auto; top:calc(100% + 14px); transform:translateX(-50%) translateY(-8px) scale(.9); }
+.mochi-result-bubble.show{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+.mochi-result-pct{
+  font-family:'Shippori Mincho', serif; font-size:32px; font-weight:700;
+  color:#f6ecd9; line-height:1; font-variant-numeric:tabular-nums;
+}
+.mochi-result-pct small{ font-size:17px; font-weight:600; margin-left:2px; color:#e9c27d; }
+.mochi-result-meta{ font-size:11.5px; color:#c9b99a; margin-top:6px; font-weight:700; letter-spacing:.03em; }
+.mochi-result-track{ height:4px; border-radius:4px; background:rgba(255,255,255,0.08); margin-top:9px; overflow:hidden; }
+.mochi-result-fill{
+  height:100%; width:0%; border-radius:4px;
+  background:linear-gradient(90deg, #8f3a22, #d0714b, #e9c27d);
+  box-shadow:0 0 10px rgba(233,194,125,0.45);
+  transition:width 1.6s cubic-bezier(.22,1,.36,1);
+}
+@media (prefers-reduced-motion: reduce){
+  .mochi-result-bubble, .mochi-result-fill{ transition:none; }
+}
 </style>
 <style id="home-nav-style">
   /* sahifa kirish/chiqish effekti: qora parda sekin ochiladi */
@@ -3372,6 +3403,11 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
     animation:none !important;
     transform:translateX(-50%) !important;
   }
+/* Mochi AI tugmasi yoqilganda/o'chirilganda silliq fade */
+.fixed-top-bar .mochi-toggle-btn{
+  transition:background-color .45s ease, color .45s ease, box-shadow .45s ease, border-color .45s ease, opacity .45s ease;
+}
+.fixed-top-bar .mochi-toggle-btn.fade-swap{ opacity:.3; }
 </style>
 </head>
 <body>
@@ -4797,7 +4833,10 @@ const viewQuiz = document.getElementById('viewQuiz');
 const viewKnown = document.getElementById('viewKnown');
 
 function switchView(showEl, hideEl, onShown){
-  if(hideEl && hideEl.id === 'viewQuiz') clearQuizTimer();
+  if(hideEl && hideEl.id === 'viewQuiz') { clearQuizTimer(); hideMochiResult(true); }
+  if(showEl && showEl.id === 'viewQuiz' && lastQuizResult && doneStage && doneStage.style.display === 'block'){
+    setTimeout(()=>showMochiResult(lastQuizResult.c, lastQuizResult.t), 450);
+  }
   if(showEl && showEl.id === 'viewQuiz' && window.mochiShowFn && !window.mochiShown){
     window.mochiShowFn();
     if(window.mochiSnapQuiz) window.mochiSnapQuiz();   // Mochi bir joydan chiqadi (tasodifiy joydan emas)
@@ -5669,6 +5708,8 @@ function playWrongSound(){
 function startQuiz(sourceWords){
   clearQuizTimer();
   quizStarted = true;
+  hideMochiResult(true);
+  lastQuizResult = null;
   if(window.mochiShowFn && !window.mochiShown) window.mochiShowFn();
   if(window.mochiUpdateState) window.mochiUpdateState();
   currentQuizWords = sourceWords;
@@ -6032,21 +6073,21 @@ function showQuizMochiNote(type, html){
 
 // Xato javob hazillari: to'g'ri javob (kana) har doim ko'rinadi
 const badJokes = [
-  k => `Oops! 🙈 To'g'ri: <b>${k}</b>`,
-  k => `Qochib ketdi 🏃 Ushlang: <b>${k}</b>`,
-  k => `Xotira uxlayapti 😴 <b>${k}</b>`,
-  k => `Yo'l adashdi 🗺️ <b>${k}</b>`,
-  k => `Yarashish uchun: <b>${k}</b> 😜`
+  k => `Afsuski, noto'g'ri. To'g'ri javob: <b>${k}</b>`,
+  k => `Bu safar olmadi. To'g'ri javob: <b>${k}</b>`,
+  k => `Xato. To'g'ri javob: <b>${k}</b>`,
+  k => `Deyarli. To'g'ri javob: <b>${k}</b>`,
+  k => `Eslab qoling: <b>${k}</b>`
 ];
 const okJokes = [
-  "To'g'ri! 😎 Endi bu so'z sening cho'ntagingda",
-  "Bingo! 🎯 Qochib keta olmaydi",
-  "Zo'r! 🙌 Miyangda xona ochildi",
-  "Ajoyib! 🍀 Omading bor ekan",
-  "Topdingiz-ku! 😜 Men ko'z qisib turgandim",
-  "Ha, shu! 🚀 Bilim ulanyapti",
-  "Bu so'z endi sening qarzdoring 🤝",
-  "Yulduz yondi ⭐ Osmon to'lib bormoqda"
+  "To'g'ri!",
+  "Ajoyib, davom eting!",
+  "Zo'r, to'g'ri topdingiz!",
+  "Barakalla, shunday davom eting!",
+  "Yaxshi, to'g'ri javob!",
+  "Ha, aynan shu!",
+  "Juda yaxshi!",
+  "A'lo natija!"
 ];
 function submitAnswer(isCorrect, selectedBtn){
   if(busy) return;
@@ -6148,6 +6189,11 @@ function showDone(){
   }
 
   document.getElementById('btnRestart').addEventListener('click', ()=>startQuiz(currentQuizWords));
+
+  // Natija: foiz Mochi ustida chiqadi, Mochi esa erkin suzib yuradi
+  lastQuizResult = { c: correctCount, t: total };
+  if(total) showMochiResult(correctCount, total);
+  if(window.mochiRelease) window.mochiRelease();
 }
 /* ---------------- KONFETTI: 100% natija uchun kichik zarracha portlashi ---------------- */
 function spawnConfetti(anchorEl){
@@ -6309,6 +6355,49 @@ function spawnConfetti(anchorEl){
 
 
 /* ---------- MOCHI REACTIONS ---------- */
+/* ---------------- VIKTORINA NATIJASI: foiz animatsiya bilan Mochi ustida ---------------- */
+let lastQuizResult = null;
+let mochiResultRaf = 0;
+function hideMochiResult(immediate){
+  const b = document.getElementById('mochiResultBubble');
+  cancelAnimationFrame(mochiResultRaf);
+  if(!b) return;
+  if(immediate){ b.remove(); return; }
+  b.classList.remove('show');
+}
+function showMochiResult(correct, total){
+  const body = document.querySelector('.mochi-body');
+  if(!body || !total) return;
+  hideMochiResult(true);
+  const pct = Math.round(correct / total * 100);
+  const b = document.createElement('div');
+  b.id = 'mochiResultBubble';
+  b.className = 'mochi-result-bubble';
+  b.setAttribute('role', 'status');
+  b.innerHTML =
+    `<div class="mochi-result-pct"><span class="mr-num">0</span><small>%</small></div>` +
+    `<div class="mochi-result-meta">${correct} / ${total} ta savolga to'g'ri</div>` +
+    `<div class="mochi-result-track"><div class="mochi-result-fill"></div></div>`;
+  body.appendChild(b);
+  // Mochi tepasida joy yetmasa, bubble pastga chiqadi
+  if(body.getBoundingClientRect().top < 130) b.classList.add('below');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    b.classList.add('show');
+    const fill = b.querySelector('.mochi-result-fill');
+    if(fill) fill.style.width = pct + '%';
+  }));
+  // Raqam 0 dan natijagacha sanaladi
+  const numEl = b.querySelector('.mr-num');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DUR = 1600, t0 = performance.now();
+  const step = now => {
+    const p = reduced ? 1 : Math.min(1, (now - t0) / DUR);
+    const eased = 1 - Math.pow(1 - p, 3);
+    numEl.textContent = Math.round(pct * eased);
+    if(p < 1) mochiResultRaf = requestAnimationFrame(step);
+  };
+  mochiResultRaf = requestAnimationFrame(step);
+}
 function mochiHappy(ms = 1500){
   const body = document.querySelector('.mochi-body');
   if(!body) return;
@@ -6387,6 +6476,8 @@ window.addEventListener('DOMContentLoaded', function(){
     targetVy = Math.sin(angle) * speed;
   }
 
+  // Viktorina tugagach Mochi kartochka tepasidan ozod bo'lib, darhol erkin suzadi
+  window.mochiRelease = function(){ pickNewDirection(); vx = targetVx; vy = targetVy; };
   function getQuizTargetPos(){
     const quizCard = document.querySelector('.quiz-card');
     if(!quizCard) return null;
@@ -6530,7 +6621,10 @@ window.addEventListener('DOMContentLoaded', function(){
     const viewQuiz = document.getElementById('viewQuiz');
     const isQuizVisible = viewQuiz && viewQuiz.classList.contains('active');
     const quizCard = document.querySelector('.quiz-card');
-    quizModeActive = isQuizVisible && quizCard;
+    const quizStageEl = document.getElementById('quizStage');
+    // Savollar bo'limi yashirilgan bo'lsa (viktorina tugagan) Mochi ozod — kartochka DOM'da qolsa ham
+    const quizLive = !!quizCard && !!quizStageEl && quizStageEl.style.display !== 'none';
+    quizModeActive = isQuizVisible && quizLive;
 
     const mochiFrozen = Date.now() < (window.mochiFreezeUntil || 0);
     if(mochiFrozen){
@@ -7390,7 +7484,12 @@ window.addEventListener('DOMContentLoaded', ()=>{
   if(!mochi || !btn) return;
   window.mochiShown = true;
   window.mochiAwakeOverride = true;   // sahifa yuklanganda Mochi aktiv (uxlamaydi)
-  function setBtn(){ btn.classList.toggle('on', !!window.mochiShown); }
+  function setBtn(){
+    btn.classList.toggle('on', !!window.mochiShown);
+    // Holat o'zgarganda tugma biroz xiraylib, asta qaytadi (fade)
+    btn.classList.add('fade-swap');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ btn.classList.remove('fade-swap'); }); });
+  }
   let hideTimer = null;
   const chatWindow = document.getElementById('mochiBubble');
   // Faqat ishlatilmagan holatda yo'qoladi: 20 soniya davomida hech qanday harakat bo'lmasa
@@ -7492,14 +7591,16 @@ window.addEventListener('message', function(e){
 /* Bo'sh joyga (tugma bo'lmagan joyga) bosilganda Mochi hazil tariqasida bubble bilan javob beradi */
 (function(){
   const lines = [
-    "Nimani izlayapsan? 🙂",
-    "Yashirin tugma qidiryapsanmi? 😏",
-    "Bu joy tugma emas 😄",
-    "Bo'sh joyga bosding-a? 😅",
-    "Meni sinayapsanmi? 🕵️",
-    "Hech narsa yashirilmagan 🤫",
-    "Pixel-pixel qidiryapsanmi? 🔍",
-    "Ehtiyot bo'l, hazil yashirin 😸"
+    "Menga bosmang, men shunchaki fon 🙃",
+    "Tugma qidiryapsizmi? Yo'q, bu shunchaki devor 🧱",
+    "Mochi uyqusi keldi, lekin siz bosdingiz 😴",
+    "Bu yerda hech narsa yo'q, nima kutyapsiz? 🤷",
+    "Qo'lingiz adashdimi? Tugmalar yuqorida 👆",
+    "Bosganingiz bilan mavzu chiqmaydi, lekin kulgi chiqdi 😄",
+    "Ha, bosdingiz. Men ham ko'rdim 👀",
+    "Xuddi bo'sh stakanga qarab suv qidirgandek 🥛",
+    "Siz bosdingiz, men esa hayron bo'ldim 😵",
+    "Shu joyda siri yo'q, lekin bitta so'z bilsangiz ajoyib bo'lardi 📚"
   ];
   const interactive = 'button, a, input, textarea, select, label, summary, [role="button"], [onclick], [contenteditable], [class*="card"], [class*="face"], .option-btn, .mode-btn, .sub-btn, .dropdown-btn, .dot-pill, .q-word, .q-note, .quiz-stage, .listen-hint, #mochi, #pageCurtain, .mochi-quiz-bubble';
   let last = 0, lastIdx = -1;
@@ -7667,6 +7768,17 @@ window.addEventListener('message', function(e){
   function glideFromHammasi(tabBtn){
     const idx = TAB_INDEX[tabBtn.id];
     if(idx === undefined) return;
+    // Hammasi'dan istalgan tab bosilganda yoritma Flashcard'dan siljimasdan, aynan bosilgan tabda paydo bo'ladi
+    const indEl = document.querySelector('#tabs .indicator');
+    if(indEl){
+      indEl.style.transition = 'none';
+      tabs.classList.remove('pos-quiz','pos-known');
+      if(tabBtn.id === 'tabQuiz') tabs.classList.add('pos-quiz');
+      else if(tabBtn.id === 'tabKnown') tabs.classList.add('pos-known');
+      void indEl.offsetWidth;
+      indEl.style.transition = '';
+    }
+    return;
     const from = btn.getBoundingClientRect();
     const tabsEl = document.getElementById('tabs');
     if(!tabsEl) return;
@@ -7707,7 +7819,21 @@ window.addEventListener('message', function(e){
 
   // Hammasi ochiq paytida Flashcard / Viktorina / Bilaman bosilsa, ro'yxat yopiladi va o'sha bo'lim ochiladi
   document.addEventListener('click', e=>{
-    if(showing && e.target.closest && e.target.closest('#tabs .tab-btn')) setActive(false);
+    if(showing && e.target.closest && e.target.closest('#tabs .tab-btn')){
+      // Ro'yxat yopiladi va Flashcard kartochkalari Mavzular qatori bilan BIR VAQTDA chiziladi
+      setActive(false);
+      renderActiveSet();
+      // Flashcard oynasi fade bilan ochiladi
+      if(e.target.closest('#tabFlash') && viewFlash){
+        viewFlash.classList.remove('fade-in', 'fade-out');
+        void viewFlash.offsetWidth;
+        viewFlash.classList.add('fade-in');
+        viewFlash.addEventListener('animationend', function clr(){
+          viewFlash.classList.remove('fade-in');
+          viewFlash.removeEventListener('animationend', clr);
+        });
+      }
+    }
   });
   document.addEventListener('click', e=>{
     if(showing && e.target.closest && e.target.closest('#viewFlash .sub-btn')) setActive(false);
@@ -7737,6 +7863,70 @@ window.addEventListener('message', function(e){
       tabQuiz.click();                       // viktorina ochiladi (quiz allaqachon boshlangan)
     }
   }
+})();
+</script>
+<script>
+/* Oxirgi holat: qaysi bo'lim (Flashcard / Viktorina / Bilaman), qaysi mavzu va viktorina rejimi.
+   Sahifa qayta ochilganda shu joydan davom etadi. */
+(function(){
+  const KEY = 'kanji_ui_state_v1';
+  const q = (sel) => document.querySelector(sel);
+  function currentTab(){
+    if(tabQuiz.classList.contains('active')) return 'quiz';
+    if(tabKnown.classList.contains('active')) return 'known';
+    return 'flash';
+  }
+  function saveState(){
+    if(document.body.classList.contains('hammasi-open') || document.body.classList.contains('hammasi-quiz')) return;
+    const flashBtn = q('#flashSubnav .sub-btn.active[data-set], #flashDropdownPanel .sub-btn.active[data-set]');
+    const st = {
+      tab: currentTab(),
+      flash: flashBtn ? flashBtn.dataset.set : null,
+      quiz: quizActiveKey,
+      mode: quizMode,
+      known: knownActiveKey
+    };
+    try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){}
+  }
+  function restoreState(){
+    let st = null;
+    try{ st = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){}
+    if(!st) return;
+    const pick = (sel, attr, val) => {
+      if(!val) return null;
+      return document.querySelector(sel.replace('ATTR', attr).replace('VAL', CSS.escape(val)));
+    };
+    const flashEl = pick('#flashSubnav .sub-btn[ATTR="VAL"], #flashDropdownPanel .sub-btn[ATTR="VAL"]', 'data-set', st.flash);
+    if(flashEl && !flashEl.classList.contains('active')) flashEl.click();
+    const knownEl = pick('#knownSubnav .sub-btn[ATTR="VAL"], #knownDropdownPanel .sub-btn[ATTR="VAL"]', 'data-key', st.known);
+    if(knownEl && knownEl.dataset.key !== knownActiveKey) knownEl.click();
+    const quizEl = pick('#quizSubnav .sub-btn[ATTR="VAL"], #quizDropdownPanel .sub-btn[ATTR="VAL"]', 'data-key', st.quiz);
+    if(quizEl && quizEl.dataset.key !== quizActiveKey) quizEl.click();
+    if(st.mode && st.mode !== quizMode){
+      const m = q('#modeSwitch .mode-btn[data-mode="' + st.mode + '"]');
+      if(m) m.click();
+    }
+    if(st.tab === 'quiz') tabQuiz.click();
+    else if(st.tab === 'known') tabKnown.click();
+  }
+  // Har bir tanlovdan keyin holatni saqlaymiz
+  document.addEventListener('click', ()=>setTimeout(saveState, 0), true);
+  window.addEventListener('pagehide', saveState);
+  // Qora parda ostida (intro tugamasdan) tiklanadi — animatsiya ko'rinmaydi
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', restoreState);
+  else restoreState();
+})();
+</script>
+<script>
+/* Sahifaga kirilganda Mochi xush kelibsiz xabarini chiqaradi (qora parda ochilgach) */
+(function(){
+  function greet(){
+    if(document.body.classList.contains('mochi-off')) return;
+    if(!window.showQuizMochiNote) return;
+    window.showQuizMochiNote('info', "Xush kelibsiz! Men Mochi, sizning yordamchingiz 👋");
+  }
+  // Qora parda va kirish animatsiyasi tugagach chiqadi
+  setTimeout(greet, 3200);
 })();
 </script>
 </body>
