@@ -3445,6 +3445,71 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   color:#ffd1d1 !important;
 }
 .dropdown-btn .sub-count{ background:rgba(220,38,38,0.45) !important; color:#ffffff !important; }
+/* Viktorina: bubble Mochi'ning yonida (o'ngda yoki chapda) — shkala va raqamlar qatori to'silmaydi */
+.mochi-quiz-bubble.side{
+  bottom:auto; top:50%; left:calc(100% + 12px);
+  transform:translateY(-50%) scale(.96);
+  max-width:230px;
+}
+.mochi-quiz-bubble.side.side-left{ left:auto; right:calc(100% + 12px); }
+.mochi-quiz-bubble.side.show{ transform:translateY(-50%) scale(1); animation:qBubbleInSide .45s cubic-bezier(.34,1.56,.64,1) both; }
+.mochi-quiz-bubble.side.show.fade-out{ animation:qBubbleOutSide .5s ease both; }
+@keyframes qBubbleInSide{
+  from{ opacity:0; transform:translateY(-50%) translateX(-8px) scale(.8); }
+  to{ opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
+}
+@keyframes qBubbleOutSide{
+  from{ opacity:1; transform:translateY(-50%) scale(1); }
+  to{ opacity:0; transform:translateY(-50%) scale(.94); }
+}
+.mochi-quiz-bubble.side.side-left.show{ animation-name:qBubbleInSideL; }
+@keyframes qBubbleInSideL{
+  from{ opacity:0; transform:translateY(-50%) translateX(8px) scale(.8); }
+  to{ opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
+}
+/* Telefonda viktorina bubble'i ekranning pastki qismida */
+.mochi-quiz-bubble.mobile-bottom{
+  bottom:auto; right:auto; transform:scale(.96); transform-origin:50% 100%;
+  max-width:min(240px, 84vw); white-space:normal;
+}
+.mochi-quiz-bubble.mobile-bottom.show{ transform:scale(1); animation:qBubbleInMob .45s cubic-bezier(.34,1.56,.64,1) both; }
+.mochi-quiz-bubble.mobile-bottom.show.fade-out{ animation:qBubbleOutMob .5s ease both; }
+@keyframes qBubbleInMob{
+  from{ opacity:0; transform:translateY(8px) scale(.8); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes qBubbleOutMob{
+  from{ opacity:1; transform:translateY(0) scale(1); }
+  to{ opacity:0; transform:translateY(-6px) scale(.94); }
+}
+/* Viktorina nuqtalari: bajarilgan nuqta to'g'ri bo'lsa yashil, xato bo'lsa qizil rangda doim pulsatsiya qiladi.
+   Keyingi (joriy) nuqta esa keyingi savolga o'tilganda bir marta yorqin yonib o'chadi. */
+.dot-pill.correct{
+  background:rgba(74,138,70,0.6); border-color:rgba(74,138,70,0.9);
+  animation:dotLoopGreen 1.4s ease-in-out infinite;
+}
+.dot-pill.wrong{
+  background:rgba(176,69,61,0.6); border-color:rgba(176,69,61,0.9);
+  animation:dotLoopRed 1.4s ease-in-out infinite;
+}
+@keyframes dotLoopGreen{
+  0%,100%{ box-shadow:0 0 4px 1px rgba(74,138,70,0.35); transform:scale(1); }
+  50%{ box-shadow:0 0 12px 4px rgba(74,138,70,0.85), 0 0 20px 7px rgba(74,138,70,0.3); transform:scale(1.3); }
+}
+@keyframes dotLoopRed{
+  0%,100%{ box-shadow:0 0 4px 1px rgba(176,69,61,0.35); transform:scale(1); }
+  50%{ box-shadow:0 0 12px 4px rgba(176,69,61,0.85), 0 0 20px 7px rgba(176,69,61,0.3); transform:scale(1.3); }
+}
+.dot-pill.flash-once{ animation:dotFlashOnce .7s ease-out both; }
+@keyframes dotFlashOnce{
+  0%{ background:#ffffff; border-color:#ffffff; box-shadow:0 0 14px 5px rgba(246,236,217,0.9); transform:scale(1.4); }
+  100%{ background:rgba(45,212,191,0.18); border-color:#2dd4bf; box-shadow:0 0 6px 2px rgba(45,212,191,0.25); transform:scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .dot-pill.correct, .dot-pill.wrong, .dot-pill.flash-once{ animation:none; }
+}
+/* Telefonda: Mochi xabari uchun savol kartochkasi pastroqda */
+#viewQuiz .quiz-stage{ padding-top:142px; }
 </style>
 </head>
 <body>
@@ -5980,8 +6045,11 @@ function renderQuestion(){
   busy = false;
   const dots = document.querySelectorAll('.dot-pill');
   if(dots[idx]){
-    dots.forEach(d=>d.classList.remove('current'));
+    dots.forEach(d=>d.classList.remove('current', 'flash-once'));
     dots[idx].classList.add('current');
+    // keyingi nuqta bir marta yorqin yonib o'chadi
+    void dots[idx].offsetWidth;
+    dots[idx].classList.add('flash-once');
   }
 
   const isTimeTrial = quizMode === 'timetrial';
@@ -6087,6 +6155,17 @@ function flashScaleTip(){
 // Mochi o'zidan bubble chiqaradi (yashil/qizil) va gapirayotgandek effekt beradi
 let quizBubbleTimer = null, quizSpeakTimer = null;
 let quizFadeTimer = null;
+// Telefonda bubble Mochi'ning tagiga joylanadi, ekran chetidan chiqmaydi
+function placeMobileBubble(bubble, body){
+  const mr = body.getBoundingClientRect();
+  const bw = bubble.offsetWidth;
+  const mochiCx = mr.left + mr.width / 2;
+  const bh = bubble.offsetHeight;
+  let left = mochiCx - bw / 2;
+  left = Math.max(8, Math.min(window.innerWidth - bw - 8, left));
+  bubble.style.left = (left - mr.left) + 'px';
+  bubble.style.top = (-(bh + 8)) + 'px';   // Mochi'ning ustida, 8px masofada
+}
 function showQuizMochiNote(type, html){
   const bubble = document.getElementById('mochiQuizBubble');
   const body = document.querySelector('.mochi-body');
@@ -6094,7 +6173,15 @@ function showQuizMochiNote(type, html){
   // bubble Mochi boshining ustida chiqishi uchun uning ichiga joylanadi
   if(bubble.parentElement !== body) body.appendChild(bubble);
   bubble.className = 'mochi-quiz-bubble ' + type;
+  bubble.style.top = ''; bubble.style.left = '';
+  const inQuiz = document.getElementById('viewQuiz') && document.getElementById('viewQuiz').classList.contains('active');
+  if(inQuiz){
+    const mr = body.getBoundingClientRect();
+    // Xabar Mochi ustida chiqadi (joylashuv innerHTML'dan keyin hisoblanadi)
+    bubble.classList.add('mobile-bottom');
+  }
   bubble.innerHTML = html;
+  if(bubble.classList.contains('mobile-bottom')) placeMobileBubble(bubble, body);
   void bubble.offsetWidth;
   bubble.classList.add('show');
   // gapirish effekti: nurli to'lqin + speaking holati
@@ -6529,7 +6616,7 @@ window.addEventListener('DOMContentLoaded', function(){
     const gap = 10;
     // Mochi savol kartochkasining TEPASIDA, shkala/raqamlar qatoridan pastda turadi
     let tx = rect.left + rect.width/2 - mochiSize/2;
-    let ty = rect.top - mochiSize - gap;
+    let ty = rect.top - mochiSize - 4;
     const sw = document.getElementById('scaleWrap');
     if(sw && sw.style.display !== 'none'){
       const sr = sw.getBoundingClientRect();
@@ -6841,11 +6928,14 @@ window.addEventListener('DOMContentLoaded', function(){
 
   // sudrash tezligini o'lchash (boshi aylanish effekti uchun)
   let dragPath = 0, dragLastX = null, dragLastY = null, dragT0 = 0;
+  // tez-tez silkitish (uyoq-buyoqqa) aniqlash: yo'nalish almashinuvlari
+  let shakeRev = [], shakeLastSx = 0, shakeLastSy = 0, shakeLastDizzy = 0;
   function onDragStart(clientX, clientY){
     dragging = true;
     hasMoved = false;
     document.querySelector('.mochi-body')?.classList.add('grabbed');
     dragPath = 0; dragLastX = clientX; dragLastY = clientY; dragT0 = Date.now();
+    shakeRev = []; shakeLastSx = 0; shakeLastSy = 0;
     touchStartX = clientX;
     touchStartY = clientY;
     mochi.style.cursor = 'grabbing';
@@ -6863,6 +6953,21 @@ window.addEventListener('DOMContentLoaded', function(){
   function onDragMove(clientX, clientY){
     if(!dragging) return;
     if(dragLastX !== null){ dragPath += Math.hypot(clientX - dragLastX, clientY - dragLastY); }
+    // Tez, qisqa masofaga uyoq-buyoqqa silkitilsa — bosh aylanadi (sekin olib borilsa aylanmaydi)
+    if(dragLastX !== null){
+      const ddx = clientX - dragLastX, ddy = clientY - dragLastY;
+      const now = Date.now();
+      const sx = Math.abs(ddx) > 8 ? Math.sign(ddx) : 0;
+      const sy = Math.abs(ddy) > 8 ? Math.sign(ddy) : 0;
+      if(sx){ if(shakeLastSx && sx !== shakeLastSx) shakeRev.push(now); shakeLastSx = sx; }
+      if(sy){ if(shakeLastSy && sy !== shakeLastSy) shakeRev.push(now); shakeLastSy = sy; }
+      shakeRev = shakeRev.filter(t => now - t < 700);
+      if(shakeRev.length >= 4 && now - shakeLastDizzy > 2500 && window.mochiDizzy){
+        shakeLastDizzy = now;
+        shakeRev = [];
+        window.mochiDizzy();
+      }
+    }
     dragLastX = clientX; dragLastY = clientY;
     const dx = clientX - touchStartX;
     const dy = clientY - touchStartY;
@@ -6887,9 +6992,6 @@ window.addEventListener('DOMContentLoaded', function(){
       window.mochiAI.toggle();
     } else if(hasMoved) {
       pickNewDirection();
-      // tez-tez, uzoq sudrab qo'yilsa — Mochi boshi aylangandek bo'ladi
-      const dur = Math.max(1, Date.now() - dragT0);
-      if(dragPath > 260 && dragPath / dur > 0.55 && window.mochiDizzy) window.mochiDizzy();
     }
     // Qo'yilgandan keyin 1 soniyadan keyin uxlash holatini tekshirsin
     setTimeout(checkSleepState, 1000);
