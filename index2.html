@@ -3408,6 +3408,43 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   transition:background-color .45s ease, color .45s ease, box-shadow .45s ease, border-color .45s ease, opacity .45s ease;
 }
 .fixed-top-bar .mochi-toggle-btn.fade-swap{ opacity:.3; }
+/* Tepa qatordan tanlangan mavzu: oq fon, qora matn, chetidan ozgina ajralgan halqa */
+.subnav > .sub-btn.active,
+.subnav > .sub-recent.active,
+.dropdown-panel .sub-btn.active{
+  background:rgba(255,255,255,0.86) !important;
+  color:#111111 !important;
+  border-color:rgba(255,255,255,0.9) !important;
+  outline:1.5px solid rgba(255,255,255,0.85);
+  outline-offset:3px;
+  box-shadow:0 4px 14px -6px rgba(255,255,255,0.45) !important;
+}
+.subnav > .sub-btn.active .sub-count,
+.subnav > .sub-recent.active .sub-count,
+.dropdown-panel .sub-btn.active .sub-count{
+  background:rgba(0,0,0,0.12) !important;
+  color:#111111 !important;
+}
+/* Mavzular tugmasi: har bir bo'lim o'z rangida; matn, sanoq va strelka tartibli joylashadi */
+.dropdown-btn{
+  display:inline-flex !important; align-items:center; justify-content:center;
+  gap:6px; max-width:100%; overflow:hidden;
+}
+.dropdown-btn .dd-label{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dropdown-btn .sub-count{ flex:none; margin:0 !important; }
+.dropdown-btn::after{ flex:none; margin-left:2px; }
+/* Mavzular tugmasi barcha bo'limlarda qizil va biroz shaffof; tanlangan/ochiq holatda ham rangi o'zgarmaydi */
+.dropdown-btn,
+.dropdown-btn:hover,
+.dropdown-btn.active,
+#viewFlash .dropdown-btn, #viewFlash .dropdown-btn:hover, #viewFlash .dropdown-btn.active,
+#viewQuiz .dropdown-btn, #viewQuiz .dropdown-btn:hover, #viewQuiz .dropdown-btn.active,
+#viewKnown .dropdown-btn, #viewKnown .dropdown-btn:hover, #viewKnown .dropdown-btn.active{
+  background:rgba(220,38,38,0.22) !important;
+  border-color:rgba(239,68,68,0.8) !important;
+  color:#ffd1d1 !important;
+}
+.dropdown-btn .sub-count{ background:rgba(220,38,38,0.45) !important; color:#ffffff !important; }
 </style>
 </head>
 <body>
@@ -5374,14 +5411,14 @@ function setActiveDropdownBtn(activeBtn){
   // Tugma matni: eski mavzu tanlansa uning nomi, yangi (asosiy qator) mavzu bo'lsa "Mavzular"
   const actName = (activeBtn.childNodes[0] && activeBtn.childNodes[0].textContent || '').trim();
   const isRecentBtn = activeBtn.classList.contains('sub-recent');
-  flashDropdownBtn.textContent = isRecentBtn ? 'Mavzular' : actName;
   if(isRecentBtn || !activeBtn.dataset.set){
     delete flashDropdownBtn.dataset.set;
+    flashDropdownBtn.innerHTML = '<span class="dd-label">Mavzular</span>';
   } else {
     flashDropdownBtn.dataset.set = activeBtn.dataset.set;
-    const c = document.createElement('span');
-    c.className = 'sub-count';
-    flashDropdownBtn.appendChild(c);
+    flashDropdownBtn.innerHTML = '<span class="dd-label"></span><span class="sub-count"></span>';
+    const numOnly = actName.replace(/^(\d+)-mavzu.*$/, '$1');
+    flashDropdownBtn.querySelector('.dd-label').textContent = numOnly;
     updateDropdownBtnCount();
   }
 }
