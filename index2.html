@@ -5205,7 +5205,13 @@ function renderFlashGrid(words, isKnownView, targetGrid, refresh){
         });
         if(isKnownView) knownIds.delete(w.id); else knownIds.add(w.id);
         saveKnown();
+        // Sahifa o'rni saqlanadi: kartochkalar qayta chizilganda balandlik tushib, sahifa tepaga qaytmasin
+        const keepY = window.scrollY;
+        const keepH = targetGrid.offsetHeight;
+        targetGrid.style.minHeight = keepH + 'px';
         refresh();
+        window.scrollTo(0, keepY);
+        requestAnimationFrame(()=>{ targetGrid.style.minHeight = ''; window.scrollTo(0, keepY); });
         // yangi joylashuvga o'tkazamiz va silliq siljitamiz (FLIP)
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if(reduced) return;
