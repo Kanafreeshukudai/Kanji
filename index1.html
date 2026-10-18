@@ -18599,7 +18599,7 @@
 
   function setupPresenceAdminUI(user) {
     const toggleBtn = document.getElementById("presenceToggleBtn");
-    if (!user || !isAdminEmail(user.email)) {
+    if (!user) {
       teardownPresenceAdminUI();
       return;
     }
