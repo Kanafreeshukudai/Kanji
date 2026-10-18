@@ -7067,6 +7067,14 @@
     .presence-owner-badge, .owner-notice-badge{ animation:none; }
     .owner-notice-card{ transition:none; }
   }
+  .presence-admin-toggle{
+    flex:none; align-self:center; margin-left:8px;
+    border:1px solid var(--glass-border-soft); background:var(--glass-bg);
+    color:var(--ink); border-radius:10px; padding:6px 9px;
+    font-family:inherit; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .presence-admin-toggle.on{ border-color:rgba(147,177,127,0.55); color:var(--moss-soft); }
+  .presence-admin-toggle:disabled{ opacity:.5; cursor:default; }
   .presence-admin-badge{
     flex:none;
     align-self:center;
@@ -17898,7 +17906,9 @@
   // ko'rinish nazorati — chinakam himoya uchun Firebase konsolida
   // "presence" kolleksiyasini o'qish Firestore Security Rules orqali ham
   // shu admin UID/emailiga cheklab qo'yilishi tavsiya etiladi.
-  const PRESENCE_ADMIN_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
+  // OWNER — doimiy, o'zgarmaydi. Adminlar esa "admins" kolleksiyasidan dinamik yuklanadi.
+  const OWNER_EMAIL = "doniyorbektoshmatov7@gmail.com";
+  const PRESENCE_ADMIN_EMAILS = [OWNER_EMAIL];
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
   const PRESENCE_STALE_MS = 35000;
@@ -18447,13 +18457,59 @@
         row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showOwnerNotice(); } });
       }
 
+      // Admin belgisi va owner uchun "Admin qilish" tugmasi
+      const itemEmail = (item.email || "").toLowerCase();
+      const itemIsAdmin = !!itemEmail && !isOwner && isAdminEmail(itemEmail);
+      if (itemIsAdmin) {
+        const adminBadge = document.createElement("span");
+        adminBadge.className = "presence-admin-badge";
+        adminBadge.textContent = "Admin";
+        row.appendChild(adminBadge);
+      }
+      const viewerIsOwner = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL;
+      if (viewerIsOwner && !isOwner && itemEmail) {
+        const adminBtn = document.createElement("button");
+        adminBtn.type = "button";
+        adminBtn.className = "presence-admin-toggle" + (itemIsAdmin ? " on" : "");
+        adminBtn.textContent = itemIsAdmin ? "Adminlikni olish" : "Admin qilish";
+        adminBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setAdminRole(itemEmail, item.nick, !itemIsAdmin, adminBtn);
+        });
+        row.appendChild(adminBtn);
+      }
+
       listEl.appendChild(row);
     });
   }
 
+  // Faqat owner adminlikni berishi/olishi mumkin (Firestore qoidalari ham buni tekshiradi)
+  async function setAdminRole(email, nick, grant, btn) {
+    const me = auth.currentUser;
+    if (!me || String(me.email || "").toLowerCase() !== OWNER_EMAIL) return;
+    if (btn) btn.disabled = true;
+    try {
+      const ref = doc(db, "admins", email);
+      if (grant) {
+        await setDoc(ref, {
+          email: email,
+          nick: String(nick || "").slice(0, 60),
+          grantedAt: serverTimestamp(),
+          grantedBy: OWNER_EMAIL
+        });
+      } else {
+        await deleteDoc(ref);
+      }
+    } catch (err) {
+      console.error("Admin rolini o'zgartirishda xatolik:", err.message);
+      alert("Admin rolini o'zgartirib bo'lmadi. Firestore qoidalarini tekshiring.");
+      if (btn) btn.disabled = false;
+    }
+  }
+
   function setupPresenceAdminUI(user) {
     const toggleBtn = document.getElementById("presenceToggleBtn");
-    if (!user) {
+    if (!user || !isAdminEmail(user.email)) {
       teardownPresenceAdminUI();
       return;
     }
@@ -18721,12 +18777,51 @@
 
   // Chat tinglovchisi login holatiga bog'langan: kirgach ulanadi, chiqqach uziladi.
   let chatUnsub = null, myBlockUnsub = null, bansUnsub = null;
-  const isAdminEmail = (e) => !!e && PRESENCE_ADMIN_EMAILS.some((a) => a.toLowerCase() === String(e).toLowerCase());
+  let dynamicAdminEmails = new Set();   // "admins" kolleksiyasidan (lowercase email'lar)
+  const isAdminEmail = (e) => {
+    const x = String(e || "").toLowerCase();
+    return !!x && (x === OWNER_EMAIL || dynamicAdminEmails.has(x) || PRESENCE_ADMIN_EMAILS.indexOf(x) !== -1);
+  };
   window.__kanjiIsAdmin = () => !!auth.currentUser && isAdminEmail(auth.currentUser.email);
   window.__kanjiIsAdminEmail = isAdminEmail;
   // Chat'da OWNER belgisi — faqat egasi (adminlar ro'yxatiga kirmaydi; admin belgisi keyinroq qo'shiladi)
   const CHAT_OWNER_EMAILS = ["doniyorbektoshmatov7@gmail.com"];
   window.__kanjiIsOwnerEmail = (e) => !!e && CHAT_OWNER_EMAILS.some((a) => a.toLowerCase() === String(e).toLowerCase());
+
+  // Ban/mute ro'yxatini faqat admin bo'lganda tinglaydi (admin huquqi o'zgarsa qayta sozlanadi)
+  let adminsUnsub = null;
+  function syncBansListener() {
+    const me = auth.currentUser;
+    if (me && isAdminEmail(me.email)) {
+      if (bansUnsub) return;
+      bansUnsub = onSnapshot(collection(db, "chatBans"), (s2) => {
+        window.__kanjiBans = s2.docs.map((d) => {
+          const x = d.data();
+          return { email: d.id, type: x.type, until: x.until && x.until.toMillis ? x.until.toMillis() : null };
+        });
+        chatRefresh();
+      }, () => {});
+    } else if (bansUnsub) {
+      bansUnsub(); bansUnsub = null;
+      window.__kanjiBans = [];
+    }
+  }
+  // "admins" ro'yxatini barcha kirgan foydalanuvchilar uchun tinglaydi
+  function syncAdminsListener() {
+    if (auth.currentUser) {
+      if (adminsUnsub) return;
+      adminsUnsub = onSnapshot(collection(db, "admins"), (s2) => {
+        dynamicAdminEmails = new Set(s2.docs.map((d) => String(d.id).toLowerCase()));
+        syncBansListener();
+        if (auth.currentUser) setupPresenceAdminUI(auth.currentUser);
+        if (presenceLoaded) presenceRenderList();
+        chatRefresh();
+      }, (err) => { console.error("Adminlar ro'yxatini o'qishda xatolik:", err.message); });
+    } else if (adminsUnsub) {
+      adminsUnsub(); adminsUnsub = null;
+      dynamicAdminEmails = new Set();
+    }
+  }
   const chatRefresh = () => { if (typeof window.__kanjiChatRefresh === "function") window.__kanjiChatRefresh(); };
 
   // ---------- Avatarlar: xabardagi rasm -> shu foydalanuvchining boshqa xabarlari -> chatProfiles/{uid} ----------
@@ -18807,15 +18902,8 @@
         chatRefresh();
       }, () => {});
     }
-    if (isAdminEmail(user.email)) {
-      bansUnsub = onSnapshot(collection(db, "chatBans"), (s2) => {
-        window.__kanjiBans = s2.docs.map((d) => {
-          const x = d.data();
-          return { email: d.id, type: x.type, until: x.until && x.until.toMillis ? x.until.toMillis() : null };
-        });
-        chatRefresh();
-      }, () => {});
-    }
+    syncBansListener();
+    syncAdminsListener();
     chatRefresh();
   });
 
