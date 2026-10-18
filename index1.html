@@ -7067,6 +7067,19 @@
     .presence-owner-badge, .owner-notice-badge{ animation:none; }
     .owner-notice-card{ transition:none; }
   }
+  .presence-admin-badge.f{ background:linear-gradient(135deg,#9B6FA0,#7d5684); color:#fbf4ff; border:1px solid rgba(155,111,160,0.75); box-shadow:0 0 10px rgba(155,111,160,0.35); }
+  .presence-admin-badge.m{ background:linear-gradient(135deg,#5C82A6,#466a8a); color:#eef6ff; border:1px solid rgba(92,130,166,0.8); box-shadow:0 0 10px rgba(92,130,166,0.35); }
+  .presence-admin-badge.n{ background:linear-gradient(135deg,#7C9A6B,#5f7a50); color:#f3f8ee; border:1px solid rgba(147,177,127,0.75); box-shadow:0 0 10px rgba(124,154,107,0.35); }
+  .presence-admin-badge.clickable{ cursor:pointer; }
+  .admin-gender-overlay{ position:fixed; inset:0; z-index:10800; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,7,9,0.62); }
+  .admin-gender-card{ width:100%; max-width:320px; border-radius:20px; padding:18px; background:var(--panel-1); border:1px solid var(--glass-border-soft); display:flex; flex-direction:column; gap:12px; text-align:center; }
+  .admin-gender-title{ font-size:15px; font-weight:800; color:var(--ink); }
+  .admin-gender-sub{ margin:0; font-size:12.5px; color:var(--ink-soft); }
+  .admin-gender-btns{ display:flex; gap:10px; }
+  .admin-gender-btn{ flex:1; border:none; border-radius:14px; padding:12px 8px; font-family:inherit; font-size:14px; font-weight:800; color:#fff; cursor:pointer; }
+  .admin-gender-btn.f{ background:linear-gradient(135deg,#9B6FA0,#7d5684); box-shadow:0 6px 16px rgba(155,111,160,0.35); }
+  .admin-gender-btn.m{ background:linear-gradient(135deg,#5C82A6,#466a8a); box-shadow:0 6px 16px rgba(92,130,166,0.35); }
+  .admin-gender-cancel{ border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink); border-radius:12px; padding:9px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
   .presence-admin-toggle{
     flex:none; align-self:center; margin-left:8px;
     border:1px solid var(--glass-border-soft); background:var(--glass-bg);
@@ -18457,24 +18470,36 @@
         row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showOwnerNotice(); } });
       }
 
-      // Admin belgisi va owner uchun "Admin qilish" tugmasi
+      // Admin belgisi (qiz: binafsha, o'g'il: ko'k, jins belgilanmagan: moss) va owner uchun tugmalar
       const itemEmail = (item.email || "").toLowerCase();
       const itemIsAdmin = !!itemEmail && !isOwner && isAdminEmail(itemEmail);
+      const viewerIsOwner = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL;
       if (itemIsAdmin) {
+        const g = dynamicAdminEmails.get(itemEmail) || "";
         const adminBadge = document.createElement("span");
-        adminBadge.className = "presence-admin-badge";
-        adminBadge.textContent = "Admin";
+        adminBadge.className = "presence-admin-badge " + (g === "male" ? "m" : g === "female" ? "f" : "n");
+        adminBadge.textContent = g === "male" ? "Admin \u2642" : g === "female" ? "Admin \u2640" : "Admin";
+        if (viewerIsOwner) {
+          adminBadge.classList.add("clickable");
+          adminBadge.title = "Rangni o'zgartirish";
+          adminBadge.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const pick = await askAdminGender(item.nick);
+            if (pick) setAdminGender(itemEmail, pick);
+          });
+        }
         row.appendChild(adminBadge);
       }
-      const viewerIsOwner = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL;
       if (viewerIsOwner && !isOwner && itemEmail) {
         const adminBtn = document.createElement("button");
         adminBtn.type = "button";
         adminBtn.className = "presence-admin-toggle" + (itemIsAdmin ? " on" : "");
         adminBtn.textContent = itemIsAdmin ? "Adminlikni olish" : "Admin qilish";
-        adminBtn.addEventListener("click", (e) => {
+        adminBtn.addEventListener("click", async (e) => {
           e.stopPropagation();
-          setAdminRole(itemEmail, item.nick, !itemIsAdmin, adminBtn);
+          if (itemIsAdmin) { setAdminRole(itemEmail, item.nick, false, adminBtn); return; }
+          const pick = await askAdminGender(item.nick);
+          if (pick) setAdminRole(itemEmail, item.nick, true, adminBtn, pick);
         });
         row.appendChild(adminBtn);
       }
@@ -18484,7 +18509,7 @@
   }
 
   // Faqat owner adminlikni berishi/olishi mumkin (Firestore qoidalari ham buni tekshiradi)
-  async function setAdminRole(email, nick, grant, btn) {
+  async function setAdminRole(email, nick, grant, btn, gender) {
     const me = auth.currentUser;
     if (!me || String(me.email || "").toLowerCase() !== OWNER_EMAIL) return;
     if (btn) btn.disabled = true;
@@ -18494,6 +18519,7 @@
         await setDoc(ref, {
           email: email,
           nick: String(nick || "").slice(0, 60),
+          gender: gender === "male" || gender === "female" ? gender : "",
           grantedAt: serverTimestamp(),
           grantedBy: OWNER_EMAIL
         });
@@ -18505,6 +18531,67 @@
       alert("Admin rolini o'zgartirib bo'lmadi. Firestore qoidalarini tekshiring.");
       if (btn) btn.disabled = false;
     }
+  }
+
+  // Admin belgisi rangini (jinsini) o'zgartirish — faqat owner
+  async function setAdminGender(email, gender) {
+    const me = auth.currentUser;
+    if (!me || String(me.email || "").toLowerCase() !== OWNER_EMAIL) return;
+    if (gender !== "male" && gender !== "female") return;
+    try {
+      await setDoc(doc(db, "admins", email), { gender: gender }, { merge: true });
+    } catch (err) {
+      console.error("Admin rangini o'zgartirishda xatolik:", err.message);
+      alert("Rangni o'zgartirib bo'lmadi. Firestore qoidalarini tekshiring.");
+    }
+  }
+
+  // Tanlov oynasi: qiz (binafsha) yoki o'g'il (ko'k). Qaytaradi: "female" | "male" | null
+  function askAdminGender(nick) {
+    return new Promise((resolve) => {
+      const ov = document.createElement("div");
+      ov.className = "admin-gender-overlay";
+      const card = document.createElement("div");
+      card.className = "admin-gender-card";
+      card.setAttribute("role", "dialog");
+      card.setAttribute("aria-modal", "true");
+      const title = document.createElement("div");
+      title.className = "admin-gender-title";
+      title.textContent = "Admin belgisi rangi";
+      const sub = document.createElement("p");
+      sub.className = "admin-gender-sub";
+      sub.textContent = (nick || "Foydalanuvchi") + " uchun rangni tanlang";
+      const btns = document.createElement("div");
+      btns.className = "admin-gender-btns";
+      const bf = document.createElement("button");
+      bf.type = "button";
+      bf.className = "admin-gender-btn f";
+      bf.dataset.g = "female";
+      bf.textContent = "\u2640 Qiz";
+      const bm = document.createElement("button");
+      bm.type = "button";
+      bm.className = "admin-gender-btn m";
+      bm.dataset.g = "male";
+      bm.textContent = "\u2642 O'g'il";
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "admin-gender-cancel";
+      cancel.textContent = "Bekor qilish";
+      btns.appendChild(bf);
+      btns.appendChild(bm);
+      card.appendChild(title);
+      card.appendChild(sub);
+      card.appendChild(btns);
+      card.appendChild(cancel);
+      ov.appendChild(card);
+      document.body.appendChild(ov);
+      const done = (v) => { ov.remove(); resolve(v); };
+      ov.addEventListener("click", (e) => {
+        if (e.target === bf) return done("female");
+        if (e.target === bm) return done("male");
+        if (e.target === cancel || e.target === ov) done(null);
+      });
+    });
   }
 
   function setupPresenceAdminUI(user) {
@@ -18777,7 +18864,7 @@
 
   // Chat tinglovchisi login holatiga bog'langan: kirgach ulanadi, chiqqach uziladi.
   let chatUnsub = null, myBlockUnsub = null, bansUnsub = null;
-  let dynamicAdminEmails = new Set();   // "admins" kolleksiyasidan (lowercase email'lar)
+  let dynamicAdminEmails = new Map();   // "admins" kolleksiyasidan: email (lowercase) -> "female" | "male" | ""
   const isAdminEmail = (e) => {
     const x = String(e || "").toLowerCase();
     return !!x && (x === OWNER_EMAIL || dynamicAdminEmails.has(x) || PRESENCE_ADMIN_EMAILS.indexOf(x) !== -1);
@@ -18811,7 +18898,10 @@
     if (auth.currentUser) {
       if (adminsUnsub) return;
       adminsUnsub = onSnapshot(collection(db, "admins"), (s2) => {
-        dynamicAdminEmails = new Set(s2.docs.map((d) => String(d.id).toLowerCase()));
+        dynamicAdminEmails = new Map(s2.docs.map((d) => {
+          const g = d.data().gender;
+          return [String(d.id).toLowerCase(), g === "male" || g === "female" ? g : ""];
+        }));
         syncBansListener();
         if (auth.currentUser) setupPresenceAdminUI(auth.currentUser);
         if (presenceLoaded) presenceRenderList();
@@ -18819,7 +18909,7 @@
       }, (err) => { console.error("Adminlar ro'yxatini o'qishda xatolik:", err.message); });
     } else if (adminsUnsub) {
       adminsUnsub(); adminsUnsub = null;
-      dynamicAdminEmails = new Set();
+      dynamicAdminEmails = new Map();
     }
   }
   const chatRefresh = () => { if (typeof window.__kanjiChatRefresh === "function") window.__kanjiChatRefresh(); };
