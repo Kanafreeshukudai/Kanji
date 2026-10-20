@@ -2971,6 +2971,11 @@
   .back-kana-tag{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8a9197; }
   .back-kana-val{ font-family:'Shippori Mincho', serif; font-size:17px; font-weight:600; letter-spacing:.04em; color:var(--gold); }
   .back-kana-kata{ color:#e8e4da; }
+  .back-reading .rk-row{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .back-reading .rk-type{ font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--gold); text-transform:uppercase; }
+  .back-reading .rk.rk-romaji{ display:none; }
+  html.romaji-mode .back-reading .rk.rk-romaji{ display:inline-block; }
+  html.romaji-mode .back-reading .rk.rk-kana{ display:none; }
   /* Kanji o'qilish turlari maydoni doim joyida turadi — ma'lumot bo'lmasa bo'sh qoladi */
   .back-bottom .other-readings{ min-height:2.4em; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .back-bottom .other-readings-label{ min-height:1.2em; }
@@ -12205,6 +12210,8 @@
     // O'qilish satrlaridagi lotin (romaji) qismlarini olib tashlaymiz: "山(yama)" -> "山"
     const stripRomaji = t => String(t || '').replace(/\s*\([A-Za-z'\- ]+\)/g, '');
     const readingText = stripRomaji(word.reading);
+    // O'qilish turi: on + kun / on + on / kun + kun / jukujikun — o'qilish bilan birga chiqadi
+    const typeLabel = !word.type ? '' : /istisno|jukujikun/i.test(word.type) ? 'JUKUJIKUN' : String(word.type).toUpperCase();
     const otherReadingsText = stripRomaji(word.otherReadings);
     card.innerHTML = `
       <div class="swipe-tag left">BILAMAN ✓</div>
@@ -12228,7 +12235,7 @@
               <button class="speak-jp-btn" type="button" aria-label="Yaponcha o'qish"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="spk-w1" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="spk-w2" d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
               <div class="divider"></div>
               <div class="reading-label">Kun'yomi / On'yomi</div>
-              <div class="back-reading"><span class="rk rk-kana">${readingText}</span><span class="rk rk-romaji">${word.reading}</span></div>
+              <div class="back-reading"><div class="rk-row"><span class="rk-type">${typeLabel}</span><span class="rk rk-kana">${readingText}</span><span class="rk rk-romaji">${word.reading}</span></div></div>
               <div class="back-kana">
                 <div class="back-kana-row kv-kana"><span class="back-kana-val ${isLoan ? 'back-kana-kata' : 'back-kana-hira'}">${kanaText}</span>${isLoan ? '<span class="back-kana-tag">chet so\'z</span>' : ''}</div>
                 <div class="back-kana-row kv-romaji"><span class="back-kana-val back-kana-romaji">${word.romaji}</span></div>
