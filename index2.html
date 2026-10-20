@@ -3482,31 +3482,28 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   from{ opacity:1; transform:translateY(0) scale(1); }
   to{ opacity:0; transform:translateY(-6px) scale(.94); }
 }
-/* Viktorina nuqtalari: bajarilgan nuqta to'g'ri bo'lsa yashil, xato bo'lsa qizil rangda doim pulsatsiya qiladi.
-   Keyingi (joriy) nuqta esa keyingi savolga o'tilganda bir marta yorqin yonib o'chadi. */
+/* Viktorina nuqtalari: doimiy pulsatsiya yo'q. Har bir holat faqat o'z rangida statik yonadi.
+   Joriy savol nuqtasi oq halqa bo'lib turadi. */
 .dot-pill.correct{
-  background:rgba(74,138,70,0.6); border-color:rgba(74,138,70,0.9);
-  animation:dotLoopGreen 1.4s ease-in-out infinite;
+  animation:none; transform:scale(1);
+  background:#4a8a46; border-color:#6fb56a;
+  box-shadow:0 0 6px 2px rgba(74,138,70,0.55);
 }
 .dot-pill.wrong{
-  background:rgba(176,69,61,0.6); border-color:rgba(176,69,61,0.9);
-  animation:dotLoopRed 1.4s ease-in-out infinite;
+  animation:none; transform:scale(1);
+  background:#b0453d; border-color:#d8685e;
+  box-shadow:0 0 6px 2px rgba(176,69,61,0.55);
 }
-@keyframes dotLoopGreen{
-  0%,100%{ box-shadow:0 0 4px 1px rgba(74,138,70,0.35); transform:scale(1); }
-  50%{ box-shadow:0 0 12px 4px rgba(74,138,70,0.85), 0 0 20px 7px rgba(74,138,70,0.3); transform:scale(1.3); }
+.dot-pill.current{
+  animation:none; transform:scale(1.1);
+  background:transparent; border:2px solid #ffffff;
+  box-shadow:0 0 6px 1px rgba(255,255,255,0.45);
 }
-@keyframes dotLoopRed{
-  0%,100%{ box-shadow:0 0 4px 1px rgba(176,69,61,0.35); transform:scale(1); }
-  50%{ box-shadow:0 0 12px 4px rgba(176,69,61,0.85), 0 0 20px 7px rgba(176,69,61,0.3); transform:scale(1.3); }
-}
+/* Joriy nuqtaga o'tilganda oq halqa bir marta porlab turadi */
 .dot-pill.flash-once{ animation:dotFlashOnce .7s ease-out both; }
 @keyframes dotFlashOnce{
-  0%{ background:#ffffff; border-color:#ffffff; box-shadow:0 0 14px 5px rgba(246,236,217,0.9); transform:scale(1.4); }
-  100%{ background:rgba(45,212,191,0.18); border-color:#2dd4bf; box-shadow:0 0 6px 2px rgba(45,212,191,0.25); transform:scale(1.1); }
-}
-@media (prefers-reduced-motion: reduce){
-  .dot-pill.correct, .dot-pill.wrong, .dot-pill.flash-once{ animation:none; }
+  0%{ background:#ffffff; border-color:#ffffff; box-shadow:0 0 14px 5px rgba(255,255,255,0.9); transform:scale(1.4); }
+  100%{ background:transparent; border-color:#ffffff; box-shadow:0 0 6px 1px rgba(255,255,255,0.45); transform:scale(1.1); }
 }
 /* Telefonda: Mochi xabari uchun savol kartochkasi pastroqda */
 #viewQuiz .quiz-stage{ padding-top:142px; }
