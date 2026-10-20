@@ -2966,6 +2966,23 @@
     color:#f2eee4;
   }
   .face.back .back-reading-full{ color:var(--gold); }
+  .back-kana{ margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+  .back-kana-row{ display:flex; align-items:baseline; justify-content:center; gap:10px; flex-wrap:wrap; }
+  .back-kana-tag{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8a9197; }
+  .back-kana-val{ font-family:'Shippori Mincho', serif; font-size:17px; font-weight:600; letter-spacing:.04em; color:var(--gold); }
+  .back-kana-kata{ color:#e8e4da; }
+  .back-kana-romaji{ color:var(--gold); font-family:var(--font-body, sans-serif); font-size:15px; }
+  /* Romaji/kana almashinuvi: ikkala matn ham DOMda, faqat ko'rinishi CSS bilan almashadi */
+  .back-kana-row.kv-romaji{ display:none; }
+  .rk-romaji, .or-romaji{ display:none; }
+  html.romaji-mode .kv-kana, html.romaji-mode .rk-kana, html.romaji-mode .or-kana{ display:none; }
+  html.romaji-mode .back-kana-row.kv-romaji{ display:flex; }
+  html.romaji-mode .rk-romaji, html.romaji-mode .or-romaji{ display:inline; }
+  /* Romaji tugmasi — akkaunt menyusi ichida (auth-notes-btn uslubini oladi) */
+  .romaji-toggle .rt-to-romaji{ display:inline; }
+  .romaji-toggle .rt-to-kana{ display:none; }
+  html.romaji-mode .romaji-toggle .rt-to-romaji{ display:none; }
+  html.romaji-mode .romaji-toggle .rt-to-kana{ display:inline; }
   .face.back .other-readings-label{ color:#aeb3b7; opacity:1; }
   .face.back .other-readings{ color:#cfd3d6; }
   .face.back .face-back-scroll{ scrollbar-color:rgba(255,255,255,0.35) transparent; }
@@ -8954,6 +8971,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
         <span>Qaydlar</span>
       </button>
+      <!-- Romaji / kana rejimi: butun sayt bo'yicha yapon yozuvini romaji bilan almashtiradi -->
+      <button id="romajiToggleBtn" class="auth-notes-btn romaji-toggle" type="button" aria-pressed="false" aria-label="Romaji yoki kana ko'rsatish">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h9"></path><path d="M9 3v2"></path><path d="M7 5c0 4 2.5 7 6 9"></path><path d="M5 9c1.5 2.2 3.5 4 6 5"></path><path d="M13 21l4-10 4 10"></path><path d="M14.6 17h4.8"></path></svg>
+        <span class="rt-to-romaji">Romaji ko'rsatish</span><span class="rt-to-kana">Kana ko'rsatish</span>
+      </button>
       <!-- Qo'ng'iz: shikoyat / xatolik / taklif — akkaunt menyusi ichida alohida tugma -->
       <button id="bugReportBtn" class="auth-notes-btn bug-report-menu-btn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -12112,6 +12134,25 @@
   const stage = document.getElementById('stage');
   const progressNote = document.getElementById('progressNote');
 
+  // ---------- ROMAJI / KANA REJIMI: butun saytda orqaga qaytarish tugmasi ----------
+  const ROMAJI_KEY = 'kanji-romaji-mode';
+  function applyRomajiMode(on){
+    document.documentElement.classList.toggle('romaji-mode', !!on);
+    document.querySelectorAll('.romaji-toggle').forEach(b=>b.setAttribute('aria-pressed', on ? 'true' : 'false'));
+  }
+  try{ applyRomajiMode(localStorage.getItem(ROMAJI_KEY) === '1'); }catch(e){ applyRomajiMode(false); }
+  ['pointerdown','touchstart','mousedown'].forEach(ev=>document.addEventListener(ev, e=>{
+    if(e.target && e.target.closest && e.target.closest('.romaji-toggle')) e.stopPropagation();
+  }, true));
+  document.addEventListener('click', e=>{
+    const b = e.target && e.target.closest && e.target.closest('.romaji-toggle');
+    if(!b) return;
+    e.stopPropagation(); e.preventDefault();
+    const on = !document.documentElement.classList.contains('romaji-mode');
+    applyRomajiMode(on);
+    try{ localStorage.setItem(ROMAJI_KEY, on ? '1' : '0'); }catch(err){}
+  }, true);
+
   function renderStage(enter, ghost){
     // eski faol kartochkaga bog'langan window-darajasidagi (mousemove/mouseup)
     // event listenerlar - agar tozalanmasa, har yangi kartochka chiqqanda
@@ -12149,6 +12190,15 @@
     const card = document.createElement('div');
     card.className = 'card';
     card.id = 'activeCard';
+    const hiraText = romajiToKana(word.romaji);
+    const kataText = hiraText.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+    // Chet so'z (katakanada yoziladi), qolganlari hiraganada. Kanji tarkibida katakana bo'lsa — chet so'z.
+    const isLoan = /[\u30a0-\u30ff]/.test(word.kanji) || word.kanji === '電子レンジ';
+    const kanaText = isLoan ? kataText : hiraText;
+    // O'qilish satrlaridagi lotin (romaji) qismlarini olib tashlaymiz: "山(yama)" -> "山"
+    const stripRomaji = t => String(t || '').replace(/\s*\([A-Za-z'\- ]+\)/g, '');
+    const readingText = stripRomaji(word.reading);
+    const otherReadingsText = stripRomaji(word.otherReadings);
     card.innerHTML = `
       <div class="swipe-tag left">BILAMAN ✓</div>
       <div class="swipe-tag right">NAVBATDA ↺</div>
@@ -12171,9 +12221,12 @@
               <button class="speak-jp-btn" type="button" aria-label="Yaponcha o'qish"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="spk-w1" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="spk-w2" d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
               <div class="divider"></div>
               <div class="reading-label">Kun'yomi / On'yomi</div>
-              <div class="back-reading"><span class="rk">${word.reading}</span></div>
-              <div class="back-reading-full">${word.romaji}</div>
-              ${word.otherReadings ? `<div class="other-readings-label">Kanjining boshqa o'qilishlari</div><div class="other-readings">${word.otherReadings}</div>` : ''}
+              <div class="back-reading"><span class="rk rk-kana">${readingText}</span><span class="rk rk-romaji">${word.reading}</span></div>
+              <div class="back-kana">
+                <div class="back-kana-row kv-kana"><span class="back-kana-val ${isLoan ? 'back-kana-kata' : 'back-kana-hira'}">${kanaText}</span>${isLoan ? '<span class="back-kana-tag">chet so\'z</span>' : ''}</div>
+                <div class="back-kana-row kv-romaji"><span class="back-kana-val back-kana-romaji">${word.romaji}</span></div>
+              </div>
+              ${word.otherReadings ? `<div class="other-readings-label">Kanjining boshqa o'qilishlari</div><div class="other-readings"><span class="or-kana">${otherReadingsText}</span><span class="or-romaji">${word.otherReadings}</span></div>` : ''}
             </div>
           </div>
         </div>
@@ -12184,6 +12237,7 @@
     if('speechSynthesis' in window) speechSynthesis.cancel();
     stage.appendChild(card);
     attachCardEvents(card);
+    // (romaji/kana tugmasi: kartochka aylanib ketmasligi uchun hodisani to'xtatamiz — hodisa delegatsiyasida)
     // yapon o'qilishini o'qish tugmasi (kartochka aylantirish/surish bilan adashmasligi uchun hodisani to'xtatamiz)
     const spk = card.querySelector('.speak-jp-btn');
     if(spk){
@@ -12425,7 +12479,8 @@
 
   // ---------- YAPONCHA O'QILISH: romaji -> hiragana, so'ng ja-JP ovozi bilan o'qish ----------
   function romajiToKana(src){
-    const s = String(src || '').toLowerCase().replace(/[^a-z]/g, '');
+    // apostrof (') — "n" dan keyin keladigan alohida ん (masalan den'en -> でんえん)
+    const s = String(src || '').toLowerCase().replace(/'/g, '-').replace(/[^a-z-]/g, '');
     const V = 'aiueo';
     const ROWS = {
       '':'あいうえお', k:'かきくけこ', g:'がぎぐげご', s:'さしすせそ', z:'ざじずぜぞ',
@@ -12447,6 +12502,8 @@
     let out = '', i = 0;
     while(i < s.length){
       const c = s[i];
+      if(c === '-'){ out += 'ん'; i++; continue; }
+      if(c === 'n' && s[i+1] === '-'){ i++; continue; }
       // "n" — undosh (ん): keyingi harf unli yoki "y" bo'lmasa
       if(c === 'n' && (i + 1 >= s.length || (!V.includes(s[i+1]) && s[i+1] !== 'y'))){ out += 'ん'; i++; continue; }
       // ikki undosh (tt, kk, ...) — kichik っ (ikki undoshdan oldin qisqa pauza)
