@@ -2971,6 +2971,10 @@
   .back-kana-tag{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8a9197; }
   .back-kana-val{ font-family:'Shippori Mincho', serif; font-size:17px; font-weight:600; letter-spacing:.04em; color:var(--gold); }
   .back-kana-kata{ color:#e8e4da; }
+  /* Kanji o'qilish turlari maydoni doim joyida turadi — ma'lumot bo'lmasa bo'sh qoladi */
+  .back-bottom .other-readings{ min-height:2.4em; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .back-bottom .other-readings-label{ min-height:1.2em; }
+  .back-bottom .back-reading{ min-height:2em; display:flex; align-items:center; justify-content:center; }
   .back-kana-romaji{ color:var(--gold); font-family:var(--font-body, sans-serif); font-size:15px; }
   /* Romaji/kana almashinuvi: ikkala matn ham DOMda, faqat ko'rinishi CSS bilan almashadi */
   .back-kana-row.kv-romaji{ display:none; }
@@ -8967,14 +8971,14 @@
     </span>
     <div class="auth-dropdown" id="authDropdown">
       <button id="user-name" class="auth-name" type="button" aria-haspopup="dialog" aria-label="Akkaunt ma'lumotlari"></button>
-      <button id="notes-btn" class="auth-notes-btn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-        <span>Qaydlar</span>
-      </button>
       <!-- Romaji / kana rejimi: butun sayt bo'yicha yapon yozuvini romaji bilan almashtiradi -->
       <button id="romajiToggleBtn" class="auth-notes-btn romaji-toggle" type="button" aria-pressed="false" aria-label="Romaji yoki kana ko'rsatish">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h9"></path><path d="M9 3v2"></path><path d="M7 5c0 4 2.5 7 6 9"></path><path d="M5 9c1.5 2.2 3.5 4 6 5"></path><path d="M13 21l4-10 4 10"></path><path d="M14.6 17h4.8"></path></svg>
         <span class="rt-to-romaji">Romaji ko'rsatish</span><span class="rt-to-kana">Kana ko'rsatish</span>
+      </button>
+      <button id="notes-btn" class="auth-notes-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+        <span>Qaydlar</span>
       </button>
       <!-- Qo'ng'iz: shikoyat / xatolik / taklif — akkaunt menyusi ichida alohida tugma -->
       <button id="bugReportBtn" class="auth-notes-btn bug-report-menu-btn" type="button" aria-label="Xatolik yoki shikoyat yuborish" title="Shikoyat va takliflar">
@@ -12140,6 +12144,8 @@
     document.documentElement.classList.toggle('romaji-mode', !!on);
     document.querySelectorAll('.romaji-toggle').forEach(b=>b.setAttribute('aria-pressed', on ? 'true' : 'false'));
   }
+  window.__applyRomajiMode = applyRomajiMode;
+  // Standart: romaji o'chiq (hiragana/katakana). Faqat foydalanuvchi yoqsa saqlanadi.
   try{ applyRomajiMode(localStorage.getItem(ROMAJI_KEY) === '1'); }catch(e){ applyRomajiMode(false); }
   ['pointerdown','touchstart','mousedown'].forEach(ev=>document.addEventListener(ev, e=>{
     if(e.target && e.target.closest && e.target.closest('.romaji-toggle')) e.stopPropagation();
@@ -12151,6 +12157,7 @@
     const on = !document.documentElement.classList.contains('romaji-mode');
     applyRomajiMode(on);
     try{ localStorage.setItem(ROMAJI_KEY, on ? '1' : '0'); }catch(err){}
+    if(window.__kanjiRomajiSync) window.__kanjiRomajiSync.save(on);
   }, true);
 
   function renderStage(enter, ghost){
@@ -12226,7 +12233,8 @@
                 <div class="back-kana-row kv-kana"><span class="back-kana-val ${isLoan ? 'back-kana-kata' : 'back-kana-hira'}">${kanaText}</span>${isLoan ? '<span class="back-kana-tag">chet so\'z</span>' : ''}</div>
                 <div class="back-kana-row kv-romaji"><span class="back-kana-val back-kana-romaji">${word.romaji}</span></div>
               </div>
-              ${word.otherReadings ? `<div class="other-readings-label">Kanjining boshqa o'qilishlari</div><div class="other-readings"><span class="or-kana">${otherReadingsText}</span><span class="or-romaji">${word.otherReadings}</span></div>` : ''}
+              <div class="other-readings-label">Kanjining boshqa o'qilishlari</div>
+              <div class="other-readings">${word.otherReadings ? `<span class="or-kana">${otherReadingsText}</span><span class="or-romaji">${word.otherReadings}</span>` : ''}</div>
             </div>
           </div>
         </div>
@@ -18037,6 +18045,23 @@
     collection, query, where, onSnapshot, serverTimestamp
   };
 
+  // Romaji/kana rejimi: kirgan foydalanuvchi uchun hisobida saqlanadi (userSettings/{uid})
+  window.__kanjiRomajiSync = {
+    async load() {
+      const u = auth.currentUser;
+      if (!u) return null;
+      try {
+        const snap = await getDoc(doc(db, "userSettings", u.uid));
+        return snap.exists() && typeof snap.data().romajiMode === "boolean" ? snap.data().romajiMode : null;
+      } catch (e) { return null; }
+    },
+    async save(on) {
+      const u = auth.currentUser;
+      if (!u) return;
+      try { await setDoc(doc(db, "userSettings", u.uid), { romajiMode: !!on }, { merge: true }); } catch (e) {}
+    }
+  };
+
   function loginWithGoogle() {
     signInWithPopup(auth, provider)
       .then((result) => {
@@ -18232,6 +18257,13 @@
   })();
 
   onAuthStateChanged(auth, (user) => {
+    if (user && window.__kanjiRomajiSync) {
+      window.__kanjiRomajiSync.load().then((v) => {
+        if (typeof v !== "boolean") return; // hisobda saqlanmagan — standart: kana (o'chiq romaji)
+        try { localStorage.setItem("kanji-romaji-mode", v ? "1" : "0"); } catch (e) {}
+        if (window.__applyRomajiMode) window.__applyRomajiMode(v);
+      });
+    }
     // Auth holati birinchi marta aniqlandi — endi splash ekrani noto'g'ri
     // "kiring" ogohlantirishini xotirjam ko'rsatishi (yoki ko'rsatmasligi)
     // mumkin, chunki bu yerda haqiqiy holat ma'lum.
