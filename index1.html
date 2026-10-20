@@ -12203,10 +12203,9 @@
     card.className = 'card';
     card.id = 'activeCard';
     const hiraText = romajiToKana(word.romaji);
-    const kataText = hiraText.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
-    // Chet so'z (katakanada yoziladi), qolganlari hiraganada. Kanji tarkibida katakana bo'lsa — chet so'z.
-    const isLoan = /[\u30a0-\u30ff]/.test(word.kanji) || word.kanji === '電子レンジ';
-    const kanaText = isLoan ? kataText : hiraText;
+    // Chet so'z: chet qism katakanada, yapon qismi hiraganada (LOAN_KANA); qolganlari hiraganada
+    const isLoan = isLoanWord(word);
+    const kanaText = kanaForWord(word);
     // O'qilish satrlaridagi lotin (romaji) qismlarini olib tashlaymiz: "山(yama)" -> "山"
     const stripRomaji = t => String(t || '').replace(/\s*\([A-Za-z'\- ]+\)/g, '');
     const readingText = stripRomaji(word.reading);
@@ -12237,7 +12236,7 @@
               <div class="reading-label">Kun'yomi / On'yomi</div>
               <div class="back-reading"><div class="rk-row"><span class="rk-type">${typeLabel}</span><span class="rk rk-kana">${readingText}</span><span class="rk rk-romaji">${word.reading}</span></div></div>
               <div class="back-kana">
-                <div class="back-kana-row kv-kana"><span class="back-kana-val ${isLoan ? 'back-kana-kata' : 'back-kana-hira'}">${kanaText}</span>${isLoan ? '<span class="back-kana-tag">chet so\'z</span>' : ''}</div>
+                <div class="back-kana-row kv-kana"><span class="back-kana-val ${isLoan ? 'back-kana-kata' : 'back-kana-hira'}">${kanaText}</span></div>
                 <div class="back-kana-row kv-romaji"><span class="back-kana-val back-kana-romaji">${word.romaji}</span></div>
               </div>
               <div class="other-readings-label">${word.otherReadings ? "Kanjining boshqa o'qilishlari" : ''}</div>
@@ -12493,6 +12492,20 @@
   }
 
   // ---------- YAPONCHA O'QILISH: romaji -> hiragana, so'ng ja-JP ovozi bilan o'qish ----------
+  // Chet so'z (katakanada yoziladi): kanji tarkibida katakana bo'lsa yoki maxsus so'z bo'lsa
+  function isLoanWord(w){ return /[\u30a0-\u30ff]/.test(w.kanji) || w.kanji === '電子レンジ'; }
+  // Chet so'zlarning to'g'ri kana yozuvi: chet qism katakanada, yapon qismi (masalan 川 = がわ) hiraganada
+  const LOAN_KANA = {
+    'ナイル川': 'ナイルがわ',
+    '電子レンジ': 'でんしレンジ',
+    'ローマ字': 'ローマじ',
+    '東南アジア': 'とうなんアジア',
+    '豚カツ': 'とんカツ'
+  };
+  function kanaForWord(w){
+    if(isLoanWord(w) && LOAN_KANA[w.kanji]) return LOAN_KANA[w.kanji];
+    return romajiToKana(w.romaji);
+  }
   function romajiToKana(src){
     // apostrof (') — "n" dan keyin keladigan alohida ん (masalan den'en -> でんえん)
     const s = String(src || '').toLowerCase().replace(/'/g, '-').replace(/[^a-z-]/g, '');
@@ -13246,7 +13259,7 @@
     `;
     animateQuizBar(document.getElementById('quizBarFill'));
     const playBtn = document.getElementById('listenPlay');
-    const kana = romajiToKana(word.romaji);
+    const kana = kanaForWord(word);
     playBtn.addEventListener('click', ()=>speakJP(kana, playBtn));
     // savol ochilishi bilan so'z bir marta o'qiladi
     setTimeout(()=>speakJP(kana, playBtn), 450);
