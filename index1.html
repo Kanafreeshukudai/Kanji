@@ -12233,7 +12233,7 @@
                 <div class="back-kana-row kv-kana"><span class="back-kana-val ${isLoan ? 'back-kana-kata' : 'back-kana-hira'}">${kanaText}</span>${isLoan ? '<span class="back-kana-tag">chet so\'z</span>' : ''}</div>
                 <div class="back-kana-row kv-romaji"><span class="back-kana-val back-kana-romaji">${word.romaji}</span></div>
               </div>
-              <div class="other-readings-label">Kanjining boshqa o'qilishlari</div>
+              <div class="other-readings-label">${word.otherReadings ? "Kanjining boshqa o'qilishlari" : ''}</div>
               <div class="other-readings">${word.otherReadings ? `<span class="or-kana">${otherReadingsText}</span><span class="or-romaji">${word.otherReadings}</span>` : ''}</div>
             </div>
           </div>
