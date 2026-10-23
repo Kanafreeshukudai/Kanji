@@ -2423,6 +2423,43 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
   @media (prefers-reduced-motion: reduce){
     #pageCurtain .pc-glyph.pc-word, #pageCurtain .pc-dots{ animation:none; }
   }
+
+  /* ---------- YUKLANISH: faqat tillarang "Lug'at" — L u g ' t so'nadi, "a" markazga tortilib "ai" hosil bo'ladi ---------- */
+  #pageCurtain .pc-ring, #pageCurtain .pc-bar, #pageCurtain .pc-kanji,
+  #pageCurtain .pc-core::before, #pageCurtain::after{ display:none !important; }
+  /* fon — faqat qora; so'z — faqat tillarang (oltin tonlar bo'ylab tovlanadi) */
+  #pageCurtain{ background:#000 !important; }
+  #pageCurtain .pc-glyph.pc-word{
+    display:flex; align-items:center; position:relative;
+    font-family:'Shippori Mincho', serif; font-size:34px; font-weight:700; line-height:1.2;
+    letter-spacing:0; padding:0;
+    background:none; background-image:none;
+    -webkit-background-clip:border-box; background-clip:border-box;
+    -webkit-text-fill-color:currentColor; color:#E9C27D;
+    text-shadow:0 0 14px rgba(233,194,125,0.35);
+    opacity:0; --shift:-1.3em;
+    animation:ltrIn .4s ease forwards, ltrGold 3s ease-in-out infinite, ltrCenter 1s cubic-bezier(.45,0,.2,1) 1.8s forwards;
+  }
+  #pageCurtain .pc-glyph.pc-word .pc-head{
+    display:inline-block; white-space:pre; opacity:1; transform:none;
+    animation:ltrFade .6s ease 1.6s forwards;
+  }
+  #pageCurtain .pc-glyph.pc-word .pc-a{
+    display:inline-block; opacity:1; transform:none; animation:none;
+  }
+  #pageCurtain .pc-glyph.pc-word .pc-t{
+    position:absolute; left:100%; top:0; display:inline-block; white-space:pre;
+    color:inherit; opacity:1; transform:none; animation:ltrFade .5s ease .8s forwards;
+  }
+  #pageCurtain .pc-glyph.pc-word .pc-i{
+    position:absolute; left:100%; top:0; display:inline-block; opacity:0; transform:none;
+    animation:ltrShow .5s ease 1.4s forwards;
+  }
+  @keyframes ltrIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes ltrFade{ from{ opacity:1; } to{ opacity:0; } }
+  @keyframes ltrShow{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes ltrGold{ 0%,100%{ color:#C9A66B; } 50%{ color:#FFF6D6; } }
+  @keyframes ltrCenter{ from{ transform:translateX(0); } to{ transform:translateX(var(--shift)); } }
 </style>
 <style id="mochi-all-extras">
   .mochi-body{ rotate: calc(var(--gx,0) * 5deg); transition: rotate .45s ease; }
@@ -3551,29 +3588,6 @@ window.mochiDizzy = function(){
   </button>
   <button type="button" class="mochi-toggle-btn on" id="mochiToggleBtn">Mochi AI</button>
 </div>
-<div id="enterIntro" aria-hidden="true">
-  <span class="aura a1"></span>
-  <span class="aura a2"></span>
-  <span class="aura a3"></span>
-</div>
-<script>
-(function(){
-  var intro = document.getElementById('enterIntro');
-  if(!intro) return;
-  var t0 = Date.now(), done = false;
-  function finish(){
-    if(done) return; done = true;
-    var wait = Math.max(0, 2300 - (Date.now() - t0));
-    setTimeout(function(){
-      intro.classList.add('leave');
-      setTimeout(function(){ intro.remove(); }, 1150);
-    }, wait);
-  }
-  if(document.readyState === 'complete') finish();
-  else window.addEventListener('load', finish);
-  setTimeout(finish, 5000);
-})();
-</script>
 <div class="wrap">
 
   <header>
@@ -7560,7 +7574,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
     <div class="mochi-quiz-bubble" id="mochiQuizBubble" role="status" aria-live="polite"></div>
 
-<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-ring"><span class="pc-kanji">学</span></div><div class="pc-glyph pc-word"><span style="--i:0">L</span><span style="--i:1">u</span><span style="--i:2">g</span><span style="--i:3">'</span><span style="--i:4">a</span><span style="--i:5">t</span></div><div class="pc-bar"><i></i></div></div>
+<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word" id="pcWord"><span class="pc-head">L</span><span class="pc-head">u</span><span class="pc-head">g</span><span class="pc-head">'</span><span class="pc-a">a</span><span class="pc-t">t</span><span class="pc-i" id="pcI">i</span></div>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
@@ -7607,16 +7621,30 @@ window.addEventListener('DOMContentLoaded', ()=>{
   (function(){
     var c = document.getElementById('pageCurtain');
     if(!c) return;
-    var t0 = Date.now(), finished = false;
-    function finish(){
-      if(finished) return; finished = true;
-      c.classList.add('burst');                                 // iliq to'lqin markazdan yoyiladi
-      setTimeout(function(){ c.classList.add('done'); }, 520); // parda sekin ochiladi
+    var seqDone = false, loaded = false, opened = false;
+    function open(){
+      if(opened || !(seqDone && loaded)) return;
+      opened = true;
+      c.classList.add('done');
     }
-    function ready(){ setTimeout(finish, Math.max(0, 900 - (Date.now() - t0))); }
+    // "ai" hosil bo'lib markazga tortilgach parda ochiladi
+    setTimeout(function(){ seqDone = true; open(); }, 3000);
+    function ready(){ loaded = true; open(); }
     if(document.readyState === 'complete') ready();
     else window.addEventListener('load', ready);
-    setTimeout(finish, 5000); // zaxira: hech qachon qotib qolmasin
+    setTimeout(function(){ loaded = true; seqDone = true; open(); }, 6000); // zaxira
+
+    // "a" va "i" ni markazga tortish masofasi: -(H + I) / 2 (H — o'chadigan qism, I — i harfi)
+    function measure(){
+      var h = document.getElementById('pcHead'), i = document.getElementById('pcI');
+      var w = document.getElementById('pcWord');
+      if(!h || !i || !w) return;
+      var H = 0; document.querySelectorAll('#pcWord .pc-head').forEach(function(el){ H += el.getBoundingClientRect().width; });
+      var I = i.getBoundingClientRect().width;
+      w.style.setProperty('--shift', (-(H + I) / 2) + 'px');
+    }
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    else measure();
   })();
 </script>
 <script>
