@@ -8575,17 +8575,20 @@
   .intro-flare, .intro-ripple{ display:none !important; }
   /* Markazdan kengayib yo'qoladigan iliq rang to'lqini o'chirildi */
   #pageCurtain::after{ display:none !important; animation:none !important; }
-  /* Yuklanish tugagach sahifa ortdan ekranga yaqinlashib chiqadi, so'ng animatsiya olib tashlanadi */
-  .app-shell.app-shell-zoom{
-    animation:appShellZoomIn .9s cubic-bezier(.16,.9,.25,1);
+  /* ---------- Nuqta: K ostidan boshlanadi, yarim aylana (parabola) bo'ylab sakraydi,
+     i ustiga chiqib joylashadi va tovlanadi. Harakatni JS fizikasi boshqaradi. ---------- */
+  #pageCurtain .pc-glyph.pc-word{ position:relative; }
+  #pageCurtain .pc-hop{
+    position:absolute; left:0; top:0;
+    width:0.16em; height:0.16em; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #F6E3B8 0%, #E9C27D 45%, #C9A66B 100%);
+    box-shadow:0 0 8px rgba(233,194,125,.5);
+    opacity:0; pointer-events:none;
   }
-  @keyframes appShellZoomIn{
-    0%  { opacity:0; transform:scale(.55); }
-    60% { opacity:1; }
-    100%{ opacity:1; transform:none; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .app-shell.app-shell-zoom{ animation:none; }
+  #pageCurtain .pc-hop.landed{ animation:pcTwinkle 1.4s ease-in-out infinite; }
+  @keyframes pcTwinkle{
+    0%,100%{ scale:1;    box-shadow:0 0 6px rgba(233,194,125,.45); }
+    50%    { scale:1.35; box-shadow:0 0 16px rgba(246,227,184,.95); }
   }
 </style>
 <style id="smooth-flip-patch">
@@ -8968,6 +8971,34 @@
     background:linear-gradient(165deg, rgba(217,105,79,0.24), rgba(11,13,16,0.82));
     border:1px solid rgba(217,105,79,0.9);
     box-shadow:inset 0 0 0 1px rgba(217,105,79,0.22), 0 0 18px -6px rgba(217,105,79,0.6);
+  }
+</style>
+<style id="iris-open">
+  /* Yuklanish tugagach qora parda markazdan chetga qarab, tumandek yumshoq chekka bilan yoyiladi */
+  @property --hole { syntax:'<percentage>'; inherits:false; initial-value:-50%; }
+  #pageCurtain.iris.done{
+    -webkit-mask-image:radial-gradient(circle at 50% 50%,
+      transparent var(--hole),
+      rgba(0,0,0,.12) calc(var(--hole) + 10%),
+      rgba(0,0,0,.35) calc(var(--hole) + 22%),
+      rgba(0,0,0,.68) calc(var(--hole) + 36%),
+      rgba(0,0,0,.92) calc(var(--hole) + 50%),
+      #000 calc(var(--hole) + 62%));
+            mask-image:radial-gradient(circle at 50% 50%,
+      transparent var(--hole),
+      rgba(0,0,0,.12) calc(var(--hole) + 10%),
+      rgba(0,0,0,.35) calc(var(--hole) + 22%),
+      rgba(0,0,0,.68) calc(var(--hole) + 36%),
+      rgba(0,0,0,.92) calc(var(--hole) + 50%),
+      #000 calc(var(--hole) + 62%));
+    animation:pcIris 1.5s cubic-bezier(.35,.0,.25,1) forwards;
+  }
+  @keyframes pcIris{
+    0%  { --hole:-50%; visibility:visible; }
+    100%{ --hole:170%; visibility:hidden; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    #pageCurtain.iris.done{ animation:pageCurtainOpen .3s ease forwards; -webkit-mask-image:none; mask-image:none; }
   }
 </style>
 </head>
@@ -19280,7 +19311,7 @@
   };
 
 </script>
-<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word">Kanji</div><div class="pc-dots"><span></span><span></span><span></span></div></div></div>
+<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word"><span class="pc-k">K</span>anj<span class="pc-i">&#x131;</span><span class="pc-base" style="display:inline-block;width:0;height:0"></span><i class="pc-hop" aria-hidden="true"></i></div></div></div>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
@@ -19328,21 +19359,90 @@
     var c = document.getElementById('pageCurtain');
     if(!c) return;
     var t0 = Date.now(), finished = false;
+    // Nuqta (i ustidagi) sakrab-sakrab i ustiga chiqadi; sayt esa nuqta joyiga kelib,
+    // yuklanish tugagach ochiladi.
+    var hop = c.querySelector('.pc-hop');
+    var hopDone = false, pageReady = false, closed = false;
+    function tryClose(){
+      if(closed || !hopDone || !pageReady) return;
+      closed = true;
+      setTimeout(function(){ c.classList.add('iris'); c.classList.add('done'); }, 250);
+    }
+    function markHop(){ if(!hopDone){ hopDone = true; tryClose(); } }
+    if(hop) hop.addEventListener('animationend', markHop);
+    // Nuqta fizikasi: K tagidan 3 ta yarim aylana sakrash, so'ng parabola bo'ylab i ustiga chiqish,
+    // i nuqtasining aniq joyiga (shrift metrikasi bo'yicha) tushib, 2 ta kichik sakrash bilan to'xtash.
+    function startHop(){
+      var g = c.querySelector('.pc-glyph'), k = c.querySelector('.pc-k'),
+          iEl = c.querySelector('.pc-i'), base = c.querySelector('.pc-base');
+      if(!hop || !g || !k || !iEl || !base){ markHop(); return; }
+      var fs = parseFloat(getComputedStyle(g).fontSize) || 34;
+      var gr = g.getBoundingClientRect();
+      var kr = k.getBoundingClientRect(), ir = iEl.getBoundingClientRect(), br = base.getBoundingClientRect();
+      var baseY = br.top - gr.top;                 // harf asosi (baseline)
+      var kx = kr.left + kr.width / 2 - gr.left;   // K markazi
+      var ix = ir.left + ir.width / 2 - gr.left;   // i markazi
+      var cs = getComputedStyle(g), ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = cs.fontWeight + ' ' + fs + 'px ' + cs.fontFamily;
+      var asc = ctx.measureText('i').actualBoundingBoxAscent || 0.7 * fs; // i ning eng yuqori nuqtasi
+      var r = 0.08 * fs;                           // nuqta radiusi
+      var tY = baseY - asc + r;                    // i nuqtasining markazi
+      var yG = baseY + 0.42 * fs;                  // matn tagidagi sakrash chizig'i
+
+      function place(x, y){ hop.style.translate = (x - r) + 'px ' + (y - r) + 'px'; }
+
+      // 1) K tagidan i tagigacha, matn ostida (yG) 3 ta sakrash — hammasi pastda.
+      // 2) i ning tagiga yetgach, bitta vertikal sakrash bilan i ustiga chiqadi.
+      function arc(ax, ay, bx, by, H, dur){
+        return { dur: dur, fn: function(t){
+          return [ax + (bx - ax) * t, ay + (by - ay) * t - 4 * H * t * (1 - t)];
+        }};
+      }
+      var st = (ix - kx) / 3;
+      var segs = [
+        arc(kx,          yG, kx + st,     yG, 0.30 * fs, 420),
+        arc(kx + st,     yG, kx + 2 * st, yG, 0.30 * fs, 420),
+        arc(kx + 2 * st, yG, ix,          yG, 0.30 * fs, 420),
+        arc(ix, yG, ix, tY, 0.45 * fs, 620)   // bitta sakrash: i tagidan i ustiga
+      ];
+      // tushish paytida nuqta biroz yassilanadi (squash), so'ng tiklanadi
+      segs.push({ dur: 200, on: function(){ hop.style.scale = '1.3 0.74'; },
+        fn: function(t){ return [ix, tY - 4 * (0.10 * fs) * t * (1 - t)]; }});
+      segs.push({ dur: 150, on: function(){ hop.style.scale = '1.12 0.9'; },
+        fn: function(t){ return [ix, tY - 4 * (0.035 * fs) * t * (1 - t)]; }});
+
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduce){ place(ix, tY); hop.style.opacity = '1'; hop.classList.add('landed'); markHop(); return; }
+
+      place(kx, yG); hop.style.opacity = '1';
+      var idx = 0, segStart = null;
+      function frame(now){
+        if(segStart === null){ segStart = now; if(segs[idx].on) segs[idx].on(); }
+        var sg = segs[idx], t = Math.min(1, (now - segStart) / sg.dur);
+        var p = sg.fn(t); place(p[0], p[1]);
+        if(t >= 1){
+          idx++; segStart = null;
+          if(idx >= segs.length){
+            hop.style.scale = '1 1';
+            hop.classList.add('landed'); markHop(); return;
+          }
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    var started = false;
+    function kickoff(){ if(started) return; started = true; startHop(); }
+    if(document.fonts && document.fonts.load){
+      document.fonts.load('900 34px "Zen Maru Gothic"').then(kickoff, kickoff);
+    } else kickoff();
+    setTimeout(kickoff, 1500); // zaxira
+    setTimeout(markHop, 4500); // zaxira: animatsiya ishlamasa ham qotib qolmasin
     function finish(){
       if(finished) return; finished = true;
+      pageReady = true;
       c.classList.add('burst');                                 // iliq to'lqin markazdan yoyiladi
-      setTimeout(function(){ c.classList.add('done'); }, 520); // parda sekin ochiladi
-      // yuklanish tugagach butun sahifa ortdan ekranga yaqinlashib chiqadi
-      setTimeout(function(){
-        var sh = document.getElementById('appShell');
-        if(!sh) return;
-        sh.classList.add('app-shell-zoom');
-        sh.addEventListener('animationend', function onZoomEnd(e){
-          if(e.target !== sh || e.animationName !== 'appShellZoomIn') return;
-          sh.removeEventListener('animationend', onZoomEnd);
-          sh.classList.remove('app-shell-zoom'); // tugagach animatsiya olib tashlanadi
-        });
-      }, 420);
+      tryClose();
     }
     function ready(){ setTimeout(finish, Math.max(0, 900 - (Date.now() - t0))); }
     if(document.readyState === 'complete') ready();
