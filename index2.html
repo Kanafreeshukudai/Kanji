@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
 <style>
+html{background:#000;}
 
 :root{
   --bg:#000000;
@@ -3545,8 +3546,84 @@ body.mochi-off #mochi, body.mochi-off #mochiBubble, body.mochi-off #mochiHint{di
 /* Telefonda: Mochi xabari uchun savol kartochkasi pastroqda */
 #viewQuiz .quiz-stage{ padding-top:142px; }
 </style>
+
+<style id="romaji-toggle-style">
+  .fixed-top-bar .romaji-toggle-btn{
+    position:absolute !important; pointer-events:auto;
+    top:calc(12px + env(safe-area-inset-top,0px)); left:152px;
+    height:36px; display:inline-flex; align-items:center;
+    padding:0 14px; border-radius:999px; cursor:pointer;
+    font-family:var(--font-body); font-weight:800; font-size:12.5px; letter-spacing:.04em;
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.05); color:#8b9794;
+    transition:background-color .3s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .fixed-top-bar .romaji-toggle-btn.on{
+    background:linear-gradient(135deg,#2dd4bf,#14b8a6 70%,#0f766e);
+    border-color:rgba(153,246,228,0.55); color:#f0fdfa;
+    box-shadow:0 6px 18px -6px rgba(20,184,166,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  body.romaji-off .card .face.back .romaji{ display:none !important; }
+</style>
+
+<style id="mochi-reading-style">
+  .mochi-book{
+    position:absolute; left:50%; top:44px; width:68px; height:41px; margin-left:-34px; z-index:4;
+    pointer-events:none; opacity:0; transform:translateY(18px) scale(.55); transform-origin:50% 100%;
+    transition:opacity .5s ease, transform .65s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 4px 5px rgba(30,6,70,.5));
+  }
+  .mochi-book svg{ width:100%; height:100%; display:block; overflow:visible; }
+  /* kitobdan chiqayotgan iliq yorug'lik */
+  .mochi-book::before{
+    content:""; position:absolute; left:-10px; right:-10px; top:-30px; height:50px; z-index:-1;
+    background:radial-gradient(ellipse at 50% 100%, rgba(255,230,150,.6) 0%, rgba(255,230,150,.18) 45%, rgba(255,230,150,0) 72%);
+    filter:blur(3px); opacity:0; transition:opacity .8s ease .3s;
+  }
+  .mochi-body.reading .mochi-book{ opacity:1; transform:translateY(0) scale(1); animation:mochiBookBob 3.4s ease-in-out .7s infinite; }
+  .mochi-body.reading .mochi-book::before{ opacity:1; animation:mochiGlow 2.6s ease-in-out infinite; }
+  @keyframes mochiBookBob{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-1.6px) rotate(-1.2deg); } }
+  @keyframes mochiGlow{ 0%,100%{ opacity:.85; } 50%{ opacity:1; } }
+  .mochi-body.reading .mochi-eye{ height:11px; top:29px; }
+  .mochi-body.reading .mochi-mouth{ opacity:0; }
+  .mochi-book .pg-flip{ transform-box:view-box; transform-origin:35px 20px; animation:mochiPageFlip 2.6s ease-in-out infinite; }
+  @keyframes mochiPageFlip{
+    0%,38%{ transform:scaleX(1) skewY(0deg); opacity:1; }
+    58%{ transform:scaleX(.06) skewY(-9deg); opacity:1; }
+    84%{ transform:scaleX(-1) skewY(0deg); opacity:1; }
+    95%,100%{ transform:scaleX(-1) skewY(0deg); opacity:0; }
+  }
+  /* ko'zoynak */
+  .mochi-glasses{
+    position:absolute; inset:0; z-index:3; pointer-events:none;
+    opacity:0; transform:translateY(-7px) scale(.88);
+    transition:opacity .45s ease .2s, transform .55s cubic-bezier(.34,1.56,.64,1) .2s;
+  }
+  .mochi-glasses svg{ width:100%; height:100%; display:block; overflow:visible; }
+  .mochi-body.reading .mochi-glasses{ opacity:1; transform:none; }
+  /* kitobdan uchib chiqadigan harflar */
+  .mochi-kana{
+    position:absolute; left:50%; top:36px; z-index:5; pointer-events:none; opacity:0;
+    font-family:'Shippori Mincho', serif; font-size:13px; font-weight:700; line-height:1;
+    color:#fff3c4; text-shadow:0 0 6px rgba(255,214,102,.95), 0 0 2px rgba(255,255,255,.8);
+    animation:mochiKanaUp 2.3s ease-out forwards;
+  }
+  @keyframes mochiKanaUp{
+    0%{ opacity:0; transform:translate(0,8px) scale(.5) rotate(0deg); }
+    18%{ opacity:1; }
+    100%{ opacity:0; transform:translate(var(--kx,0px),-50px) scale(1.15) rotate(var(--kr,0deg)); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .mochi-body.reading .mochi-book, .mochi-body.reading .mochi-book::before{ animation:none; }
+    .mochi-book .pg-flip{ animation:none; }
+    .mochi-kana{ display:none; }
+  }
+</style>
 </head>
-<body>
+<body class="romaji-off">
+<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word" id="pcWord"><span class="pc-head">L</span><span class="pc-head">u</span><span class="pc-head">g</span><span class="pc-head">'</span><span class="pc-a">a</span><span class="pc-t">t</span><span class="pc-i" id="pcI">i</span></div></div></div>
+
 <script>
 /* Chizilgan ikonkalar (emoji o'rniga) — rangi joriy matn rangiga mos (currentColor) */
 window.ICON = {
@@ -3587,6 +3664,7 @@ window.mochiDizzy = function(){
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
   </button>
   <button type="button" class="mochi-toggle-btn on" id="mochiToggleBtn">Mochi AI</button>
+  <button type="button" class="romaji-toggle-btn" id="romajiToggleBtn" aria-pressed="false" title="Romajini ko'rsatish / yashirish">Romaji</button>
 </div>
 <div class="wrap">
 
@@ -6823,6 +6901,7 @@ window.addEventListener('DOMContentLoaded', function(){
     gazeQueued = true;
     requestAnimationFrame(()=>{
       gazeQueued = false;
+      if(window.mochiReading) return;
       const e = gazeMoveE;
       if(isSleeping || Date.now() < gazeLockUntil) return;
       const rect = mochi.getBoundingClientRect();
@@ -6834,7 +6913,7 @@ window.addEventListener('DOMContentLoaded', function(){
     });
   });
   setInterval(()=>{
-    if(isSleeping || dragging || quizModeActive) return;
+    if(isSleeping || dragging || quizModeActive || window.mochiReading) return;
     if(Date.now() < gazeLockUntil || Date.now() - lastMouseLook < 3000) return;
     if(Math.random() < 0.6){
       const dirs = [[-1,0],[1,0],[0,-1],[0,1],[0,0]];
@@ -6846,7 +6925,7 @@ window.addEventListener('DOMContentLoaded', function(){
   /* Ba'zan bir ko'z qisiladi: erkin suzayotganda, to'g'riga qarab, tabassum bilan */
   setInterval(()=>{
     const b = mochi.querySelector('.mochi-body');
-    const busy = !b || isSleeping || dragging || quizModeActive ||
+    const busy = !b || isSleeping || dragging || quizModeActive || window.mochiReading ||
       ['happy','sad','thinking','speaking','sleep'].some(c => b.classList.contains(c));
     if(busy || Math.random() > 0.4) return;
     const eyes = mochi.querySelectorAll('.mochi-eye');
@@ -6894,12 +6973,84 @@ window.addEventListener('DOMContentLoaded', function(){
 
   /* Kichik sakrash: bo'sh turganda, joyida */
   setInterval(()=>{
-    if(isSleeping || dragging || quizModeActive || petting) return;
+    if(isSleeping || dragging || quizModeActive || petting || window.mochiReading) return;
     if(Math.random() < 0.25){
       mochi.classList.remove('hop'); void mochi.offsetWidth; mochi.classList.add('hop');
       setTimeout(()=>mochi.classList.remove('hop'), 950);
     }
   }, 9000);
+
+  /* --- Ba'zan Mochi kitob o'qiydi (kamdan-kam, bir necha soniya) --- */
+  window.mochiReading = false;
+  let readTimers = [], bookEl = null, glassesEl = null;
+  const BOOK_SVG = '<svg viewBox="0 0 70 42" aria-hidden="true"><defs><linearGradient id="mbCover" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1d95"/></linearGradient><linearGradient id="mbPL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fffaea"/><stop offset=".78" stop-color="#f6ecc9"/><stop offset="1" stop-color="#dccb9a"/></linearGradient><linearGradient id="mbPR" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dccb9a"/><stop offset=".22" stop-color="#f6ecc9"/><stop offset="1" stop-color="#fffaea"/></linearGradient></defs><path d="M1 12 Q35 1.5 69 12 L69 35 Q35 24.5 1 35 Z" fill="url(#mbCover)" stroke="#f0bd5c" stroke-width="1.1" stroke-linejoin="round"/><path d="M3.5 13.8 Q19 8.6 35 14 L35 33 Q19 27.6 3.5 32.8 Z" fill="#e2d1a2"/><path d="M66.5 13.8 Q51 8.6 35 14 L35 33 Q51 27.6 66.5 32.8 Z" fill="#e2d1a2"/><path d="M3.5 12.2 Q19 7 35 12.4 L35 31.2 Q19 26 3.5 31.2 Z" fill="url(#mbPL)" stroke="#d6c590" stroke-width=".7"/><path d="M66.5 12.2 Q51 7 35 12.4 L35 31.2 Q51 26 66.5 31.2 Z" fill="url(#mbPR)" stroke="#d6c590" stroke-width=".7"/><path d="M9 15.4 Q16 13 22 14.4" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" fill="none"/><g stroke="#b09c6c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".8"><path d="M9 19.3 Q19.5 13.5 30 16.5"/><path d="M9 20.0 Q19.5 17.0 30 20.0"/><path d="M9 23.5 Q17.5 20.5 26 23.5"/><path d="M9 27.0 Q19.5 24.0 30 27.0"/><path d="M9 30.5 Q15.5 27.5 22 30.5"/></g><path d="M40 15 Q47 13 53 14.4" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" fill="none"/><g stroke="#b09c6c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".8"><path d="M40 19.3 Q50.5 13.5 61 16.5"/><path d="M40 20.0 Q48.5 17.0 57 20.0"/><path d="M40 23.5 Q50.5 20.5 61 23.5"/><path d="M40 27.0 Q50.5 24.0 61 27.0"/><path d="M40 30.5 Q44.0 27.5 48 30.5"/></g><g class="pg-flip"><path d="M66.5 12.2 Q51 7 35 12.4 L35 31.2 Q51 26 66.5 31.2 Z" fill="url(#mbPR)" stroke="#d6c590" stroke-width=".7"/><path d="M40 19.3 Q47 16.3 61 19.3" stroke="#b09c6c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".8"/><path d="M40 22.8 Q50 19.8 57 22.8" stroke="#b09c6c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".8"/><path d="M40 26.3 Q50 23.3 61 26.3" stroke="#b09c6c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".8"/></g><path d="M35 12.4 L35 31.2" stroke="#a48d58" stroke-width="1.1"/><path d="M33.2 28 L33.2 40.5 L35 38.2 L36.8 40.5 L36.8 28 Z" fill="#ef4444" stroke="#b91c1c" stroke-width=".5" stroke-linejoin="round"/></svg>';
+  const GLASSES_SVG = '<svg viewBox="0 0 72 72" aria-hidden="true"><g fill="rgba(255,255,255,.08)" stroke="#fbbf24" stroke-width="1.7"><circle cx="25" cy="34.5" r="9.4"/><circle cx="47" cy="34.5" r="9.4"/></g><path d="M34.4 33.6 Q36 31.4 37.6 33.6" fill="none" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round"/><path d="M15.8 33.2 L9 30.5 M56.2 33.2 L63 30.5" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/><path d="M19.2 31 Q20.6 28.8 23.4 28.4 M41.2 31 Q42.6 28.8 45.4 28.4" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".75"/></svg>';
+  const KANA = ['あ','ア','日','本','語','字','の','い','カ','文'];
+  function readingBlocked(){
+    const b = mochi.querySelector('.mochi-body');
+    const cw = document.getElementById('mochiBubble');
+    return !b || isSleeping || dragging || quizModeActive || petting || window.mochiShown === false ||
+      (cw && cw.classList.contains('show')) ||
+      ['happy','sad','thinking','speaking','sleep','dizzy'].some(c => b.classList.contains(c));
+  }
+  function stopReading(){
+    readTimers.forEach(clearTimeout); readTimers.forEach(clearInterval); readTimers = [];
+    if(!window.mochiReading) return;
+    window.mochiReading = false;
+    const b = mochi.querySelector('.mochi-body');
+    if(b) b.classList.remove('reading');
+    gazeLockUntil = 0; setGaze(0, 0);
+  }
+  function startReading(){
+    if(window.mochiReading || readingBlocked()) return;
+    const b = mochi.querySelector('.mochi-body');
+    if(!bookEl){
+      bookEl = document.createElement('div');
+      bookEl.className = 'mochi-book';
+      bookEl.innerHTML = BOOK_SVG;
+      b.appendChild(bookEl);
+      glassesEl = document.createElement('div');
+      glassesEl.className = 'mochi-glasses';
+      glassesEl.innerHTML = GLASSES_SVG;
+      b.appendChild(glassesEl);
+    }
+    window.mochiReading = true;
+    b.classList.add('reading');
+    // Ko'zlar chapdan o'ngga qatorlar bo'ylab yuradi
+    let side = -1;
+    const scan = ()=>{
+      gazeLockUntil = Date.now() + 2000;
+      setGaze(side * 0.9, 1.1);
+      side = -side;
+    };
+    scan();
+    readTimers.push(setInterval(scan, 900));
+    // Kitobdan yapon harflari uchib chiqadi
+    const puff = ()=>{
+      if(!window.mochiReading) return;
+      const k = document.createElement('div');
+      k.className = 'mochi-kana';
+      k.textContent = KANA[Math.floor(Math.random()*KANA.length)];
+      k.style.marginLeft = (Math.random()*28 - 14 - 6).toFixed(0) + 'px';
+      k.style.setProperty('--kx', (Math.random()*18 - 9).toFixed(0) + 'px');
+      k.style.setProperty('--kr', (Math.random()*30 - 15).toFixed(0) + 'deg');
+      b.appendChild(k);
+      setTimeout(()=>k.remove(), 2400);
+    };
+    readTimers.push(setTimeout(puff, 700));
+    readTimers.push(setInterval(puff, 1100));
+    // 7–11 soniyadan keyin kitobni yopadi
+    readTimers.push(setTimeout(stopReading, 7000 + Math.random()*4000));
+    // Boshqa holat boshlansa darhol to'xtaydi
+    readTimers.push(setInterval(()=>{ if(readingBlocked()) stopReading(); }, 250));
+  }
+  mochi.addEventListener('pointerdown', stopReading);
+  // Kamdan-kam: har ~30 soniyada 30% ehtimol bilan
+  setInterval(()=>{
+    if(Math.random() < 0.3) startReading();
+  }, 30000);
+  // Birinchi marta sahifa ochilgach taxminan 12–20 soniyadan keyin ko'rsatamiz
+  setTimeout(()=>{ if(Math.random() < 0.7) startReading(); }, 12000 + Math.random()*8000);
 
   /* --- Ko'z yumib ochish: AFK vaqtida tez-tez (uxlamaganda) --- */
   let lastActivity = Date.now();
@@ -7574,7 +7725,38 @@ window.addEventListener('DOMContentLoaded', ()=>{
     <div class="mochi-hint-float" id="mochiHint">Menga bosing!</div>
     <div class="mochi-quiz-bubble" id="mochiQuizBubble" role="status" aria-live="polite"></div>
 
-<div id="pageCurtain" aria-hidden="true"><div class="pc-core"><div class="pc-glyph pc-word" id="pcWord"><span class="pc-head">L</span><span class="pc-head">u</span><span class="pc-head">g</span><span class="pc-head">'</span><span class="pc-a">a</span><span class="pc-t">t</span><span class="pc-i" id="pcI">i</span></div>
+<script id="romaji-toggle-script">
+(function(){
+  var KEY='romajiVisible', btn=document.getElementById('romajiToggleBtn'), mochi=document.getElementById('mochiToggleBtn');
+  if(!btn) return;
+  var visible=false;
+  // yangi kiruvchilar uchun standart: o'chiq (faqat '1' saqlangan bo'lsa ko'rsatiladi)
+  try{ visible = localStorage.getItem(KEY) === '1'; }catch(e){}
+  function apply(){
+    document.body.classList.toggle('romaji-off', !visible);
+    btn.classList.toggle('on', visible);
+    btn.setAttribute('aria-pressed', visible ? 'true' : 'false');
+    if(typeof fitCardText==='function'){
+      requestAnimationFrame(function(){ document.querySelectorAll('.card').forEach(function(c){ try{ fitCardText(c); }catch(e){} }); });
+    }
+  }
+  function place(){
+    if(!mochi) return;
+    var l = mochi.offsetLeft + mochi.offsetWidth + 8;
+    if(l > 60) btn.style.left = l + 'px';
+  }
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    visible = !visible;
+    try{ localStorage.setItem(KEY, visible ? '1' : '0'); }catch(err){}
+    apply();
+  });
+  apply(); place();
+  window.addEventListener('resize', place);
+  window.addEventListener('load', place);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+})();
+</script>
 <script id="home-nav-script">
   (function(){
     var curtain = document.getElementById('pageCurtain');
