@@ -3741,10 +3741,11 @@
   }
   .quiz-progress .score{color:var(--moss-soft); font-weight:700;}
   .quiz-bar{
-    width:100%; height:6px; background:var(--glass-bg); border-radius:6px; overflow:hidden; margin-bottom:22px;
-    border:1px solid var(--glass-border-soft);
+    width:100%; height:5px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; margin-bottom:22px;
+    border:none;
   }
   .quiz-bar-fill{height:100%; background:var(--accent); border-radius:6px; transition:width .3s ease;}
+  .quiz-bar-fill.seg{ border-radius:0; will-change:clip-path; }
   .quiz-card{
     background:var(--glass-bg);
     backdrop-filter:var(--blur-3) saturate(var(--sat-2));
@@ -6635,6 +6636,22 @@
   .chat-admin-card .chat-admin-close{border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink); border-radius:12px; padding:10px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;}
   .chat-admin-section-title{font-size:12px; font-weight:700; color:var(--ink-soft); margin-top:2px;}
   .chat-admin-card .chat-bans-list{margin:0; max-height:200px; padding-right:2px;}
+  .chat-admin-card{ max-height:88vh; overflow-y:auto; }
+  .chat-admin-card [hidden]{ display:none !important; }
+  .chat-admin-card .chat-admin-toggle{ border:1px solid rgba(147,177,127,0.55); background:rgba(124,154,107,0.16); color:var(--ink); border-radius:12px; padding:11px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .chat-admin-subsection{ display:flex; flex-direction:column; gap:8px; }
+  .chat-admin-add{ display:flex; flex-direction:column; gap:8px; }
+  .chat-admin-search{ width:100%; box-sizing:border-box; border:1px solid var(--glass-border-soft); background:var(--glass-bg); color:var(--ink); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; outline:none; }
+  .chat-admin-search:focus{ border-color:rgba(147,177,127,0.6); }
+  .chat-admin-list{ max-height:170px; overflow-y:auto; }
+  .chat-admin-row{ display:flex; align-items:center; gap:8px; padding:7px 2px; border-bottom:1px solid var(--glass-border-soft); }
+  .chat-admin-row-info{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .chat-admin-row-nick{ font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chat-admin-row-mail{ font-size:11px; color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chat-admin-row-btn{ flex:none; border:none; border-radius:8px; padding:6px 10px; font-family:inherit; font-size:11px; font-weight:800; cursor:pointer; background:var(--moss); color:#0B0D10; }
+  .chat-admin-row-btn.revoke{ background:rgba(163,35,35,0.35); color:#f5e2df; }
+  .chat-admin-row-btn:disabled{ opacity:.5; cursor:default; }
+  .chat-admin-empty{ font-size:12px; color:var(--ink-faint); padding:6px 2px; }
   .chat-header-actions{display:flex; align-items:center; gap:8px; flex:none;}
   .chat-nick-edit-btn{
     display:flex; align-items:center; gap:5px;
@@ -9001,6 +9018,166 @@
     #pageCurtain.iris.done{ animation:pageCurtainOpen .3s ease forwards; -webkit-mask-image:none; mask-image:none; }
   }
 </style>
+
+<style id="listen-mode-style">
+  /* ---- Eshitish testi: rejim tanlash oynasi (markazda) ---- */
+  .lm-overlay{
+    position:fixed; inset:0; z-index:7000; display:flex; align-items:center; justify-content:center;
+    padding:20px; box-sizing:border-box;
+    background:rgba(0,0,0,0);
+    transition:background-color .3s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .lm-overlay.show{
+    background:rgba(2,4,6,.68);
+    -webkit-backdrop-filter:blur(10px) saturate(1.2); backdrop-filter:blur(10px) saturate(1.2);
+  }
+  .lm-card{
+    position:relative; width:min(100%,380px); max-height:calc(100vh - 32px); overflow:auto; box-sizing:border-box;
+    padding:26px 16px 16px; border-radius:30px;
+    font-family:'Zen Maru Gothic',sans-serif; color:var(--ink);
+    background:
+      radial-gradient(80% 55% at 18% 0%, rgba(92,130,166,.24), transparent 70%),
+      radial-gradient(80% 55% at 88% 0%, rgba(124,154,107,.20), transparent 70%),
+      linear-gradient(180deg,#1b2026 0%,#0f1215 100%);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 34px 80px -22px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14);
+    opacity:0; transform:translateY(20px) scale(.93);
+    transition:opacity .3s ease, transform .5s cubic-bezier(.2,1.25,.35,1);
+  }
+  .lm-overlay.show .lm-card{ opacity:1; transform:none; }
+  .lm-card button{ -webkit-appearance:none; appearance:none; margin:0; font-family:inherit; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .lm-x{
+    position:absolute; top:12px; right:12px; width:34px; height:34px; padding:0; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    transition:background-color .2s ease, color .2s ease, transform .2s ease;
+  }
+  .lm-x:hover{ background:rgba(255,255,255,.12); color:var(--ink); }
+  .lm-x:active{ transform:scale(.88); }
+  .lm-x svg{ width:15px; height:15px; display:block; }
+  .lm-head{ text-align:center; margin-bottom:18px; }
+  .lm-ico{
+    position:relative; width:60px; height:60px; margin:0 auto 12px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; color:#a9cdf0;
+    background:radial-gradient(circle at 50% 35%, rgba(92,130,166,.34), rgba(92,130,166,.1));
+    border:1px solid rgba(92,130,166,.65);
+    box-shadow:0 10px 28px -10px rgba(92,130,166,.9), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .lm-ico svg{ width:27px; height:27px; display:block; position:relative; z-index:1; }
+  .lm-ring{
+    position:absolute; inset:-1px; border-radius:50%; border:1.5px solid rgba(92,130,166,.7); opacity:0;
+    animation:lmRing 2.6s ease-out infinite;
+  }
+  .lm-ring.r2{ animation-delay:1.3s; }
+  @keyframes lmRing{ 0%{ transform:scale(1); opacity:.7; } 100%{ transform:scale(1.75); opacity:0; } }
+  .lm-title{ font-size:21px; font-weight:800; letter-spacing:.2px; }
+  .lm-sub{ font-size:13px; color:var(--ink-soft); margin-top:4px; }
+  .lm-opts{ display:grid; gap:12px; }
+  .lm-opt{
+    --c:92,130,166; --t:#a9cdf0;
+    position:relative; display:flex; align-items:center; gap:14px; width:100%; padding:14px;
+    border-radius:20px; cursor:pointer; text-align:left; color:var(--ink);
+    background:linear-gradient(135deg, rgba(var(--c),.20) 0%, rgba(var(--c),.06) 100%);
+    border:1.5px solid rgba(var(--c),.5);
+    box-shadow:0 14px 28px -18px rgba(var(--c),.9), inset 0 1px 0 rgba(255,255,255,.07);
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s ease, box-shadow .25s ease;
+    opacity:0; transform:translateY(12px);
+  }
+  .lm-opt-both{ --c:124,154,107; --t:#b4d3a2; }
+  .lm-overlay.show .lm-opt{ animation:lmOptIn .5s cubic-bezier(.22,1,.36,1) .14s both; }
+  .lm-overlay.show .lm-opt-both{ animation-delay:.22s; }
+  @keyframes lmOptIn{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+  .lm-opt:hover{ border-color:rgba(var(--c),.95); box-shadow:0 18px 34px -16px rgba(var(--c),1), inset 0 1px 0 rgba(255,255,255,.1); }
+  .lm-opt:active{ transform:scale(.97) !important; }
+  .lm-opt:focus-visible, .lm-x:focus-visible{ outline:2px solid rgba(255,255,255,.8); outline-offset:3px; }
+  .lm-glyph{
+    position:relative; flex:0 0 auto; width:54px; height:54px; border-radius:17px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif; font-size:29px; font-weight:700; color:var(--t);
+    background:radial-gradient(circle at 50% 30%, rgba(var(--c),.34), rgba(var(--c),.12));
+    border:1px solid rgba(var(--c),.55);
+  }
+  .lm-glyph i{
+    position:absolute; right:-6px; bottom:-6px; width:23px; height:23px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-style:normal;
+    font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif; font-size:13px; font-weight:700;
+    color:#0B0D10; background:rgb(var(--c)); border:2px solid #14181c;
+  }
+  .lm-txt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .lm-name{ font-size:17px; font-weight:800; color:var(--t); line-height:1.2; }
+  .lm-desc{ font-size:12.5px; color:var(--ink-soft); font-weight:500; line-height:1.35; }
+  .lm-chips{ display:flex; align-items:center; gap:5px; margin-top:5px; flex-wrap:wrap; }
+  .lm-chips u{ text-decoration:none; font-size:10px; color:var(--ink-faint); }
+  .lm-chips em{
+    font-style:normal; display:inline-flex; align-items:center; gap:4px; padding:2px 8px 2px 3px; border-radius:99px;
+    font-size:11px; font-weight:700; color:var(--t); background:rgba(var(--c),.14); border:1px solid rgba(var(--c),.35);
+  }
+  .lm-chips em b{
+    display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%;
+    font-size:9.5px; color:#0B0D10; background:rgb(var(--c));
+  }
+  .lm-go{ flex:0 0 auto; color:var(--t); opacity:.55; transition:transform .2s ease, opacity .2s ease; display:flex; }
+  .lm-go svg{ width:18px; height:18px; display:block; }
+  .lm-opt:hover .lm-go{ transform:translateX(3px); opacity:1; }
+  /* ---- 2 bosqichli ko'rsatkich: 1 Kanji — 2 Romaji ---- */
+  .listen-steps{ display:flex; align-items:center; justify-content:center; gap:8px; margin:-4px auto 14px; }
+  .ls-step{
+    display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px;
+    font-size:12.5px; font-weight:700; color:var(--ink-faint);
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+    transition:color .3s ease, background-color .3s ease, border-color .3s ease;
+  }
+  .ls-step b{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%;
+    font-size:11.5px; background:rgba(255,255,255,.1); color:var(--ink-soft); transition:background-color .3s ease, color .3s ease;
+  }
+  .ls-step.active{ color:#cfe2f5; border-color:rgba(92,130,166,.8); background:rgba(92,130,166,.16); }
+  .ls-step.active b{ background:#5C82A6; color:#fff; }
+  .ls-step.done{ color:#bcd6ad; border-color:rgba(124,154,107,.7); background:rgba(124,154,107,.14); }
+  .ls-step.done b{ background:var(--moss); color:#0B0D10; font-size:0; }
+  .ls-step.done b::after{ content:"✓"; font-size:12px; font-weight:900; }
+  .ls-line{ width:22px; height:2px; border-radius:2px; background:rgba(255,255,255,.14); }
+  /* variantlar kanjidan romajiga almashganda */
+  .quiz-options.lo-out{ opacity:0; transform:translateY(8px); transition:opacity .22s ease, transform .22s ease; }
+  .quiz-options.lo-in{ animation:loIn .42s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes loIn{ from{ opacity:0; transform:translateY(12px) scale(.97); } to{ opacity:1; transform:none; } }
+  .quiz-mode-label .lm-found{ font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif; font-weight:700; color:var(--moss-soft); }
+  html.perf .lm-overlay.show{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(2,4,6,.82); }
+  html.perf .lm-ring{ display:none; }
+  @media (prefers-reduced-motion: reduce){
+    .lm-card{ transition:opacity .2s ease; transform:none; }
+    .lm-ring{ display:none; }
+    .lm-overlay.show .lm-opt{ animation:none; opacity:1; transform:none; }
+    .quiz-options.lo-in{ animation:none; }
+  }
+</style>
+
+<style id="top-badge-style">
+  /* Tugmani o'rab turuvchi qatlam: .quiz-launch overflow:hidden bo'lgani uchun bulutcha tashqarida turadi */
+  /* flex-basis tugmaning o'z bo'sh joyiga (padding+chegara) teng — qo'shni tugmalar bilan bir xil kenglik */
+  .quiz-launch-wrap{ position:relative; display:flex; flex:1 1 30px; min-width:0; }
+  #view-all .all-bottom-bar .quiz-launch-wrap{ flex:1 1 10px; }
+  .quiz-launch-wrap > .quiz-launch{ flex:1 1 0; min-width:0; width:100%; }
+  .top-badge{
+    position:absolute; top:-9px; right:8px; z-index:4; pointer-events:none;
+    animation:none;
+  }
+  .tb-in{
+    position:relative; display:inline-flex; align-items:center; gap:3px;
+    padding:2px 7px 2px 6px; border-radius:999px;
+    font-family:'Zen Maru Gothic',sans-serif; font-weight:700; font-size:9px; line-height:1.4; letter-spacing:.12em;
+    color:var(--gold);
+    background:rgba(20,22,26,.72);
+    border:1px solid rgba(201,166,107,.38);
+    box-shadow:none;
+  }
+  .tb-in svg{ display:block; color:var(--gold); flex:0 0 auto; opacity:.9; }
+  .top-badge::after, .tb-in::before{ display:none; }
+  .quiz-launch-wrap:has(> .quiz-launch:disabled) .top-badge{ opacity:.4; }
+  html.perf .top-badge, html.perf .tb-in::before{ animation:none; }
+  @media (prefers-reduced-motion: reduce){ .top-badge, .tb-in::before{ animation:none; } }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
@@ -9380,7 +9557,7 @@
     <div class="quiz-launch-row">
       <button class="quiz-launch" id="btnQuizTranslate" disabled>Tarjima test</button>
       <button class="quiz-launch quiz-launch-romaji" id="btnQuizRomaji" disabled>Romaji test</button>
-      <button class="quiz-launch quiz-launch-listen" id="btnQuizListen" disabled>Eshitish test</button>
+      <span class="quiz-launch-wrap"><button class="quiz-launch quiz-launch-listen" id="btnQuizListen" disabled>Eshitish test</button><span class="top-badge" aria-hidden="true"><span class="tb-in">TOP</span></span></span>
       <button class="quiz-launch quiz-launch-timed" id="btnQuizTimed" disabled>Vaqt sinovi</button>
     </div>
   </section>
@@ -9395,7 +9572,7 @@
       <div class="quiz-launch-row">
         <button class="quiz-launch" id="btnAllQuizTranslate" disabled>Tarjima test</button>
         <button class="quiz-launch quiz-launch-romaji" id="btnAllQuizRomaji" disabled>Romaji test</button>
-        <button class="quiz-launch quiz-launch-listen" id="btnAllQuizListen" disabled>Eshitish test</button>
+        <span class="quiz-launch-wrap"><button class="quiz-launch quiz-launch-listen" id="btnAllQuizListen" disabled>Eshitish test</button><span class="top-badge" aria-hidden="true"><span class="tb-in">TOP</span></span></span>
         <button class="quiz-launch quiz-launch-timed" id="btnAllQuizTimed" disabled>Vaqt sinovi</button>
       </div>
       <div class="flashcard-convert-btn disabled" id="btnAllToFlashcard" role="button" tabindex="0" aria-disabled="true">
@@ -9731,6 +9908,16 @@
     <button class="chat-admin-clear" id="chatClearBtn" type="button">🧹 Chatni tozalash</button>
     <div class="chat-admin-section-title">🚫 Bloklanganlar <span id="chatBansCount"></span></div>
     <div class="chat-bans-list" id="chatBansList"></div>
+    <button class="chat-admin-toggle" id="chatAdminsOpenBtn" type="button">👥 Adminlar <span id="chatAdminsCount"></span></button>
+    <div class="chat-admin-subsection" id="chatAdminsSection" hidden>
+      <div class="chat-admin-section-title">Adminlar ro'yxati</div>
+      <div class="chat-admin-list" id="chatAdminsList"></div>
+      <div class="chat-admin-add" id="chatAdminAddWrap">
+        <div class="chat-admin-section-title">Yangi admin qo'shish</div>
+        <input class="chat-admin-search" id="chatAdminSearch" type="search" placeholder="Ism yoki email qismini yozing" autocomplete="off" />
+        <div class="chat-admin-list" id="chatAdminResults"></div>
+      </div>
+    </div>
     <button class="chat-admin-close" id="chatAdminCloseBtn" type="button">Yopish</button>
   </div>
 </div>
@@ -12203,7 +12390,7 @@
     startQuiz([...selectedKanji], 'all', 'timed');
   });
   btnAllQuizListen.addEventListener('click', ()=>{
-    startQuiz([...selectedKanji], 'all', 'listen');
+    openListenModePicker((m)=>startQuiz([...selectedKanji], 'all', m));
   });
   // Fisher-Yates aralashtirish — massivni joyida tasodifiy tartibga soladi
   function shuffleArray(arr){
@@ -13192,11 +13379,81 @@
 
   // ---------- QUIZ ----------
   let quizItems = [], quizIdx = 0, quizScore = 0, quizReturnTab = 'known', quizPool = [], quizType = 'translate';
+  let quizResults = []; // har bir savol natijasi: true (to'g'ri) / false (xato) — shkala ranglari uchun
+  let listenTr = false; // Eshitish testi: true bo'lsa kanji topilgach 2-bosqich (romaji) ham so'raladi
   let quizWrongList = []; // xato javob berilgan savollar: {id, chosen} — natija ekranida ro'yxat va "Xatolarni takrorlash" uchun
   let quizBarPct = 0; // savollar shkalasining joriy foizi — savollar orasida sekin siljishi uchun saqlanadi
   let timedRevealTimeout = null;
   let timedUrgentTimeout = null;
   let timedNextInterval = null;
+
+  // ---------- ESHITISH TESTI: REJIM TANLASH OYNASI ----------
+  // "Faqat kanji" — eshitib, to'g'ri kanjini topish (avvalgidek).
+  // "Kanji va tarjima" — kanji topilgach variantlar tarjimaga almashadi; ikkalasi ham
+  // to'g'ri bo'lsagina 1 ball beriladi.
+  function openListenModePicker(onPick){
+    const old = document.getElementById('listenModePicker');
+    if(old) old.remove();
+    const ov = document.createElement('div');
+    ov.id = 'listenModePicker';
+    ov.className = 'lm-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', 'Eshitish testi rejimi');
+    const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor" fill-opacity=".18"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+    const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+    const XICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    ov.innerHTML = `
+      <div class="lm-card">
+        <button type="button" class="lm-x" aria-label="Yopish">${XICO}</button>
+        <div class="lm-head">
+          <div class="lm-ico"><span class="lm-ring"></span><span class="lm-ring r2"></span>${SPK}</div>
+          <div class="lm-title">Eshitish test</div>
+          <div class="lm-sub">Kanji ovozi eshittiriladi. Qanday topasiz?</div>
+        </div>
+        <div class="lm-opts">
+          <button type="button" class="lm-opt lm-opt-kanji" data-mode="listen">
+            <span class="lm-glyph">字</span>
+            <span class="lm-txt">
+              <span class="lm-name">Faqat kanji</span>
+              <span class="lm-desc">Eshitib, to'g'ri kanjini toping</span>
+              <span class="lm-chips"><em><b>1</b>Kanji</em></span>
+            </span>
+            <span class="lm-go">${CHEV}</span>
+          </button>
+          <button type="button" class="lm-opt lm-opt-both" data-mode="listen-tr">
+            <span class="lm-glyph">字<i>訳</i></span>
+            <span class="lm-txt">
+              <span class="lm-name">Kanji va tarjima</span>
+              <span class="lm-desc">Kanjini, so'ng uning tarjimasini toping</span>
+              <span class="lm-chips"><em><b>1</b>Kanji</em><u>→</u><em><b>2</b>Tarjima</em></span>
+            </span>
+            <span class="lm-go">${CHEV}</span>
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    let closed = false;
+    function close(){
+      if(closed) return; closed = true;
+      document.removeEventListener('keydown', onKey, true);
+      ov.classList.remove('show');
+      setTimeout(()=>ov.remove(), 260);
+    }
+    function onKey(e){ if(e.key === 'Escape'){ e.stopPropagation(); close(); } }
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e)=>{ e.stopPropagation(); if(e.target === ov) close(); });
+    ov.querySelector('.lm-x').addEventListener('click', close);
+    ov.querySelectorAll('.lm-opt').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const mode = b.getAttribute('data-mode');
+        close();
+        // oyna yopilish animatsiyasi bilan quiz ochilishi bir vaqtda og'irlashmasin
+        setTimeout(()=>onPick(mode), 120);
+      });
+    });
+    requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('show')));
+  }
 
   function startQuiz(ids, returnTab, mode){
     if(ids.length === 0) return;
@@ -13205,9 +13462,11 @@
     quizIdx = 0; quizScore = 0;
     quizBarPct = 0;
     quizWrongList = [];
+    quizResults = [];
     quizReturnTab = returnTab;
     document.getElementById('quizWrap').classList.toggle('quiz-from-all', returnTab === 'all');
-    quizType = mode === 'romaji' ? 'romaji' : mode === 'timed' ? 'timed' : mode === 'listen' ? 'listen' : 'translate';
+    listenTr = (mode === 'listen-tr');
+    quizType = mode === 'romaji' ? 'romaji' : mode === 'timed' ? 'timed' : (mode === 'listen' || mode === 'listen-tr') ? 'listen' : 'translate';
     showTab('quiz');
     renderQuizQuestion();
   }
@@ -13222,7 +13481,7 @@
     startQuiz(known, 'known', 'timed');
   });
   document.getElementById('btnQuizListen').addEventListener('click', ()=>{
-    startQuiz(known, 'known', 'listen');
+    openListenModePicker((m)=>startQuiz(known, 'known', m));
   });
 
   function shuffle(arr){
@@ -13248,8 +13507,60 @@
 
   // savollar shkalasi (Savol X/Y ostidagi chiziq) — savoldan-savolga sakramay,
   // avvalgi qiymatidan yangi qiymatga qarab sekin siljib boradi
+  // ---- Shkala: har bir savol o'z rangida — to'g'ri javob yashil, xato javob qizil ----
+  // Chiziq bitta tekis qatlam: ranglar qattiq (gradientsiz) chegarada almashadi,
+  // oraliq/yumshoq o'tish yo'q. Ochilish clip-path orqali, o'ng uchi yumaloq.
+  function quizBarGradient(count){
+    const n = quizItems.length;
+    if(!n || count <= 0) return 'none';
+    const GOOD = '#4fbf86', BAD = '#e0695c';   // to'g'ri — yumshoq yashil, xato — yumshoq qizil
+    const seg = 100 / n;                        // bitta savolning kengligi (foizda)
+    const soft = seg * 0.3;                     // rang o'tishining yarim kengligi — chegara sezilmaydi
+    const cols = [];
+    for(let i=0;i<count;i++) cols.push(quizResults[i] === false ? BAD : GOOD);
+    const stops = [`${cols[0]} 0%`];
+    for(let i=1;i<count;i++){
+      if(cols[i] !== cols[i-1]){
+        const b = i * seg;
+        stops.push(`${cols[i-1]} ${(b - soft).toFixed(3)}%`, `${cols[i]} ${(b + soft).toFixed(3)}%`);
+      }
+    }
+    stops.push(`${cols[count-1]} ${(count * seg).toFixed(3)}%`);
+    return 'linear-gradient(90deg,' + stops.join(',') + ')';
+  }
+  function quizBarClip(pct){ return `inset(0 ${(100-pct).toFixed(3)}% 0 0 round 6px)`; }
+  // javob berilgan zahoti (keyingi savolni kutmasdan) shkalaga o'sha savol rangini qo'shadi
+  function quizBarMark(isCorrect){
+    if(quizType === 'timed') return;
+    quizResults[quizIdx] = !!isCorrect;
+    const fill = document.getElementById('quizBarFill');
+    if(!fill) return;
+    const pct = ((quizIdx+1)/quizItems.length)*100;
+    fill.classList.add('seg');
+    fill.style.background = quizBarGradient(quizIdx+1);
+    fill.style.width = '100%';
+    fill.style.transition = 'clip-path .55s ease';
+    fill.style.clipPath = quizBarClip(pct);
+    quizBarPct = pct;
+  }
+  function animateQuizBarSegments(fillEl, targetPct){
+    fillEl.classList.add('seg');
+    fillEl.style.background = quizBarGradient(quizIdx);
+    fillEl.style.width = '100%';
+    fillEl.style.transition = 'none';
+    fillEl.style.clipPath = quizBarClip(quizBarPct);
+    void fillEl.offsetWidth; // majburiy reflow
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        fillEl.style.transition = 'clip-path .6s ease';
+        fillEl.style.clipPath = quizBarClip(targetPct);
+      });
+    });
+    quizBarPct = targetPct;
+  }
   function animateQuizBar(fillEl){
     const targetPct = (quizIdx/quizItems.length)*100;
+    if(quizType !== 'timed'){ animateQuizBarSegments(fillEl, targetPct); return; }
     fillEl.style.transition = 'none';
     fillEl.style.width = quizBarPct + '%';
     void fillEl.offsetWidth; // majburiy reflow — boshlang'ich holat chizib bo'lingandan keyingina animatsiya boshlansin
@@ -13361,6 +13672,7 @@
       <div class="quiz-bar"><div class="quiz-bar-fill" id="quizBarFill" style="width:${quizBarPct}%"></div></div>
       <div class="quiz-mode-label">Tinglang va to'g'ri kanjini toping</div>
       <div class="quiz-mode-sublabel listen-hint">Karnay tugmasini bosib qayta tinglashingiz mumkin</div>
+      ${listenTr ? `<div class="listen-steps" id="listenSteps"><span class="ls-step active" data-s="1"><b>1</b>Kanji</span><span class="ls-line"></span><span class="ls-step" data-s="2"><b>2</b>Tarjima</span></div>` : ''}
       <div class="quiz-feedback" id="quizFeedback"></div>
       <div class="quiz-card quiz-card-listen">
         <button class="speak-jp-btn listen-play-icon" id="listenPlay" type="button" aria-label="Qayta tinglash"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="spk-w1" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="spk-w2" d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
@@ -13381,8 +13693,76 @@
     // savol ochilishi bilan so'z bir marta o'qiladi
     setTimeout(()=>speakJP(kana, playBtn), 450);
     wrap.querySelectorAll('.quiz-opt').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); handleQuizAnswer(btn, word.id, options); });
+      btn.addEventListener('click', ()=>{
+        if(window.speechSynthesis) speechSynthesis.cancel();
+        if(listenTr && btn.getAttribute('data-id') === word.id){
+          listenKanjiFound(btn, word);   // 1-bosqich to'g'ri → 2-bosqich (romaji)
+        } else {
+          handleQuizAnswer(btn, word.id, options, 1);  // xato (yoki oddiy rejim)
+        }
+      });
     });
+  }
+
+  // 1-bosqich to'g'ri topildi: ball HALI berilmaydi, variantlar tarjimaga almashadi
+  function listenKanjiFound(btn, word){
+    const wrap = document.getElementById('quizWrap');
+    wrap.querySelectorAll('.quiz-opt').forEach(b=>b.classList.add('disabled'));
+    btn.classList.add('correct');
+    playCorrectSound();
+    playJoyBurst(btn);
+    vibrateCorrect();
+    const myIdx = quizIdx;
+    setTimeout(()=>{
+      // foydalanuvchi shu orada boshqa joyga o'tib ketgan bo'lsa — hech narsa qilmaymiz
+      if(currentTab !== 'quiz' || quizIdx !== myIdx || !wrap.querySelector('.quiz-card-listen')) return;
+      showListenTranslationStep(word);
+    }, 950);
+  }
+
+  function showListenTranslationStep(word){
+    const wrap = document.getElementById('quizWrap');
+    const optsEl = wrap.querySelector('.quiz-options');
+    if(!optsEl) return;
+    // 3 ta chalg'ituvchi tarjima (matni takrorlanmasin)
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word.uz]);
+    let distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id].uz;
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
+    const options2 = shuffle([word.id, ...distractors]);
+    const label = wrap.querySelector('.quiz-mode-label');
+    const steps = document.getElementById('listenSteps');
+    optsEl.classList.add('lo-out');
+    setTimeout(()=>{
+      if(!optsEl.isConnected) return;
+      if(label) label.innerHTML = `<span class="lm-found">${word.kanji}</span> ning tarjimasini toping`;
+      if(steps){
+        const s1 = steps.querySelector('[data-s="1"]'), s2 = steps.querySelector('[data-s="2"]');
+        s1.classList.remove('active'); s1.classList.add('done');
+        s2.classList.add('active');
+      }
+      optsEl.innerHTML = options2.map(id=>`<button class="quiz-opt quiz-opt-tr" data-id="${id}">${byId[id].uz}</button>`).join('');
+      optsEl.classList.remove('lo-out');
+      optsEl.classList.add('lo-in');
+      setTimeout(()=>optsEl.classList.remove('lo-in'), 450);
+      optsEl.querySelectorAll('.quiz-opt').forEach(b=>{
+        b.addEventListener('click', ()=>handleQuizAnswer(b, word.id, options2, 2));
+      });
+    }, 230);
   }
 
   // ---------- VAQT SINOVI (timed recall quiz) ----------
@@ -13643,12 +14023,13 @@
     }
   }
 
-  function handleQuizAnswer(btn, correctId, options){
+  function handleQuizAnswer(btn, correctId, options, step){
     const chosenId = btn.getAttribute('data-id');
     const allBtns = document.querySelectorAll('.quiz-opt');
     allBtns.forEach(b=>b.classList.add('disabled'));
     if(chosenId === correctId){
       btn.classList.add('correct');
+      quizBarMark(true);
       quizScore++;
       flashPage('flash-correct');
       playCorrectSound();
@@ -13657,8 +14038,9 @@
       vibrateCorrect();
     } else {
       btn.classList.add('wrong');
+      quizBarMark(false);
       playWrongEffect(btn);
-      if(!quizWrongList.some(w=>w.id===correctId)) quizWrongList.push({id:correctId, chosen:chosenId});
+      if(!quizWrongList.some(w=>w.id===correctId)) quizWrongList.push({id:correctId, chosen:chosenId, step:step||0});
       allBtns.forEach(b=>{ if(b.getAttribute('data-id')===correctId) b.classList.add('correct'); });
       flashPage('flash-wrong');
       playWrongSound();
@@ -13929,7 +14311,7 @@
     // qayta boshlash — xuddi shu so'zlar to'plami, rejim va qaytish tabi bilan
     const restartPool = quizPool.slice();
     const restartReturnTab = quizReturnTab;
-    const restartType = quizType;
+    const restartType = (quizType === 'listen' && listenTr) ? 'listen-tr' : quizType;
     if(quizType === 'timed'){
       wrap.innerHTML = `
         <div class="quiz-result">
@@ -13960,12 +14342,13 @@
         ${wrongList.map(w=>{
           const word = byId[w.id];
           const picked = byId[w.chosen];
+          const f = optField;  // eshitish testida ham tarjima (uz) ko'rsatiladi
           return `
           <div class="quiz-mistake-item">
             <div class="qm-kanji">${word.kanji}</div>
             <div class="qm-body">
-              <div class="qm-correct">✓ ${word[optField]}</div>
-              <div class="qm-wrong">✕ ${picked ? picked[optField] : ''}</div>
+              <div class="qm-correct">✓ ${word[f]}</div>
+              <div class="qm-wrong">✕ ${picked ? picked[f] : ''}</div>
             </div>
           </div>`;
         }).join('')}
@@ -18719,19 +19102,6 @@
         }
         row.appendChild(adminBadge);
       }
-      if (viewerIsOwner && !isOwner && itemEmail) {
-        const adminBtn = document.createElement("button");
-        adminBtn.type = "button";
-        adminBtn.className = "presence-admin-toggle" + (itemIsAdmin ? " on" : "");
-        adminBtn.textContent = itemIsAdmin ? "Adminlikni olish" : "Admin qilish";
-        adminBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          if (itemIsAdmin) { setAdminRole(itemEmail, item.nick, false, adminBtn); return; }
-          const pick = await askAdminColor(item.nick);
-          if (pick) setAdminRole(itemEmail, item.nick, true, adminBtn, pick);
-        });
-        row.appendChild(adminBtn);
-      }
 
       listEl.appendChild(row);
     });
@@ -18774,6 +19144,135 @@
       alert("Rangni o'zgartirib bo'lmadi. Firestore qoidalarini tekshiring.");
     }
   }
+
+  // ---------- CHAT ADMIN OYNASI: "Adminlar" bo'limi — ro'yxat, qidirish, qo'shish ----------
+  // Faqat owner admin tayinlay/olib tashlay oladi (Firestore qoidalari ham shuni tekshiradi).
+  // Oddiy admin ro'yxatni ko'radi, xolos. Ro'yxat katta emas: qidiruvda faqat mos keladiganlar chiqadi.
+  let dynamicAdminNicks = new Map();   // admins hujjatidagi nick: email (lowercase) -> nick
+  const chatAdminEl = (id) => document.getElementById(id);
+  const chatAdminIsOwnerViewer = () => !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL;
+  const chatAdminNickOf = (email) => dynamicAdminNicks.get(email) || email.split("@")[0];
+  function chatAdminBtn(text, cls, onClick){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chat-admin-row-btn" + (cls ? " " + cls : "");
+    b.textContent = text;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+  function chatAdminRow(nick, email, rightEl){
+    const row = document.createElement("div");
+    row.className = "chat-admin-row";
+    const info = document.createElement("div");
+    info.className = "chat-admin-row-info";
+    const n = document.createElement("span");
+    n.className = "chat-admin-row-nick";
+    n.textContent = nick;
+    const m = document.createElement("span");
+    m.className = "chat-admin-row-mail";
+    m.textContent = email;
+    info.appendChild(n);
+    info.appendChild(m);
+    row.appendChild(info);
+    if (rightEl) row.appendChild(rightEl);
+    return row;
+  }
+  function chatAdminEmpty(text){
+    const p = document.createElement("div");
+    p.className = "chat-admin-empty";
+    p.textContent = text;
+    return p;
+  }
+  // Adminlar ro'yxati (hammaga ko'rinadi; owner esa "Olish" tugmasini ko'radi)
+  function chatAdminRenderList(){
+    const listEl = chatAdminEl("chatAdminsList");
+    const countEl = chatAdminEl("chatAdminsCount");
+    if (!listEl) return;
+    const isOwner = chatAdminIsOwnerViewer();
+    const emails = [...dynamicAdminEmails.keys()].filter((e) => e !== OWNER_EMAIL);
+    emails.sort((a, b) => chatAdminNickOf(a).localeCompare(chatAdminNickOf(b)));
+    if (countEl) countEl.textContent = emails.length ? "(" + emails.length + ")" : "";
+    listEl.innerHTML = "";
+    if (!emails.length) { listEl.appendChild(chatAdminEmpty("Hozircha qo'shimcha adminlar yo'q")); return; }
+    emails.forEach((email) => {
+      const nick = chatAdminNickOf(email);
+      const right = isOwner
+        ? chatAdminBtn("Olish", "revoke", (e) => setAdminRole(email, nick, false, e.currentTarget))
+        : null;
+      listEl.appendChild(chatAdminRow(nick, email, right));
+    });
+  }
+  // Qidiruv: ism yoki email qismi yozilganda mos foydalanuvchilar chiqadi
+  function chatAdminRenderResults(){
+    const input = chatAdminEl("chatAdminSearch");
+    const resEl = chatAdminEl("chatAdminResults");
+    if (!input || !resEl) return;
+    resEl.innerHTML = "";
+    if (!chatAdminIsOwnerViewer()) return;
+    const q = input.value.trim().toLowerCase();
+    if (!q) return;
+    const found = new Map();
+    (presenceLastDocs || []).forEach((d) => {
+      const x = d.data();
+      const email = String(x.email || "").trim().toLowerCase();
+      if (!email || email === OWNER_EMAIL) return;
+      const nick = String(x.nick || email.split("@")[0]);
+      if (nick.toLowerCase().indexOf(q) === -1 && email.indexOf(q) === -1) return;
+      if (!found.has(email)) found.set(email, nick);
+    });
+    const items = [...found.entries()].slice(0, 8);
+    items.forEach(([email, nick]) => {
+      const isAdm = dynamicAdminEmails.has(email);
+      const btn = isAdm
+        ? chatAdminBtn("Olish", "revoke", (e) => setAdminRole(email, nick, false, e.currentTarget))
+        : chatAdminBtn("Admin qilish", "", (e) => chatAdminGrant(email, nick, e.currentTarget));
+      resEl.appendChild(chatAdminRow(nick, email, btn));
+    });
+    // Hali ro'yxatda yo'q yangi odam: to'liq email yozilsa, uni to'g'ridan-to'g'ri qo'shish mumkin
+    if (!items.length && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q)) {
+      const nick = q.split("@")[0];
+      if (dynamicAdminEmails.has(q)) {
+        resEl.appendChild(chatAdminRow(chatAdminNickOf(q), q, chatAdminBtn("Olish", "revoke", (e) => setAdminRole(q, chatAdminNickOf(q), false, e.currentTarget))));
+      } else {
+        resEl.appendChild(chatAdminRow(nick, q, chatAdminBtn("Admin qilish", "", (e) => chatAdminGrant(q, nick, e.currentTarget))));
+      }
+      return;
+    }
+    if (!items.length) resEl.appendChild(chatAdminEmpty("Topilmadi — to'liq email yozing"));
+  }
+  async function chatAdminGrant(email, nick, btn){
+    const pick = await askAdminColor(nick);
+    if (pick) setAdminRole(email, nick, true, btn, pick);
+  }
+  function chatAdminRenderAll(){
+    chatAdminRenderList();
+    const add = chatAdminEl("chatAdminAddWrap");
+    if (add) add.hidden = !chatAdminIsOwnerViewer();
+    chatAdminRenderResults();
+  }
+  function chatAdminInit(){
+    const tgl = chatAdminEl("chatAdminsOpenBtn");
+    const sec = chatAdminEl("chatAdminsSection");
+    const input = chatAdminEl("chatAdminSearch");
+    if (tgl && sec && !tgl.dataset.bound) {
+      tgl.dataset.bound = "1";
+      tgl.addEventListener("click", () => {
+        sec.hidden = !sec.hidden;
+        if (!sec.hidden) chatAdminRenderAll();
+      });
+    }
+    if (input && !input.dataset.bound) {
+      input.dataset.bound = "1";
+      input.addEventListener("input", chatAdminRenderResults);
+    }
+    window.__kanjiRenderAdmins = () => {
+      const ov = chatAdminEl("chatAdminOverlay");
+      const sec2 = chatAdminEl("chatAdminsSection");
+      if (sec2 && !sec2.hidden && ov && ov.classList.contains("show")) chatAdminRenderAll();
+    };
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", chatAdminInit);
+  else chatAdminInit();
 
   // Rang tanlash oynasi. Qaytaradi: "plum" | "slate" | "moss" | "gold" | null
   function askAdminColor(nick) {
@@ -19129,10 +19628,12 @@
       adminsUnsub = onSnapshot(collection(db, "admins"), (s2) => {
         dynamicAdminEmails = new Map(s2.docs.map((d) => {
           const c = d.data().color;
-          return [String(d.id).toLowerCase(), ' + COLORS_JS + '.indexOf(c) !== -1 ? c : ""];
+          return [String(d.id).toLowerCase(), ["plum", "slate", "moss", "gold"].indexOf(c) !== -1 ? c : ""];
         }));
+        dynamicAdminNicks = new Map(s2.docs.map((d) => [String(d.id).toLowerCase(), String(d.data().nick || "")]));
         syncBansListener();
         if (auth.currentUser) setupPresenceAdminUI(auth.currentUser);
+        if (window.__kanjiRenderAdmins) window.__kanjiRenderAdmins();
         if (presenceLoaded) presenceRenderList();
         chatRefresh();
       }, (err) => { console.error("Adminlar ro'yxatini o'qishda xatolik:", err.message); });
@@ -19378,10 +19879,12 @@
       if(!hop || !g || !k || !iEl || !base){ markHop(); return; }
       var fs = parseFloat(getComputedStyle(g).fontSize) || 34;
       var gr = g.getBoundingClientRect();
+      // ekrandagi o'lchamni mahalliy (layout) px ga keltiramiz: brauzer zoom/transform ta'sirida ham nuqta aniq joyga tushsin
+      var sc = g.offsetWidth ? gr.width / g.offsetWidth : 1;
       var kr = k.getBoundingClientRect(), ir = iEl.getBoundingClientRect(), br = base.getBoundingClientRect();
-      var baseY = br.top - gr.top;                 // harf asosi (baseline)
-      var kx = kr.left + kr.width / 2 - gr.left;   // K markazi
-      var ix = ir.left + ir.width / 2 - gr.left;   // i markazi
+      var baseY = (br.top - gr.top) / sc;                  // harf asosi (baseline)
+      var kx = (kr.left + kr.width / 2 - gr.left) / sc;   // K markazi
+      var ix = (ir.left + ir.width / 2 - gr.left) / sc;   // i markazi
       var cs = getComputedStyle(g), ctx = document.createElement('canvas').getContext('2d');
       ctx.font = cs.fontWeight + ' ' + fs + 'px ' + cs.fontFamily;
       var asc = ctx.measureText('i').actualBoundingBoxAscent || 0.7 * fs; // i ning eng yuqori nuqtasi
@@ -19433,8 +19936,10 @@
     }
     var started = false;
     function kickoff(){ if(started) return; started = true; startHop(); }
+    // shrift to'liq yuklanib, qo'llanib bo'lgach o'lchaymiz — aks holda harf o'lchami noto'g'ri bo'lib, nuqta siljiydi
     if(document.fonts && document.fonts.load){
-      document.fonts.load('900 34px "Zen Maru Gothic"').then(kickoff, kickoff);
+      Promise.all([document.fonts.load('900 34px "Zen Maru Gothic"'), document.fonts.ready])
+        .then(function(){ requestAnimationFrame(function(){ requestAnimationFrame(kickoff); }); }, kickoff);
     } else kickoff();
     setTimeout(kickoff, 1500); // zaxira
     setTimeout(markHop, 4500); // zaxira: animatsiya ishlamasa ham qotib qolmasin
