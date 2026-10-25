@@ -9905,7 +9905,6 @@
 <div class="chat-admin-overlay" id="chatAdminOverlay" aria-hidden="true">
   <div class="chat-admin-card">
     <h4>🛡 Chat boshqaruvi</h4>
-    <button class="chat-admin-clear" id="chatClearBtn" type="button">🧹 Chatni tozalash</button>
     <div class="chat-admin-section-title">🚫 Bloklanganlar <span id="chatBansCount"></span></div>
     <div class="chat-bans-list" id="chatBansList"></div>
     <button class="chat-admin-toggle" id="chatAdminsOpenBtn" type="button">👥 Adminlar <span id="chatAdminsCount"></span></button>
@@ -12322,6 +12321,7 @@
           } else {
             dayIds.forEach(id=>selectedKanji.add(id));
           }
+          playSelectDayTing(!allAlreadySelected);
           refreshAllSelectionUI();
           return;
         }
@@ -12336,6 +12336,7 @@
         const id = btn.getAttribute('data-id');
         if(selectedKanji.has(id)){ selectedKanji.delete(id); btn.classList.remove('selected'); }
         else { selectedKanji.add(id); btn.classList.add('selected'); }
+        playSelectKanjiTing(selectedKanji.has(id));
         refreshAllSelectionUI();
       });
       allListBuilt = true;
@@ -14162,6 +14163,77 @@
   // toni va yengil "xona aksi" (kechikish) — bularning barchasi tovushni
   // to'liqroq, boyroq va quloqqa yanada yoqimli qiladi. Faqat kartochka orqa
   // (tarjima/romaji) tomoniga o'tganda chiqadi.
+  // ---------- TING ovozlari: "Hammasi" bo'limida kun va kanji tanlash ----------
+  // Kalimba (barmoq bilan chertilgan musiqiy taqillatgich) uslubidagi iliq, mayin ting:
+  // sof sinus + juda past intensivlikdagi uchburchak garmonika, yumshoq lowpass filtri
+  // (o'tkir yuqori chastotalarsiz), va nozik, yengil aks-sado (kechikish) — "sevgi" tuyg'usi.
+  // Ovoz o'chirilgan bo'lsa getAudioCtx() null qaytaradi, shu sababli sukut ham hurmat qilinadi.
+  let selectTingEcho = null;   // aks-sado zanjiri (bir marta yaratiladi)
+  function getSelectTingBus(ctx){
+    if(selectTingEcho && selectTingEcho.ctx === ctx) return selectTingEcho;
+    const out = ctx.createGain();
+    out.gain.value = 1;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 2400;
+    lp.Q.value = 0.4;
+    lp.connect(out);
+    out.connect(ctx.destination);
+    // aks-sado: 0.22 s kechikish, har takrorida pasayib boradi, lowpass orqali yumshaydi
+    const delay = ctx.createDelay(1.0);
+    delay.delayTime.value = 0.22;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.28;
+    const wet = ctx.createGain();
+    wet.gain.value = 0.16;
+    lp.connect(delay);
+    delay.connect(fb);
+    fb.connect(delay);
+    delay.connect(wet);
+    wet.connect(out);
+    selectTingEcho = { ctx, input: lp };
+    return selectTingEcho;
+  }
+  function playSelectTingTone(freq, dur, peak, when){
+    try{
+      const ctx = getAudioCtx();
+      if(!ctx) return;
+      const bus = getSelectTingBus(ctx);
+      const t = ctx.currentTime + (when || 0);
+      // asosiy sinus
+      const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+      o1.type = 'sine';
+      o1.frequency.setValueAtTime(freq, t);
+      g1.gain.setValueAtTime(0.0001, t);
+      g1.gain.linearRampToValueAtTime(peak, t + 0.006);
+      g1.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o1.connect(g1); g1.connect(bus.input);
+      o1.start(t); o1.stop(t + dur + 0.05);
+      // nozik yuqori garmonika — "barmoq chertishi" tembri, juda past hajmda
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.type = 'triangle';
+      o2.frequency.setValueAtTime(freq * 3, t);
+      g2.gain.setValueAtTime(0.0001, t);
+      g2.gain.linearRampToValueAtTime(peak * 0.09, t + 0.004);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.35);
+      o2.connect(g2); g2.connect(bus.input);
+      o2.start(t); o2.stop(t + dur * 0.35 + 0.05);
+    }catch(e){}
+  }
+  // Kun tanlanganda — ikki nota, yuqoriga yumshoq ko'tarilish (C5 → E5, iliq "sevgi" ohangi)
+  function playSelectDayTing(on){
+    if(on){
+      playSelectTingTone(523.25, 0.55, 0.06, 0);      // C5
+      playSelectTingTone(659.25, 0.80, 0.06, 0.13);   // E5
+    } else {
+      playSelectTingTone(440.00, 0.50, 0.045, 0);     // A4 — pastga qaytish, sokinroq
+    }
+  }
+  // Kanji tanlanganda — bitta yengil nota (G5); bekor qilinganda — yumshoq pastroq (D5)
+  function playSelectKanjiTing(on){
+    if(on) playSelectTingTone(783.99, 0.60, 0.05);    // G5
+    else   playSelectTingTone(587.33, 0.45, 0.04);    // D5
+  }
   function playFlipSound(){
     try{
       const ctx = getAudioCtx();
@@ -17547,10 +17619,6 @@
     if(nickEditBtn) nickEditBtn.addEventListener('click', openNicknameModal);
     const msgsWrap = document.getElementById('chatMessages');
     if(msgsWrap) msgsWrap.addEventListener('click', onChatListClick);
-    const clearBtn = document.getElementById('chatClearBtn');
-    if(clearBtn) clearBtn.addEventListener('click', ()=>{
-      if(confirm("Chatdagi BARCHA xabarlar o'chiriladi. Davom etasizmi?")) window.__kanjiChatClear().then(()=>{ const o=document.getElementById('chatAdminOverlay'); if(o) o.classList.remove('show'); }).catch(()=>alert("Tozalab bo'lmadi."));
-    });
     const bansList = document.getElementById('chatBansList');
     const adminOv = document.getElementById('chatAdminOverlay');
     const adminOpenBtn = document.getElementById('chatAdminOpenBtn');
