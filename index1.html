@@ -9143,7 +9143,9 @@
     border:1.5px solid rgba(var(--c),.5);
     box-shadow:0 14px 28px -18px rgba(var(--c),.9), inset 0 1px 0 rgba(255,255,255,.07);
     transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s ease, box-shadow .25s ease;
-    opacity:0; transform:translateY(12px);
+    /* Oxirgi holat ko'rinadigan bo'lishi shart: animatsiya o'chirilgan (no-anim / yengil rejim) bo'lsa ham tugmalar yashirin qolmasin.
+       Kirish animatsiyasi (lmOptIn) faqat yumshoq kirish effektini beradi. */
+    opacity:1; transform:none;
   }
   .lm-opt-both{ --c:124,154,107; --t:#b4d3a2; }
   .lm-overlay.show .lm-opt{ animation:lmOptIn .5s cubic-bezier(.22,1,.36,1) .14s both; }
