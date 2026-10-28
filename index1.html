@@ -2,6 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
+<meta name="app-version" content="__APP_VERSION__">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Kanji Flashcard</title>
 
@@ -8972,22 +8973,82 @@
   .kb-quiz-btn-timed{ --tc:var(--gold); }
 
   /* Maqtov va xato xabari: kapsula emas, aniq ramkali kartochka */
+  /* Maqtov va ogohlantirish matnlari — ramkasiz, faqat matn ko'rinishida */
   .quiz-feedback-badge{
-    border-radius:14px;
+    border-radius:0;
     padding:10px 16px;
-    background:rgba(11,13,16,0.78);
-    border:1px solid rgba(255,255,255,0.16);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 24px -14px rgba(0,0,0,0.7);
+    background:none;
+    border:none;
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
   }
   .quiz-feedback-badge.correct{
-    background:linear-gradient(165deg, rgba(124,154,107,0.24), rgba(11,13,16,0.82));
-    border:1px solid rgba(124,154,107,0.9);
-    box-shadow:inset 0 0 0 1px rgba(124,154,107,0.22), 0 0 18px -6px rgba(124,154,107,0.6);
+    background:none;
+    border:none;
+    box-shadow:none;
   }
   .quiz-feedback-badge.wrong{
-    background:linear-gradient(165deg, rgba(217,105,79,0.24), rgba(11,13,16,0.82));
-    border:1px solid rgba(217,105,79,0.9);
-    box-shadow:inset 0 0 0 1px rgba(217,105,79,0.22), 0 0 18px -6px rgba(217,105,79,0.6);
+    background:none;
+    border:none;
+    box-shadow:none;
+  }
+  /* Emoji matnga teng qatorda, bir xil balandlikda; sakrash animatsiyasiz */
+  .quiz-feedback-badge{ line-height:1.2; gap:6px; }
+  .quiz-feedback-badge .fb-emoji{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+    font-size:1.2em;
+    transform:none;
+    animation:none;
+    opacity:1;
+  }
+  .quiz-feedback-badge .fb-text{ line-height:1.2; flex:0 1 auto; }
+  /* Ortki fonsiz: matn ostida ingichka rangli chiziq asta cho'ziladi — to'g'ri yashil, xato qizil */
+  .quiz-feedback-badge{ overflow:visible; }
+  .quiz-feedback-badge.correct{ color:#ecffe2; }
+  .quiz-feedback-badge.wrong{ color:#ffe6dc; }
+  .quiz-feedback-badge::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-7px;
+    height:3px;
+    border-radius:3px;
+    transform:scaleX(0);
+    transform-origin:center;
+    pointer-events:none;
+  }
+  /* Chiziq: uchlari yumshoq so'nadigan gradient + bir marta o'tadigan yorqin sheen */
+  .quiz-feedback-badge.correct::after{
+    background:
+      linear-gradient(100deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 65%) no-repeat,
+      linear-gradient(90deg, rgba(143,196,119,0) 0%, #9fd98c 18%, #8fc477 50%, #9fd98c 82%, rgba(143,196,119,0) 100%);
+    background-size:260% 100%, 100% 100%;
+    background-position:150% 0, 0 0;
+    animation:fbLineRun 1.2s ease-in-out .05s forwards, fbSheen .9s ease-in-out .55s forwards;
+  }
+  .quiz-feedback-badge.wrong::after{
+    background:
+      linear-gradient(100deg, rgba(255,255,255,0) 35%, rgba(255,240,235,0.9) 50%, rgba(255,255,255,0) 65%) no-repeat,
+      linear-gradient(90deg, rgba(230,115,92,0) 0%, #f08a76 18%, #e6735c 50%, #f08a76 82%, rgba(230,115,92,0) 100%);
+    background-size:260% 100%, 100% 100%;
+    background-position:150% 0, 0 0;
+    animation:fbLineRun 1.2s ease-in-out .05s forwards, fbSheen .9s ease-in-out .55s forwards;
+  }
+  @keyframes fbSheen{
+    from { background-position:150% 0, 0 0; }
+    to   { background-position:-60% 0, 0 0; }
+  }
+  /* Chiziq to'liq cho'ziladi, bir zum turadi, so'ng so'nib yo'qoladi — keyingi savol shundan keyin chiqadi (1.3 s) */
+  @keyframes fbLineRun{
+    0%   { transform:scaleX(0); opacity:.4; }
+    55%  { transform:scaleX(1); opacity:1; }
+    75%  { transform:scaleX(1); opacity:1; }
+    100% { transform:scaleX(1); opacity:0; }
   }
 </style>
 <style id="iris-open">
@@ -9177,6 +9238,67 @@
   .quiz-launch-wrap:has(> .quiz-launch:disabled) .top-badge{ opacity:.4; }
   html.perf .top-badge, html.perf .tb-in::before{ animation:none; }
   @media (prefers-reduced-motion: reduce){ .top-badge, .tb-in::before{ animation:none; } }
+</style>
+
+<style id="lite-simple">
+  /* ---------- YENGIL REJIM: kartochka sodda, harakatsiz ko'rinishda ----------
+     Aylanish (3D rotateY) o'rniga kartochka darhol almashadi. Matn, tugmalar
+     va to'g'ri/xato ranglari saqlanadi; bezak nurlari va animatsiyalar o'chadi. */
+  html.lite .card-inner,
+  html.lite .card.flipped .card-inner{
+    transition:none !important;
+    transform:none !important;
+    -webkit-transform:none !important;
+  }
+  html.lite .card.flipped:not(.flipping) .face.front,
+  html.lite .card.flipping.flipped .face.front{ display:none !important; }
+  html.lite .card:not(.flipped) .face.back{ display:none !important; }
+  html.lite .card.flipped .face.back{ display:flex !important; }
+  html.lite .face{
+    transform:none !important;
+    -webkit-transform:none !important;
+    backface-visibility:visible !important;
+    animation:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  html.lite .card::before,
+  html.lite .card::after,
+  html.lite .face::before,
+  html.lite .face::after{ display:none !important; }
+  html.lite .card *{ animation:none !important; }
+  html.lite .card{ box-shadow:0 1px 0 rgba(0,0,0,.35) !important; }
+  html.lite .card, html.lite .card-inner{ will-change:auto !important; }
+  html.lite .quiz-opt{
+    transform:none !important;
+    transition:background-color .15s ease, color .15s ease, border-color .15s ease !important;
+    animation:none !important;
+  }
+  html.lite .quiz-opt:hover,
+  html.lite .quiz-opt:active{ transform:none !important; }
+  html.lite .kanji-display,
+  html.lite .card *{ text-shadow:none !important; }
+  html.lite .swipe-hints .hint .hint-arrow{ animation:none !important; }
+</style>
+
+<style id="clear-btn-solid">
+  /* "Tozalash" tugmasi: shaffof emas, qattiq (solid) qizg'ish fon */
+  #view-all .all-bar-info .all-clear-btn,
+  #view-all .all-bar-info .all-clear-btn:not(.slot-empty){
+    background:#3b2019 !important;
+    border:1px solid #D9694F !important;
+    color:#f3e3dc !important;
+    box-shadow:none !important;
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+  @media (hover:hover) and (pointer:fine){
+    #view-all .all-bar-info .all-clear-btn:hover{
+      background:#4a261d !important;
+      border-color:#e5876f !important;
+    }
+  }
+  #view-all .all-bar-info .all-clear-btn:active{ background:#4a261d !important; }
 </style>
 </head>
 <script>
@@ -9570,8 +9692,7 @@
         <button class="all-clear-btn slot-empty" id="btnAllClear" type="button">Tozalash</button>
       </div>
       <div class="quiz-launch-row">
-        <button class="quiz-launch" id="btnAllQuizTranslate" disabled>Tarjima test</button>
-        <button class="quiz-launch quiz-launch-romaji" id="btnAllQuizRomaji" disabled>Romaji test</button>
+        <button class="quiz-launch quiz-launch-romaji" id="btnAllQuizRomaji" disabled>Romaji va tarjima test</button>
         <span class="quiz-launch-wrap"><button class="quiz-launch quiz-launch-listen" id="btnAllQuizListen" disabled>Eshitish test</button><span class="top-badge" aria-hidden="true"><span class="tb-in">TOP</span></span></span>
         <button class="quiz-launch quiz-launch-timed" id="btnAllQuizTimed" disabled>Vaqt sinovi</button>
       </div>
@@ -10166,6 +10287,7 @@
     {id:"kanojo", day:5, group:"女", kanji:"彼女", romaji:"kanojo", type:"kun + on", reading:"彼(kano) + 女(jo)", uz:"u / qiz do'sti"},
 
     {id:"take", day:5, group:"竹", kanji:"竹", romaji:"take", type:"kun'yomi", reading:"竹(take) — yakka kanji", uz:"bambuk"},
+    {id:"chikurin", day:5, group:"竹", kanji:"竹林", romaji:"chikurin", type:"on + on", reading:"竹(chiku) + 林(rin)", uz:"bambuk chakalakzori"},
     {id:"takenoko", day:5, group:"竹", kanji:"竹の子", romaji:"takenoko", type:"kun + kun", reading:"竹(take) + の + 子(ko)", uz:"bambuk yosh niholi"},
 
     {id:"ame", day:5, group:"雨", kanji:"雨", romaji:"ame", type:"kun'yomi", reading:"雨(ame) — yakka kanji", otherReadings:"kun: あめ(ame) · on: ウ(u)", uz:"yomg'ir"},
@@ -12247,7 +12369,6 @@
   const allList = document.getElementById('allList');
   const allSelectedNote = document.getElementById('allSelectedNote');
   const btnAllClear = document.getElementById('btnAllClear');
-  const btnAllQuizTranslate = document.getElementById('btnAllQuizTranslate');
   const btnAllQuizRomaji = document.getElementById('btnAllQuizRomaji');
   const btnAllQuizTimed = document.getElementById('btnAllQuizTimed');
   const btnAllQuizListen = document.getElementById('btnAllQuizListen');
@@ -12276,7 +12397,7 @@
     });
   }
   [
-    btnAllQuizTranslate, btnAllQuizRomaji, btnAllQuizTimed, btnAllToFlashcard, btnAllToFlashcardShuffle,
+    btnAllQuizRomaji, btnAllQuizTimed, btnAllToFlashcard, btnAllToFlashcardShuffle,
     document.getElementById('btnQuizTranslate'), document.getElementById('btnQuizRomaji'), document.getElementById('btnQuizTimed')
   ].forEach(attachBtnRipple);
 
@@ -12363,7 +12484,6 @@
 
   function updateAllQuizButtons(){
     const n = selectedKanji.size;
-    btnAllQuizTranslate.disabled = n === 0;
     btnAllQuizRomaji.disabled = n === 0;
     btnAllQuizTimed.disabled = n === 0;
     btnAllQuizListen.disabled = n === 0;
@@ -12378,14 +12498,12 @@
   }
 
   btnAllClear.addEventListener('click', ()=>{
+    playClearSelectionSound();
     selectedKanji.clear();
     refreshAllSelectionUI();
   });
-  btnAllQuizTranslate.addEventListener('click', ()=>{
-    startQuiz([...selectedKanji], 'all', 'translate');
-  });
   btnAllQuizRomaji.addEventListener('click', ()=>{
-    startQuiz([...selectedKanji], 'all', 'romaji');
+    openHammasiModePicker((m)=>startQuiz([...selectedKanji], 'all', m));
   });
   btnAllQuizTimed.addEventListener('click', ()=>{
     startQuiz([...selectedKanji], 'all', 'timed');
@@ -13456,6 +13574,80 @@
     requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('show')));
   }
 
+  // ---------- "HAMMASI" BO'LIMI: TEST REJIMI TANLASH OYNASI ----------
+  // Eshitish testi oynasi bilan bir xil ko'rinish. 3 ta rejim: romaji, tarjima, romaji va tarjima.
+  function openHammasiModePicker(onPick){
+    const old = document.getElementById('hammasiModePicker');
+    if(old) old.remove();
+    const ov = document.createElement('div');
+    ov.id = 'hammasiModePicker';
+    ov.className = 'lm-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', 'Test rejimi');
+    const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5" fill="currentColor" fill-opacity=".18"/><path d="M9 9.5l1.8 1.8L15 7.5"/><path d="M9 15.5h6"/></svg>';
+    const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+    const XICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    ov.innerHTML = `
+      <div class="lm-card">
+        <button type="button" class="lm-x" aria-label="Yopish">${XICO}</button>
+        <div class="lm-head">
+          <div class="lm-ico"><span class="lm-ring"></span><span class="lm-ring r2"></span>${SPK}</div>
+          <div class="lm-title">Test rejimi</div>
+          <div class="lm-sub">Qaysi testni boshlaysiz?</div>
+        </div>
+        <div class="lm-opts">
+          <button type="button" class="lm-opt lm-opt-kanji" data-mode="romaji">
+            <span class="lm-glyph">字</span>
+            <span class="lm-txt">
+              <span class="lm-name">Romaji test</span>
+              <span class="lm-desc">Kanjini ko'rib, to'g'ri romajini toping</span>
+              <span class="lm-chips"><em><b>1</b>Romaji</em></span>
+            </span>
+            <span class="lm-go">${CHEV}</span>
+          </button>
+          <button type="button" class="lm-opt lm-opt-kanji" data-mode="translate">
+            <span class="lm-glyph">字</span>
+            <span class="lm-txt">
+              <span class="lm-name">Tarjima test</span>
+              <span class="lm-desc">Kanjini ko'rib, to'g'ri tarjimasini toping</span>
+              <span class="lm-chips"><em><b>1</b>Tarjima</em></span>
+            </span>
+            <span class="lm-go">${CHEV}</span>
+          </button>
+          <button type="button" class="lm-opt lm-opt-both" data-mode="romtr">
+            <span class="lm-glyph">字<i>訳</i></span>
+            <span class="lm-txt">
+              <span class="lm-name">Romaji va tarjima test</span>
+              <span class="lm-desc">Avval romajini, so'ng tarjimasini toping</span>
+              <span class="lm-chips"><em><b>1</b>Romaji</em><u>→</u><em><b>2</b>Tarjima</em></span>
+            </span>
+            <span class="lm-go">${CHEV}</span>
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    let closed = false;
+    function close(){
+      if(closed) return; closed = true;
+      document.removeEventListener('keydown', onKey, true);
+      ov.classList.remove('show');
+      setTimeout(()=>ov.remove(), 260);
+    }
+    function onKey(e){ if(e.key === 'Escape'){ e.stopPropagation(); close(); } }
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e)=>{ e.stopPropagation(); if(e.target === ov) close(); });
+    ov.querySelector('.lm-x').addEventListener('click', close);
+    ov.querySelectorAll('.lm-opt').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const mode = b.getAttribute('data-mode');
+        close();
+        setTimeout(()=>onPick(mode), 120);
+      });
+    });
+    requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('show')));
+  }
+
   function startQuiz(ids, returnTab, mode){
     if(ids.length === 0) return;
     quizPool = ids.slice();
@@ -13467,7 +13659,7 @@
     quizReturnTab = returnTab;
     document.getElementById('quizWrap').classList.toggle('quiz-from-all', returnTab === 'all');
     listenTr = (mode === 'listen-tr');
-    quizType = mode === 'romaji' ? 'romaji' : mode === 'timed' ? 'timed' : (mode === 'listen' || mode === 'listen-tr') ? 'listen' : 'translate';
+    quizType = mode === 'romaji' ? 'romaji' : mode === 'romtr' ? 'romtr' : mode === 'timed' ? 'timed' : (mode === 'listen' || mode === 'listen-tr') ? 'listen' : 'translate';
     showTab('quiz');
     renderQuizQuestion();
   }
@@ -13591,6 +13783,10 @@
       renderListenQuizQuestion();
       return;
     }
+    if(quizType === 'romtr'){
+      renderRomTrQuizQuestion();
+      return;
+    }
     const word = byId[quizItems[quizIdx]];
     // build 4 options: correct + 3 distractors (shu viktorina o'z manbasidan, kifoya bo'lmasa hammasidan)
     // Bir xil tarjima/romaji matnli variantlar takrorlanib chiqmasligi uchun,
@@ -13638,6 +13834,98 @@
     wrap.querySelectorAll('.quiz-opt').forEach(btn=>{
       btn.addEventListener('click', ()=>handleQuizAnswer(btn, word.id, options));
     });
+  }
+
+  // ---------- ROMAJI VA TARJIMA (birlashgan test, "Hammasi" bo'limidan) ----------
+  // Savol — kanji. 1-bosqich: to'g'ri romaji topiladi. To'g'ri bo'lsa, ball hali berilmaydi,
+  // 2-bosqichda tarjima so'raladi. Romajida xato bo'lsa — darhol keyingi savolga o'tiladi.
+  function buildRomTrOptions(word, field){
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word[field]]);
+    const distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id][field];
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
+    return shuffle([word.id, ...distractors]);
+  }
+  function renderRomTrQuizQuestion(){
+    const wrap = document.getElementById('quizWrap');
+    const word = byId[quizItems[quizIdx]];
+    const options = buildRomTrOptions(word, 'romaji');
+    wrap.innerHTML = `
+      <div class="quiz-progress">
+        <span>Savol ${quizIdx+1} / ${quizItems.length}</span>
+        <span class="score">Ball: ${quizScore}</span>
+      </div>
+      <div class="quiz-bar"><div class="quiz-bar-fill" id="quizBarFill" style="width:${quizBarPct}%"></div></div>
+      <div class="quiz-mode-label">Kanjining romajisini toping</div>
+      <div class="listen-steps" id="listenSteps"><span class="ls-step active" data-s="1"><b>1</b>Romaji</span><span class="ls-line"></span><span class="ls-step" data-s="2"><b>2</b>Tarjima</span></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-card">
+        <div class="quiz-kanji${kanjiLenClass(word.kanji)}">${word.kanji}</div>
+      </div>
+      <div class="quiz-options">
+        ${options.map(id=>`<button class="quiz-opt" data-id="${id}">${byId[id].romaji}</button>`).join('')}
+      </div>
+    `;
+    animateQuizBar(document.getElementById('quizBarFill'));
+    wrap.querySelectorAll('.quiz-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(btn.getAttribute('data-id') === word.id) romTrRomajiFound(btn, word);
+        else handleQuizAnswer(btn, word.id, options, 1);
+      });
+    });
+  }
+  // 1-bosqich to'g'ri: tugmalar qulflanadi, so'ng tarjima bosqichi ochiladi
+  function romTrRomajiFound(btn, word){
+    const wrap = document.getElementById('quizWrap');
+    wrap.querySelectorAll('.quiz-opt').forEach(b=>b.classList.add('disabled'));
+    btn.classList.add('correct');
+    playCorrectSound();
+    playJoyBurst(btn);
+    vibrateCorrect();
+    const myIdx = quizIdx;
+    setTimeout(()=>{
+      if(currentTab !== 'quiz' || quizIdx !== myIdx || !wrap.querySelector('.quiz-card')) return;
+      showRomTrTranslationStep(word);
+    }, 330);
+  }
+  function showRomTrTranslationStep(word){
+    const wrap = document.getElementById('quizWrap');
+    const optsEl = wrap.querySelector('.quiz-options');
+    if(!optsEl) return;
+    const options2 = buildRomTrOptions(word, 'uz');
+    const label = wrap.querySelector('.quiz-mode-label');
+    const steps = document.getElementById('listenSteps');
+    optsEl.classList.add('lo-out');
+    setTimeout(()=>{
+      if(!optsEl.isConnected) return;
+      if(label) label.innerHTML = `<span class="lm-found">${word.kanji}</span> ning tarjimasini toping`;
+      if(steps){
+        const s1 = steps.querySelector('[data-s="1"]'), s2 = steps.querySelector('[data-s="2"]');
+        s1.classList.remove('active'); s1.classList.add('done');
+        s2.classList.add('active');
+      }
+      optsEl.innerHTML = options2.map(id=>`<button class="quiz-opt quiz-opt-tr" data-id="${id}">${byId[id].uz}</button>`).join('');
+      optsEl.classList.remove('lo-out');
+      optsEl.classList.add('lo-in');
+      setTimeout(()=>optsEl.classList.remove('lo-in'), 450);
+      optsEl.querySelectorAll('.quiz-opt').forEach(b=>{
+        b.addEventListener('click', ()=>handleQuizAnswer(b, word.id, options2, 2));
+      });
+    }, 90);
   }
 
   // ---------- ESHITISH QUIZ (listening quiz) ----------
@@ -13718,7 +14006,7 @@
       // foydalanuvchi shu orada boshqa joyga o'tib ketgan bo'lsa — hech narsa qilmaymiz
       if(currentTab !== 'quiz' || quizIdx !== myIdx || !wrap.querySelector('.quiz-card-listen')) return;
       showListenTranslationStep(word);
-    }, 950);
+    }, 330);
   }
 
   function showListenTranslationStep(word){
@@ -13763,7 +14051,7 @@
       optsEl.querySelectorAll('.quiz-opt').forEach(b=>{
         b.addEventListener('click', ()=>handleQuizAnswer(b, word.id, options2, 2));
       });
-    }, 230);
+    }, 90);
   }
 
   // ---------- VAQT SINOVI (timed recall quiz) ----------
@@ -13913,7 +14201,7 @@
         fs = Math.max(FB_MIN_FS, FB_BASE_FS * (available / naturalW));
       }
       badge.style.fontSize = fs.toFixed(2) + 'px';
-      if(emojiEl) emojiEl.style.fontSize = (fs + 4.5).toFixed(2) + 'px';
+      if(emojiEl) emojiEl.style.fontSize = (fs * 1.2).toFixed(2) + 'px';
     });
   }
 
@@ -14228,6 +14516,12 @@
     } else {
       playSelectTingTone(440.00, 0.50, 0.045, 0);     // A4 — pastga qaytish, sokinroq
     }
+  }
+  // Tozalash bosilganda — pastga tushuvchi uch nota (G5 → E5 → C5), kun ohangidan farqli
+  function playClearSelectionSound(){
+    playSelectTingTone(783.99, 0.40, 0.05, 0);
+    playSelectTingTone(659.25, 0.40, 0.05, 0.09);
+    playSelectTingTone(523.25, 0.60, 0.05, 0.18);
   }
   // Kanji tanlanganda — bitta yengil nota (G5); bekor qilinganda — yumshoq pastroq (D5)
   function playSelectKanjiTing(on){
@@ -18439,9 +18733,14 @@
   // Sahifa to'liq yuklanganidan keyin, fonda, hech narsani sekinlashtirmasdan.
   // Ilova bosh ekranga qo'shilganda brauzer panellarisiz ochilishi va
   // internetsiz ham ishlashi shu orqali ta'minlanadi.
+  // Versiya: har yangilanishda APP_VERSION ni oshiring (index.html dagi <meta name="app-version"> bilan bir xil bo'lsin).
+  // sw.js URL ga ?v= qo'shilgan: yangi raqamda brauzer service worker'ni qayta yuklaydi va yangilaydi.
+  const APP_VERSION = '__APP_VERSION__';
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=>{
-      navigator.serviceWorker.register('./sw.js').catch(()=>{ /* sokin o'tkazib yuboriladi */ });
+      navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION)
+        .then(reg => { reg.update().catch(()=>{}); })
+        .catch(()=>{ /* sokin o'tkazib yuboriladi */ });
     });
   }
 
@@ -20058,6 +20357,34 @@ window.addEventListener('message', function(e){
   function sync(){ document.documentElement.classList.toggle('tab-hidden', document.hidden); }
   document.addEventListener('visibilitychange', sync);
   sync();
+})();
+</script>
+<script id="perf-detect-js">
+(function(){
+  var root = document.documentElement;
+  var saved = null;
+  try{ saved = localStorage.getItem('kanji-perf'); }catch(e){}
+  if(saved !== null) return; /* foydalanuvchi o'zi tanlagan */
+  /* Faqat haqiqatan kuchsiz qurilmalar oldindan yengil rejimga o'tadi */
+  var weak = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+             (navigator.deviceMemory && navigator.deviceMemory <= 3);
+  if(weak){ root.classList.add('lite'); root.classList.add('perf'); }
+  /* Ishlash davomida sekinlik kuzatiladi: kadrlarning 30% dan ko'pi sekin bo'lsa yengillashtiriladi */
+  var last = performance.now(), slow = 0, total = 0;
+  function tick(now){
+    var d = now - last; last = now;
+    if(!document.hidden && d < 500){ total++; if(d > 40) slow++; }
+    if(total >= 120){
+      if(slow / total > 0.3){
+        root.classList.add('lite', 'perf');
+        try{ localStorage.setItem('kanji-perf','1'); }catch(e){}
+        return;
+      }
+      total = 0; slow = 0;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 })();
 </script>
 <script id="perf-ask-js">

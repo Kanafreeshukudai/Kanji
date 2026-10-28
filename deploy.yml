@@ -1,0 +1,43 @@
+name: Deploy with auto version
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site with version
+        run: |
+          VERSION=$(git rev-parse --short HEAD)
+          echo "Version: $VERSION"
+          rsync -a --exclude '.git' --exclude '.github' ./ dist/
+          # __APP_VERSION__ o'rnini commit raqami bilan almashtiramiz
+          find dist -name '*.html' -o -name '*.js' | xargs sed -i "s/__APP_VERSION__/$VERSION/g"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
