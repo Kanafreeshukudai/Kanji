@@ -9243,43 +9243,47 @@
 </style>
 
 <style id="lite-simple">
-  /* ---------- YENGIL REJIM: kartochka sodda, harakatsiz ko'rinishda ----------
-     Aylanish (3D rotateY) o'rniga kartochka darhol almashadi. Matn, tugmalar
-     va to'g'ri/xato ranglari saqlanadi; bezak nurlari va animatsiyalar o'chadi. */
-  html.lite .card-inner,
-  html.lite .card.flipped .card-inner{
-    transition:none !important;
-    transform:none !important;
-    -webkit-transform:none !important;
-  }
-  html.lite .card.flipped:not(.flipping) .face.front,
-  html.lite .card.flipping.flipped .face.front{ display:none !important; }
-  html.lite .card:not(.flipped) .face.back{ display:none !important; }
-  html.lite .card.flipped .face.back{ display:flex !important; }
-  html.lite .face{
-    transform:none !important;
-    -webkit-transform:none !important;
-    backface-visibility:visible !important;
-    animation:none !important;
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-  }
+  /* ---------- YENGIL REJIM: aylanish saqlanadi, og'ir bezak va chet yonishlari o'chadi ----------
+     Kartochka aylanishi (rotateY) o'zgarmaydi. Quyidagilar o'chadi: chetki nur (glow),
+     drop-shadow filtrlari, shisha (backdrop-filter) va doimiy animatsiyalar. */
+
+  /* 1. Kartochkaning chetki yonishi va filtrlari o'chadi */
   html.lite .card::before,
   html.lite .card::after,
   html.lite .face::before,
   html.lite .face::after{ display:none !important; }
-  html.lite .card *{ animation:none !important; }
-  html.lite .card{ box-shadow:0 1px 0 rgba(0,0,0,.35) !important; }
-  html.lite .card, html.lite .card-inner{ will-change:auto !important; }
+  html.lite .card,
+  html.lite .card-inner,
+  html.lite .face{
+    filter:none !important;
+    -webkit-filter:none !important;
+    text-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  /* 2. Og'ir soya o'rniga yengil chegara */
+  html.lite .card{
+    box-shadow:0 2px 8px rgba(0,0,0,.35) !important;
+  }
+  html.lite .face{
+    box-shadow:none !important;
+  }
+
+  /* 3. Doimiy bezak animatsiyalari (aylanishning o'zi emas, faqat ichidagi bezaklar) */
+  html.lite .card *{
+    animation:none !important;
+  }
+
+  /* 4. Tugmalar va to'g'ri/xato javob tugmalari: hover ko'tarilishi va og'ir o'tishlar yo'q */
   html.lite .quiz-opt{
     transform:none !important;
     transition:background-color .15s ease, color .15s ease, border-color .15s ease !important;
     animation:none !important;
+    box-shadow:none !important;
   }
   html.lite .quiz-opt:hover,
   html.lite .quiz-opt:active{ transform:none !important; }
-  html.lite .kanji-display,
-  html.lite .card *{ text-shadow:none !important; }
+  html.lite .kanji-display{ text-shadow:none !important; }
   html.lite .swipe-hints .hint .hint-arrow{ animation:none !important; }
 </style>
 
