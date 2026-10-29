@@ -5156,6 +5156,14 @@
     justify-content:space-between;
     gap:10px;
   }
+  .ct-mode-note{
+    margin:-4px 0 0;
+    font-size:11.5px;
+    line-height:1.5;
+    color:var(--ink-faint);
+    text-align:left;
+  }
+  .ct-mode-note:empty{display:none;}
   .ct-setting-label{
     font-size:12.5px;
     font-weight:600;
@@ -5570,7 +5578,7 @@
      lekin o'zi kichik va ixcham qoladi. */
   .ct-scoreboard{
     position:absolute;
-    top:calc(160px + env(safe-area-inset-top));
+    top:calc(92px + env(safe-area-inset-top));
     right:12px;
     z-index:5;
     width:118px;
@@ -6174,6 +6182,12 @@
     .ct-table-center-hint:not(.picker-open){ animation:none; background-position:0% 0, 0 0, 0 0; }
   }
   .ct-table-center-hint.picker-open{max-width:min(92%,340px); width:92%;}
+  /* Maslahat matni endi markazdagi "Flashcard tanlash" tugmasining TEPASIDA turadi */
+  .ct-table .ct-table-center-hint:not(.picker-open){
+    top:auto;
+    bottom:calc(50% + 36px);
+    transform:translateX(-50%);
+  }
   /* ---------- XONA MARKAZI: qabul qilingan kartochka(lar) ----------
      Kimdir kartochka yuborganda, uni har kim o'z o'rindig'ida kichik
      ko'rmaydi — stol/oyna markazida, kattaroq kanji va kattaroq javob
@@ -6530,9 +6544,13 @@
      chetda, ingichka issiq rangli hoshiya va sekin "nafas oluvchi" porlash
      animatsiyasi bilan, ko'zga yoqimli va e'tiborni tortadigan holatda. */
   .ct-choose-flashcard-btn{
-    position:relative;
-    z-index:1;
-    width:100%;
+    position:absolute;
+    left:0; right:0;
+    top:50%;
+    z-index:2;
+    width:210px;
+    max-width:80%;
+    box-sizing:border-box;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -6550,7 +6568,7 @@
     overflow:hidden;
     transition:transform .2s ease, box-shadow .2s ease;
     box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
-    margin:10px 0 14px;
+    margin:-24px auto 0;
     flex:none;
     animation:chooseFlashcardGlow 2.8s ease-in-out infinite;
   }
@@ -9869,6 +9887,15 @@
             <button type="button" class="ct-segment-btn" data-visibility="private">Yopiq</button>
           </div>
         </div>
+        <!-- Faqat 3-4 kishilik xonada ko'rinadi -->
+        <div class="ct-setting-row" id="ctModeRow">
+          <span class="ct-setting-label">Rejim</span>
+          <div class="ct-segment" id="ctModeSegment">
+            <button type="button" class="ct-segment-btn active" data-mode="chain">Ketma-ket</button>
+            <button type="button" class="ct-segment-btn" data-mode="all">Hammaga</button>
+          </div>
+        </div>
+        <p class="ct-mode-note" id="ctModeNote"></p>
       </div>
 
       <button class="ct-create-room-btn" id="ctCreateRoomBtn" type="button">Xona yaratish</button>
@@ -9949,14 +9976,14 @@
        o'rindiqlardagi kichik ochko yozuvidan farqli, hammani bir joyda,
        bir qarashda solishtirish uchun. renderScoreboard() to'ldiradi. -->
   <div class="ct-scoreboard" id="ctScoreboard" aria-hidden="true"></div>
-  <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">
-    <svg class="ct-choose-flashcard-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3.2" y="5.5" width="13" height="16" rx="2.6" transform="rotate(-8 9.7 13.5)"></rect>
-      <rect x="7.5" y="3" width="13" height="16" rx="2.6" fill="rgba(255,255,255,0.14)"></rect>
-    </svg>
-    <span>Flashcard tanlash</span>
-  </button>
   <div class="ct-table" id="ctTable">
+    <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">
+      <svg class="ct-choose-flashcard-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.2" y="5.5" width="13" height="16" rx="2.6" transform="rotate(-8 9.7 13.5)"></rect>
+        <rect x="7.5" y="3" width="13" height="16" rx="2.6" fill="rgba(255,255,255,0.14)"></rect>
+      </svg>
+      <span>Flashcard tanlash</span>
+    </button>
     <div class="ct-table-center-hint" id="ctTableCenterHint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
     <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
   </div>
@@ -16516,6 +16543,22 @@
     const visibilitySegment = document.getElementById('ctVisibilitySegment');
     const createRoomBtn = document.getElementById('ctCreateRoomBtn');
     let roomSize = 3; // standart: 3 kishilik xona
+    const modeSegment = document.getElementById('ctModeSegment');
+    const modeRow = document.getElementById('ctModeRow');
+    const modeNote = document.getElementById('ctModeNote');
+    // Rejimlar: 'chain' — kartochka faqat keyingi ishtirokchiga uzatiladi (navbatma-navbat);
+    //           'all'   — navbatdagi kartochka tanlaydi, u BARCHA qolganlarga bir vaqtda so'rov bo'lib boradi.
+    let roomMode = 'chain';
+    function refreshModeUI(){
+      const multi = roomSize >= 3;
+      if(modeRow) modeRow.classList.toggle('hidden', !multi);
+      if(modeNote){
+        modeNote.classList.toggle('hidden', !multi);
+        modeNote.textContent = roomMode === 'all'
+          ? "Navbatdagi ishtirokchi kartochka tanlaydi — u qolgan hammaga bir vaqtda so'rov bo'lib boradi."
+          : "Kartochka navbatma-navbat faqat keyingi ishtirokchiga uzatiladi.";
+      }
+    }
 
     function escapeCt(str){
       return String(str).replace(/[&<>"']/g, (c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16560,9 +16603,20 @@
           setActiveSegmentBtn(sizeSegment, btn);
           roomSize = parseInt(btn.dataset.size, 10) || 3;
           renderSeats(roomSize);
+          refreshModeUI();
         });
       });
     }
+    if(modeSegment){
+      modeSegment.querySelectorAll('.ct-segment-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          setActiveSegmentBtn(modeSegment, btn);
+          roomMode = btn.dataset.mode === 'all' ? 'all' : 'chain';
+          refreshModeUI();
+        });
+      });
+    }
+    refreshModeUI();
     if(visibilitySegment){
       visibilitySegment.querySelectorAll('.ct-segment-btn').forEach(btn=>{
         btn.addEventListener('click', ()=> setActiveSegmentBtn(visibilitySegment, btn));
@@ -16746,7 +16800,7 @@
       const user = auth.currentUser;
       if(!user || !waitingRoomRef || !lastRoomData) return;
       const card = lastRoomData.cards && lastRoomData.cards[uid];
-      if(!card) return;
+      if(!card || uid === user.uid) return;
       if(card.toUid && card.toUid !== user.uid) return; // boshqaga yo'llangan kartochka
       if(currentGuessRecord(uid)) return;               // allaqachon javob berilgan
       const correct = !!isCorrect;
@@ -16916,7 +16970,8 @@
         }).join('');
         const btnText = alreadyIn ? "Ichkariga" : started ? "O'yinda" : full ? "To'liq" : "Kirish";
         const disabled = !alreadyIn && (full || started);
-        const metaText = started ? `${count}/${r.size} ishtirokchi · o'yin boshlangan` : `${count}/${r.size} ishtirokchi`;
+        const modeTxt = (r.size >= 3 && r.mode === 'all') ? " · hammaga rejimi" : "";
+        const metaText = started ? `${count}/${r.size} ishtirokchi${modeTxt} · o'yin boshlangan` : `${count}/${r.size} ishtirokchi${modeTxt}`;
         return `
           <div class="ct-room-item" data-room-id="${escapeCt(r.id)}">
             <div class="ct-room-item-avatar">${avatarHTML}</div>
@@ -16956,6 +17011,8 @@
         participants: { [user.uid]: { name: getHostName(), photo: user.photoURL || '' } },
         status: 'waiting',
         size: roomSize,
+        // 2 kishilik xonada ikkala rejim bir xil, shu sabab ketma-ket saqlanadi
+        mode: (roomSize >= 3 && roomMode === 'all') ? 'all' : 'chain',
         visibility: visibility,
         createdAt: serverTimestamp(),
         lastActivity: serverTimestamp()
@@ -17187,21 +17244,37 @@
       const turnUid = (data && data.turnUid && uids.includes(data.turnUid)) ? data.turnUid : (uids[0] || null);
       const idx = uids.indexOf(turnUid);
       const nextUid = uids.length > 1 ? uids[(idx + 1) % uids.length] : null;
+      // "Hammaga" rejimi: kartochka hamma ishtirokchiga bir vaqtda boradi (toUid yo'q)
+      const broadcast = !!(data && data.mode === 'all');
       // Navbat egasiga yo'llangan va hali javob berilmagan kartochka
       let pendingFromUid = null;
+      // Faqat "Hammaga" rejimida: yuborilgan kartochkaga hali hamma javob bermagan
+      let waitingOthers = false;
       if(turnUid && data && data.cards){
         for(const senderUid of Object.keys(data.cards)){
           const c = data.cards[senderUid];
-          if(!c || senderUid === turnUid || c.toUid !== turnUid) continue;
+          if(!c || !uids.includes(senderUid)) continue;
+          if(broadcast){
+            if(senderUid !== turnUid){
+              const g = data.guesses && data.guesses[`${turnUid}_${senderUid}`];
+              if(!g && !pendingFromUid) pendingFromUid = senderUid;
+            }
+            for(const pUid of uids){
+              if(pUid === senderUid) continue;
+              if(!(data.guesses && data.guesses[`${pUid}_${senderUid}`])){ waitingOthers = true; break; }
+            }
+            continue;
+          }
+          if(senderUid === turnUid || c.toUid !== turnUid) continue;
           const g = data.guesses && data.guesses[`${turnUid}_${senderUid}`];
           if(!g){ pendingFromUid = senderUid; break; }
         }
       }
       return {
-        turnUid, nextUid, pendingFromUid,
+        turnUid, nextUid, pendingFromUid, broadcast, waitingOthers,
         isMyTurn: !!myUid && myUid === turnUid,
         mustAnswerFirst: !!myUid && myUid === turnUid && !!pendingFromUid,
-        canSend: !!myUid && myUid === turnUid && !pendingFromUid && !!nextUid
+        canSend: !!myUid && myUid === turnUid && !pendingFromUid && !waitingOthers && !!nextUid
       };
     }
 
@@ -17348,6 +17421,9 @@
       // maslahat vaqtincha yashiriladi.
       if(centerHintEl){
         centerHintEl.style.display = (centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen) ? 'none' : '';
+      }
+      if(chooseFlashcardBtn){
+        chooseFlashcardBtn.style.display = (centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen) ? 'none' : '';
       }
       renderScoreboard(data);
     }
@@ -17811,6 +17887,20 @@
       if(chooseFlashcardBtn) chooseFlashcardBtn.classList.toggle('ct-turn-locked', !t.canSend);
       if(!t.turnUid){ centerHintEl.textContent = ''; return; }
       const nextName = t.nextUid ? nameOfUid(data, t.nextUid) : '';
+      if(t.broadcast){
+        if(t.canSend){
+          centerHintEl.textContent = "Sizning navbatingiz! «Flashcard tanlash»ni bosing — kartochka hamma ishtirokchiga bir vaqtda yuboriladi.";
+        } else if(t.mustAnswerFirst){
+          centerHintEl.textContent = `Avval ${nameOfUid(data, t.pendingFromUid)} yuborgan kartochkaga javob bering — shundan so'ng o'zingiz kartochka tanlab yuborasiz.`;
+        } else if(t.waitingOthers){
+          centerHintEl.textContent = t.isMyTurn
+            ? "Hamma ishtirokchi javob berishini kuting — shundan so'ng kartochka tanlaysiz."
+            : `Ishtirokchilar kartochkaga javob bermoqda. Navbat keyin ${nameOfUid(data, t.turnUid)}ga o'tadi.`;
+        } else {
+          centerHintEl.textContent = `Navbat: ${nameOfUid(data, t.turnUid)} — u kartochka tanlab, hamma ishtirokchiga bir vaqtda yuboradi.`;
+        }
+        return;
+      }
       if(t.canSend){
         centerHintEl.textContent = `Sizning navbatingiz! «Flashcard tanlash»ni bosing va kartochkani ${nextName}ga uzating.`;
       } else if(t.mustAnswerFirst){
@@ -17874,7 +17964,8 @@
         // Kartochka navbatdagi KEYINGI ishtirokchiga uzatiladi va navbat unga o'tadi
         turnUid: turn.nextUid,
         [`cards.${user.uid}`]: {
-          toUid: turn.nextUid,
+          // "Hammaga" rejimida kartochka aniq kimgadir emas — hamma qolganlarga boradi
+          toUid: turn.broadcast ? null : turn.nextUid,
           wordId: word.id,
           day: kanjiPickerDay,
           kanji: word.kanji,
@@ -17900,6 +17991,7 @@
       const t = getTurnState(lastRoomData || {});
       if(!t.canSend){
         if(t.mustAnswerFirst) showCardTransferToast("Avval kelgan kartochkaga javob bering");
+        else if(t.isMyTurn && t.waitingOthers) showCardTransferToast("Hamma javob berishini kuting");
         else showCardTransferToast(`Hozir ${nameOfUid(lastRoomData || {}, t.turnUid)}ning navbati`);
         return;
       }
