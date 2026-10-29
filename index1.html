@@ -6054,6 +6054,62 @@
   }
   .ct-guess-opt:hover{background:rgba(255,255,255,0.14);}
   .ct-guess-opt:active{transform:scale(0.96);}
+
+  /* ===== Savol kartochkasi: to'liq ko'rinadigan, zamonaviy ko'rinish ===== */
+  /* Karta orqasidagi maydonlar ko'rinmasligi uchun to'liq (shaffof bo'lmagan) fon */
+  .ct-center-stack:has(.guess-pending){ z-index:300; }
+  .ct-center-card.guess-pending{
+    background:linear-gradient(170deg, #241f1b 0%, #15120f 100%) !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 26px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    border-radius:26px;
+    padding:22px 20px 20px;
+    gap:6px;
+    width:min(86vw, 300px);
+    max-width:min(86vw, 300px);
+    color:#f4efe6;
+  }
+  .ct-center-card.guess-pending .ct-center-card-from{ margin-bottom:2px; }
+  .ct-center-card.guess-pending .ct-center-card-kanji{
+    font-size:76px; line-height:1.05; margin:6px 0 4px; color:#fbf6ec;
+    text-shadow:0 6px 28px rgba(217,105,79,0.35);
+  }
+  .ct-center-card.guess-pending .ct-guess-meta{
+    display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;
+  }
+  .ct-guess-progress{ display:flex; gap:6px; width:120px; }
+  .ct-guess-progress i{
+    flex:1; height:4px; border-radius:4px; background:rgba(255,255,255,0.12); display:block;
+    transition:background .25s ease;
+  }
+  .ct-guess-progress i.on{ background:linear-gradient(90deg, var(--accent), var(--gold)); }
+  .ct-center-card.guess-pending .ct-guess-step{
+    font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:rgba(244,239,230,0.6); margin:0;
+  }
+  .ct-center-card.guess-pending .ct-guess-q{
+    font-size:13px; font-weight:600; color:rgba(244,239,230,0.85); margin:4px 0 10px; text-align:center;
+  }
+  .ct-center-card.guess-pending .ct-guess-opts{
+    grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; max-width:none; width:100%;
+  }
+  .ct-center-card.guess-pending .ct-guess-opt{
+    min-height:46px; padding:9px 8px; border-radius:14px;
+    background:#2b2622; border:1px solid rgba(255,255,255,0.1);
+    color:#f4efe6; font-size:13px; font-weight:600;
+    box-shadow:0 3px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .ct-center-card.guess-pending .ct-guess-opt:hover{
+    background:#332d28; border-color:rgba(217,105,79,0.55); color:#fff;
+  }
+  .ct-center-card.guess-pending .ct-guess-opt:active{
+    transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.35);
+  }
+  .ct-center-card.guess-pending .ct-guess-opt:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
   .ct-table-seat-score{
     font-size:11px;
     font-weight:700;
@@ -17245,11 +17301,13 @@
                 const opts = getGuessOptions(uid, card);
                 const list = inUz ? opts.uz : opts.romaji;
                 const stepName = inUz ? 'uz' : 'romaji';
-                const stepLabel = inUz ? '2/2 · tarjimasini tanlang' : '1/2 · romanjisini tanlang';
+                const stepQ = inUz ? "Bu so'zning ma'nosi qaysi?" : "Bu kanji qanday o'qiladi?";
+                const stepProg = `<div class="ct-guess-progress"><i class="on"></i><i class="${inUz ? 'on' : ''}"></i></div>`;
                 centerCardsHTML.push(`<div class="ct-center-card guess-pending" data-card-uid="${escapeCt(uid)}">
                      <div class="ct-center-card-from">${escapeCt(name)}</div>
                      <span class="ct-table-seat-card-kanji ct-center-card-kanji">${escapeCt(card.kanji || '')}</span>
-                     <div class="ct-guess-step">${stepLabel}</div>
+                     <div class="ct-guess-meta">${stepProg}<span class="ct-guess-step">${inUz ? '2/2 · Tarjima' : '1/2 · Romanji'}</span></div>
+                     <div class="ct-guess-q">${stepQ}</div>
                      <div class="ct-guess-opts">${list.map(o => `<button type="button" class="ct-guess-opt" data-guess-uid="${escapeCt(uid)}" data-step="${stepName}" data-value="${escapeCt(o)}">${escapeCt(o)}</button>`).join('')}</div>
                    </div>`);
               }
