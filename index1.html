@@ -5589,12 +5589,10 @@
     gap:4px;
     padding:7px;
     border-radius:18px;
-    background:var(--glass-bg);
-    border:1px solid var(--glass-border-soft);
+    background:none;
+    border:none;
     box-sizing:border-box;
-    -webkit-backdrop-filter:blur(var(--blur-2));
-    backdrop-filter:blur(var(--blur-2));
-    box-shadow:0 12px 30px -14px var(--glass-shadow);
+    box-shadow:none;
     animation:ctScoreboardIn .45s cubic-bezier(.22,.61,.36,1);
   }
   .ct-scoreboard.ct-scoreboard-compact{ width:min(56%, 230px); }
@@ -5614,7 +5612,6 @@
     background:rgba(255,255,255,0.03);
   }
   .ct-scoreboard-row-self{ background:rgba(255,255,255,0.08); }
-  .ct-scoreboard-row-lead{ box-shadow:inset 0 0 0 1px rgba(201,166,107,0.35); }
   .ct-scoreboard-rank{
     flex:none;
     width:14px;
@@ -6160,9 +6157,9 @@
     line-height:1;
     padding:6px 10px;
     border-radius:9px;
-    border:1px solid var(--glass-border-soft);
-    background:var(--glass-bg);
-    color:var(--ink-soft);
+    border:1px solid rgba(255,255,255,0.2);
+    background:linear-gradient(155deg, var(--moss), var(--moss-soft));
+    color:#fff;
     cursor:pointer;
     flex:none;
   }
@@ -6173,11 +6170,11 @@
   .ct-guess-step{font-size:11.5px; font-weight:700; color:var(--ink-soft); margin:6px 0 5px; letter-spacing:.2px;}
   .ct-guess-opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:5px; width:100%; max-width:270px;}
   .ct-guess-opt{
-    padding:6px 5px; border-radius:9px; border:1px solid rgba(255,255,255,0.18);
-    background:rgba(255,255,255,0.07); color:var(--ink); font:inherit; font-size:12px; font-weight:600;
+    padding:6px 5px; border-radius:9px; border:1px solid rgba(217,105,79,0.55);
+    background:rgba(217,105,79,0.16); color:var(--ink); font:inherit; font-size:12px; font-weight:600;
     line-height:1.25; cursor:pointer; word-break:break-word; transition:transform .12s ease, background .15s ease;
   }
-  .ct-guess-opt:hover{background:rgba(255,255,255,0.14);}
+  .ct-guess-opt:hover{background:rgba(217,105,79,0.28);}
   .ct-guess-opt:active{transform:scale(0.96);}
 
   /* ===== Savol kartochkasi (javob berish oynasi): yengil, yassi, rangli ko'rinish =====
@@ -6231,13 +6228,13 @@
   }
   .ct-center-card.guess-pending .ct-guess-opt{
     min-height:44px; padding:8px 8px; border-radius:13px;
-    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14);
-    color:#f6f1e8; font-size:13px; font-weight:600;
+    background:rgba(217,105,79,0.18); border:1px solid rgba(217,105,79,0.55);
+    color:#fff; font-size:13px; font-weight:600;
     box-shadow:none;
     transition:background .12s ease, border-color .12s ease, transform .1s ease;
   }
   .ct-center-card.guess-pending .ct-guess-opt:hover{
-    background:rgba(217,105,79,0.16); border-color:rgba(217,105,79,0.65); color:#fff;
+    background:rgba(217,105,79,0.34); border-color:rgba(217,105,79,0.9); color:#fff;
   }
   .ct-center-card.guess-pending .ct-guess-opt:active{
     background:var(--accent); border-color:var(--accent); color:#fff; transform:scale(0.97);
@@ -6698,10 +6695,9 @@
     cursor:pointer;
     overflow:hidden;
     transition:transform .2s ease, box-shadow .2s ease;
-    box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
     margin:-24px auto 0;
     flex:none;
-    animation:chooseFlashcardGlow 2.8s ease-in-out infinite;
   }
   .ct-choose-flashcard-btn::before{
     /* nafis, yuqoridan pastga so'nib boruvchi shisha nur chizig'i */
@@ -6718,14 +6714,10 @@
     position:relative;
     filter:drop-shadow(0 1px 1px rgba(0,0,0,0.2));
   }
-  @keyframes chooseFlashcardGlow{
-    0%,100%{ box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04); }
-    50%{ box-shadow:0 10px 28px -6px rgba(163,230,53,0.8), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.06); }
-  }
   @media (prefers-reduced-motion: reduce){
     .ct-choose-flashcard-btn{ animation:none; }
   }
-  .ct-choose-flashcard-btn:active{transform:scale(0.97); box-shadow:0 4px 14px -6px rgba(163,230,53,0.5);}
+  .ct-choose-flashcard-btn:active{transform:scale(0.97);}
   .ct-leave-btn{
     width:100%;
     padding:12px;
@@ -10026,7 +10018,6 @@
             <button type="button" class="ct-segment-btn" data-mode="all">Hammaga</button>
           </div>
         </div>
-        <p class="ct-mode-note" id="ctModeNote"></p>
       </div>
 
       <button class="ct-create-room-btn" id="ctCreateRoomBtn" type="button">Xona yaratish</button>
@@ -16675,19 +16666,12 @@
     let roomSize = 3; // standart: 3 kishilik xona
     const modeSegment = document.getElementById('ctModeSegment');
     const modeRow = document.getElementById('ctModeRow');
-    const modeNote = document.getElementById('ctModeNote');
     // Rejimlar: 'chain' — kartochka faqat keyingi ishtirokchiga uzatiladi (navbatma-navbat);
     //           'all'   — navbatdagi kartochka tanlaydi, u BARCHA qolganlarga bir vaqtda so'rov bo'lib boradi.
     let roomMode = 'chain';
     function refreshModeUI(){
       const multi = roomSize >= 3;
       if(modeRow) modeRow.classList.toggle('hidden', !multi);
-      if(modeNote){
-        modeNote.classList.toggle('hidden', !multi);
-        modeNote.textContent = roomMode === 'all'
-          ? "Navbatdagi ishtirokchi kartochka tanlaydi — u qolgan hammaga bir vaqtda so'rov bo'lib boradi."
-          : "Kartochka navbatma-navbat faqat keyingi ishtirokchiga uzatiladi.";
-      }
     }
 
     function escapeCt(str){
