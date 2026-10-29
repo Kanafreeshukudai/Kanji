@@ -6044,6 +6044,16 @@
   .ct-guess-check-btn:active{transform:scale(0.92);}
   .ct-guess-wrong-hint{font-size:10.5px; color:var(--accent-soft); margin-top:2px;}
   .ct-guess-correct-mark{font-size:14px; font-weight:700; color:var(--moss-soft);}
+  /* Yangi o'yin: 10 ta variant (romanji → tarjima) */
+  .ct-guess-step{font-size:11.5px; font-weight:700; color:var(--ink-soft); margin:6px 0 5px; letter-spacing:.2px;}
+  .ct-guess-opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:5px; width:100%; max-width:270px;}
+  .ct-guess-opt{
+    padding:6px 5px; border-radius:9px; border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.07); color:var(--ink); font:inherit; font-size:12px; font-weight:600;
+    line-height:1.25; cursor:pointer; word-break:break-word; transition:transform .12s ease, background .15s ease;
+  }
+  .ct-guess-opt:hover{background:rgba(255,255,255,0.14);}
+  .ct-guess-opt:active{transform:scale(0.96);}
   .ct-table-seat-score{
     font-size:11px;
     font-weight:700;
@@ -6419,6 +6429,23 @@
   }
   .ct-kanji-picker-send:disabled{opacity:0.35; cursor:default; box-shadow:none;}
   .ct-kanji-picker-send:not(:disabled):active{transform:scale(0.97) translateY(0);}
+  /* Kanji tanlash paneli: "Yuborish" tugmasi har doim pastda ko'rinib tursin.
+     Ro'yxat (kanjilar) o'zi aylanadi, sarlavha va tugma esa qotirilgan holda qoladi. */
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid){
+    display:flex !important;
+    flex-direction:column;
+    overflow:hidden !important;
+  }
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid) .ct-kanji-picker-head{ flex:none; }
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid) .ct-kanji-picker-grid{
+    flex:1 1 auto;
+    min-height:0;
+    max-height:none !important;
+  }
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid) .ct-kanji-picker-send{
+    flex:none;
+    margin-top:10px;
+  }
   /* ---------- XONA ICHKARISI: yuborilgan kartochka ko'rinishi ---------- */
   .ct-sent-card{
     display:flex;
@@ -10302,6 +10329,8 @@
     {id:"uki", day:5, group:"雨", kanji:"雨季", romaji:"uki", type:"on + on", reading:"雨(u) + 季(ki)", uz:"yomg'irli mavsum (N3)"},
 
     {id:"kai", day:5, group:"貝", kanji:"貝", romaji:"kai", type:"kun'yomi", reading:"貝(kai) — yakka kanji", uz:"chig'anoq"},
+    {id:"kaigara", day:5, group:"貝", kanji:"貝がら", romaji:"kaigara", type:"kun + kun", reading:"貝(kai) + がら(gara)", uz:"chig'anoq qobig'i"},
+    {id:"kaibashira", day:5, group:"貝", kanji:"貝柱", romaji:"kaibashira", type:"kun + kun", reading:"貝(kai) + 柱(bashira)", uz:"chig'anoqning go'shtli qismi / ichki qismi"},
 
     // ---- 6-KUN ----
     {id:"kome", day:6, group:"米", kanji:"米", romaji:"kome", type:"kun'yomi", reading:"米(kome) — yakka kanji", otherReadings:"kun: こめ(kome) · on: マイ(mai), ベイ(bei)", uz:"guruch"},
@@ -16558,7 +16587,11 @@
     // hozircha kim nima yozayotgani shu Map orqali saqlanib turadi (aks
     // holda har safar boshqa birov kartochka yuborganda yozilayotgan matn
     // o'chib qolar edi).
-    const guessDrafts = new Map();
+    // Yangi o'yin: 1-bosqich romanji, 2-bosqich tarjima (ikkalasi 10 ta variantdan tanlanadi).
+    // guessStepState: uid -> {wordId, step:'uz', romaji} (faqat romanji to'g'ri topilganda)
+    const guessStepState = new Map();
+    // guessOptCache: uid -> {wordId, romaji:[10], uz:[10]} — variantlar qayta chizilganda o'zgarmasin
+    const guessOptCache = new Map();
     // ---------- JAVOB BERGANDA AVATAR ORTIDA YASHIL/QIZIL AURA YONIB-SO'NISHI ----------
     // To'g'ri javob — yashil (moss), xato javob — qizil (accent) aura porlab,
     // so'ng asta-sekin so'nadi. Bu holat Firestore orqali (`avatarFlashes`
@@ -16612,72 +16645,106 @@
       if(!user || !lastRoomData) return null;
       return (lastRoomData.guesses && lastRoomData.guesses[`${user.uid}_${uid}`]) || null;
     }
-    async function submitGuess(uid, rawAnswer){
+    function guessNorm(v){ return (v || '').toString().trim().toLowerCase().replace(/\s+/g, ''); }
+    function shuffleArr(a){
+      for(let k = a.length - 1; k > 0; k--){
+        const r = Math.floor(Math.random() * (k + 1));
+        const t = a[k]; a[k] = a[r]; a[r] = t;
+      }
+      return a;
+    }
+    // Savol uchun 10 ta variant: 1 ta to'g'ri + 9 ta boshqa so'zdan (takrorlanmasdan)
+    function getGuessOptions(uid, card){
+      const cached = guessOptCache.get(uid);
+      if(cached && cached.wordId === card.wordId) return cached;
+      const pick = (field, correct) => {
+        const seen = new Set([guessNorm(correct)]);
+        const out = [];
+        for(const w of shuffleArr(WORDS.slice())){
+          if(out.length >= 9) break;
+          const v = (w[field] || '').toString().trim();
+          const n = guessNorm(v);
+          if(!v || seen.has(n)) continue;
+          seen.add(n);
+          out.push(v);
+        }
+        return out;
+      };
+      const entry = {
+        wordId: card.wordId,
+        romaji: shuffleArr([card.romaji || ''].concat(pick('romaji', card.romaji))),
+        uz: shuffleArr([card.uz || ''].concat(pick('uz', card.uz)))
+      };
+      guessOptCache.set(uid, entry);
+      return entry;
+    }
+    function currentGuessRecord(uid){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !lastRoomData) return null;
+      return (lastRoomData.guesses && lastRoomData.guesses[`${user.uid}_${uid}`]) || null;
+    }
+    // Savol yakuniy javob bilan yopiladi (to'g'ri yoki xato, qayta urinish yo'q)
+    async function submitGuess(uid, isCorrect, answerText){
       const {auth, updateDoc, serverTimestamp, increment} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user || !waitingRoomRef || !lastRoomData) return;
       const card = lastRoomData.cards && lastRoomData.cards[uid];
       if(!card) return;
       if(card.toUid && card.toUid !== user.uid) return; // boshqaga yo'llangan kartochka
-      const existing = currentGuessRecord(uid);
-      // Bitta urinishdan keyin javob yakuniy hisoblanadi — to'g'ri yoki
-      // xato bo'lishidan qat'iy nazar, qayta yozib bo'lmaydi (xato bo'lsa
-      // to'g'ri javob darhol ochib ko'rsatiladi, qayta urinishni kutib
-      // o'tirilmaydi).
-      if(existing) return;
-      const answer = (rawAnswer || '').toString().trim();
-      if(!answer) return;
-      const norm = s => (s || '').toString().trim().toLowerCase().replace(/\s+/g, '');
-      const isCorrect = norm(answer) === norm(card.romaji);
-      // Javob berilgan zahoti — o'zimiz uchun darhol tovush effekti (mavjud
-      // to'g'ri/xato tovushlar bilan bir xil, viktorinada ishlatilgani kabi),
-      // Firestore javobini kutib o'tirmaydi, shu bilan darhol his-tuyg'u beradi.
-      if(isCorrect) playCorrectSound(); else playWrongSound();
+      if(currentGuessRecord(uid)) return;               // allaqachon javob berilgan
+      const correct = !!isCorrect;
+      if(correct) playCorrectSound(); else playWrongSound();
       const key = `${user.uid}_${uid}`;
       const updates = {
-        [`guesses.${key}`]: { correct: isCorrect, answer, checkedAt: serverTimestamp() },
-        // Javob bergan kishining avatari ortida hammaga ko'rinadigan
-        // yashil/qizil aura — `at` client vaqti sifatida yoziladi (serverTimestamp
-        // emas), shunda barcha ishtirokchilarning animatsiyasi bir xil, kechikishsiz
-        // boshlanadi va har bir flash o'ziga xos qiymat bilan aniq ajraladi.
-        [`avatarFlashes.${user.uid}`]: { type: isCorrect ? 'correct' : 'wrong', at: Date.now() }
+        [`guesses.${key}`]: { correct, answer: answerText || '', checkedAt: serverTimestamp() },
+        [`avatarFlashes.${user.uid}`]: { type: correct ? 'correct' : 'wrong', at: Date.now() }
       };
-      // To'g'ri topilsa — taxmin qilgan kishining umumiy ochkosiga +1
-      // qo'shiladi. Xato bo'lsa ochko o'zgarmaydi (0 bilan qoladi) va
-      // javob yozish oynasi butunlay yopiladi (qayta urinish yo'q).
-      if(isCorrect) updates[`scores.${user.uid}`] = increment(1);
+      // Ikkala bosqich ham to'g'ri bo'lsagina +1 ochko
+      if(correct) updates[`scores.${user.uid}`] = increment(1);
       try{
         await updateDoc(waitingRoomRef, updates);
-        guessDrafts.delete(uid);
+        guessStepState.delete(uid);
       }catch(e){
         console.error("Javobni tekshirishda xatolik:", e.message);
         showCardTransferToast("Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
       }
     }
+    // Variant bosilganda: romanji bosqichi yoki tarjima bosqichi
+    function handleGuessChoice(uid, step, value){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !lastRoomData) return;
+      const card = lastRoomData.cards && lastRoomData.cards[uid];
+      if(!card || (card.toUid && card.toUid !== user.uid)) return;
+      if(currentGuessRecord(uid)) return;
+      const st = guessStepState.get(uid);
+      const inUzStep = !!(st && st.wordId === card.wordId && st.step === 'uz');
+      if(step === 'romaji'){
+        if(inUzStep) return;
+        // 1-bosqich: romanji. Xato bo'lsa savolga darhol xato javob beriladi
+        if(guessNorm(value) !== guessNorm(card.romaji)){
+          submitGuess(uid, false, value);
+          return;
+        }
+        guessStepState.set(uid, { wordId: card.wordId, step: 'uz', romaji: value });
+        renderTableSeats(lastRoomData);
+        return;
+      }
+      if(step === 'uz'){
+        if(!inUzStep) return;
+        // 2-bosqich: tarjima
+        const isCorrect = guessNorm(value) === guessNorm(card.uz);
+        submitGuess(uid, isCorrect, `${st.romaji} — ${value}`);
+      }
+    }
     if(tableSeatsEl){
-      tableSeatsEl.addEventListener('input', (e)=>{
-        const input = e.target.closest('.ct-guess-input');
-        if(!input) return;
-        const uid = input.dataset.guessUid;
-        if(!uid) return;
-        guessDrafts.set(uid, input.value);
-        input.classList.remove('wrong');
-      });
-      tableSeatsEl.addEventListener('keydown', (e)=>{
-        if(e.key !== 'Enter') return;
-        const input = e.target.closest('.ct-guess-input');
-        if(!input) return;
-        e.preventDefault();
-        const uid = input.dataset.guessUid;
-        if(uid) submitGuess(uid, input.value);
-      });
       tableSeatsEl.addEventListener('click', (e)=>{
-        const checkBtn = e.target.closest('.ct-guess-check-btn');
-        if(!checkBtn) return;
-        const uid = checkBtn.dataset.guessUid;
+        const opt = e.target.closest('.ct-guess-opt');
+        if(!opt) return;
+        const uid = opt.dataset.guessUid;
         if(!uid) return;
-        const input = tableSeatsEl.querySelector(`.ct-guess-input[data-guess-uid="${uid}"]`);
-        submitGuess(uid, input ? input.value : '');
+        handleGuessChoice(uid, opt.dataset.step, opt.dataset.value || '');
       });
     }
 
@@ -17173,14 +17240,17 @@
                 // kattaroq kartochka sifatida ko'rsatiladi (pastda
                 // centerCardsHTML'ga qo'shiladi), shu sababli bu yerda
                 // o'rindiq ichida hech narsa chizilmaydi.
-                const draftVal = guessDrafts.has(uid) ? guessDrafts.get(uid) : '';
+                const stepSt = guessStepState.get(uid);
+                const inUz = !!(stepSt && stepSt.wordId === card.wordId && stepSt.step === 'uz');
+                const opts = getGuessOptions(uid, card);
+                const list = inUz ? opts.uz : opts.romaji;
+                const stepName = inUz ? 'uz' : 'romaji';
+                const stepLabel = inUz ? '2/2 · tarjimasini tanlang' : '1/2 · romanjisini tanlang';
                 centerCardsHTML.push(`<div class="ct-center-card guess-pending" data-card-uid="${escapeCt(uid)}">
                      <div class="ct-center-card-from">${escapeCt(name)}</div>
                      <span class="ct-table-seat-card-kanji ct-center-card-kanji">${escapeCt(card.kanji || '')}</span>
-                     <div class="ct-guess-form ct-center-guess-form">
-                       <input type="text" class="ct-guess-input ct-center-guess-input" data-guess-uid="${escapeCt(uid)}" value="${escapeCt(draftVal)}" placeholder="romaji" autocomplete="off" autocorrect="off" spellcheck="false">
-                       <button type="button" class="ct-guess-check-btn ct-center-guess-check-btn" data-guess-uid="${escapeCt(uid)}">&#10003;</button>
-                     </div>
+                     <div class="ct-guess-step">${stepLabel}</div>
+                     <div class="ct-guess-opts">${list.map(o => `<button type="button" class="ct-guess-opt" data-guess-uid="${escapeCt(uid)}" data-step="${stepName}" data-value="${escapeCt(o)}">${escapeCt(o)}</button>`).join('')}</div>
                    </div>`);
               }
             }
