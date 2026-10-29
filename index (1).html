@@ -2,6 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
+<meta name="app-version" content="__APP_VERSION__">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Kanji Flashcard</title>
 
@@ -5155,6 +5156,14 @@
     justify-content:space-between;
     gap:10px;
   }
+  .ct-mode-note{
+    margin:-4px 0 0;
+    font-size:11.5px;
+    line-height:1.5;
+    color:var(--ink-faint);
+    text-align:left;
+  }
+  .ct-mode-note:empty{display:none;}
   .ct-setting-label{
     font-size:12.5px;
     font-weight:600;
@@ -5569,7 +5578,7 @@
      lekin o'zi kichik va ixcham qoladi. */
   .ct-scoreboard{
     position:absolute;
-    top:calc(160px + env(safe-area-inset-top));
+    top:calc(92px + env(safe-area-inset-top));
     right:12px;
     z-index:5;
     width:118px;
@@ -6043,6 +6052,72 @@
   .ct-guess-check-btn:active{transform:scale(0.92);}
   .ct-guess-wrong-hint{font-size:10.5px; color:var(--accent-soft); margin-top:2px;}
   .ct-guess-correct-mark{font-size:14px; font-weight:700; color:var(--moss-soft);}
+  /* Yangi o'yin: 10 ta variant (romanji → tarjima) */
+  .ct-guess-step{font-size:11.5px; font-weight:700; color:var(--ink-soft); margin:6px 0 5px; letter-spacing:.2px;}
+  .ct-guess-opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:5px; width:100%; max-width:270px;}
+  .ct-guess-opt{
+    padding:6px 5px; border-radius:9px; border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.07); color:var(--ink); font:inherit; font-size:12px; font-weight:600;
+    line-height:1.25; cursor:pointer; word-break:break-word; transition:transform .12s ease, background .15s ease;
+  }
+  .ct-guess-opt:hover{background:rgba(255,255,255,0.14);}
+  .ct-guess-opt:active{transform:scale(0.96);}
+
+  /* ===== Savol kartochkasi: to'liq ko'rinadigan, zamonaviy ko'rinish ===== */
+  /* Karta orqasidagi maydonlar ko'rinmasligi uchun to'liq (shaffof bo'lmagan) fon */
+  .ct-center-stack:has(.guess-pending){ z-index:300; }
+  .ct-center-card.guess-pending{
+    background:linear-gradient(170deg, #241f1b 0%, #15120f 100%) !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 26px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    border-radius:26px;
+    padding:22px 20px 20px;
+    gap:6px;
+    width:min(86vw, 300px);
+    max-width:min(86vw, 300px);
+    color:#f4efe6;
+  }
+  .ct-center-card.guess-pending .ct-center-card-from{ margin-bottom:2px; }
+  .ct-center-card.guess-pending .ct-center-card-kanji{
+    font-size:76px; line-height:1.05; margin:6px 0 4px; color:#fbf6ec;
+    text-shadow:0 6px 28px rgba(217,105,79,0.35);
+  }
+  .ct-center-card.guess-pending .ct-guess-meta{
+    display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;
+  }
+  .ct-guess-progress{ display:flex; gap:6px; width:120px; }
+  .ct-guess-progress i{
+    flex:1; height:4px; border-radius:4px; background:rgba(255,255,255,0.12); display:block;
+    transition:background .25s ease;
+  }
+  .ct-guess-progress i.on{ background:linear-gradient(90deg, var(--accent), var(--gold)); }
+  .ct-center-card.guess-pending .ct-guess-step{
+    font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:rgba(244,239,230,0.6); margin:0;
+  }
+  .ct-center-card.guess-pending .ct-guess-q{
+    font-size:13px; font-weight:600; color:rgba(244,239,230,0.85); margin:4px 0 10px; text-align:center;
+  }
+  .ct-center-card.guess-pending .ct-guess-opts{
+    grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; max-width:none; width:100%;
+  }
+  .ct-center-card.guess-pending .ct-guess-opt{
+    min-height:46px; padding:9px 8px; border-radius:14px;
+    background:#2b2622; border:1px solid rgba(255,255,255,0.1);
+    color:#f4efe6; font-size:13px; font-weight:600;
+    box-shadow:0 3px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .ct-center-card.guess-pending .ct-guess-opt:hover{
+    background:#332d28; border-color:rgba(217,105,79,0.55); color:#fff;
+  }
+  .ct-center-card.guess-pending .ct-guess-opt:active{
+    transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.35);
+  }
+  .ct-center-card.guess-pending .ct-guess-opt:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
   .ct-table-seat-score{
     font-size:11px;
     font-weight:700;
@@ -6107,6 +6182,12 @@
     .ct-table-center-hint:not(.picker-open){ animation:none; background-position:0% 0, 0 0, 0 0; }
   }
   .ct-table-center-hint.picker-open{max-width:min(92%,340px); width:92%;}
+  /* Maslahat matni endi markazdagi "Flashcard tanlash" tugmasining TEPASIDA turadi */
+  .ct-table .ct-table-center-hint:not(.picker-open){
+    top:auto;
+    bottom:calc(50% + 36px);
+    transform:translateX(-50%);
+  }
   /* ---------- XONA MARKAZI: qabul qilingan kartochka(lar) ----------
      Kimdir kartochka yuborganda, uni har kim o'z o'rindig'ida kichik
      ko'rmaydi — stol/oyna markazida, kattaroq kanji va kattaroq javob
@@ -6418,6 +6499,23 @@
   }
   .ct-kanji-picker-send:disabled{opacity:0.35; cursor:default; box-shadow:none;}
   .ct-kanji-picker-send:not(:disabled):active{transform:scale(0.97) translateY(0);}
+  /* Kanji tanlash paneli: "Yuborish" tugmasi har doim pastda ko'rinib tursin.
+     Ro'yxat (kanjilar) o'zi aylanadi, sarlavha va tugma esa qotirilgan holda qoladi. */
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid){
+    display:flex !important;
+    flex-direction:column;
+    overflow:hidden !important;
+  }
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid) .ct-kanji-picker-head{ flex:none; }
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid) .ct-kanji-picker-grid{
+    flex:1 1 auto;
+    min-height:0;
+    max-height:none !important;
+  }
+  .ct-table-center-hint.picker-open:has(.ct-kanji-picker-grid) .ct-kanji-picker-send{
+    flex:none;
+    margin-top:10px;
+  }
   /* ---------- XONA ICHKARISI: yuborilgan kartochka ko'rinishi ---------- */
   .ct-sent-card{
     display:flex;
@@ -6446,9 +6544,13 @@
      chetda, ingichka issiq rangli hoshiya va sekin "nafas oluvchi" porlash
      animatsiyasi bilan, ko'zga yoqimli va e'tiborni tortadigan holatda. */
   .ct-choose-flashcard-btn{
-    position:relative;
-    z-index:1;
-    width:100%;
+    position:absolute;
+    left:0; right:0;
+    top:50%;
+    z-index:2;
+    width:210px;
+    max-width:80%;
+    box-sizing:border-box;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -6466,7 +6568,7 @@
     overflow:hidden;
     transition:transform .2s ease, box-shadow .2s ease;
     box-shadow:0 8px 22px -8px rgba(163,230,53,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.04);
-    margin:10px 0 14px;
+    margin:-24px auto 0;
     flex:none;
     animation:chooseFlashcardGlow 2.8s ease-in-out infinite;
   }
@@ -9142,7 +9244,9 @@
     border:1.5px solid rgba(var(--c),.5);
     box-shadow:0 14px 28px -18px rgba(var(--c),.9), inset 0 1px 0 rgba(255,255,255,.07);
     transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s ease, box-shadow .25s ease;
-    opacity:0; transform:translateY(12px);
+    /* Oxirgi holat ko'rinadigan bo'lishi shart: animatsiya o'chirilgan (no-anim / yengil rejim) bo'lsa ham tugmalar yashirin qolmasin.
+       Kirish animatsiyasi (lmOptIn) faqat yumshoq kirish effektini beradi. */
+    opacity:1; transform:none;
   }
   .lm-opt-both{ --c:124,154,107; --t:#b4d3a2; }
   .lm-overlay.show .lm-opt{ animation:lmOptIn .5s cubic-bezier(.22,1,.36,1) .14s both; }
@@ -9240,44 +9344,68 @@
 </style>
 
 <style id="lite-simple">
-  /* ---------- YENGIL REJIM: kartochka sodda, harakatsiz ko'rinishda ----------
-     Aylanish (3D rotateY) o'rniga kartochka darhol almashadi. Matn, tugmalar
-     va to'g'ri/xato ranglari saqlanadi; bezak nurlari va animatsiyalar o'chadi. */
-  html.lite .card-inner,
-  html.lite .card.flipped .card-inner{
-    transition:none !important;
-    transform:none !important;
-    -webkit-transform:none !important;
-  }
-  html.lite .card.flipped:not(.flipping) .face.front,
-  html.lite .card.flipping.flipped .face.front{ display:none !important; }
-  html.lite .card:not(.flipped) .face.back{ display:none !important; }
-  html.lite .card.flipped .face.back{ display:flex !important; }
-  html.lite .face{
-    transform:none !important;
-    -webkit-transform:none !important;
-    backface-visibility:visible !important;
-    animation:none !important;
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-  }
+  /* ---------- YENGIL REJIM: aylanish saqlanadi, og'ir bezak va chet yonishlari o'chadi ----------
+     Kartochka aylanishi (rotateY) o'zgarmaydi. Quyidagilar o'chadi: chetki nur (glow),
+     drop-shadow filtrlari, shisha (backdrop-filter) va doimiy animatsiyalar. */
+
+  /* 1. Kartochkaning chetki yonishi va filtrlari o'chadi */
   html.lite .card::before,
   html.lite .card::after,
   html.lite .face::before,
   html.lite .face::after{ display:none !important; }
-  html.lite .card *{ animation:none !important; }
-  html.lite .card{ box-shadow:0 1px 0 rgba(0,0,0,.35) !important; }
-  html.lite .card, html.lite .card-inner{ will-change:auto !important; }
+  html.lite .card,
+  html.lite .card-inner,
+  html.lite .face{
+    filter:none !important;
+    -webkit-filter:none !important;
+    text-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  /* 2. Og'ir soya o'rniga yengil chegara */
+  html.lite .card{
+    box-shadow:0 2px 8px rgba(0,0,0,.35) !important;
+  }
+  html.lite .face{
+    box-shadow:none !important;
+  }
+
+  /* 3. Doimiy bezak animatsiyalari (aylanishning o'zi emas, faqat ichidagi bezaklar) */
+  html.lite .card *{
+    animation:none !important;
+  }
+
+  /* 4. Tugmalar va to'g'ri/xato javob tugmalari: hover ko'tarilishi va og'ir o'tishlar yo'q */
   html.lite .quiz-opt{
     transform:none !important;
     transition:background-color .15s ease, color .15s ease, border-color .15s ease !important;
     animation:none !important;
+    box-shadow:none !important;
   }
   html.lite .quiz-opt:hover,
   html.lite .quiz-opt:active{ transform:none !important; }
-  html.lite .kanji-display,
-  html.lite .card *{ text-shadow:none !important; }
+  html.lite .kanji-display{ text-shadow:none !important; }
   html.lite .swipe-hints .hint .hint-arrow{ animation:none !important; }
+</style>
+
+<style id="clear-btn-solid">
+  /* "Tozalash" tugmasi: shaffof emas, qattiq (solid) qizg'ish fon */
+  #view-all .all-bar-info .all-clear-btn,
+  #view-all .all-bar-info .all-clear-btn:not(.slot-empty){
+    background:#3b2019 !important;
+    border:1px solid #D9694F !important;
+    color:#f3e3dc !important;
+    box-shadow:none !important;
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+  @media (hover:hover) and (pointer:fine){
+    #view-all .all-bar-info .all-clear-btn:hover{
+      background:#4a261d !important;
+      border-color:#e5876f !important;
+    }
+  }
+  #view-all .all-bar-info .all-clear-btn:active{ background:#4a261d !important; }
 </style>
 </head>
 <script>
@@ -9759,6 +9887,15 @@
             <button type="button" class="ct-segment-btn" data-visibility="private">Yopiq</button>
           </div>
         </div>
+        <!-- Faqat 3-4 kishilik xonada ko'rinadi -->
+        <div class="ct-setting-row" id="ctModeRow">
+          <span class="ct-setting-label">Rejim</span>
+          <div class="ct-segment" id="ctModeSegment">
+            <button type="button" class="ct-segment-btn active" data-mode="chain">Ketma-ket</button>
+            <button type="button" class="ct-segment-btn" data-mode="all">Hammaga</button>
+          </div>
+        </div>
+        <p class="ct-mode-note" id="ctModeNote"></p>
       </div>
 
       <button class="ct-create-room-btn" id="ctCreateRoomBtn" type="button">Xona yaratish</button>
@@ -9839,14 +9976,14 @@
        o'rindiqlardagi kichik ochko yozuvidan farqli, hammani bir joyda,
        bir qarashda solishtirish uchun. renderScoreboard() to'ldiradi. -->
   <div class="ct-scoreboard" id="ctScoreboard" aria-hidden="true"></div>
-  <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">
-    <svg class="ct-choose-flashcard-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3.2" y="5.5" width="13" height="16" rx="2.6" transform="rotate(-8 9.7 13.5)"></rect>
-      <rect x="7.5" y="3" width="13" height="16" rx="2.6" fill="rgba(255,255,255,0.14)"></rect>
-    </svg>
-    <span>Flashcard tanlash</span>
-  </button>
   <div class="ct-table" id="ctTable">
+    <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">
+      <svg class="ct-choose-flashcard-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.2" y="5.5" width="13" height="16" rx="2.6" transform="rotate(-8 9.7 13.5)"></rect>
+        <rect x="7.5" y="3" width="13" height="16" rx="2.6" fill="rgba(255,255,255,0.14)"></rect>
+      </svg>
+      <span>Flashcard tanlash</span>
+    </button>
     <div class="ct-table-center-hint" id="ctTableCenterHint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
     <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
   </div>
@@ -10275,6 +10412,8 @@
     {id:"uki", day:5, group:"雨", kanji:"雨季", romaji:"uki", type:"on + on", reading:"雨(u) + 季(ki)", uz:"yomg'irli mavsum (N3)"},
 
     {id:"kai", day:5, group:"貝", kanji:"貝", romaji:"kai", type:"kun'yomi", reading:"貝(kai) — yakka kanji", uz:"chig'anoq"},
+    {id:"kaigara", day:5, group:"貝", kanji:"貝がら", romaji:"kaigara", type:"kun + kun", reading:"貝(kai) + がら(gara)", uz:"chig'anoq qobig'i"},
+    {id:"kaibashira", day:5, group:"貝", kanji:"貝柱", romaji:"kaibashira", type:"kun + kun", reading:"貝(kai) + 柱(bashira)", uz:"chig'anoqning go'shtli qismi / ichki qismi"},
 
     // ---- 6-KUN ----
     {id:"kome", day:6, group:"米", kanji:"米", romaji:"kome", type:"kun'yomi", reading:"米(kome) — yakka kanji", otherReadings:"kun: こめ(kome) · on: マイ(mai), ベイ(bei)", uz:"guruch"},
@@ -12477,6 +12616,7 @@
   }
 
   btnAllClear.addEventListener('click', ()=>{
+    playClearSelectionSound();
     selectedKanji.clear();
     refreshAllSelectionUI();
   });
@@ -14495,6 +14635,12 @@
       playSelectTingTone(440.00, 0.50, 0.045, 0);     // A4 — pastga qaytish, sokinroq
     }
   }
+  // Tozalash bosilganda — pastga tushuvchi uch nota (G5 → E5 → C5), kun ohangidan farqli
+  function playClearSelectionSound(){
+    playSelectTingTone(783.99, 0.40, 0.05, 0);
+    playSelectTingTone(659.25, 0.40, 0.05, 0.09);
+    playSelectTingTone(523.25, 0.60, 0.05, 0.18);
+  }
   // Kanji tanlanganda — bitta yengil nota (G5); bekor qilinganda — yumshoq pastroq (D5)
   function playSelectKanjiTing(on){
     if(on) playSelectTingTone(783.99, 0.60, 0.05);    // G5
@@ -16397,6 +16543,22 @@
     const visibilitySegment = document.getElementById('ctVisibilitySegment');
     const createRoomBtn = document.getElementById('ctCreateRoomBtn');
     let roomSize = 3; // standart: 3 kishilik xona
+    const modeSegment = document.getElementById('ctModeSegment');
+    const modeRow = document.getElementById('ctModeRow');
+    const modeNote = document.getElementById('ctModeNote');
+    // Rejimlar: 'chain' — kartochka faqat keyingi ishtirokchiga uzatiladi (navbatma-navbat);
+    //           'all'   — navbatdagi kartochka tanlaydi, u BARCHA qolganlarga bir vaqtda so'rov bo'lib boradi.
+    let roomMode = 'chain';
+    function refreshModeUI(){
+      const multi = roomSize >= 3;
+      if(modeRow) modeRow.classList.toggle('hidden', !multi);
+      if(modeNote){
+        modeNote.classList.toggle('hidden', !multi);
+        modeNote.textContent = roomMode === 'all'
+          ? "Navbatdagi ishtirokchi kartochka tanlaydi — u qolgan hammaga bir vaqtda so'rov bo'lib boradi."
+          : "Kartochka navbatma-navbat faqat keyingi ishtirokchiga uzatiladi.";
+      }
+    }
 
     function escapeCt(str){
       return String(str).replace(/[&<>"']/g, (c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16441,9 +16603,20 @@
           setActiveSegmentBtn(sizeSegment, btn);
           roomSize = parseInt(btn.dataset.size, 10) || 3;
           renderSeats(roomSize);
+          refreshModeUI();
         });
       });
     }
+    if(modeSegment){
+      modeSegment.querySelectorAll('.ct-segment-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          setActiveSegmentBtn(modeSegment, btn);
+          roomMode = btn.dataset.mode === 'all' ? 'all' : 'chain';
+          refreshModeUI();
+        });
+      });
+    }
+    refreshModeUI();
     if(visibilitySegment){
       visibilitySegment.querySelectorAll('.ct-segment-btn').forEach(btn=>{
         btn.addEventListener('click', ()=> setActiveSegmentBtn(visibilitySegment, btn));
@@ -16524,7 +16697,11 @@
     // hozircha kim nima yozayotgani shu Map orqali saqlanib turadi (aks
     // holda har safar boshqa birov kartochka yuborganda yozilayotgan matn
     // o'chib qolar edi).
-    const guessDrafts = new Map();
+    // Yangi o'yin: 1-bosqich romanji, 2-bosqich tarjima (ikkalasi 10 ta variantdan tanlanadi).
+    // guessStepState: uid -> {wordId, step:'uz', romaji} (faqat romanji to'g'ri topilganda)
+    const guessStepState = new Map();
+    // guessOptCache: uid -> {wordId, romaji:[10], uz:[10]} — variantlar qayta chizilganda o'zgarmasin
+    const guessOptCache = new Map();
     // ---------- JAVOB BERGANDA AVATAR ORTIDA YASHIL/QIZIL AURA YONIB-SO'NISHI ----------
     // To'g'ri javob — yashil (moss), xato javob — qizil (accent) aura porlab,
     // so'ng asta-sekin so'nadi. Bu holat Firestore orqali (`avatarFlashes`
@@ -16578,72 +16755,106 @@
       if(!user || !lastRoomData) return null;
       return (lastRoomData.guesses && lastRoomData.guesses[`${user.uid}_${uid}`]) || null;
     }
-    async function submitGuess(uid, rawAnswer){
+    function guessNorm(v){ return (v || '').toString().trim().toLowerCase().replace(/\s+/g, ''); }
+    function shuffleArr(a){
+      for(let k = a.length - 1; k > 0; k--){
+        const r = Math.floor(Math.random() * (k + 1));
+        const t = a[k]; a[k] = a[r]; a[r] = t;
+      }
+      return a;
+    }
+    // Savol uchun 10 ta variant: 1 ta to'g'ri + 9 ta boshqa so'zdan (takrorlanmasdan)
+    function getGuessOptions(uid, card){
+      const cached = guessOptCache.get(uid);
+      if(cached && cached.wordId === card.wordId) return cached;
+      const pick = (field, correct) => {
+        const seen = new Set([guessNorm(correct)]);
+        const out = [];
+        for(const w of shuffleArr(WORDS.slice())){
+          if(out.length >= 9) break;
+          const v = (w[field] || '').toString().trim();
+          const n = guessNorm(v);
+          if(!v || seen.has(n)) continue;
+          seen.add(n);
+          out.push(v);
+        }
+        return out;
+      };
+      const entry = {
+        wordId: card.wordId,
+        romaji: shuffleArr([card.romaji || ''].concat(pick('romaji', card.romaji))),
+        uz: shuffleArr([card.uz || ''].concat(pick('uz', card.uz)))
+      };
+      guessOptCache.set(uid, entry);
+      return entry;
+    }
+    function currentGuessRecord(uid){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !lastRoomData) return null;
+      return (lastRoomData.guesses && lastRoomData.guesses[`${user.uid}_${uid}`]) || null;
+    }
+    // Savol yakuniy javob bilan yopiladi (to'g'ri yoki xato, qayta urinish yo'q)
+    async function submitGuess(uid, isCorrect, answerText){
       const {auth, updateDoc, serverTimestamp, increment} = window.__kanjiFB;
       const user = auth.currentUser;
       if(!user || !waitingRoomRef || !lastRoomData) return;
       const card = lastRoomData.cards && lastRoomData.cards[uid];
-      if(!card) return;
+      if(!card || uid === user.uid) return;
       if(card.toUid && card.toUid !== user.uid) return; // boshqaga yo'llangan kartochka
-      const existing = currentGuessRecord(uid);
-      // Bitta urinishdan keyin javob yakuniy hisoblanadi — to'g'ri yoki
-      // xato bo'lishidan qat'iy nazar, qayta yozib bo'lmaydi (xato bo'lsa
-      // to'g'ri javob darhol ochib ko'rsatiladi, qayta urinishni kutib
-      // o'tirilmaydi).
-      if(existing) return;
-      const answer = (rawAnswer || '').toString().trim();
-      if(!answer) return;
-      const norm = s => (s || '').toString().trim().toLowerCase().replace(/\s+/g, '');
-      const isCorrect = norm(answer) === norm(card.romaji);
-      // Javob berilgan zahoti — o'zimiz uchun darhol tovush effekti (mavjud
-      // to'g'ri/xato tovushlar bilan bir xil, viktorinada ishlatilgani kabi),
-      // Firestore javobini kutib o'tirmaydi, shu bilan darhol his-tuyg'u beradi.
-      if(isCorrect) playCorrectSound(); else playWrongSound();
+      if(currentGuessRecord(uid)) return;               // allaqachon javob berilgan
+      const correct = !!isCorrect;
+      if(correct) playCorrectSound(); else playWrongSound();
       const key = `${user.uid}_${uid}`;
       const updates = {
-        [`guesses.${key}`]: { correct: isCorrect, answer, checkedAt: serverTimestamp() },
-        // Javob bergan kishining avatari ortida hammaga ko'rinadigan
-        // yashil/qizil aura — `at` client vaqti sifatida yoziladi (serverTimestamp
-        // emas), shunda barcha ishtirokchilarning animatsiyasi bir xil, kechikishsiz
-        // boshlanadi va har bir flash o'ziga xos qiymat bilan aniq ajraladi.
-        [`avatarFlashes.${user.uid}`]: { type: isCorrect ? 'correct' : 'wrong', at: Date.now() }
+        [`guesses.${key}`]: { correct, answer: answerText || '', checkedAt: serverTimestamp() },
+        [`avatarFlashes.${user.uid}`]: { type: correct ? 'correct' : 'wrong', at: Date.now() }
       };
-      // To'g'ri topilsa — taxmin qilgan kishining umumiy ochkosiga +1
-      // qo'shiladi. Xato bo'lsa ochko o'zgarmaydi (0 bilan qoladi) va
-      // javob yozish oynasi butunlay yopiladi (qayta urinish yo'q).
-      if(isCorrect) updates[`scores.${user.uid}`] = increment(1);
+      // Ikkala bosqich ham to'g'ri bo'lsagina +1 ochko
+      if(correct) updates[`scores.${user.uid}`] = increment(1);
       try{
         await updateDoc(waitingRoomRef, updates);
-        guessDrafts.delete(uid);
+        guessStepState.delete(uid);
       }catch(e){
         console.error("Javobni tekshirishda xatolik:", e.message);
         showCardTransferToast("Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
       }
     }
+    // Variant bosilganda: romanji bosqichi yoki tarjima bosqichi
+    function handleGuessChoice(uid, step, value){
+      const {auth} = window.__kanjiFB;
+      const user = auth.currentUser;
+      if(!user || !lastRoomData) return;
+      const card = lastRoomData.cards && lastRoomData.cards[uid];
+      if(!card || (card.toUid && card.toUid !== user.uid)) return;
+      if(currentGuessRecord(uid)) return;
+      const st = guessStepState.get(uid);
+      const inUzStep = !!(st && st.wordId === card.wordId && st.step === 'uz');
+      if(step === 'romaji'){
+        if(inUzStep) return;
+        // 1-bosqich: romanji. Xato bo'lsa savolga darhol xato javob beriladi
+        if(guessNorm(value) !== guessNorm(card.romaji)){
+          submitGuess(uid, false, value);
+          return;
+        }
+        guessStepState.set(uid, { wordId: card.wordId, step: 'uz', romaji: value });
+        renderTableSeats(lastRoomData);
+        return;
+      }
+      if(step === 'uz'){
+        if(!inUzStep) return;
+        // 2-bosqich: tarjima
+        const isCorrect = guessNorm(value) === guessNorm(card.uz);
+        submitGuess(uid, isCorrect, `${st.romaji} — ${value}`);
+      }
+    }
     if(tableSeatsEl){
-      tableSeatsEl.addEventListener('input', (e)=>{
-        const input = e.target.closest('.ct-guess-input');
-        if(!input) return;
-        const uid = input.dataset.guessUid;
-        if(!uid) return;
-        guessDrafts.set(uid, input.value);
-        input.classList.remove('wrong');
-      });
-      tableSeatsEl.addEventListener('keydown', (e)=>{
-        if(e.key !== 'Enter') return;
-        const input = e.target.closest('.ct-guess-input');
-        if(!input) return;
-        e.preventDefault();
-        const uid = input.dataset.guessUid;
-        if(uid) submitGuess(uid, input.value);
-      });
       tableSeatsEl.addEventListener('click', (e)=>{
-        const checkBtn = e.target.closest('.ct-guess-check-btn');
-        if(!checkBtn) return;
-        const uid = checkBtn.dataset.guessUid;
+        const opt = e.target.closest('.ct-guess-opt');
+        if(!opt) return;
+        const uid = opt.dataset.guessUid;
         if(!uid) return;
-        const input = tableSeatsEl.querySelector(`.ct-guess-input[data-guess-uid="${uid}"]`);
-        submitGuess(uid, input ? input.value : '');
+        handleGuessChoice(uid, opt.dataset.step, opt.dataset.value || '');
       });
     }
 
@@ -16759,7 +16970,8 @@
         }).join('');
         const btnText = alreadyIn ? "Ichkariga" : started ? "O'yinda" : full ? "To'liq" : "Kirish";
         const disabled = !alreadyIn && (full || started);
-        const metaText = started ? `${count}/${r.size} ishtirokchi · o'yin boshlangan` : `${count}/${r.size} ishtirokchi`;
+        const modeTxt = (r.size >= 3 && r.mode === 'all') ? " · hammaga rejimi" : "";
+        const metaText = started ? `${count}/${r.size} ishtirokchi${modeTxt} · o'yin boshlangan` : `${count}/${r.size} ishtirokchi${modeTxt}`;
         return `
           <div class="ct-room-item" data-room-id="${escapeCt(r.id)}">
             <div class="ct-room-item-avatar">${avatarHTML}</div>
@@ -16799,6 +17011,8 @@
         participants: { [user.uid]: { name: getHostName(), photo: user.photoURL || '' } },
         status: 'waiting',
         size: roomSize,
+        // 2 kishilik xonada ikkala rejim bir xil, shu sabab ketma-ket saqlanadi
+        mode: (roomSize >= 3 && roomMode === 'all') ? 'all' : 'chain',
         visibility: visibility,
         createdAt: serverTimestamp(),
         lastActivity: serverTimestamp()
@@ -17030,21 +17244,37 @@
       const turnUid = (data && data.turnUid && uids.includes(data.turnUid)) ? data.turnUid : (uids[0] || null);
       const idx = uids.indexOf(turnUid);
       const nextUid = uids.length > 1 ? uids[(idx + 1) % uids.length] : null;
+      // "Hammaga" rejimi: kartochka hamma ishtirokchiga bir vaqtda boradi (toUid yo'q)
+      const broadcast = !!(data && data.mode === 'all');
       // Navbat egasiga yo'llangan va hali javob berilmagan kartochka
       let pendingFromUid = null;
+      // Faqat "Hammaga" rejimida: yuborilgan kartochkaga hali hamma javob bermagan
+      let waitingOthers = false;
       if(turnUid && data && data.cards){
         for(const senderUid of Object.keys(data.cards)){
           const c = data.cards[senderUid];
-          if(!c || senderUid === turnUid || c.toUid !== turnUid) continue;
+          if(!c || !uids.includes(senderUid)) continue;
+          if(broadcast){
+            if(senderUid !== turnUid){
+              const g = data.guesses && data.guesses[`${turnUid}_${senderUid}`];
+              if(!g && !pendingFromUid) pendingFromUid = senderUid;
+            }
+            for(const pUid of uids){
+              if(pUid === senderUid) continue;
+              if(!(data.guesses && data.guesses[`${pUid}_${senderUid}`])){ waitingOthers = true; break; }
+            }
+            continue;
+          }
+          if(senderUid === turnUid || c.toUid !== turnUid) continue;
           const g = data.guesses && data.guesses[`${turnUid}_${senderUid}`];
           if(!g){ pendingFromUid = senderUid; break; }
         }
       }
       return {
-        turnUid, nextUid, pendingFromUid,
+        turnUid, nextUid, pendingFromUid, broadcast, waitingOthers,
         isMyTurn: !!myUid && myUid === turnUid,
         mustAnswerFirst: !!myUid && myUid === turnUid && !!pendingFromUid,
-        canSend: !!myUid && myUid === turnUid && !pendingFromUid && !!nextUid
+        canSend: !!myUid && myUid === turnUid && !pendingFromUid && !waitingOthers && !!nextUid
       };
     }
 
@@ -17139,14 +17369,19 @@
                 // kattaroq kartochka sifatida ko'rsatiladi (pastda
                 // centerCardsHTML'ga qo'shiladi), shu sababli bu yerda
                 // o'rindiq ichida hech narsa chizilmaydi.
-                const draftVal = guessDrafts.has(uid) ? guessDrafts.get(uid) : '';
+                const stepSt = guessStepState.get(uid);
+                const inUz = !!(stepSt && stepSt.wordId === card.wordId && stepSt.step === 'uz');
+                const opts = getGuessOptions(uid, card);
+                const list = inUz ? opts.uz : opts.romaji;
+                const stepName = inUz ? 'uz' : 'romaji';
+                const stepQ = inUz ? "Bu so'zning ma'nosi qaysi?" : "Bu kanji qanday o'qiladi?";
+                const stepProg = `<div class="ct-guess-progress"><i class="on"></i><i class="${inUz ? 'on' : ''}"></i></div>`;
                 centerCardsHTML.push(`<div class="ct-center-card guess-pending" data-card-uid="${escapeCt(uid)}">
                      <div class="ct-center-card-from">${escapeCt(name)}</div>
                      <span class="ct-table-seat-card-kanji ct-center-card-kanji">${escapeCt(card.kanji || '')}</span>
-                     <div class="ct-guess-form ct-center-guess-form">
-                       <input type="text" class="ct-guess-input ct-center-guess-input" data-guess-uid="${escapeCt(uid)}" value="${escapeCt(draftVal)}" placeholder="romaji" autocomplete="off" autocorrect="off" spellcheck="false">
-                       <button type="button" class="ct-guess-check-btn ct-center-guess-check-btn" data-guess-uid="${escapeCt(uid)}">&#10003;</button>
-                     </div>
+                     <div class="ct-guess-meta">${stepProg}<span class="ct-guess-step">${inUz ? '2/2 · Tarjima' : '1/2 · Romanji'}</span></div>
+                     <div class="ct-guess-q">${stepQ}</div>
+                     <div class="ct-guess-opts">${list.map(o => `<button type="button" class="ct-guess-opt" data-guess-uid="${escapeCt(uid)}" data-step="${stepName}" data-value="${escapeCt(o)}">${escapeCt(o)}</button>`).join('')}</div>
                    </div>`);
               }
             }
@@ -17186,6 +17421,9 @@
       // maslahat vaqtincha yashiriladi.
       if(centerHintEl){
         centerHintEl.style.display = (centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen) ? 'none' : '';
+      }
+      if(chooseFlashcardBtn){
+        chooseFlashcardBtn.style.display = (centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen) ? 'none' : '';
       }
       renderScoreboard(data);
     }
@@ -17649,6 +17887,20 @@
       if(chooseFlashcardBtn) chooseFlashcardBtn.classList.toggle('ct-turn-locked', !t.canSend);
       if(!t.turnUid){ centerHintEl.textContent = ''; return; }
       const nextName = t.nextUid ? nameOfUid(data, t.nextUid) : '';
+      if(t.broadcast){
+        if(t.canSend){
+          centerHintEl.textContent = "Sizning navbatingiz! «Flashcard tanlash»ni bosing — kartochka hamma ishtirokchiga bir vaqtda yuboriladi.";
+        } else if(t.mustAnswerFirst){
+          centerHintEl.textContent = `Avval ${nameOfUid(data, t.pendingFromUid)} yuborgan kartochkaga javob bering — shundan so'ng o'zingiz kartochka tanlab yuborasiz.`;
+        } else if(t.waitingOthers){
+          centerHintEl.textContent = t.isMyTurn
+            ? "Hamma ishtirokchi javob berishini kuting — shundan so'ng kartochka tanlaysiz."
+            : `Ishtirokchilar kartochkaga javob bermoqda. Navbat keyin ${nameOfUid(data, t.turnUid)}ga o'tadi.`;
+        } else {
+          centerHintEl.textContent = `Navbat: ${nameOfUid(data, t.turnUid)} — u kartochka tanlab, hamma ishtirokchiga bir vaqtda yuboradi.`;
+        }
+        return;
+      }
       if(t.canSend){
         centerHintEl.textContent = `Sizning navbatingiz! «Flashcard tanlash»ni bosing va kartochkani ${nextName}ga uzating.`;
       } else if(t.mustAnswerFirst){
@@ -17712,7 +17964,8 @@
         // Kartochka navbatdagi KEYINGI ishtirokchiga uzatiladi va navbat unga o'tadi
         turnUid: turn.nextUid,
         [`cards.${user.uid}`]: {
-          toUid: turn.nextUid,
+          // "Hammaga" rejimida kartochka aniq kimgadir emas — hamma qolganlarga boradi
+          toUid: turn.broadcast ? null : turn.nextUid,
           wordId: word.id,
           day: kanjiPickerDay,
           kanji: word.kanji,
@@ -17738,6 +17991,7 @@
       const t = getTurnState(lastRoomData || {});
       if(!t.canSend){
         if(t.mustAnswerFirst) showCardTransferToast("Avval kelgan kartochkaga javob bering");
+        else if(t.isMyTurn && t.waitingOthers) showCardTransferToast("Hamma javob berishini kuting");
         else showCardTransferToast(`Hozir ${nameOfUid(lastRoomData || {}, t.turnUid)}ning navbati`);
         return;
       }
@@ -18705,9 +18959,14 @@
   // Sahifa to'liq yuklanganidan keyin, fonda, hech narsani sekinlashtirmasdan.
   // Ilova bosh ekranga qo'shilganda brauzer panellarisiz ochilishi va
   // internetsiz ham ishlashi shu orqali ta'minlanadi.
+  // Versiya: har yangilanishda APP_VERSION ni oshiring (index.html dagi <meta name="app-version"> bilan bir xil bo'lsin).
+  // sw.js URL ga ?v= qo'shilgan: yangi raqamda brauzer service worker'ni qayta yuklaydi va yangilaydi.
+  const APP_VERSION = '__APP_VERSION__';
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=>{
-      navigator.serviceWorker.register('./sw.js').catch(()=>{ /* sokin o'tkazib yuboriladi */ });
+      navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION)
+        .then(reg => { reg.update().catch(()=>{}); })
+        .catch(()=>{ /* sokin o'tkazib yuboriladi */ });
     });
   }
 
