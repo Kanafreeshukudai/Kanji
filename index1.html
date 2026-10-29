@@ -150,7 +150,8 @@
   }
   /* faqat blur bilan yumshatilgan "nur" qatlamlari yashiriladi (filtersiz qattiq shaklga aylanib qolmasligi uchun) */
   html.perf .card::after, html.perf .ai-aura::after,
-  html.perf .ct-table-seat-avatar-slot::before{ display:none !important; }
+  html.perf .ct-table-seat-avatar-slot::before,
+  html.perf .ct-table-seat-avatar-slot::after{ display:none !important; }
   html.perf .quiz-card{ background:rgba(20,22,26,0.92); }
   html.perf .quiz-opt:not(.correct):not(.wrong){ background:rgba(24,26,31,0.94); }
   /* Yengil rejimda orqa fon chiziq/zarrachalari o'chiq — menyudagi tegishli tugmalar faolsiz ko'rinadi */
@@ -5571,51 +5572,67 @@
     margin:6px auto 0;
     min-height:340px;
   }
-  /* ---------- YON TARAFDAGI KICHIK OYNA: ishtirokchilar + ochkolar ----------
-     ct-room-page position:fixed bo'lgani uchun shu yerda position:absolute
-     unga nisbatan joylashadi — stol/kartochkalar ustida, doim o'ng yon
-     tomonda suzib turadi. Ko'p ishtirokchi bo'lsa ichkarida scroll bo'ladi,
-     lekin o'zi kichik va ixcham qoladi. */
+  /* ---------- REYTING PESHTAXTASI ("Flashcard tanlash" tugmasi ostida, keng) ----------
+     .ct-table ichida, markazdagi tugma ostida turadi. Qator: o'rin raqami,
+     avatar, ism, ochko. To'g'ri javob topilganda shu foydalanuvchi qatori
+     yashil nur bilan chaqnaydi, ochkosi "pop" qiladi va ro'parasida "+1"
+     suzib chiqadi. */
   .ct-scoreboard{
     position:absolute;
-    top:calc(92px + env(safe-area-inset-top));
-    right:12px;
-    z-index:5;
-    width:118px;
-    max-height:min(46vh, 260px);
-    overflow-y:auto;
+    left:50%;
+    top:calc(50% + 38px);
+    transform:translateX(-50%);
+    z-index:3;
+    width:min(70%, 300px);
     display:flex;
     flex-direction:column;
-    gap:6px;
-    padding:8px;
-    border-radius:14px;
+    gap:4px;
+    padding:7px;
+    border-radius:18px;
     background:var(--glass-bg);
     border:1px solid var(--glass-border-soft);
     box-sizing:border-box;
     -webkit-backdrop-filter:blur(var(--blur-2));
     backdrop-filter:blur(var(--blur-2));
+    box-shadow:0 12px 30px -14px var(--glass-shadow);
+    animation:ctScoreboardIn .45s cubic-bezier(.22,.61,.36,1);
   }
+  .ct-scoreboard.ct-scoreboard-compact{ width:min(56%, 230px); }
   .ct-scoreboard:empty{display:none;}
+  @keyframes ctScoreboardIn{
+    from{ opacity:0; transform:translateX(-50%) translateY(10px); }
+    to{ opacity:1; transform:translateX(-50%) translateY(0); }
+  }
   .ct-scoreboard-row{
+    position:relative;
     display:flex;
     align-items:center;
-    gap:6px;
+    gap:9px;
+    padding:5px 10px 5px 8px;
+    border-radius:13px;
+    overflow:hidden;
+    background:rgba(255,255,255,0.03);
   }
-  .ct-scoreboard-row-self{
-    border-radius:9px;
-    background:rgba(255,255,255,0.07);
-    margin:-2px -3px;
-    padding:2px 3px;
+  .ct-scoreboard-row-self{ background:rgba(255,255,255,0.08); }
+  .ct-scoreboard-row-lead{ box-shadow:inset 0 0 0 1px rgba(201,166,107,0.35); }
+  .ct-scoreboard-rank{
+    flex:none;
+    width:14px;
+    text-align:center;
+    font-size:11px;
+    font-weight:800;
+    color:var(--ink-soft);
   }
+  .ct-scoreboard-row-lead .ct-scoreboard-rank{ color:var(--gold); }
   .ct-scoreboard-avatar{
-    width:22px;
-    height:22px;
+    width:26px;
+    height:26px;
     border-radius:50%;
     flex:none;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:10px;
+    font-size:11px;
     font-weight:700;
     color:var(--ink);
     background:var(--bg-2);
@@ -5626,7 +5643,7 @@
   .ct-scoreboard-name{
     flex:1;
     min-width:0;
-    font-size:11px;
+    font-size:12.5px;
     color:var(--ink-soft);
     white-space:nowrap;
     overflow:hidden;
@@ -5635,10 +5652,81 @@
   .ct-scoreboard-row-self .ct-scoreboard-name{color:var(--ink); font-weight:700;}
   .ct-scoreboard-score{
     flex:none;
-    font-size:11.5px;
-    font-weight:700;
+    min-width:30px;
+    text-align:right;
+    font-size:14px;
+    font-weight:800;
+    font-variant-numeric:tabular-nums;
     color:var(--gold);
+    transform-origin:100% 50%;
   }
+  /* "+1" — ochko yig'ilgan foydalanuvchi qatori ro'parasida suzib chiqadi */
+  .ct-scoreboard-gain{
+    position:absolute;
+    right:48px;
+    top:50%;
+    margin-top:-9px;
+    font-size:13px;
+    font-weight:900;
+    line-height:18px;
+    color:#b6f08a;
+    text-shadow:0 0 10px rgba(124,154,107,0.9);
+    pointer-events:none;
+    opacity:0;
+  }
+  .ct-scoreboard-row.score-up::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(100deg, transparent 0%, rgba(124,154,107,0.0) 30%, rgba(160,230,120,0.45) 50%, rgba(124,154,107,0.0) 70%, transparent 100%);
+    transform:translateX(-110%);
+    animation:ctSbSweep 1.1s ease-out both;
+    animation-delay:var(--sb-delay, 0ms);
+  }
+  .ct-scoreboard-row.score-up{
+    animation:ctSbRowFlash 1.7s ease-out both;
+    animation-delay:var(--sb-delay, 0ms);
+  }
+  .ct-scoreboard-row.score-up .ct-scoreboard-score{
+    animation:ctSbScorePop .9s cubic-bezier(.2,.9,.3,1.4) both;
+    animation-delay:var(--sb-delay, 0ms);
+  }
+  .ct-scoreboard-row.score-up .ct-scoreboard-gain{
+    animation:ctSbGain 1.5s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:var(--sb-delay, 0ms);
+  }
+  @keyframes ctSbRowFlash{
+    0%{ background:rgba(124,154,107,0.55); box-shadow:inset 0 0 0 1px rgba(160,230,120,0.9), 0 0 22px rgba(124,154,107,0.55); }
+    100%{ box-shadow:inset 0 0 0 1px rgba(160,230,120,0), 0 0 0 rgba(124,154,107,0); }
+  }
+  @keyframes ctSbSweep{
+    0%{ transform:translateX(-110%); }
+    100%{ transform:translateX(110%); }
+  }
+  @keyframes ctSbScorePop{
+    0%{ transform:scale(1); color:var(--gold); }
+    35%{ transform:scale(1.75); color:#b6f08a; text-shadow:0 0 12px rgba(124,154,107,0.95); }
+    100%{ transform:scale(1); color:var(--gold); text-shadow:none; }
+  }
+  @keyframes ctSbGain{
+    0%{ opacity:0; transform:translateY(12px) scale(.5); }
+    22%{ opacity:1; transform:translateY(-1px) scale(1.25); }
+    60%{ opacity:1; transform:translateY(-4px) scale(1); }
+    100%{ opacity:0; transform:translateY(-14px) scale(.9); }
+  }
+  @media (max-height:600px){
+    .ct-scoreboard{ gap:2px; padding:5px; }
+    .ct-scoreboard-row{ padding:3px 9px 3px 7px; }
+    .ct-scoreboard-avatar{ width:22px; height:22px; font-size:10px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ct-scoreboard{ animation:none; }
+    .ct-scoreboard-row.score-up, .ct-scoreboard-row.score-up::after,
+    .ct-scoreboard-row.score-up .ct-scoreboard-score{ animation:none; }
+    .ct-scoreboard-row.score-up .ct-scoreboard-gain{ animation:none; opacity:1; }
+  }
+  
   /* ---------- MUSOBAQA NATIJALARI: tabriklash oynasi ---------- */
   .ct-results-overlay{
     position:fixed;
@@ -5910,21 +5998,27 @@
   .ct-table-seat-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
   /* ---------- JAVOB BERGANDA AVATAR ORTIDAGI YASHIL/QIZIL AURA ----------
      Slot — avatarning o'zi bilan bir xil o'lchamda, position:relative
-     konteyner; aura esa shu slotning ::before psevdo-elementi sifatida,
-     avatar ORQASIDA (z-index pastroq), markazdan kattalashib chiqib,
-     porlab so'nadigan doira sifatida chiziladi. To'g'ri javob — moss
-     (yashil), xato javob — accent (qizil) rangda. */
+     konteyner. ::before — avatar ORQASIDA markazdan keng (≈4x) yoyilib
+     chiqadigan yumshoq nur; ::after — undan tashqariga yoyiluvchi to'lqin
+     halqa. Avatarning o'zi ham shu rangda porlaydi. To'g'ri javob —
+     yashil, xato javob — qizil. Hamma ishtirokchiga bir vaqtda ko'rinadi. */
   .ct-table-seat-avatar-slot{
     position:relative;
     width:58px;
     height:58px;
     flex:none;
+    --aura-rgb:94,200,110;
   }
   .ct-table-seat-avatar-slot .ct-table-seat-avatar{
     position:relative;
     z-index:1;
   }
-  .ct-table-seat-avatar-slot::before{
+  .ct-table-seat-label, .ct-table-seat-score, .ct-turn-badge{
+    position:relative;
+    z-index:1;
+  }
+  .ct-table-seat-avatar-slot::before,
+  .ct-table-seat-avatar-slot::after{
     content:"";
     position:absolute;
     left:50%; top:50%;
@@ -5933,32 +6027,55 @@
     z-index:0;
     opacity:0;
     pointer-events:none;
+  }
+  .ct-table-seat-avatar-slot::before{
     filter:blur(var(--blur-2));
+    background:radial-gradient(circle, rgba(var(--aura-rgb),1) 0%, rgba(var(--aura-rgb),0.7) 38%, rgba(var(--aura-rgb),0.28) 62%, rgba(var(--aura-rgb),0) 78%);
   }
-  .ct-table-seat-avatar-slot.avatar-aura-correct::before{
-    background:radial-gradient(circle, rgba(124,154,107,0.95) 0%, rgba(124,154,107,0.55) 45%, rgba(124,154,107,0) 72%);
-    animation:avatarAuraPulse 1.1s ease-out forwards;
+  .ct-table-seat-avatar-slot::after{
+    border:3px solid rgba(var(--aura-rgb),0.95);
+    box-shadow:0 0 18px rgba(var(--aura-rgb),0.8), inset 0 0 14px rgba(var(--aura-rgb),0.6);
   }
+  .ct-table-seat-avatar-slot.avatar-aura-correct{ --aura-rgb:94,200,110; }
+  .ct-table-seat-avatar-slot.avatar-aura-wrong{ --aura-rgb:236,64,56; }
+  .ct-table-seat-avatar-slot.avatar-aura-correct::before,
   .ct-table-seat-avatar-slot.avatar-aura-wrong::before{
-    background:radial-gradient(circle, rgba(217,60,52,0.95) 0%, rgba(217,60,52,0.55) 45%, rgba(217,60,52,0) 72%);
-    animation:avatarAuraPulse 1.1s ease-out forwards;
+    animation:avatarAuraPulse 1.7s ease-out forwards;
+  }
+  .ct-table-seat-avatar-slot.avatar-aura-correct::after,
+  .ct-table-seat-avatar-slot.avatar-aura-wrong::after{
+    animation:avatarAuraRing 1.5s cubic-bezier(.2,.7,.3,1) forwards;
   }
   .ct-table-seat-avatar-slot.avatar-aura-correct .ct-table-seat-avatar{
-    border-color:var(--moss-soft);
-    transition:border-color .18s ease;
+    border-color:rgb(var(--aura-rgb));
+    animation:avatarGlowKeep 1.7s ease-out forwards;
   }
   .ct-table-seat-avatar-slot.avatar-aura-wrong .ct-table-seat-avatar{
-    border-color:var(--accent);
-    transition:border-color .18s ease;
+    border-color:rgb(var(--aura-rgb));
+    animation:avatarGlowKeep 1.7s ease-out forwards;
   }
   @keyframes avatarAuraPulse{
-    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.7); }
-    18%{ opacity:1; transform:translate(-50%,-50%) scale(1.7); }
-    100%{ opacity:0; transform:translate(-50%,-50%) scale(2.4); }
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.6); }
+    14%{ opacity:1; transform:translate(-50%,-50%) scale(2.3); }
+    55%{ opacity:.8; transform:translate(-50%,-50%) scale(3.1); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(3.9); }
+  }
+  @keyframes avatarAuraRing{
+    0%{ opacity:.95; transform:translate(-50%,-50%) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(3); }
+  }
+  @keyframes avatarGlowKeep{
+    0%{ box-shadow:0 0 0 0 rgba(var(--aura-rgb),0.9), 0 0 0 rgba(var(--aura-rgb),0); }
+    20%{ box-shadow:0 0 0 5px rgba(var(--aura-rgb),0.55), 0 0 26px rgba(var(--aura-rgb),0.95); }
+    100%{ box-shadow:0 0 0 0 rgba(var(--aura-rgb),0), 0 0 0 rgba(var(--aura-rgb),0); }
   }
   @media (prefers-reduced-motion: reduce){
-    .ct-table-seat-avatar-slot::before{ animation:none !important; }
+    .ct-table-seat-avatar-slot::before, .ct-table-seat-avatar-slot::after,
+    .ct-table-seat-avatar-slot .ct-table-seat-avatar{ animation:none !important; }
+    .ct-table-seat-avatar-slot.avatar-aura-correct::before,
+    .ct-table-seat-avatar-slot.avatar-aura-wrong::before{ opacity:.7; transform:translate(-50%,-50%) scale(2.6); }
   }
+  
   /* ---------- NAVBAT (kartochkani ketma-ket uzatish) ---------- */
   .ct-choose-flashcard-btn.ct-turn-locked{ opacity:.45; filter:saturate(.5); animation:none; }
   .ct-table-seat-turn .ct-table-seat-avatar{
@@ -6063,60 +6180,74 @@
   .ct-guess-opt:hover{background:rgba(255,255,255,0.14);}
   .ct-guess-opt:active{transform:scale(0.96);}
 
-  /* ===== Savol kartochkasi: to'liq ko'rinadigan, zamonaviy ko'rinish ===== */
-  /* Karta orqasidagi maydonlar ko'rinmasligi uchun to'liq (shaffof bo'lmagan) fon */
+  /* ===== Savol kartochkasi (javob berish oynasi): yengil, yassi, rangli ko'rinish =====
+     Og'ir effektlar yo'q: blur, katta soya va porlash olib tashlangan — faqat
+     to'liq (shaffof bo'lmagan) fon, nozik chegara va rang urg'ulari. */
   .ct-center-stack:has(.guess-pending){ z-index:300; }
   .ct-center-card.guess-pending{
-    background:linear-gradient(170deg, #241f1b 0%, #15120f 100%) !important;
+    background:#13161b !important;
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
-    border:1px solid rgba(255,255,255,0.12);
-    box-shadow:0 26px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
-    border-radius:26px;
-    padding:22px 20px 20px;
+    border:1px solid rgba(217,105,79,0.32);
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+    border-radius:24px;
+    padding:20px 16px 16px;
     gap:6px;
-    width:min(86vw, 300px);
-    max-width:min(86vw, 300px);
+    width:min(88vw, 310px);
+    max-width:min(88vw, 310px);
     color:#f4efe6;
+    animation:none;
   }
   .ct-center-card.guess-pending .ct-center-card-from{ margin-bottom:2px; }
+  /* Kanji — rangli "plitka" ichida, matn soyasiz */
   .ct-center-card.guess-pending .ct-center-card-kanji{
-    font-size:76px; line-height:1.05; margin:6px 0 4px; color:#fbf6ec;
-    text-shadow:0 6px 28px rgba(217,105,79,0.35);
+    display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+    width:100%; box-sizing:border-box;
+    padding:14px 8px 12px; margin:6px 0 4px;
+    font-size:68px; line-height:1.08; text-align:center; word-break:break-all;
+    color:#fff6e6; text-shadow:none;
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(217,105,79,0.20) 0%, rgba(201,166,107,0.08) 100%);
+    border:1px solid rgba(217,105,79,0.30);
   }
   .ct-center-card.guess-pending .ct-guess-meta{
     display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;
   }
-  .ct-guess-progress{ display:flex; gap:6px; width:120px; }
+  .ct-guess-progress{ display:flex; gap:6px; width:130px; }
   .ct-guess-progress i{
-    flex:1; height:4px; border-radius:4px; background:rgba(255,255,255,0.12); display:block;
-    transition:background .25s ease;
+    flex:1; height:5px; border-radius:5px; background:rgba(255,255,255,0.12); display:block;
+    transition:background .2s ease;
   }
   .ct-guess-progress i.on{ background:linear-gradient(90deg, var(--accent), var(--gold)); }
   .ct-center-card.guess-pending .ct-guess-step{
-    font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
-    color:rgba(244,239,230,0.6); margin:0;
+    font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--gold); margin:0;
   }
   .ct-center-card.guess-pending .ct-guess-q{
-    font-size:13px; font-weight:600; color:rgba(244,239,230,0.85); margin:4px 0 10px; text-align:center;
+    font-size:13.5px; font-weight:600; color:#ece6da; margin:2px 0 8px; text-align:center;
   }
   .ct-center-card.guess-pending .ct-guess-opts{
-    grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; max-width:none; width:100%;
+    grid-template-columns:repeat(2, minmax(0,1fr)); gap:7px; max-width:none; width:100%;
   }
   .ct-center-card.guess-pending .ct-guess-opt{
-    min-height:46px; padding:9px 8px; border-radius:14px;
-    background:#2b2622; border:1px solid rgba(255,255,255,0.1);
-    color:#f4efe6; font-size:13px; font-weight:600;
-    box-shadow:0 3px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    min-height:44px; padding:8px 8px; border-radius:13px;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14);
+    color:#f6f1e8; font-size:13px; font-weight:600;
+    box-shadow:none;
+    transition:background .12s ease, border-color .12s ease, transform .1s ease;
   }
   .ct-center-card.guess-pending .ct-guess-opt:hover{
-    background:#332d28; border-color:rgba(217,105,79,0.55); color:#fff;
+    background:rgba(217,105,79,0.16); border-color:rgba(217,105,79,0.65); color:#fff;
   }
   .ct-center-card.guess-pending .ct-guess-opt:active{
-    transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.35);
+    background:var(--accent); border-color:var(--accent); color:#fff; transform:scale(0.97);
   }
   .ct-center-card.guess-pending .ct-guess-opt:focus-visible{
     outline:2px solid var(--accent); outline-offset:2px;
+  }
+  @media (max-width:380px){
+    .ct-center-card.guess-pending .ct-center-card-kanji{ font-size:54px; padding:10px 6px 8px; }
+    .ct-center-card.guess-pending .ct-guess-opt{ font-size:12.5px; min-height:42px; }
   }
   .ct-table-seat-score{
     font-size:11px;
@@ -9970,12 +10101,6 @@
       <button class="ct-room-page-leave-btn" id="ctRoomPageLeaveBtn" type="button">Chiqish</button>
     </div>
   </div>
-  <!-- ---------- YON TARAFDAGI KICHIK OYNA: ishtirokchilar + ochkolar ----------
-       Har bir ishtirokchining ismi, avatari va joriy ochkosi ko'proq ochko
-       tartibida (yuqoridan pastga kamayib boruvchi) shu yerda ko'rsatiladi —
-       o'rindiqlardagi kichik ochko yozuvidan farqli, hammani bir joyda,
-       bir qarashda solishtirish uchun. renderScoreboard() to'ldiradi. -->
-  <div class="ct-scoreboard" id="ctScoreboard" aria-hidden="true"></div>
   <div class="ct-table" id="ctTable">
     <button class="ct-choose-flashcard-btn" id="ctChooseFlashcardBtn" type="button">
       <svg class="ct-choose-flashcard-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -9984,6 +10109,11 @@
       </svg>
       <span>Flashcard tanlash</span>
     </button>
+    <!-- ---------- REYTING PESHTAXTASI: "Flashcard tanlash" tugmasi ostida ----------
+         Ishtirokchilar ochko bo'yicha kamayish tartibida; kim to'g'ri javob
+         bersa, aynan uning qatori ro'parasida "+1" animatsiya bilan yoziladi.
+         renderScoreboard() to'ldiradi. -->
+    <div class="ct-scoreboard" id="ctScoreboard" aria-hidden="true"></div>
     <div class="ct-table-center-hint" id="ctTableCenterHint">Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.</div>
     <div class="ct-table-seats" id="ctTableSeats" aria-hidden="true"></div>
   </div>
@@ -16712,7 +16842,7 @@
     // flash" farqlanadi — aks holda daftar (guesses) yoki chat kabi
     // aloqador bo'lmagan har qanday yangilanishda ham eski aura qayta
     // portlab ketishi mumkin edi.
-    const AVATAR_AURA_MS = 1100;
+    const AVATAR_AURA_MS = 1700;
     const avatarAuraSeenAt = new Map();   // uid -> oxirgi ko'rilgan flash `at` qiymati
     const avatarAuraActive = new Map();   // uid -> {type:'correct'|'wrong', timer}
     function triggerAvatarAura(uid, type){
@@ -17425,7 +17555,7 @@
       if(chooseFlashcardBtn){
         chooseFlashcardBtn.style.display = (centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen) ? 'none' : '';
       }
-      renderScoreboard(data);
+      renderScoreboard(data, !!(centerCardsHTML.length && !dayPickerOpen && !kanjiPickerOpen));
     }
     function buildParticipantRows(data){
       const {auth} = window.__kanjiFB;
@@ -17452,7 +17582,7 @@
           avatarHTML = '👤';
         }
         const score = (data.scores && data.scores[uid]) || 0;
-        return {name, avatarHTML, isSelf, score};
+        return {uid, name, avatarHTML, isSelf, score};
       });
       // Ko'proq ochko yig'gan ishtirokchi yuqorida chiqishi uchun ochko
       // bo'yicha kamayish tartibida saralanadi (teng ochkoda dastlabki
@@ -17460,21 +17590,57 @@
       rows.sort((a,b) => b.score - a.score);
       return rows;
     }
-    // ---------- YON TARAFDAGI KICHIK OYNA: ismi/avatari + ochkosi bilan
-    // ishtirokchilar ro'yxati (renderTableSeats har chaqirilganda yangilanadi) ----------
-    function renderScoreboard(data){
+    // ---------- REYTING PESHTAXTASI: "Flashcard tanlash" tugmasi ostida ----------
+    // Ochkosi oshgan foydalanuvchi aniqlansa (oldingi snapshotga nisbatan),
+    // aynan uning qatori ro'parasida "+N" chiqadi, ochko "pop" qiladi va qator
+    // yashil chaqnaydi. Snapshot tez-tez kelib qatorlar qayta chizilgani uchun
+    // animatsiya vaqti saqlanadi va qayta chizilganda manfiy delay bilan
+    // uzilmasdan davom ettiriladi.
+    const SCORE_GAIN_MS = 1700;
+    const scoreboardPrev = new Map();   // uid -> oxirgi ko'rilgan ochko
+    const scoreboardGain = new Map();   // uid -> {delta, start}
+    function resetScoreboardState(){ scoreboardPrev.clear(); scoreboardGain.clear(); }
+    function renderScoreboard(data, hidden){
       const scoreboardEl = document.getElementById('ctScoreboard');
       if(!scoreboardEl) return;
       const uids = data.participantUids || [];
-      if(!uids.length){ scoreboardEl.innerHTML = ''; return; }
+      if(!uids.length){ scoreboardEl.innerHTML = ''; resetScoreboardState(); return; }
       const rows = buildParticipantRows(data);
-      scoreboardEl.innerHTML = rows.map(r => `
-        <div class="ct-scoreboard-row${r.isSelf ? ' ct-scoreboard-row-self' : ''}">
+      const now = Date.now();
+      rows.forEach(r => {
+        const prev = scoreboardPrev.get(r.uid);
+        if(prev !== undefined && r.score > prev){
+          scoreboardGain.set(r.uid, { delta: r.score - prev, start: now });
+        }
+        scoreboardPrev.set(r.uid, r.score);
+      });
+      scoreboardEl.classList.toggle('ct-scoreboard-compact', (data.size || uids.length) >= 4);
+      scoreboardEl.style.display = hidden ? 'none' : '';
+      scoreboardEl.innerHTML = rows.map((r, i) => {
+        let up = '';
+        let delayStyle = '';
+        let gainHTML = '';
+        const g = scoreboardGain.get(r.uid);
+        if(g){
+          const elapsed = now - g.start;
+          if(elapsed >= SCORE_GAIN_MS){
+            scoreboardGain.delete(r.uid);
+          } else {
+            up = ' score-up';
+            delayStyle = ` style="--sb-delay:-${elapsed}ms"`;
+            gainHTML = `<span class="ct-scoreboard-gain">+${g.delta}</span>`;
+          }
+        }
+        const lead = (i === 0 && r.score > 0) ? ' ct-scoreboard-row-lead' : '';
+        return `
+        <div class="ct-scoreboard-row${r.isSelf ? ' ct-scoreboard-row-self' : ''}${lead}${up}"${delayStyle}>
+          <div class="ct-scoreboard-rank">${i + 1}</div>
           <div class="ct-scoreboard-avatar">${r.avatarHTML}</div>
           <div class="ct-scoreboard-name">${escapeCt(r.name)}</div>
+          ${gainHTML}
           <div class="ct-scoreboard-score">${r.score}</div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
     // ---------- MUSOBAQA NATIJALARI: tabriklash oynasi ----------
     const CT_CONFETTI_COLORS = ['var(--gold)','var(--accent)','var(--accent-soft)','var(--moss-soft)','var(--slate)','var(--plum)','#f2e4bf'];
@@ -17788,6 +17954,7 @@
       kanjiPickerDay = null;
       selectedKanjiId = null;
       lastRoomData = null;
+      resetScoreboardState();
       closeRoomPage();
       if(waitingView) waitingView.classList.add('hidden');
       if(startRoomBtn) startRoomBtn.classList.add('hidden');
