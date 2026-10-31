@@ -2149,9 +2149,20 @@
     "auth/missing-verification-code": "SMS kodni kiriting.",
     "auth/captcha-check-failed": "Xavfsizlik tekshiruvi o'tmadi. Sahifani yangilab qayta urinib ko'ring.",
     "auth/operation-not-allowed": "Telefon orqali kirish yoqilmagan (Firebase sozlamasi).",
-    "auth/quota-exceeded": "SMS limiti tugagan. Keyinroq urinib ko'ring."
+    "auth/quota-exceeded": "SMS limiti tugagan. Keyinroq urinib ko'ring.",
+    "auth/unauthorized-domain": "Bu sayt manzili Firebase'da ruxsat etilmagan (Authorized domains ro'yxatiga qo'shing).",
+    "auth/invalid-app-credential": "Xavfsizlik tekshiruvi rad etildi. API kalit cheklovlarini (Identity Toolkit API, sayt manzili) tekshiring.",
+    "auth/app-not-authorized": "Bu ilova Firebase/Google API kalitiga ruxsat etilmagan. API kalit cheklovlarini tekshiring.",
+    "auth/billing-not-enabled": "SMS yuborish uchun Firebase loyihasi Blaze (to'lovli) rejimida bo'lishi kerak.",
+    "auth/network-request-failed": "Internet aloqasi yo'q yoki tarmoq so'rovi bloklandi.",
+    "auth/internal-error": "Firebase ichki xatosi. Sahifani yangilab qayta urinib ko'ring; davom etsa, konsol (F12) xabarini yuboring.",
+    "auth/web-storage-unsupported": "Brauzer saqlashni (storage) bloklagan. Maxfiy rejimni o'chirib ko'ring."
   };
-  function phoneErrText(e){ return PHONE_ERRORS[e && e.code] || ("Xatolik: " + ((e && e.message) || "noma'lum")); }
+  function phoneErrText(e){
+    // Aniq sababni ko'rish uchun konsolga ham yozamiz (F12 → Console)
+    console.error("Telefon kirish xatosi:", e && e.code, e && e.message);
+    return PHONE_ERRORS[e && e.code] || ("Xatolik: " + ((e && e.code) || (e && e.message) || "noma'lum"));
+  }
   function getRecaptcha(){
     if(!recaptcha){ recaptcha = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" }); }
     return recaptcha;
