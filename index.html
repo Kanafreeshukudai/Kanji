@@ -1414,10 +1414,11 @@
 </style>
 <style id="app-version-style">
   .app-version{
-    margin-top:12px; text-align:center;
-    font-size:11px; line-height:1.4; letter-spacing:.04em;
+    margin-top:6px; max-width:100%;
+    font-size:10px; line-height:1.2; letter-spacing:.03em;
     color:var(--ink-faint, #6b7075);
     font-variant-numeric:tabular-nums; user-select:text;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .app-version.stale{ color:#e0a060; }
 </style>
@@ -2402,10 +2403,10 @@
       var running = e.data && e.data.version;
       if(!label) return;
       if(running && running !== window.APP_VERSION){
-        label.textContent = 'Versiya: ' + window.APP_VERSION + ' · ishlayotgan: ' + running + ' (yangilanmoqda)';
+        label.textContent = 'Versiya: ' + window.APP_VERSION + ' · yangilash kerak';
         label.classList.add('stale');
       } else {
-        label.textContent = 'Versiya: ' + window.APP_VERSION + ' · ishlayapti';
+        label.textContent = 'Versiya: ' + window.APP_VERSION;
         label.classList.remove('stale');
       }
     };
