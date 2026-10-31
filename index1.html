@@ -50,11 +50,11 @@
     --card-w: min(84vw, 360px);
     --card-h: min(120vw, 460px);
     /* Kartochka aylanishi: darhol javob beradi (kutdirmaydi), oxirida uzoq va yumshoq tinchlanadi */
-    --flip-dur: .72s;
+    --flip-dur: .8s;
     /* Simmetrik ease-in-out: avvalgi egri chiziq (.3,.8,.2,1) burilishning ~75% ini birinchi
        ~170ms da bajarib, qolganini sekin tinchlantirardi — old yuz bir zumda "uzilib" ketib,
        tepa/pastki chetlar sakrab, oxirida qotib qolgandek ko'rinardi. */
-    --flip-ease: cubic-bezier(.3,.7,.25,1);
+    --flip-ease: cubic-bezier(.45,.1,.25,1);
     /* umumiy kontent kengligi — kichik ekranda 480px, katta ekranlarda
        pastdagi @media qoidalari orqali kengayadi, shu bilan kartochkalar
        katta ekranda markazdagi tor ustunga siqilib qolmaydi */
@@ -13470,6 +13470,7 @@
     // never gets mistaken for the start of a drag, but small enough that an intentional
     // swipe still feels immediate.
     const INTENT_PX = 14;
+    let lastDx = 0, lastT = 0, velX = 0;
 
     let lastTouchAt = 0, downAt = 0, lastFlipAt = 0, flipTimer = null;
     const dots = (m)=>{ try{ DotsFX[m](); }catch(_){} };
@@ -13480,6 +13481,7 @@
       const p = e.touches ? e.touches[0] : e;
       startX = p.clientX; startY = p.clientY; curX = 0;
       lastY = startY; scrolledManually = false;
+      lastDx = 0; lastT = performance.now(); velX = 0;
       inner.style.transition = 'none';
       inner.style.willChange = 'transform'; // qatlam aylanishdan OLDIN tayyor bo'ladi
       // Kartochkaning o'zi: oldingi "qaytish" yoki "kirish" animatsiyasi tugamagan bo'lsa ham,
@@ -13487,7 +13489,10 @@
       card.classList.remove('card-enter');
       card.style.transition = 'none';
     }
-    function applyTransform(dx){
+    function applyTransform(dx0){
+      // yumshoq qarshilik: chegaradan uzoqlashganda barmoq harakati sekinlashadi
+      const SOFT = 120, ad0 = Math.abs(dx0);
+      const dx = ad0 <= SOFT ? dx0 : Math.sign(dx0) * (SOFT + (ad0 - SOFT) * 0.6);
       const rot = dx / 18;
       card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
       try{ DotsFX.drift(dx/180); }catch(_){}   // fon zarralari tortish yo'nalishiga yengil ergashadi
@@ -13530,7 +13535,7 @@
           // brauzerning o'zi sahifani momentum bilan scroll qilsin.
           const innerScrollable = backScroll && card.classList.contains('flipped') &&
                                   backScroll.scrollHeight > backScroll.clientHeight + 1;
-          if(true){ // vertikal surish — native scroll
+          if(!innerScrollable){ // vertikal surish — sahifaning native scroll'i
             dragging = false;
             inner.style.transition = '';
             if(!card.classList.contains('flipping')) inner.style.willChange = '';
@@ -13554,6 +13559,9 @@
       }
 
       moved = true;
+      const nowT = performance.now();
+      velX = Math.max(-3, Math.min(3, (dx - lastDx) / Math.max(1, nowT - lastT)));
+      lastDx = dx; lastT = nowT;
       curX = dx;
       pendingDx = dx;
       if(rafId === null){
@@ -13578,14 +13586,15 @@
       if(!card.classList.contains('flipping')) inner.style.willChange = '';
       setTimeout(()=>dots('resume'), 450);
       const threshold = 90;
-      if(curX <= -threshold){
+      const flick = performance.now() - lastT < 90 && Math.abs(velX) > 0.5 && Math.abs(curX) > 28 && Math.sign(velX) === Math.sign(curX);
+      if(curX <= -threshold || (flick && curX < 0)){
         try{ DotsFX.fling(-1, card.getBoundingClientRect()); }catch(_){}
         flyOut(-1, markKnown);
-      } else if(curX >= threshold){
+      } else if(curX >= threshold || (flick && curX > 0)){
         try{ DotsFX.fling(1, card.getBoundingClientRect()); }catch(_){}
         flyOut(1, markLater);
       } else if(moved){
-        card.style.transition = 'transform .5s cubic-bezier(.25,.8,.25,1)';
+        card.style.transition = 'transform .55s cubic-bezier(.22,1,.36,1)';
         card.style.transform = '';
         ringLeft.style.opacity = 0; ringRight.style.opacity = 0;
         setTimeout(()=>{ card.classList.remove('swiping'); }, 520);
@@ -13626,7 +13635,7 @@
       card.style.touchAction = 'pan-y'; // MUHIM: orqa tomonda sahifa scrolli ishlashi uchun
       dots('pause');
       clearTimeout(flipTimer);
-      flipTimer = setTimeout(finishFlip, 820); // transitionend kelmasa ham holat albatta tozalanadi
+      flipTimer = setTimeout(finishFlip, 900); // transitionend kelmasa ham holat albatta tozalanadi
       if(showingBack) playFlipSound();
     }
     function finishFlip(){
