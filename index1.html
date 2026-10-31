@@ -108,6 +108,9 @@
   html.lite .bg-scene .blob.b4{ display:none; }
   html.lite .card.flipped .face.back{ animation:none !important; }
   html.lite .card::after{ display:none; }
+  /* Yengil rejimda surishdagi moss/qizil kartochka halqasi chiqmaydi (og'irlik qilmaslik uchun) */
+  html.lite .swipe-ring{ display:none !important; }
+  html.lite .swipe-tag{ display:none !important; }
 
   /* ---------- YENGIL REJIM (html.perf) — eng kuchsiz qurilmalar uchun ----------
      Maqsad: qotmasdan, maksimal silliq ishlash. Eng og'ir narsalar o'chiriladi:
@@ -13054,7 +13057,11 @@
         });
         return b;
       };
-      if(!stage.querySelector('.side-push-arrow')){
+      // Strelkalar faqat sichqonchali (desktop) qurilmalarda yaratiladi; mobilda umuman yo'q
+      const canHoverArrows = !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches);
+      if(!canHoverArrows){
+        stage.querySelectorAll('.side-push-arrow').forEach(n=>n.remove());
+      } else if(!stage.querySelector('.side-push-arrow')){
         stage.appendChild(mkArrow(-1));
         stage.appendChild(mkArrow(1));
       }
@@ -17181,7 +17188,7 @@
       const {updateDoc, serverTimestamp} = window.__kanjiFB;
       const beat = () => { updateDoc(roomRef, { lastActivity: serverTimestamp() }).catch(()=>{}); };
       beat();
-      roomHeartbeatTimer = setInterval(beat, ROOM_HEARTBEAT_MS);
+      roomHeartbeatTimer = setInterval(() => { if (!document.hidden) beat(); }, ROOM_HEARTBEAT_MS);
     }
     function stopRoomHeartbeat(){
       if(roomHeartbeatTimer){ clearInterval(roomHeartbeatTimer); roomHeartbeatTimer = null; }
@@ -18491,7 +18498,12 @@
       const ban = bansList._bans[+b.dataset.unblock];
       if(ban) window.__kanjiChatUnblock(ban.email).catch(()=>alert("Ochib bo'lmadi."));
     });
-    setInterval(()=>{ applyChatBlock(); renderBans(); }, 45000);
+    setInterval(()=>{
+      if(document.hidden) return;
+      const fb = window.__kanjiFB;
+      if(!fb || !fb.auth || !fb.auth.currentUser) return; // kirilmagan bo'lsa ishlamaydi
+      applyChatBlock(); renderBans();
+    }, 45000);
   })();
 
   // ---------- Yuqori kontrast kaliti ----------
@@ -19828,7 +19840,7 @@
   function startPresenceHeartbeat(user) {
     stopPresenceHeartbeat();
     presenceBeat(user, true);
-    presenceHeartbeatTimer = setInterval(() => presenceBeat(user, true), PRESENCE_HEARTBEAT_MS);
+    presenceHeartbeatTimer = setInterval(() => { if (document.visibilityState !== "hidden") presenceBeat(user, true); }, PRESENCE_HEARTBEAT_MS);
     document.addEventListener("visibilitychange", handlePresenceVisibility);
     window.addEventListener("beforeunload", handlePresenceUnload);
     window.addEventListener("pagehide", handlePresenceUnload);
@@ -20339,7 +20351,7 @@
     if (presenceRefreshTimer) clearInterval(presenceRefreshTimer);
     // Snapshot yangilanmasa ham, vaqt o'tishi bilan "online -> offline"ga
     // aylanishini ko'rsatish uchun ro'yxatni davriy qayta chizamiz.
-    presenceRefreshTimer = setInterval(presenceRenderList, 30000);
+    presenceRefreshTimer = setInterval(() => { if (!document.hidden) presenceRenderList(); }, 30000);
   }
 
   function teardownPresenceAdminUI() {
