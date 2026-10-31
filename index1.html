@@ -2561,6 +2561,7 @@
   }
   /* ---------- STAGE / SWIPE CARD ---------- */
   .stage{
+    height:auto !important; min-height:var(--card-h);
     width:100%;
     display:flex;
     justify-content:center;
@@ -2605,20 +2606,9 @@
      aylanish davom etayotgan paytda (JS orqali qo'shiladigan .flipping klassi)
      backdrop-filter va og'ir soyalar vaqtincha o'chiriladi, oddiy orqa fon bilan
      almashtiriladi; transition tugagach avtomatik qaytariladi (pastda, JS). */
-  .card.flipping .face{
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-  }
-  .card.flipping .face.back{ animation:none !important; }
-  /* Kartochka chapga/o'ngga uchayotganda (flying) og'ir blur/filter/halqalar o'chiriladi —
-     kadrlar tekis bo'ladi (FPS yuqori). Uchish tugagach ghost sahnadan olib tashlanadi. */
+  /* Kartochka uchayotganda faqat GPU qatlami tayyorlanadi; vizual holatlar (soya, blur, halqa)
+     o'zgartirilmaydi, shunda ekranda sakrash/o'chib-yonish bo'lmaydi. */
   .card.flying{ will-change:transform, opacity; }
-  .card.flipping .face, .card.flying .face{ box-shadow:none !important; }
-  .card.flying .face{
-    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
-    filter:none !important;
-  }
-  .card.flying .swipe-ring, .card.flying .swipe-tag{ display:none !important; }
   /* aylanish paytida old chet nuri (drop-shadow filter) alohida render-sirt talab qilib,
      kadrlarni og'irlashtirardi — vaqtincha o'chiriladi (juda nozik 2px nur, sezilmaydi) */
 
@@ -12935,6 +12925,18 @@
     if(window.__kanjiRomajiSync) window.__kanjiRomajiSync.save(on);
   }, true);
 
+  // Orqa tomondagi barcha ma'lumotlar ko'rinsin: kartochka balandligi
+  // ichidagi matn talab qilgan balandlikka yetguncha kattalashadi (chegara to'liq ko'rinadi)
+  function fitCardToContent(c){
+    if(!c) return;
+    const sc = c.querySelector('.face-back-scroll');
+    if(!sc) return;
+    c.style.height = '';
+    const base = c.getBoundingClientRect().height;
+    const need = Math.ceil(sc.scrollHeight);
+    if(need > base + 1) c.style.height = need + 'px';
+  }
+  window.addEventListener('resize', ()=>fitCardToContent(document.getElementById('activeCard')));
   function renderStage(enter, ghost){
     // eski faol kartochkaga bog'langan window-darajasidagi (mousemove/mouseup)
     // event listenerlar - agar tozalanmasa, har yangi kartochka chiqqanda
@@ -13078,6 +13080,7 @@
     keepGhost();
     if('speechSynthesis' in window) speechSynthesis.cancel();
     stage.appendChild(card);
+    fitCardToContent(card);
     attachCardEvents(card);
     // (romaji/kana tugmasi: kartochka aylanib ketmasligi uchun hodisani to'xtatamiz — hodisa delegatsiyasida)
     // yapon o'qilishini o'qish tugmasi (kartochka aylantirish/surish bilan adashmasligi uchun hodisani to'xtatamiz)
