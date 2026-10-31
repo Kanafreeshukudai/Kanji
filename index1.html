@@ -12929,7 +12929,8 @@
     const prevCard = document.getElementById('activeCard');
     if(prevCard && prevCard._cleanupEvents) prevCard._cleanupEvents();
 
-    stage.innerHTML = "";
+    // Uchib ketayotgan kartochka (ghost) DOM'dan uzilmasin: qayta qo'shish animatsiyani bekor qiladi
+    Array.from(stage.children).forEach(n=>{ if(n !== ghost && !n.classList.contains('side-push-arrow')) n.remove(); });
     updateCounts();
     // uchib ketayotgan kartochka (ghost) stage'da qolib, o'z uchishini tugatadi
     const keepGhost = ()=>{
@@ -12937,8 +12938,8 @@
       ghost.removeAttribute('id');
       ghost.classList.add('card-ghost');
       ghost.setAttribute('aria-hidden', 'true');
-      stage.appendChild(ghost);
-      setTimeout(()=>{ ghost.remove(); }, 700);
+      if(ghost.parentNode !== stage) stage.appendChild(ghost);
+      setTimeout(()=>{ ghost.remove(); }, 950);
     };
     const queue = queues[currentDay];
     if(queue.length === 0){
@@ -13051,9 +13052,10 @@
         });
         return b;
       };
-      stage.querySelectorAll('.side-push-arrow').forEach(n=>n.remove());
-      stage.appendChild(mkArrow(-1));
-      stage.appendChild(mkArrow(1));
+      if(!stage.querySelector('.side-push-arrow')){
+        stage.appendChild(mkArrow(-1));
+        stage.appendChild(mkArrow(1));
+      }
     }
     keepGhost();
     if('speechSynthesis' in window) speechSynthesis.cancel();
