@@ -3166,6 +3166,18 @@
   .empty-state .big-em{font-size:40px; opacity:0.8;}
   .empty-state h2{font-family:'Shippori Mincho',serif; font-size:19px; margin:14px 0 6px; color:var(--ink);}
   .empty-state p{font-size:13.5px; color:var(--ink-soft); max-width:280px; margin:0 auto;}
+  .empty-actions{ display:flex; flex-direction:column; gap:10px; margin:22px auto 0; width:min(280px,80%); }
+  .empty-action-btn{
+    width:100%; padding:12px 16px; border-radius:999px;
+    font-family:inherit; font-size:14px; font-weight:700; letter-spacing:0.01em; line-height:1;
+    color:var(--ink); cursor:pointer; touch-action:manipulation;
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.32);
+    transition:background .2s ease, border-color .2s ease, transform .15s ease;
+  }
+  .empty-action-btn:hover{ background:rgba(255,255,255,0.14); border-color:#fff; }
+  .empty-action-btn:active{ transform:scale(0.98); }
+  .empty-action-btn.primary{ background:#fff; color:#0B0D10; border-color:#fff; }
+  .empty-action-btn.primary:hover{ background:#e9e9e9; }
 
   /* ---------- KNOWN SUMMARY ---------- */
   .known-summary{
@@ -7326,6 +7338,10 @@
     html.side-push-ok .side-push-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   }
   html.perf .side-push-arrow{ background:rgba(0,0,0,0.85); }
+  /* Kartochka paydo bo'layotganda strelkalar yashirin, animatsiya tugagach yumshoq fade bilan chiqadi */
+  #stage.arrows-hidden .side-push-arrow{ opacity:0; pointer-events:none; }
+  #stage.arrows-in .side-push-arrow{ animation:sideArrowFade .45s ease both; }
+  @keyframes sideArrowFade{ from{ opacity:0; } to{ opacity:1; } }
   .presence-owner-badge.presence-sensei-badge{
     animation:ownerShineRun 2.6s ease-in-out infinite;
     border:1px solid rgba(255,255,255,0.55);
@@ -12915,7 +12931,22 @@
         <div class="big-em">⛩️</div>
         <h2>Barchasi ko'rib chiqildi!</h2>
         <p>${DAY_LABELS[currentDay]} bo'limidagi so'zlar "Bilganlarim" bo'limiga o'tdi. Endi Viktorina bilan mustahkamlang.</p>
+        <div class="empty-actions">
+          <button type="button" class="empty-action-btn primary" id="emptyRestartBtn">Qaytadan boshlash</button>
+          <button type="button" class="empty-action-btn" id="emptyKnownBtn">Bilganlarimga o'tish</button>
+        </div>
       </div>`;
+      const restartBtn = stage.querySelector('#emptyRestartBtn');
+      const knownBtnEl = stage.querySelector('#emptyKnownBtn');
+      if(restartBtn) restartBtn.addEventListener('click', ()=>{
+        // Kun kartochkalarini boshidan, asl tartibda qayta to'ldiramiz
+        if(currentDay !== CUSTOM_DAY_ID){
+          queues[currentDay] = WORDS.filter(w=>w.day===currentDay).map(w=>w.id);
+        }
+        saveState();
+        renderStage(true);
+      });
+      if(knownBtnEl) knownBtnEl.addEventListener('click', ()=>showTab('known'));
       progressNote.textContent = "";
       keepGhost();
       return;
@@ -12996,6 +13027,15 @@
       stage.querySelectorAll('.side-push-arrow').forEach(n=>n.remove());
       stage.appendChild(mkArrow(-1));
       stage.appendChild(mkArrow(1));
+    }
+    if(enter){
+      hideSideArrows();
+      clearTimeout(window.__sideArrowRevealT);
+      window.__sideArrowRevealT = setTimeout(()=>{
+        const c = document.getElementById('activeCard');
+        if(c && c.classList.contains('card-forming')) return;
+        revealSideArrows();
+      }, 620);
     }
     keepGhost();
     if('speechSynthesis' in window) speechSynthesis.cancel();
@@ -13211,6 +13251,20 @@
   }
 
   // umumiy orkestrator: tugma bosilib, yangi kartochka ekranga chiqqach chaqiriladi
+  function hideSideArrows(){
+    const st = document.getElementById('stage');
+    if(!st) return;
+    st.classList.remove('arrows-in');
+    st.classList.add('arrows-hidden');
+  }
+  function revealSideArrows(){
+    const st = document.getElementById('stage');
+    if(!st) return;
+    st.classList.remove('arrows-hidden');
+    st.classList.remove('arrows-in');
+    void st.offsetWidth;
+    st.classList.add('arrows-in');
+  }
   function playCardCreationAnimation(){
     const card = document.getElementById('activeCard');
     if(!card) return;
@@ -13219,10 +13273,12 @@
 
     card.style.pointerEvents = 'none';
     card.classList.add('card-forming');
+    hideSideArrows();
     setTimeout(()=>{   // zaxira: animatsiya o'chiq bo'lsa kartochka qotib qolmasin
       if(card.classList.contains('card-forming')){
         card.classList.remove('card-forming');
         card.style.pointerEvents = '';
+        revealSideArrows();
       }
     }, 1500);
 
@@ -13237,6 +13293,7 @@
       setTimeout(()=>{
         card.classList.remove('card-forming');
         card.style.pointerEvents = '';
+        revealSideArrows();
       }, 180);
     }, {once:true});
   }
@@ -19814,7 +19871,6 @@
           '<div class="sensei-notice-kanji" aria-hidden="true">\u5148\u751F</div>' +
           '<h4 class="sensei-notice-name" id="senseiNoticeName"></h4>' +
           '<span class="sensei-notice-badge">Sensei</span>' +
-          '<p class="sensei-notice-title">Kanji ilovasining sensei\u2019si</p>' +
           '<button type="button" class="sensei-notice-close">Yopish</button>' +
         '</div>';
       document.body.appendChild(senseiNoticeEl);
@@ -19823,7 +19879,7 @@
       senseiNoticeEl.querySelector(".sensei-notice-close").addEventListener("click", hide);
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && senseiNoticeEl.classList.contains("show")) hide(); });
     }
-    senseiNoticeEl.querySelector(".sensei-notice-name").textContent = nick || "";
+    senseiNoticeEl.querySelector(".sensei-notice-name").textContent = "Qodirova Muxlisa";
     senseiNoticeEl.classList.add("show");
     senseiNoticeEl.setAttribute("aria-hidden", "false");
   }
