@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uz"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnostika</title>
+<style>
+  body{font:14px/1.5 system-ui,sans-serif;background:#0b0d10;color:#ECE7DC;margin:0;padding:16px}
+  h1{font-size:17px;margin:0 0 12px}
+  .row{padding:8px 10px;border-radius:10px;background:#15181c;margin-bottom:8px;word-break:break-all}
+  .ok{color:#7fd08a} .bad{color:#ff8a80} .warn{color:#e0a060}
+  img{width:48px;height:48px;vertical-align:middle;margin-right:8px;background:#222;border-radius:8px}
+  button{margin-top:10px;padding:10px 16px;border-radius:10px;border:0;background:#D9694F;color:#fff;font-weight:700}
+</style></head><body>
+<h1>Ilova diagnostikasi</h1>
+<div id="out"></div>
+<button id="btn" hidden>Ilovani o'rnatish</button>
+<script>
+var out = document.getElementById('out');
+function row(cls, html){ var d = document.createElement('div'); d.className = 'row'; d.innerHTML = html; out.appendChild(d); return d; }
+var base = new URL('.', location.href).href;
+var installEvt = null;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); installEvt = e; document.getElementById('btn').hidden = false;
+  row('ok', '<span class="ok">✔ beforeinstallprompt keldi — o\'rnatish mumkin</span>'); });
+document.getElementById('btn').onclick = function(){ if(installEvt){ installEvt.prompt(); } };
+
+row('', 'Sahifa manzili: ' + location.href);
+row('', 'Standalone rejimmi: ' + ((matchMedia('(display-mode: standalone)').matches || navigator.standalone) ? '<span class="warn">ha (ilova ichida)</span>' : 'yo\'q (brauzerda)'));
+if(!window.isSecureContext) row('', '<span class="bad">✘ HTTPS emas — o\'rnatish ishlamaydi</span>');
+
+fetch('manifest.json', {cache:'no-store'}).then(function(r){
+  if(!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}).then(function(m){
+  row('ok', '<span class="ok">✔ manifest.json topildi</span><br>nom: ' + m.name + '<br>display: ' + m.display + '<br>start_url: ' + m.start_url);
+  var list = m.icons || [];
+  var sizes = {};
+  list.forEach(function(ic){
+    var url = new URL(ic.src, base).href;
+    var d = row('', 'Ikonka ' + ic.sizes + ' (' + ic.purpose + '): ' + ic.src + '<br>');
+    var img = new Image();
+    img.onload = function(){ d.insertBefore(img, d.firstChild); d.innerHTML += '<br><span class="ok">✔ yuklandi ' + img.naturalWidth + 'x' + img.naturalHeight + '</span>'; };
+    img.onerror = function(){ d.innerHTML += '<br><span class="bad">✘ TOPILMADI (404) — fayl nomi/joyi noto\'g\'ri</span>'; };
+    img.src = url;
+  });
+  var has192 = list.some(function(i){ return i.sizes && i.sizes.indexOf('192x192') >= 0; });
+  var has512 = list.some(function(i){ return i.sizes && i.sizes.indexOf('512x512') >= 0; });
+  if(!has192 || !has512) row('bad', '<span class="bad">✘ manifestda 192 va 512 PNG ikonka yo\'q</span>');
+}).catch(function(e){
+  row('bad', '<span class="bad">✘ manifest.json yuklanmadi: ' + e.message + '</span>');
+});
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    if(!regs.length) row('warn', '<span class="warn">Service worker ro\'yxatdan o\'tmagan</span>');
+    regs.forEach(function(r){
+      var s = r.active ? r.active.scriptURL : (r.waiting ? r.waiting.scriptURL : (r.installing ? r.installing.scriptURL : '—'));
+      row('ok', '<span class="ok">✔ Service worker: ' + s + '</span>');
+    });
+  });
+} else row('bad', '<span class="bad">✘ Bu brauzerda service worker yo\'q</span>');
+
+if(navigator.getInstalledRelatedApps){
+  navigator.getInstalledRelatedApps().then(function(l){
+    row('', 'Qurilmada o\'rnatilgan ilovalar: ' + (l.length ? '<span class="warn">' + l.length + ' ta (eski o\'rnatishni o\'chiring)</span>' : 'yo\'q'));
+  });
+}
+setTimeout(function(){
+  if(!installEvt) row('warn', 'beforeinstallprompt hali kelmadi. Sabab bo\'lishi mumkin: ilova allaqachon o\'rnatilgan, ikonka yo\'q, yoki Chrome shartlarni tekshirmoqda. Chrome menyusida "Ilovani o\'rnatish" bandini tekshiring.');
+}, 4000);
+</script>
+</body></html>
