@@ -3418,7 +3418,9 @@
   .flashcard-convert-btn.disabled{
     background:var(--panel-2); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
   }
-  .flashcard-convert-btn:active:not(.disabled){
+  /* Bosilish effekti faqat matn qismiga (Flashcardga aylantirish) tegishli bo'lsin.
+     Ichidagi "Aralashtirish" tugmasi bosilganda butun pill "ezilmasin". */
+  .flashcard-convert-btn:not(.disabled):has(> .flashcard-convert-label:active){
     transform:scale(0.98);
     filter:brightness(1.14) saturate(1.12);
     box-shadow:0 4px 12px -6px rgba(0,0,0,0.5);
@@ -7368,7 +7370,16 @@
     transform:translateY(14px) scale(0.96); transition:transform .3s cubic-bezier(.2,.9,.3,1.2);
   }
   .sensei-notice-overlay.show .sensei-notice-card{ transform:none; }
-  .sensei-notice-kanji{ font-size:38px; line-height:1; margin-bottom:8px; color:#fff; font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif; text-shadow:0 0 12px rgba(255,255,255,0.35); }
+  .sensei-notice-kanji{
+    display:inline-block; font-size:38px; line-height:1.15; margin-bottom:8px;
+    font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+    /* Owner belgisidagi bilan bir xil tovlanish — matn ichida yorug' sweep */
+    background:linear-gradient(110deg, #C9A66B 0%, #C9A66B 30%, #f1d9a0 43%, #ffffff 50%, #f1d9a0 57%, #C9A66B 70%, #C9A66B 100%);
+    background-size:240% 100%;
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+    animation:ownerShineRun 3.2s ease-in-out infinite;
+  }
   .sensei-notice-name{ margin:0 0 8px; font-size:19px; font-weight:800; color:#fff; letter-spacing:0.01em; }
   .sensei-notice-badge{
     display:inline-block; font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;
@@ -7416,7 +7427,7 @@
   }
   .owner-notice-close:active{ transform:scale(0.97); }
   @media (prefers-reduced-motion: reduce){
-    .presence-owner-badge, .owner-notice-badge{ animation:none; }
+    .presence-owner-badge, .owner-notice-badge, .sensei-notice-kanji{ animation:none; }
     .owner-notice-card{ transition:none; }
   }
   .presence-admin-badge.c-plum{ background:linear-gradient(135deg,#9B6FA0,#7d5684); color:#fbf4ff; border:1px solid rgba(155,111,160,0.75); box-shadow:0 0 10px rgba(155,111,160,0.35); }
@@ -12467,6 +12478,8 @@
   queues[CUSTOM_DAY_ID] = []; // maxsus kartochka navbati — "Hammasi" bo'limidan tanlab qo'shiladi
   let customDeckExists = false; // maxsus kartochka tabi hech bo'lmasa bir marta yasalganmi
   let customDeckShuffled = false; // joriy Maxsus Flashcard to'plami "Aralashtirish" orqali yasalganmi
+  let customDeckIds = [];          // Maxsus Flashcard'ga tanlangan kanjilar (asl ro'yxat, qayta boshlash uchun)
+  let customDeckOrder = 'plain';   // 'shuffled' yoki 'plain' — qayta boshlashda shu rejim saqlanadi
   let customFadingOut = false; // hammasi ko'rib chiqilgach, tab sekin yo'qolish animatsiyasida
   let customKnownSet = new Set(); // Maxsus Flashcard orqali "bilaman"ga o'tkazilgan so'zlar — Bilganlarimda alohida guruhlanadi
   let known = [];
@@ -12850,6 +12863,8 @@
   function createCustomDeck(shuffled){
     const ids = [...selectedKanji];
     if(ids.length === 0) return;
+    customDeckIds = [...ids];
+    customDeckOrder = shuffled ? 'shuffled' : 'plain';
     queues[CUSTOM_DAY_ID] = shuffled ? shuffleArray(ids) : ids;
     customDeckExists = true;
     customDeckShuffled = shuffled;
@@ -12939,10 +12954,22 @@
       const restartBtn = stage.querySelector('#emptyRestartBtn');
       const knownBtnEl = stage.querySelector('#emptyKnownBtn');
       if(restartBtn) restartBtn.addEventListener('click', ()=>{
-        // Kun kartochkalarini boshidan, asl tartibda qayta to'ldiramiz
-        if(currentDay !== CUSTOM_DAY_ID){
-          queues[currentDay] = WORDS.filter(w=>w.day===currentDay).map(w=>w.id);
+        if(currentDay === CUSTOM_DAY_ID){
+          // Maxsus Flashcard: asl tanlovdan qayta yig'amiz; aralashtirilgan bo'lsa, har safar yangi tartibda
+          if(customDeckIds.length === 0) return;
+          const ids = [...customDeckIds];
+          queues[CUSTOM_DAY_ID] = customDeckOrder === 'shuffled' ? shuffleArray(ids) : ids;
+          customDeckExists = true;
+          customDeckShuffled = customDeckOrder === 'shuffled';
+          customFadingOut = false;
+          saveState();
+          renderTabs();
+          showTab('learn');
+          renderStage(true);
+          return;
         }
+        // Kun kartochkalarini boshidan, asl tartibda qayta to'ldiramiz
+        queues[currentDay] = WORDS.filter(w=>w.day===currentDay).map(w=>w.id);
         saveState();
         renderStage(true);
       });
@@ -13027,15 +13054,6 @@
       stage.querySelectorAll('.side-push-arrow').forEach(n=>n.remove());
       stage.appendChild(mkArrow(-1));
       stage.appendChild(mkArrow(1));
-    }
-    if(enter){
-      hideSideArrows();
-      clearTimeout(window.__sideArrowRevealT);
-      window.__sideArrowRevealT = setTimeout(()=>{
-        const c = document.getElementById('activeCard');
-        if(c && c.classList.contains('card-forming')) return;
-        revealSideArrows();
-      }, 620);
     }
     keepGhost();
     if('speechSynthesis' in window) speechSynthesis.cancel();
