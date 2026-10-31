@@ -19333,7 +19333,7 @@
   // Versiya: har yangilanishda APP_VERSION ni oshiring (index.html dagi <meta name="app-version"> bilan bir xil bo'lsin).
   // sw.js URL ga ?v= qo'shilgan: yangi raqamda brauzer service worker'ni qayta yuklaydi va yangilaydi.
   const APP_VERSION = '__APP_VERSION__';
-  if('serviceWorker' in navigator && window.self === window.top){
+  if(false && 'serviceWorker' in navigator){ /* SW faqat hub (index.html) orqali */
     window.addEventListener('load', ()=>{
       navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION)
         .then(reg => { reg.update().catch(()=>{}); })
@@ -21220,5 +21220,21 @@ window.addEventListener('message', function(e){
     pointer-events:none;
   }
 </style>
+<script id="quiet-media-js">
+/* Musiqa ijro etilaveradi, lekin telefon/desktop bildirishnoma va boshqaruv panelida ko'rinmaydi */
+(function(){
+  var a = document.getElementById('splashPhonkAudio');
+  if(!a || !('mediaSession' in navigator)) return;
+  function quiet(){
+    try{ navigator.mediaSession.metadata = null; }catch(e){}
+    ['play','pause','stop','seekbackward','seekforward','seekto','previoustrack','nexttrack'].forEach(function(act){
+      try{ navigator.mediaSession.setActionHandler(act, null); }catch(e){}
+    });
+    try{ navigator.mediaSession.playbackState = 'none'; }catch(e){}
+  }
+  ['play','playing','loadeddata','pause','emptied'].forEach(function(ev){ a.addEventListener(ev, quiet); });
+  quiet();
+})();
+</script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 /* Kanji ilovasi — service worker (hub + ichki ilovalar uchun bitta).
-   Yangi versiya chiqqanda CACHE nomini o'zgartiring (masalan v2), eski kesh avtomatik o'chadi. */
-const CACHE = 'kanji-app-v2';
+   Versiya avtomatik: hub sahifasi sw.js ga ?v=<versiya> qo'shib ro'yxatdan o'tkazadi.
+   Fayllar o'zgarganda versiya o'zgaradi, yangi SW o'rnatiladi, eski kesh o'chadi. */
+const VERSION = new URL(self.location.href).searchParams.get('v') || 'dev';
+const CACHE = 'kanji-app-' + VERSION;
 const PRECACHE = [
   './',
   './index.html',
@@ -30,6 +32,13 @@ self.addEventListener('activate', (event) => {
     await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
+});
+
+// Sahifa ishlayotgan versiyani so'raydi (akkaunt menyusidagi raqam uchun)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_VERSION' && event.ports && event.ports[0]) {
+    event.ports[0].postMessage({ version: VERSION });
+  }
 });
 
 self.addEventListener('fetch', (event) => {
