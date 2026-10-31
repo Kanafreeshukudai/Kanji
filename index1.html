@@ -7302,38 +7302,34 @@
     color:#14101a;
     box-shadow:0 0 8px rgba(155,111,160,0.55), 0 0 10px rgba(230,205,235,0.3);
   }
-  /* ---------- Kartochkani yonga surish tugmalari (chap/o'ng) — faqat owner va sensei uchun ---------- */
+  /* Eski animatsiyali "Bilganlarim / Navbatga" ko'rsatkichlari olib tashlandi */
+  html.no-swipe-hints .swipe-hints{ display:none !important; }
+  /* ---------- Kartochkani yonga surish tugmalari — faqat owner va sensei uchun ----------
+     Ikkala tugma kartochka markazidan bir xil masofada (kartochka kengligiga nisbatan) joylashadi */
   .side-push-row{
     display:none;
-    position:absolute; left:50%; bottom:-56px; transform:translateX(-50%);
-    z-index:6; gap:10px; align-items:center; white-space:nowrap;
+    position:absolute; left:0; right:0; bottom:-64px; height:42px;
+    z-index:6;
   }
-  html.side-push-ok .card .side-push-row{ display:flex; }
+  html.side-push-ok .card .side-push-row{ display:block; }
   .side-push-btn{
-    padding:8px 14px; border-radius:999px; border:0; cursor:pointer;
-    font-family:inherit; font-size:12.5px; font-weight:700; line-height:1;
-    color:#0B0D10;
-    background:linear-gradient(110deg,#C9A66B 0%,#f1d9a0 50%,#C9A66B 100%);
-    box-shadow:0 0 10px rgba(201,166,107,0.45);
-    touch-action:manipulation;
+    position:absolute; top:0; width:42%; height:42px;
+    display:flex; align-items:center; justify-content:center;
+    padding:0 12px; border-radius:999px;
+    border:1px solid rgba(124,154,107,0.55);
+    background:rgba(124,154,107,0.16);
+    color:var(--moss-soft);
+    font-family:inherit; font-size:13px; font-weight:600; letter-spacing:0.02em; line-height:1;
+    cursor:pointer; touch-action:manipulation;
+    -webkit-user-select:none; user-select:none;
+    transition:background .2s ease, transform .15s ease;
   }
-  .side-push-btn:active{ transform:scale(0.96); }
-  /* Sensei qatori: tovlanuvchi binafsha chegara va yorug' fon — boshqalardan ajralib turadi */
-  .presence-item.presence-item-sensei{
-    position:relative; isolation:isolate;
-    border-radius:14px;
-    background:linear-gradient(100deg, rgba(155,111,160,0.10) 0%, rgba(233,205,235,0.20) 45%, rgba(155,111,160,0.10) 90%);
-    background-size:240% 100%;
-    animation:senseiRowShine 4s ease-in-out infinite;
-  }
-  .presence-item.presence-item-sensei::before{
-    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-    box-shadow:inset 0 0 0 1px rgba(233,205,235,0.45), 0 0 12px rgba(155,111,160,0.35);
-  }
-  @keyframes senseiRowShine{
-    0%{ background-position:100% 0; }
-    55%,100%{ background-position:-40% 0; }
-  }
+  .side-push-btn.left { right: calc(50% + 4%); }
+  .side-push-btn.right{ left:  calc(50% + 4%); }
+  .side-push-btn:hover{ background:rgba(124,154,107,0.26); }
+  .side-push-btn:active{ transform:scale(0.97); }
+  .side-push-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:2px; }
+  html.perf .side-push-btn{ background:rgba(30,44,30,0.85); }
   .presence-owner-badge.presence-sensei-badge{
     animation:ownerShineRun 2.6s ease-in-out infinite;
     border:1px solid rgba(255,255,255,0.55);
@@ -12959,6 +12955,7 @@
         b.title = title;
         b.setAttribute('aria-label', title);
         b.textContent = label;
+        b.classList.add(dir < 0 ? 'left' : 'right');
         ['pointerdown','mousedown'].forEach(ev=>b.addEventListener(ev, e=>e.stopPropagation()));
         b.addEventListener('touchstart', e=>e.stopPropagation(), {passive:true});
         b.addEventListener('click', e=>{
@@ -12968,8 +12965,8 @@
         });
         return b;
       };
-      row.appendChild(mk('← Bilganlarim', 'Bilganlarimga surish', -1));
-      row.appendChild(mk('Navbatga →', 'Navbatga surish', 1));
+      row.appendChild(mk('Bilganlarim', 'Bilganlarimga surish', -1));
+      row.appendChild(mk('Navbatga', 'Navbatga surish', 1));
       card.appendChild(row);
     }
     keepGhost();
@@ -19332,7 +19329,11 @@
     return e === OWNER_EMAIL.toLowerCase() || SENSEI_EMAILS.indexOf(e) !== -1 || SIDE_PUSH_EXTRA_EMAILS.indexOf(e) !== -1;
   }
   function syncSidePushFlag(){
-    document.documentElement.classList.toggle("side-push-ok", canUseSidePush());
+    const root = document.documentElement;
+    const e = String((auth.currentUser && auth.currentUser.email) || "").toLowerCase();
+    root.classList.toggle("side-push-ok", canUseSidePush());
+    // Eski "Bilganlarim / Navbatga" ko'rsatkichlari faqat owner va sensei uchun yashiriladi
+    root.classList.toggle("no-swipe-hints", e === OWNER_EMAIL.toLowerCase() || SENSEI_EMAILS.indexOf(e) !== -1);
   }
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
@@ -19914,12 +19915,11 @@
         senseiBadge.textContent = "先生";
         senseiBadge.title = "Sensei";
         row.appendChild(senseiBadge);
-        row.classList.add("presence-item-sensei");
       }
 
       // Admin belgisi (owner tanlagan rang) va owner uchun tugmalar
       const itemEmail = (item.email || "").toLowerCase();
-      const itemIsAdmin = !!itemEmail && !isOwner && isAdminEmail(itemEmail);
+      const itemIsAdmin = !!itemEmail && !isOwner && isAdminEmail(itemEmail) && SENSEI_EMAILS.indexOf(itemEmail) === -1;
       const viewerIsOwner = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL;
       if (itemIsAdmin) {
         const color = dynamicAdminEmails.get(itemEmail) || "moss";
