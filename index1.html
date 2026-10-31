@@ -9095,15 +9095,13 @@
     box-shadow:none !important;
     background:transparent !important;
   }
-  .card .face, .card .face.front, .card .face.back{
+  html.lite .card .face, html.perf .card .face, html.lite .card .face.front, html.perf .card .face.front, html.lite .card .face.back, html.perf .card .face.back{
     border:1px solid rgba(255,255,255,0.22) !important;
     outline:0 !important;
     box-shadow:none !important;
     background:#000 !important;
   }
-  .card::before, .card::after,
-  .card .face::before, .card .face::after,
-  .card .face.front::after, .card .face.back::before, .card .face.back::after{
+  html.lite .card::before, html.perf .card::before, html.lite .card::after, html.perf .card::after, html.lite .card .face::before, html.perf .card .face::before, html.lite .card .face::after, html.perf .card .face::after, html.lite .card .face.front::after, html.perf .card .face.front::after, html.lite .card .face.back::before, html.perf .card .face.back::before, html.lite .card .face.back::after, html.perf .card .face.back::after{
     display:none !important;
   }
 
@@ -9129,8 +9127,8 @@
   }
 </style>
 <style>
-  /* KARTOCHKA CHETI: oq, ingichka */
-  .card .face, .card .face.front, .card .face.back{
+  /* KARTOCHKA CHETI: oq, ingichka (faqat yengil rejim) */
+  html.lite .card .face, html.perf .card .face, html.lite .card .face.front, html.perf .card .face.front, html.lite .card .face.back, html.perf .card .face.back{
     border:1px solid #ffffff !important;
   }
 
@@ -9173,19 +9171,18 @@
     box-shadow:none !important;
   }
   /* ---------- MARKAZIY KARTOCHKA: asl fon saqlanadi; old tomoni ingichka oq, orqa (ma'no) tomoni ingichka tillarang hoshiya ---------- */
-  .face.front{
+  html.lite .face.front, html.perf .face.front{
     border:1px solid #ffffff !important;
   }
-  .face.back{
+  html.lite .face.back, html.perf .face.back{
     border:1px solid #C9A66B !important;
   }
   /* Ma'no (orqa) tarafining hoshiyasi: ingichka kulrang chiziq (qora fonda ko'rinadi). Old taraf o'zgarmaydi (oq hoshiya). */
-  .card .face.back{
+  html.lite .card .face.back, html.perf .card .face.back{
     border:1px solid #5a5a60 !important;
   }
   /* orqa tomondagi oq yorug' hoshiya qatlami (::after) tillarang hoshiyani yopib qo'ymasin */
-  .card .face.back::after,
-  .card .face.back::before{ display:none !important; }
+  html.lite .card .face.back::after, html.perf .card .face.back::after, html.lite .card .face.back::before, html.perf .card .face.back::before{ display:none !important; }
   /* ovoz tugmasi: faqat karnay belgisi (halqasiz), kattaroq, bosilganda ezilib turadi */
   .speak-jp-btn{
     width:auto; height:auto;
@@ -10006,8 +10003,8 @@
       <p>Kartochkalarni chapga surganingizda, bilgan so'zlaringiz shu yerda to'planadi.</p>
     </div>
     <div class="quiz-launch-row">
-      <button class="quiz-launch" id="btnQuizTranslate" disabled>Tarjima test</button>
-      <button class="quiz-launch quiz-launch-romaji" id="btnQuizRomaji" disabled>Romaji test</button>
+      <button class="quiz-launch" id="btnQuizTranslate" disabled style="display:none">Tarjima test</button>
+      <button class="quiz-launch quiz-launch-romaji" id="btnQuizRomaji" disabled>Romaji va tarjima test</button>
       <span class="quiz-launch-wrap"><button class="quiz-launch quiz-launch-listen" id="btnQuizListen" disabled>Eshitish test</button><span class="top-badge" aria-hidden="true"><span class="tb-in">TOP</span></span></span>
       <button class="quiz-launch quiz-launch-timed" id="btnQuizTimed" disabled>Vaqt sinovi</button>
     </div>
@@ -14125,7 +14122,7 @@
     startQuiz(known, 'known', 'translate');
   });
   document.getElementById('btnQuizRomaji').addEventListener('click', ()=>{
-    startQuiz(known, 'known', 'romaji');
+    openHammasiModePicker((m)=>startQuiz(known, 'known', m));
   });
   document.getElementById('btnQuizTimed').addEventListener('click', ()=>{
     startQuiz(known, 'known', 'timed');
@@ -21162,14 +21159,46 @@ window.addEventListener('message', function(e){
 })();
 </script>
 <style id="face-rim-sync">
-  /* Yengil hoshiya: ikki tomon bir xil, lekin nur yumshoq va sezilar-sezilmas */
+  /* NORMAL REJIM: soyali, qalin, yorqin hoshiya — ikki tomon bir xil */
   .card .face.front, .card .face.back{
-    border:1px solid rgba(255,255,255,0.14) !important;
+    border:1px solid rgba(255,255,255,0.3);
     box-shadow:
-      0 16px 34px -18px var(--glass-shadow),
-      inset 0 0 0 1px rgba(255,255,255,0.03) !important;
+      0 24px 50px -16px var(--glass-shadow),
+      0 2px 10px rgba(0,0,0,0.3),
+      inset 0 0 0 1px rgba(255,255,255,0.06);
   }
   .card .face.front::after, .card .face.back::after{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:22px;
+    border:1.4px solid transparent;
+    background:
+      linear-gradient(135deg,
+        rgba(255,255,255,0.98) 0%,
+        rgba(255,255,255,0.8)  4%,
+        rgba(255,255,255,0.42) 11%,
+        rgba(255,255,255,0.14) 21%,
+        rgba(255,255,255,0.03) 33%,
+        transparent 46%,
+        transparent 82%,
+        rgba(255,255,255,0.05) 94%,
+        rgba(255,255,255,0.14) 100%
+      ) border-box;
+    -webkit-mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    opacity:0.95;
+    pointer-events:none;
+  }
+
+  /* YENGIL REJIM: hoshiya nozik, soya va nur minimal — ikki tomon bir xil */
+  html.lite .card .face.front, html.lite .card .face.back,
+  html.perf .card .face.front, html.perf .card .face.back{
+    border:1px solid rgba(255,255,255,0.14) !important;
+    box-shadow:0 16px 34px -18px var(--glass-shadow), inset 0 0 0 1px rgba(255,255,255,0.03) !important;
+  }
+  html.lite .card .face.front::after, html.lite .card .face.back::after,
+  html.perf .card .face.front::after, html.perf .card .face.back::after{
     display:block !important;
     content:"";
     position:absolute; inset:0;
