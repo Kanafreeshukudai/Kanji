@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Kanji va Lug'at</title>
+<!-- PWA: telefonga ilova sifatida o'rnatish (manzil va menyu qatorlarisiz ochiladi) -->
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kanji">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImJvZHkiIGN4PSIzMiUiIGN5PSIyOCUiIHI9Ijc1JSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNlMGFhZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIyNSUiIHN0b3AtY29sb3I9IiNjNzdkZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiM5ZDRlZGQiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI3NSUiIHN0b3AtY29sb3I9IiM3YjJjYmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNWExODlhIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8ZyB0cmFuc2Zvcm09InJvdGF0ZSgtOCA0NiA1NCkiPgogICAgPGNpcmNsZSBjeD0iNDYiIGN5PSI1NCIgcj0iMzgiIGZpbGw9InVybCgjYm9keSkiLz4KICAgIDwhLS0geW9ub3FsYXIgLS0+CiAgICA8ZWxsaXBzZSBjeD0iMzAiIGN5PSI2NiIgcng9IjYiIHJ5PSIzLjUiIGZpbGw9IiNmZjllY2YiIG9wYWNpdHk9IjAuNDUiLz4KICAgIDxlbGxpcHNlIGN4PSI2NiIgY3k9IjY2IiByeD0iNiIgcnk9IjMuNSIgZmlsbD0iI2ZmOWVjZiIgb3BhY2l0eT0iMC40NSIvPgogICAgPCEtLSBjaGFwIGtvJ3o6IHFpc2lsZ2FuIChrdWxpYiBxaXNpc2gpIC0tPgogICAgPHBhdGggZD0iTTMzIDUyIFEzOSA0NSA0NSA1MiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmQxYjRlIiBzdHJva2Utd2lkdGg9IjMuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8IS0tIG8nbmcga28nejogb2NoaXEsIHlvcnFpbiBha3NpIGJpbGFuIC0tPgogICAgPGVsbGlwc2UgY3g9IjYwIiBjeT0iNTIiIHJ4PSI1LjUiIHJ5PSI3IiBmaWxsPSIjMmQxYjRlIi8+CiAgICA8Y2lyY2xlIGN4PSI2MiIgY3k9IjQ5IiByPSIyLjMiIGZpbGw9IiNmZmZmZmYiLz4KICAgIDwhLS0gdGFiYXNzdW0gLS0+CiAgICA8cGF0aCBkPSJNNDAgNjYgUTUxIDc2IDYyIDY2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyZDFiNGUiIHN0cm9rZS13aWR0aD0iMy40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+Cjwvc3ZnPgo=">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImJvZHkiIGN4PSIzMiUiIGN5PSIyOCUiIHI9Ijc1JSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNlMGFhZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIyNSUiIHN0b3AtY29sb3I9IiNjNzdkZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiM5ZDRlZGQiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI3NSUiIHN0b3AtY29sb3I9IiM3YjJjYmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNWExODlhIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8ZyB0cmFuc2Zvcm09InJvdGF0ZSgtOCA0NiA1NCkiPgogICAgPGNpcmNsZSBjeD0iNDYiIGN5PSI1NCIgcj0iMzgiIGZpbGw9InVybCgjYm9keSkiLz4KICAgIDwhLS0geW9ub3FsYXIgLS0+CiAgICA8ZWxsaXBzZSBjeD0iMzAiIGN5PSI2NiIgcng9IjYiIHJ5PSIzLjUiIGZpbGw9IiNmZjllY2YiIG9wYWNpdHk9IjAuNDUiLz4KICAgIDxlbGxpcHNlIGN4PSI2NiIgY3k9IjY2IiByeD0iNiIgcnk9IjMuNSIgZmlsbD0iI2ZmOWVjZiIgb3BhY2l0eT0iMC40NSIvPgogICAgPCEtLSBjaGFwIGtvJ3o6IHFpc2lsZ2FuIChrdWxpYiBxaXNpc2gpIC0tPgogICAgPHBhdGggZD0iTTMzIDUyIFEzOSA0NSA0NSA1MiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmQxYjRlIiBzdHJva2Utd2lkdGg9IjMuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8IS0tIG8nbmcga28nejogb2NoaXEsIHlvcnFpbiBha3NpIGJpbGFuIC0tPgogICAgPGVsbGlwc2UgY3g9IjYwIiBjeT0iNTIiIHJ4PSI1LjUiIHJ5PSI3IiBmaWxsPSIjMmQxYjRlIi8+CiAgICA8Y2lyY2xlIGN4PSI2MiIgY3k9IjQ5IiByPSIyLjMiIGZpbGw9IiNmZmZmZmYiLz4KICAgIDwhLS0gdGFiYXNzdW0gLS0+CiAgICA8cGF0aCBkPSJNNDAgNjYgUTUxIDc2IDYyIDY2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyZDFiNGUiIHN0cm9rZS13aWR0aD0iMy40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+Cjwvc3ZnPgo=">
 
@@ -1378,6 +1385,33 @@
   .kanji-dark .kanji-label{ color:#000; font-weight:800; }
   .menu-btn.kanji-dark.ready{ animation:menuAuraIn .6s ease-out both, menuPulse 1.9s ease-in-out .6s infinite; }
 </style>
+<style id="install-bar-style">
+  .install-bar{
+    position:fixed; z-index:900;
+    left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px));
+    max-width:440px; margin:0 auto;
+    display:flex; align-items:center; gap:10px;
+    padding:10px 10px 10px 14px;
+    background:rgba(20,22,26,0.94);
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    color:#ECE7DC; font-size:14px; line-height:1.35;
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    animation:installBarIn .35s ease both;
+  }
+  .install-bar[hidden]{ display:none; }
+  .install-bar .ib-text{ flex:1; min-width:0; }
+  .install-bar .ib-btn{
+    flex:none; border:0; border-radius:12px; padding:9px 14px;
+    background:#D9694F; color:#fff; font-weight:700; font-size:14px; cursor:pointer;
+  }
+  .install-bar .ib-close{
+    flex:none; width:32px; height:32px; border:0; border-radius:50%;
+    background:rgba(255,255,255,0.08); color:#ECE7DC; cursor:pointer; font-size:14px;
+  }
+  @keyframes installBarIn{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+</style>
 </head>
 <body>
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
@@ -2267,6 +2301,68 @@
   }
   setTimeout(blink, 1500);
 })();
+</script>
+<div class="install-bar" id="installBar" role="region" aria-label="Ilovani o'rnatish" hidden>
+  <div class="ib-text" id="installText">Telefonga ilova sifatida o'rnating</div>
+  <button type="button" class="ib-btn" id="installBtn">O'rnatish</button>
+  <button type="button" class="ib-close" id="installClose" aria-label="Yopish">✕</button>
+</div>
+<script id="pwa-install-js">
+(function(){
+  var bar = document.getElementById('installBar');
+  var txt = document.getElementById('installText');
+  var btn = document.getElementById('installBtn');
+  var close = document.getElementById('installClose');
+  var KEY = 'kanji-install-dismissed';
+  var deferred = null;
+
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  if(standalone) return;                 // allaqachon ilova sifatida ochilgan
+  var dismissed = false;
+  try{ dismissed = localStorage.getItem(KEY) === '1'; }catch(e){}
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  function show(mode){
+    if(dismissed || bar.hidden === false && mode !== 'ios') return;
+    if(document.getElementById('appOverlay') && document.getElementById('appOverlay').classList.contains('open')) return;
+    if(mode === 'ios'){
+      txt.textContent = "Safari'da \u00ABUlashish\u00BB tugmasini bosing, so'ng \u00ABBosh ekranga qo'shish\u00BB ni tanlang";
+      btn.style.display = 'none';
+    } else {
+      txt.textContent = "Telefonga ilova sifatida o'rnating — manzil qatorisiz ochiladi";
+      btn.style.display = '';
+    }
+    bar.hidden = false;
+  }
+  function hide(){ bar.hidden = true; }
+
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();                  // brauzerning o'z oynasini kechiktiramiz, o'zimiz ko'rsatamiz
+    deferred = e;
+    show('install');
+  });
+  window.addEventListener('appinstalled', function(){ deferred = null; hide(); });
+
+  if(isIOS){ setTimeout(function(){ show('ios'); }, 4000); }
+
+  btn.addEventListener('click', function(){
+    if(!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.finally(function(){ deferred = null; hide(); });
+  });
+  close.addEventListener('click', function(){
+    dismissed = true;
+    try{ localStorage.setItem(KEY, '1'); }catch(e){}
+    hide();
+  });
+})();
+</script>
+<script id="pwa-sw-js">
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
 </script>
 </body>
 </html>

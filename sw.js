@@ -1,67 +1,71 @@
-// Kanji Flashcard — minimal service worker
-// Vazifasi: ilova qobig'ini (index.html + ikonkalar) keshga olish, shu bilan
-// ilova internetsiz ham ochiladi va PWA sifatida o'rnatilishi yanada
-// ishonchli bo'ladi. Lug'at ma'lumotlari index.html ichida saqlangani
-// uchun alohida keshlashning hojati yo'q.
-
-const CACHE_NAME = 'kanji-flashcard-v2';
-const APP_SHELL = [
+/* Kanji ilovasi — service worker (hub + ichki ilovalar uchun bitta).
+   Yangi versiya chiqqanda CACHE nomini o'zgartiring (masalan v2), eski kesh avtomatik o'chadi. */
+const CACHE = 'kanji-app-v1';
+const PRECACHE = [
   './',
   './index.html',
+  './index1.html',
+  './index2.html',
   './manifest.json',
-  './icon-any-192.png',
-  './icon-any-512.png',
-  './apple-touch-icon.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
+  './splash-art.jpg'
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    // bitta fayl topilmasa ham o'rnatish to'xtab qolmasin
+    await Promise.all(PRECACHE.map((u) =>
+      cache.add(new Request(u, { cache: 'reload' })).catch(() => {})
+    ));
+    self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
-    ).then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
-// Network-first strategiya index.html uchun (har doim eng yangi versiyani
-// olishga harakat qiladi), boshqa hamma narsa uchun cache-first (tezroq,
-// kamroq trafik). Ikkalasida ham tarmoq mavjud bo'lmasa keshdan qaytariladi.
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  // Boshqa domenlar (Firebase, Google Fonts va h.k.) — o'zgarishsiz o'tkazamiz
   if (url.origin !== self.location.origin) return;
+  // Audio/video diapazon so'rovlari keshga yozilmaydi
+  if (req.headers.has('range')) return;
 
-  const isHTML = event.request.mode === 'navigate' ||
-    event.request.headers.get('accept')?.includes('text/html');
-
-  if (isHTML) {
-    event.respondWith(
-      fetch(event.request)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return res;
-        })
-        .catch(() => caches.match(event.request).then((res) => res || caches.match('./index.html')))
-    );
+  if (req.mode === 'navigate') {
+    // Sahifalar: avval tarmoq, ishlamasa kesh (oflayn ham ochiladi)
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(req);
+        const cache = await caches.open(CACHE);
+        cache.put(req, fresh.clone()).catch(() => {});
+        return fresh;
+      } catch (e) {
+        return (await caches.match(req, { ignoreSearch: true })) ||
+               (await caches.match('./index.html')) ||
+               Response.error();
+      }
+    })());
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return res;
-      }).catch(() => cached);
-    })
-  );
+  // Qolgan fayllar (rasm, css, js, audio): keshdan tez beriladi, fonda yangilanadi
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(req, { ignoreSearch: true });
+    const network = fetch(req).then((res) => {
+      if (res && res.status === 200) cache.put(req, res.clone()).catch(() => {});
+      return res;
+    }).catch(() => cached);
+    return cached || network;
+  })());
 });

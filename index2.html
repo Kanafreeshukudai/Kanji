@@ -7200,7 +7200,7 @@ window.addEventListener('DOMContentLoaded', function(){
 });
 
 /* ---------------- PWA: service worker ro'yxatdan o'tkazish ---------------- */
-if('serviceWorker' in navigator){
+if('serviceWorker' in navigator && window.self === window.top){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{ /* sw.js topilmasa, sahifa baribir oddiy ishlayveradi */ });
   });

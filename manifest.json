@@ -1,38 +1,18 @@
 {
-  "name": "Kanji Flashcard",
+  "name": "Kanji va Lug'at",
   "short_name": "Kanji",
-  "description": "Yapon kanji va so'z birikmalarini o'rganish uchun flashcard ilovasi",
+  "description": "Kanji va lug'at o'rganish ilovasi",
+  "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0B0D10",
-  "theme_color": "#0B0D10",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "lang": "uz",
   "icons": [
-    {
-      "src": "icon-any-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-any-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
