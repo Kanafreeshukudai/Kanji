@@ -21161,5 +21161,35 @@ window.addEventListener('message', function(e){
   btn.addEventListener('click', function(){ window.setMossOn(!on); });
 })();
 </script>
+<style id="face-rim-sync">
+  /* Yengil hoshiya: ikki tomon bir xil, lekin nur yumshoq va sezilar-sezilmas */
+  .card .face.front, .card .face.back{
+    border:1px solid rgba(255,255,255,0.14) !important;
+    box-shadow:
+      0 16px 34px -18px var(--glass-shadow),
+      inset 0 0 0 1px rgba(255,255,255,0.03) !important;
+  }
+  .card .face.front::after, .card .face.back::after{
+    display:block !important;
+    content:"";
+    position:absolute; inset:0;
+    border-radius:22px;
+    border:1px solid transparent;
+    background:
+      linear-gradient(135deg,
+        rgba(255,255,255,0.35) 0%,
+        rgba(255,255,255,0.12) 12%,
+        rgba(255,255,255,0.03) 30%,
+        transparent 50%,
+        transparent 85%,
+        rgba(255,255,255,0.04) 100%
+      ) border-box;
+    -webkit-mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    opacity:0.6;
+    pointer-events:none;
+  }
+</style>
 </body>
 </html>
