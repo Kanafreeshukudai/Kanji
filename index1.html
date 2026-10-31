@@ -2610,6 +2610,15 @@
     -webkit-backdrop-filter:none !important;
   }
   .card.flipping .face.back{ animation:none !important; }
+  /* Kartochka chapga/o'ngga uchayotganda (flying) og'ir blur/filter/halqalar o'chiriladi —
+     kadrlar tekis bo'ladi (FPS yuqori). Uchish tugagach ghost sahnadan olib tashlanadi. */
+  .card.flying{ will-change:transform, opacity; }
+  .card.flipping .face, .card.flying .face{ box-shadow:none !important; }
+  .card.flying .face{
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    filter:none !important;
+  }
+  .card.flying .swipe-ring, .card.flying .swipe-tag{ display:none !important; }
   /* aylanish paytida old chet nuri (drop-shadow filter) alohida render-sirt talab qilib,
      kadrlarni og'irlashtirardi — vaqtincha o'chiriladi (juda nozik 2px nur, sezilmaydi) */
 
@@ -13588,6 +13597,9 @@
       }
     }
     function flyOut(dir, cb){
+      card.classList.add('flying');
+      try{ dots('pause'); }catch(_){}
+      setTimeout(()=>{ try{ dots('resume'); }catch(_){} }, 980);
       // Yumshoq uchish: animatsiya tugagunga qadar kartochka almashtirilmaydi.
       // Sekin boshlanadi, tekis uchadi, oxirida nozik tushib yo'qoladi.
       const DUR = 900; // sekinroq uchish (oldin 560ms)
