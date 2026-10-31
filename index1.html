@@ -7303,33 +7303,33 @@
     box-shadow:0 0 8px rgba(155,111,160,0.55), 0 0 10px rgba(230,205,235,0.3);
   }
   /* Eski animatsiyali "Bilganlarim / Navbatga" ko'rsatkichlari olib tashlandi */
-  html.no-swipe-hints .swipe-hints{ display:none !important; }
-  /* ---------- Kartochkani yonga surish tugmalari — faqat owner va sensei uchun ----------
-     Ikkala tugma kartochka markazidan bir xil masofada (kartochka kengligiga nisbatan) joylashadi */
-  .side-push-row{
+  /* ---------- Kartochkani yonga surish strelkalari — faqat owner va sensei uchun ----------
+     Chap: Bilganlarimga, o'ng: Navbatda saqlaydi. Monoxrom (oq/qora), sayt uslubida. */
+  .side-push-arrow{
     display:none;
-    position:absolute; left:0; right:0; bottom:-64px; height:42px;
-    z-index:6;
-  }
-  html.side-push-ok .card .side-push-row{ display:block; }
-  .side-push-btn{
-    position:absolute; top:0; width:42%; height:42px;
-    display:flex; align-items:center; justify-content:center;
-    padding:0 12px; border-radius:999px;
-    border:1px solid rgba(124,154,107,0.55);
-    background:rgba(124,154,107,0.16);
-    color:var(--moss-soft);
-    font-family:inherit; font-size:13px; font-weight:600; letter-spacing:0.02em; line-height:1;
-    cursor:pointer; touch-action:manipulation;
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:42px; height:42px; border-radius:50%;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.55);
+    border:1px solid rgba(255,255,255,0.6);
+    color:#fff; cursor:pointer; z-index:6;
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation;
     -webkit-user-select:none; user-select:none;
-    transition:background .2s ease, transform .15s ease;
+    transition:background .2s ease, transform .15s ease, border-color .2s ease;
   }
-  .side-push-btn.left { right: calc(50% + 4%); }
-  .side-push-btn.right{ left:  calc(50% + 4%); }
-  .side-push-btn:hover{ background:rgba(124,154,107,0.26); }
-  .side-push-btn:active{ transform:scale(0.97); }
-  .side-push-btn:focus-visible{ outline:2px solid var(--moss-soft); outline-offset:2px; }
-  html.perf .side-push-btn{ background:rgba(30,44,30,0.85); }
+  .side-push-arrow svg{ width:20px; height:20px; display:block; }
+  .side-push-arrow.left { left:10px; }
+  .side-push-arrow.right{ right:10px; }
+  html.side-push-ok .card .side-push-arrow{ display:flex; }
+  /* Desktop (sichqoncha): strelkalar kartochkaning yonida turadi */
+  @media (hover:hover) and (pointer:fine){
+    .side-push-arrow.left { left:auto; right:calc(100% + 16px); }
+    .side-push-arrow.right{ right:auto; left:calc(100% + 16px); }
+  }
+  .side-push-arrow:hover{ background:rgba(255,255,255,0.16); border-color:#fff; }
+  .side-push-arrow:active{ transform:translateY(-50%) scale(0.94); }
+  .side-push-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  html.perf .side-push-arrow{ background:rgba(0,0,0,0.85); }
   .presence-owner-badge.presence-sensei-badge{
     animation:ownerShineRun 2.6s ease-in-out infinite;
     border:1px solid rgba(255,255,255,0.55);
@@ -7338,6 +7338,38 @@
   .presence-item.presence-item-owner:active{ transform:scale(0.985); }
 
   /* ---------- Owner bildirishnomasi (qator bosilganda) ---------- */
+  /* ---------- Sensei bildirishnomasi (moss) — owner oynasiga o'xshash ---------- */
+  .sensei-notice-overlay{
+    position:fixed; inset:0; z-index:10800;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(6,7,9,0.62);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .sensei-notice-overlay.show{ opacity:1; pointer-events:auto; }
+  .sensei-notice-card{
+    position:relative; overflow:hidden;
+    width:100%; max-width:340px; border-radius:22px; padding:26px 20px 18px;
+    text-align:center;
+    background:linear-gradient(160deg, #111a12 0%, #050806 100%);
+    border:1px solid rgba(124,154,107,0.7);
+    box-shadow:0 18px 50px rgba(0,0,0,0.7), 0 0 26px rgba(124,154,107,0.18);
+    transform:translateY(14px) scale(0.96); transition:transform .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .sensei-notice-overlay.show .sensei-notice-card{ transform:none; }
+  .sensei-notice-kanji{ font-size:40px; line-height:1; margin-bottom:8px; color:var(--moss-soft); font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif; text-shadow:0 0 14px rgba(124,154,107,0.55); }
+  .sensei-notice-name{ margin:0 0 8px; font-size:19px; font-weight:800; color:#fff; letter-spacing:0.01em; }
+  .sensei-notice-badge{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:#eef5ea; padding:5px 14px; border-radius:999px;
+    background:rgba(124,154,107,0.28); border:1px solid rgba(124,154,107,0.7);
+  }
+  .sensei-notice-title{ margin:14px 0 0; font-size:13.5px; font-weight:700; color:#e6efe0; }
+  .sensei-notice-close{
+    margin-top:18px; width:100%; padding:11px 14px; border-radius:12px; cursor:pointer;
+    font-family:inherit; font-size:14px; font-weight:700; color:#eef5ea;
+    background:rgba(124,154,107,0.22); border:1px solid rgba(124,154,107,0.6);
+  }
+  .sensei-notice-close:active{ transform:scale(0.97); }
   .owner-notice-overlay{
     position:fixed; inset:0; z-index:10800;
     display:flex; align-items:center; justify-content:center; padding:24px;
@@ -12946,16 +12978,17 @@
     `;
     if(enter) card.classList.add('card-enter');
     {
-      const row = document.createElement('div');
-      row.className = 'side-push-row';
-      const mk = (label, title, dir) => {
+      const mkArrow = (dir) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'side-push-btn';
+        const isLeft = dir < 0;
+        b.className = 'side-push-arrow ' + (isLeft ? 'left' : 'right');
+        const title = isLeft ? 'Bilganlarimga surish' : 'Navbatda saqlash';
         b.title = title;
         b.setAttribute('aria-label', title);
-        b.textContent = label;
-        b.classList.add(dir < 0 ? 'left' : 'right');
+        b.innerHTML = isLeft
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
         ['pointerdown','mousedown'].forEach(ev=>b.addEventListener(ev, e=>e.stopPropagation()));
         b.addEventListener('touchstart', e=>e.stopPropagation(), {passive:true});
         b.addEventListener('click', e=>{
@@ -12965,9 +12998,8 @@
         });
         return b;
       };
-      row.appendChild(mk('Bilganlarim', 'Bilganlarimga surish', -1));
-      row.appendChild(mk('Navbatga', 'Navbatga surish', 1));
-      card.appendChild(row);
+      card.appendChild(mkArrow(-1));
+      card.appendChild(mkArrow(1));
     }
     keepGhost();
     if('speechSynthesis' in window) speechSynthesis.cancel();
@@ -19332,8 +19364,6 @@
     const root = document.documentElement;
     const e = String((auth.currentUser && auth.currentUser.email) || "").toLowerCase();
     root.classList.toggle("side-push-ok", canUseSidePush());
-    // Eski "Bilganlarim / Navbatga" ko'rsatkichlari faqat owner va sensei uchun yashiriladi
-    root.classList.toggle("no-swipe-hints", e === OWNER_EMAIL.toLowerCase() || SENSEI_EMAILS.indexOf(e) !== -1);
   }
   // Necha millisoniya davomida "so'nggi ko'rinish" bo'lmasa foydalanuvchi
   // offline hisoblanadi (heartbeat har 20s da yuborilgani uchun 35s yetarli zaxira beradi).
@@ -19751,6 +19781,32 @@
     return diffYear + " yil oldin";
   }
 
+  // Sensei qatori bosilganda chiqadigan moss bildirishnoma
+  let senseiNoticeEl = null;
+  function showSenseiNotice(nick) {
+    if (!senseiNoticeEl) {
+      senseiNoticeEl = document.createElement("div");
+      senseiNoticeEl.className = "sensei-notice-overlay";
+      senseiNoticeEl.setAttribute("aria-hidden", "true");
+      senseiNoticeEl.innerHTML =
+        '<div class="sensei-notice-card" role="dialog" aria-modal="true" aria-labelledby="senseiNoticeName">' +
+          '<div class="sensei-notice-kanji" aria-hidden="true">\u5148\u751F</div>' +
+          '<h4 class="sensei-notice-name" id="senseiNoticeName"></h4>' +
+          '<span class="sensei-notice-badge">Sensei</span>' +
+          '<p class="sensei-notice-title">Kanji ilovasining sensei\u2019si</p>' +
+          '<button type="button" class="sensei-notice-close">Yopish</button>' +
+        '</div>';
+      document.body.appendChild(senseiNoticeEl);
+      const hide = () => { senseiNoticeEl.classList.remove("show"); senseiNoticeEl.setAttribute("aria-hidden", "true"); };
+      senseiNoticeEl.addEventListener("click", (e) => { if (e.target === senseiNoticeEl) hide(); });
+      senseiNoticeEl.querySelector(".sensei-notice-close").addEventListener("click", hide);
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && senseiNoticeEl.classList.contains("show")) hide(); });
+    }
+    senseiNoticeEl.querySelector(".sensei-notice-name").textContent = nick || "";
+    senseiNoticeEl.classList.add("show");
+    senseiNoticeEl.setAttribute("aria-hidden", "false");
+  }
+
   // Owner qatori bosilganda chiqadigan bildirishnoma
   let ownerNoticeEl = null;
   function showOwnerNotice() {
@@ -19915,6 +19971,10 @@
         senseiBadge.textContent = "先生";
         senseiBadge.title = "Sensei";
         row.appendChild(senseiBadge);
+        row.setAttribute("role", "button");
+        row.setAttribute("tabindex", "0");
+        row.addEventListener("click", () => showSenseiNotice(item.nick));
+        row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showSenseiNotice(item.nick); } });
       }
 
       // Admin belgisi (owner tanlagan rang) va owner uchun tugmalar
