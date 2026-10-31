@@ -7302,33 +7302,29 @@
     color:#14101a;
     box-shadow:0 0 8px rgba(155,111,160,0.55), 0 0 10px rgba(230,205,235,0.3);
   }
-  /* Eski animatsiyali "Bilganlarim / Navbatga" ko'rsatkichlari olib tashlandi */
-  /* ---------- Kartochkani yonga surish strelkalari — faqat owner va sensei uchun ----------
-     Chap: Bilganlarimga, o'ng: Navbatda saqlaydi. Monoxrom (oq/qora), sayt uslubida. */
-  .side-push-arrow{
-    display:none;
-    position:absolute; top:50%; transform:translateY(-50%);
-    width:42px; height:42px; border-radius:50%;
-    align-items:center; justify-content:center;
-    background:rgba(0,0,0,0.55);
-    border:1px solid rgba(255,255,255,0.6);
-    color:#fff; cursor:pointer; z-index:6;
-    -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-    -webkit-user-select:none; user-select:none;
-    transition:background .2s ease, transform .15s ease, border-color .2s ease;
-  }
-  .side-push-arrow svg{ width:20px; height:20px; display:block; }
-  .side-push-arrow.left { left:10px; }
-  .side-push-arrow.right{ right:10px; }
-  html.side-push-ok .card .side-push-arrow{ display:flex; }
-  /* Desktop (sichqoncha): strelkalar kartochkaning yonida turadi */
+  /* ---------- Kartochkani yonga surish strelkalari — faqat owner va sensei, faqat desktop ----------
+     Strelkalar stage ichida turadi (kartochka bilan birga siljimaydi). Mobilda ular umuman yo'q. */
   @media (hover:hover) and (pointer:fine){
-    .side-push-arrow.left { left:auto; right:calc(100% + 16px); }
-    .side-push-arrow.right{ right:auto; left:calc(100% + 16px); }
+    html.side-push-ok .side-push-arrow{
+      display:flex;
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:44px; height:44px; border-radius:50%; padding:0;
+      align-items:center; justify-content:center;
+      background:radial-gradient(circle at 50% 35%, rgba(42,42,42,0.92) 0%, rgba(0,0,0,0.92) 100%);
+      border:1px solid rgba(255,255,255,0.42);
+      box-shadow:0 6px 18px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+      color:#fff; cursor:pointer; z-index:30; pointer-events:auto;
+      -webkit-tap-highlight-color:transparent;
+      -webkit-user-select:none; user-select:none;
+      transition:background .2s ease, border-color .2s ease, transform .15s ease;
+    }
+    html.side-push-ok .side-push-arrow svg{ width:22px; height:22px; display:block; overflow:visible; }
+    html.side-push-ok .side-push-arrow.left { right:calc(50% + var(--card-w) / 2 + 14px); }
+    html.side-push-ok .side-push-arrow.right{ left:calc(50% + var(--card-w) / 2 + 14px); }
+    html.side-push-ok .side-push-arrow:hover{ border-color:#fff; box-shadow:0 6px 22px rgba(0,0,0,0.6), 0 0 0 3px rgba(255,255,255,0.12); }
+    html.side-push-ok .side-push-arrow:active{ transform:translateY(-50%) scale(0.94); }
+    html.side-push-ok .side-push-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   }
-  .side-push-arrow:hover{ background:rgba(255,255,255,0.16); border-color:#fff; }
-  .side-push-arrow:active{ transform:translateY(-50%) scale(0.94); }
-  .side-push-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   html.perf .side-push-arrow{ background:rgba(0,0,0,0.85); }
   .presence-owner-badge.presence-sensei-badge{
     animation:ownerShineRun 2.6s ease-in-out infinite;
@@ -7338,7 +7334,7 @@
   .presence-item.presence-item-owner:active{ transform:scale(0.985); }
 
   /* ---------- Owner bildirishnomasi (qator bosilganda) ---------- */
-  /* ---------- Sensei bildirishnomasi (moss) — owner oynasiga o'xshash ---------- */
+  /* ---------- Sensei bildirishnomasi — owner oynasi kabi oq-qora ---------- */
   .sensei-notice-overlay{
     position:fixed; inset:0; z-index:10800;
     display:flex; align-items:center; justify-content:center; padding:24px;
@@ -7350,24 +7346,23 @@
     position:relative; overflow:hidden;
     width:100%; max-width:340px; border-radius:22px; padding:26px 20px 18px;
     text-align:center;
-    background:linear-gradient(160deg, #111a12 0%, #050806 100%);
-    border:1px solid rgba(124,154,107,0.7);
-    box-shadow:0 18px 50px rgba(0,0,0,0.7), 0 0 26px rgba(124,154,107,0.18);
+    background:linear-gradient(160deg, #0d0d0d 0%, #000 100%);
+    border:1px solid rgba(255,255,255,0.78);
+    box-shadow:0 18px 50px rgba(0,0,0,0.7), 0 0 26px rgba(255,255,255,0.08);
     transform:translateY(14px) scale(0.96); transition:transform .3s cubic-bezier(.2,.9,.3,1.2);
   }
   .sensei-notice-overlay.show .sensei-notice-card{ transform:none; }
-  .sensei-notice-kanji{ font-size:40px; line-height:1; margin-bottom:8px; color:var(--moss-soft); font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif; text-shadow:0 0 14px rgba(124,154,107,0.55); }
+  .sensei-notice-kanji{ font-size:38px; line-height:1; margin-bottom:8px; color:#fff; font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif; text-shadow:0 0 12px rgba(255,255,255,0.35); }
   .sensei-notice-name{ margin:0 0 8px; font-size:19px; font-weight:800; color:#fff; letter-spacing:0.01em; }
   .sensei-notice-badge{
-    display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
-    color:#eef5ea; padding:5px 14px; border-radius:999px;
-    background:rgba(124,154,107,0.28); border:1px solid rgba(124,154,107,0.7);
+    display:inline-block; font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;
+    color:#0B0D10; padding:5px 14px; border-radius:999px; background:#fff;
   }
-  .sensei-notice-title{ margin:14px 0 0; font-size:13.5px; font-weight:700; color:#e6efe0; }
+  .sensei-notice-title{ margin:14px 0 0; font-size:13.5px; font-weight:700; color:#fff; }
   .sensei-notice-close{
     margin-top:18px; width:100%; padding:11px 14px; border-radius:12px; cursor:pointer;
-    font-family:inherit; font-size:14px; font-weight:700; color:#eef5ea;
-    background:rgba(124,154,107,0.22); border:1px solid rgba(124,154,107,0.6);
+    font-family:inherit; font-size:14px; font-weight:700; color:#0B0D10;
+    background:#fff; border:1px solid #fff;
   }
   .sensei-notice-close:active{ transform:scale(0.97); }
   .owner-notice-overlay{
@@ -12987,8 +12982,8 @@
         b.title = title;
         b.setAttribute('aria-label', title);
         b.innerHTML = isLeft
-          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>'
-          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14.5 6.5 8.5 12 14.5 17.5"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9.5 6.5 15.5 12 9.5 17.5"/></svg>';
         ['pointerdown','mousedown'].forEach(ev=>b.addEventListener(ev, e=>e.stopPropagation()));
         b.addEventListener('touchstart', e=>e.stopPropagation(), {passive:true});
         b.addEventListener('click', e=>{
@@ -12998,8 +12993,9 @@
         });
         return b;
       };
-      card.appendChild(mkArrow(-1));
-      card.appendChild(mkArrow(1));
+      stage.querySelectorAll('.side-push-arrow').forEach(n=>n.remove());
+      stage.appendChild(mkArrow(-1));
+      stage.appendChild(mkArrow(1));
     }
     keepGhost();
     if('speechSynthesis' in window) speechSynthesis.cancel();
@@ -19355,10 +19351,9 @@
   const PRESENCE_ADMIN_EMAILS = [OWNER_EMAIL, "muxlisa@uz.onodera-user-run.com"];
   // Sensei (先生) belgisi va kartochkani yonga surish tugmasi faqat shu akkauntlarga ochiq
   const SENSEI_EMAILS = ["muxlisa@uz.onodera-user-run.com"]; // sensei belgisi faqat shu akkauntda
-  const SIDE_PUSH_EXTRA_EMAILS = ["muxlisaqodirova313@gmail.com"]; // qo'shimcha akkaunt: faqat surish tugmalari
   function canUseSidePush(){
     const e = String((auth.currentUser && auth.currentUser.email) || "").toLowerCase();
-    return e === OWNER_EMAIL.toLowerCase() || SENSEI_EMAILS.indexOf(e) !== -1 || SIDE_PUSH_EXTRA_EMAILS.indexOf(e) !== -1;
+    return e === OWNER_EMAIL.toLowerCase() || SENSEI_EMAILS.indexOf(e) !== -1;
   }
   function syncSidePushFlag(){
     const root = document.documentElement;
@@ -19780,6 +19775,19 @@
     const diffYear = Math.floor(diffMonth / 12);
     return diffYear + " yil oldin";
   }
+
+  // Kartochka yonidagi surish strelkalari — hujjat darajasida ushlanadi (kartochkaning
+  // aylantirish/bosish mantig'iga aralashmaydi)
+  document.addEventListener("click", (e) => {
+    const btn = e.target && e.target.closest ? e.target.closest(".side-push-arrow") : null;
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!canUseSidePush()) return;
+    const c = document.getElementById("activeCard");
+    if (!c || typeof c._sidePush !== "function" || c.classList.contains("flipping")) return;
+    c._sidePush(btn.classList.contains("left") ? -1 : 1);
+  }, true);
 
   // Sensei qatori bosilganda chiqadigan moss bildirishnoma
   let senseiNoticeEl = null;
