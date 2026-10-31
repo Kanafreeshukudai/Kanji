@@ -7319,8 +7319,8 @@
       transition:background .2s ease, border-color .2s ease, transform .15s ease;
     }
     html.side-push-ok .side-push-arrow svg{ width:22px; height:22px; display:block; overflow:visible; }
-    html.side-push-ok .side-push-arrow.left { right:calc(50% + var(--card-w) / 2 + 14px); }
-    html.side-push-ok .side-push-arrow.right{ left:calc(50% + var(--card-w) / 2 + 14px); }
+    html.side-push-ok .side-push-arrow.left { right:calc(50% + var(--card-w) / 2 + 34px); }
+    html.side-push-ok .side-push-arrow.right{ left:calc(50% + var(--card-w) / 2 + 34px); }
     html.side-push-ok .side-push-arrow:hover{ border-color:#fff; box-shadow:0 6px 22px rgba(0,0,0,0.6), 0 0 0 3px rgba(255,255,255,0.12); }
     html.side-push-ok .side-push-arrow:active{ transform:translateY(-50%) scale(0.94); }
     html.side-push-ok .side-push-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
@@ -13353,7 +13353,20 @@
     const controller = new AbortController();
     const signal = controller.signal;
     // Tugma orqali kartochkani chapga (Bilganlarim) yuborish — xuddi surish kabi
-    card._sidePush = (dir) => flyOut(dir, dir < 0 ? markKnown : markLater);
+    card._sidePush = (dir) => {
+      // Qo'lda surish bilan bir xil boshlanish: ichki qism va kartochka tranzitsiyasini o'chiramiz,
+      // shunda eski kanji ortda qolib ketmaydi
+      dragging = false;
+      inner.style.transition = 'none';
+      inner.style.willChange = 'transform';
+      card.classList.remove('card-enter');
+      card.style.transition = 'none';
+      card.classList.add('swiping');
+      try{ DotsFX.drift(0); }catch(_){}
+      try{ DotsFX.fling(dir, card.getBoundingClientRect()); }catch(_){}
+      // Brauzer yuqoridagi holatni qo'llashi uchun bir kadr kutamiz, so'ng uchiramiz
+      requestAnimationFrame(() => requestAnimationFrame(() => flyOut(dir, dir < 0 ? markKnown : markLater)));
+    };
 
     // real finger taps always wobble a few pixels — this must be big enough that a tap
     // never gets mistaken for the start of a drag, but small enough that an intentional
