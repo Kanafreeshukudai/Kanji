@@ -19323,10 +19323,10 @@
   // shu admin UID/emailiga cheklab qo'yilishi tavsiya etiladi.
   // OWNER — doimiy, o'zgarmaydi. Adminlar esa "admins" kolleksiyasidan dinamik yuklanadi.
   const OWNER_EMAIL = "doniyorbektoshmatov7@gmail.com";
-  const PRESENCE_ADMIN_EMAILS = [OWNER_EMAIL, "muxlisaqodirova313@gmail.com"];
+  const PRESENCE_ADMIN_EMAILS = [OWNER_EMAIL, "muxlisa@uz.onodera-user-run.com"];
   // Sensei (先生) belgisi va kartochkani yonga surish tugmasi faqat shu akkauntlarga ochiq
-  const SENSEI_EMAILS = ["muxlisaqodirova313@gmail.com"]; // sensei belgisi faqat shu akkauntda
-  const SIDE_PUSH_EXTRA_EMAILS = ["muxlisa@uz.onodera-user-run.com"]; // zaxira akkaunt: faqat tugmalar
+  const SENSEI_EMAILS = ["muxlisa@uz.onodera-user-run.com"]; // sensei belgisi faqat shu akkauntda
+  const SIDE_PUSH_EXTRA_EMAILS = ["muxlisaqodirova313@gmail.com"]; // qo'shimcha akkaunt: faqat surish tugmalari
   function canUseSidePush(){
     const e = String((auth.currentUser && auth.currentUser.email) || "").toLowerCase();
     return e === OWNER_EMAIL.toLowerCase() || SENSEI_EMAILS.indexOf(e) !== -1 || SIDE_PUSH_EXTRA_EMAILS.indexOf(e) !== -1;
