@@ -1,6 +1,6 @@
 /* Kanji ilovasi — service worker (hub + ichki ilovalar uchun bitta).
    Yangi versiya chiqqanda CACHE nomini o'zgartiring (masalan v2), eski kesh avtomatik o'chadi. */
-const CACHE = 'kanji-app-v1';
+const CACHE = 'kanji-app-v2';
 const PRECACHE = [
   './',
   './index.html',
