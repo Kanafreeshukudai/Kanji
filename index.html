@@ -1440,6 +1440,16 @@
   .splash-artwork{ border-radius:50% !important; overflow:hidden; }
   .splash-artwork img{ border-radius:50% !important; }
 </style>
+<style id="app-update-style">
+  .app-update-btn{
+    display:block; margin:6px auto 0; padding:5px 14px;
+    border:0; border-radius:10px; cursor:pointer;
+    background:#4caf7a; color:#fff; font-size:11px; font-weight:700; letter-spacing:.03em;
+    box-shadow:0 4px 12px rgba(76,175,122,0.35);
+  }
+  .app-update-btn[hidden]{ display:none; }
+  .app-update-btn:active{ transform:scale(0.96); }
+</style>
 </head>
 <body>
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
@@ -1496,6 +1506,7 @@
       <div class="user-email" id="userEmail"></div>
       <button class="logout-btn" id="logoutBtn" type="button">Chiqish</button>
       <div class="app-version" id="appVersion">Versiya: …</div>
+      <button type="button" class="app-update-btn" id="appUpdateBtn" hidden>Yangilash</button>
     </div>
     </div>
 
@@ -2424,12 +2435,37 @@
       if(running && running !== window.APP_VERSION){
         label.textContent = 'Versiya: ' + window.APP_VERSION + ' · yangilash kerak';
         label.classList.add('stale');
+        var ub = document.getElementById('appUpdateBtn');
+        if(ub) ub.hidden = false;
       } else {
         label.textContent = 'Versiya: ' + window.APP_VERSION;
         label.classList.remove('stale');
+        var ub2 = document.getElementById('appUpdateBtn');
+        if(ub2) ub2.hidden = true;
       }
     };
     navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [ch.port2]);
+  }
+
+  // "Yangilash" tugmasi: eski SW va keshni o'chirib, oxirgi versiyani yuklaydi
+  var upBtn = document.getElementById('appUpdateBtn');
+  if(upBtn){
+    upBtn.addEventListener('click', async function(){
+      upBtn.disabled = true;
+      upBtn.textContent = 'Yangilanmoqda…';
+      try{
+        if('serviceWorker' in navigator){
+          var regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function(r){ return r.unregister(); }));
+        }
+      }catch(e){}
+      try{
+        var keys = await caches.keys();
+        await Promise.all(keys.map(function(k){ return caches.delete(k); }));
+      }catch(e){}
+      // tarmoqdan yangi nusxani olish uchun URL'ga vaqt belgisi qo'shamiz
+      location.replace(location.pathname + '?fresh=' + Date.now());
+    });
   }
 
   Promise.all(FILES.map(info)).then(function(parts){
