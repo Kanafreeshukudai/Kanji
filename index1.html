@@ -2669,7 +2669,9 @@
   .card.flipped:not(.flipping)::after{ animation:none; opacity:0; }
   @keyframes cardGlowPulse{ 0%,100%{opacity:0;} 50%{opacity:1;} }
   /* old tomonga qaytayotganda orqa tomon nuri birdan o'chib qolmasin — yumshoq so'nadi */
-  .card.flipping:not(.flipped)::after{ animation:cardGlowOut .28s ease-out both; }
+  /* Orqadan old tomonga qaytishda yorug' halqa umuman yonmasin: animatsiya 0.7 dan boshlanardi
+     va kartochka atrofida bir marta miltillab o'chardi */
+  .card.flipping:not(.flipped)::after{ animation:none; opacity:0; }
   @keyframes cardGlowOut{ 0%{opacity:.7;} 100%{opacity:0;} }
   @keyframes cardGlow{
     0%,100%{
@@ -7353,6 +7355,37 @@
     border:1px solid rgba(255,255,255,0.55);
   }
   .presence-item.presence-item-owner{ cursor:pointer; }
+  .presence-item.presence-item-clickable{ cursor:pointer; }
+  .presence-item.presence-item-clickable:active{ transform:scale(0.985); }
+  .user-info-overlay{
+    position:fixed; inset:0; z-index:2147483100;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.55); padding:16px;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .user-info-overlay.show{ opacity:1; pointer-events:auto; }
+  .user-info-card{
+    width:min(300px,88vw); padding:20px 18px 16px; text-align:center;
+    border-radius:20px; background:rgba(18,20,24,0.97);
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 20px 50px rgba(0,0,0,0.5); color:#ECE7DC;
+  }
+  .ui-avatar{
+    width:56px; height:56px; margin:0 auto 10px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:rgba(255,255,255,0.08); font-size:22px; font-weight:700;
+  }
+  .ui-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ui-nick{ margin:0; font-size:17px; font-weight:800; color:#fff; word-break:break-word; }
+  .ui-email{ margin-top:3px; font-size:12px; color:rgba(236,231,220,0.6); word-break:break-all; }
+  .ui-rows{ margin:14px 0 14px; text-align:left; border-top:1px solid rgba(255,255,255,0.08); }
+  .ui-row{ display:flex; flex-direction:column; gap:2px; padding:9px 2px; border-bottom:1px solid rgba(255,255,255,0.08); }
+  .ui-label{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:rgba(236,231,220,0.5); }
+  .ui-val{ font-size:13.5px; color:#fff; }
+  .ui-close{
+    width:100%; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06); color:#fff; font-weight:700; cursor:pointer;
+  }
   .presence-item.presence-item-owner:active{ transform:scale(0.985); }
 
   /* ---------- Owner bildirishnomasi (qator bosilganda) ---------- */
@@ -19827,16 +19860,27 @@
     return doc(db, "presence", uid);
   }
 
+  const presenceFirstSeenChecked = new Set();
   async function presenceBeat(user, online) {
     try {
-      await setDoc(presenceDocRef(user.uid), {
+      const ref = presenceDocRef(user.uid);
+      const payload = {
         uid: user.uid,
         nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
         email: (user.email || "").toString().slice(0, 120),
         photoURL: user.photoURL || "",
         online: online,
         lastSeen: serverTimestamp()
-      }, { merge: true });
+      };
+      // Birinchi tashrif vaqti: faqat bir marta yoziladi (mavjud bo'lsa o'zgartirilmaydi)
+      if (!presenceFirstSeenChecked.has(user.uid)) {
+        presenceFirstSeenChecked.add(user.uid);
+        try {
+          const snap = await getDoc(ref);
+          if (!snap.exists() || !snap.data().firstSeen) payload.firstSeen = serverTimestamp();
+        } catch (e) { /* o'qib bo'lmasa, keyingi kirishda qayta urinadi */ presenceFirstSeenChecked.delete(user.uid); }
+      }
+      await setDoc(ref, payload, { merge: true });
     } catch (e) {
       console.error("Presence yozishda xatolik:", e.message);
     }
@@ -19964,6 +20008,50 @@
     ownerNoticeEl.setAttribute("aria-hidden", "false");
   }
 
+  let userInfoEl = null;
+  function fmtKirish(ts){
+    if (!ts || typeof ts.toDate !== "function") return "ma'lumot yo'q";
+    return ts.toDate().toLocaleString("uz-UZ", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  function showUserInfo(item){
+    const viewer = auth.currentUser;
+    if (!viewer || String(viewer.email || "").toLowerCase() !== OWNER_EMAIL) return;   // faqat owner
+    if (!userInfoEl) {
+      userInfoEl = document.createElement("div");
+      userInfoEl.className = "user-info-overlay";
+      userInfoEl.setAttribute("aria-hidden", "true");
+      userInfoEl.innerHTML =
+        '<div class="user-info-card" role="dialog" aria-modal="true">' +
+          '<div class="ui-avatar" id="uiAvatar"></div>' +
+          '<h4 class="ui-nick" id="uiNick"></h4>' +
+          '<div class="ui-email" id="uiEmail"></div>' +
+          '<div class="ui-rows">' +
+            '<div class="ui-row"><span class="ui-label">Birinchi tashrif</span><span class="ui-val" id="uiFirst"></span></div>' +
+            '<div class="ui-row"><span class="ui-label">So\'nggi kirish</span><span class="ui-val" id="uiLast"></span></div>' +
+          '</div>' +
+          '<button type="button" class="ui-close">Yopish</button>' +
+        '</div>';
+      document.body.appendChild(userInfoEl);
+      const hide = () => { userInfoEl.classList.remove("show"); userInfoEl.setAttribute("aria-hidden", "true"); };
+      userInfoEl.addEventListener("click", (e) => { if (e.target === userInfoEl) hide(); });
+      userInfoEl.querySelector(".ui-close").addEventListener("click", hide);
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && userInfoEl.classList.contains("show")) hide(); });
+    }
+    const av = userInfoEl.querySelector("#uiAvatar");
+    av.innerHTML = "";
+    if (item.photoURL) {
+      const img = document.createElement("img"); img.src = item.photoURL; img.alt = ""; av.appendChild(img);
+    } else {
+      av.textContent = (item.nick || "?").trim().charAt(0).toUpperCase();
+    }
+    userInfoEl.querySelector("#uiNick").textContent = item.nick || "Foydalanuvchi";
+    userInfoEl.querySelector("#uiEmail").textContent = item.email || "—";
+    userInfoEl.querySelector("#uiFirst").textContent = fmtKirish(item.firstSeen);
+    userInfoEl.querySelector("#uiLast").textContent = fmtKirish(item.lastSeen);
+    userInfoEl.classList.add("show");
+    userInfoEl.setAttribute("aria-hidden", "false");
+  }
+
   let presenceLoaded = false;
   function presenceRenderList() {
     const listEl = document.getElementById("presenceList");
@@ -19991,6 +20079,7 @@
         email: data.email || "",
         photoURL: data.photoURL || "",
         lastSeen: data.lastSeen || null,
+        firstSeen: data.firstSeen || null,
         online: data.online !== false && fresh
       };
     });
@@ -20082,6 +20171,16 @@
       row.appendChild(avatar);
       row.appendChild(info);
 
+      // Faqat owner (ilova egasi) ko'radi: qatorga bosilganda foydalanuvchi ma'lumoti oynasi
+      const viewerIsOwnerNow = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL;
+      if (viewerIsOwnerNow) {
+        row.classList.add("presence-item-clickable");
+        row.setAttribute("role", "button");
+        row.setAttribute("tabindex", "0");
+        row.addEventListener("click", () => showUserInfo(item));
+        row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showUserInfo(item); } });
+      }
+
       // Egasi (owner) uchun o'ng tarafda maxsus bildirishnoma
       const isOwner = !!item.email && item.email.toLowerCase() === "doniyorbektoshmatov7@gmail.com";
       if (isOwner) {
@@ -20092,8 +20191,10 @@
         row.classList.add("presence-item-owner");
         row.setAttribute("role", "button");
         row.setAttribute("tabindex", "0");
-        row.addEventListener("click", showOwnerNotice);
-        row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showOwnerNotice(); } });
+        if (!viewerIsOwnerNow) {
+          row.addEventListener("click", showOwnerNotice);
+          row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showOwnerNotice(); } });
+        }
       }
 
       // Sensei belgisi (先生) — owner belgisi kabi, faqat shu akkaunt uchun
@@ -20105,8 +20206,10 @@
         row.appendChild(senseiBadge);
         row.setAttribute("role", "button");
         row.setAttribute("tabindex", "0");
-        row.addEventListener("click", () => showSenseiNotice(item.nick));
-        row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showSenseiNotice(item.nick); } });
+        if (!viewerIsOwnerNow) {
+          row.addEventListener("click", () => showSenseiNotice(item.nick));
+          row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showSenseiNotice(item.nick); } });
+        }
       }
 
       // Admin belgisi (owner tanlagan rang) va owner uchun tugmalar
