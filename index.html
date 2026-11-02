@@ -1401,6 +1401,7 @@
     animation:installBarIn .35s ease both;
   }
   .install-bar[hidden]{ display:none; }
+  .install-bar .ib-icon{ flex:none; width:36px; height:36px; object-fit:contain; display:block; }
   .install-bar .ib-text{ flex:1; min-width:0; }
   .install-bar .ib-btn{
     flex:none; border:0; border-radius:12px; padding:9px 14px;
@@ -1433,6 +1434,11 @@
   #userLine .user-email{ font-size:10.5px !important; line-height:1.25 !important; }
   #userLine .logout-btn{ margin-top:5px !important; padding:3px 12px !important; font-size:11px !important; }
   .app-version{ font-size:9px !important; margin-top:3px !important; }
+</style>
+<style id="round-artwork-style">
+  /* Yuqoridagi asosiy rasm — doira shaklida */
+  .splash-artwork{ border-radius:50% !important; overflow:hidden; }
+  .splash-artwork img{ border-radius:50% !important; }
 </style>
 </head>
 <body>
@@ -2326,6 +2332,7 @@
 })();
 </script>
 <div class="install-bar" id="installBar" role="region" aria-label="Ilovani o'rnatish" hidden>
+  <img class="ib-icon" src="desktop-icon-192.png?v=3" alt="" width="36" height="36">
   <div class="ib-text" id="installText">Telefonga ilova sifatida o'rnating</div>
   <button type="button" class="ib-btn" id="installBtn">O'rnatish</button>
   <button type="button" class="ib-close" id="installClose" aria-label="Yopish">✕</button>
