@@ -1381,6 +1381,21 @@
   .kanji-dark .glyph-ink{ color:var(--accent); }
   .kanji-dark .kanji-label{ color:#000; font-weight:800; }
   .menu-btn.kanji-dark.ready{ animation:menuAuraIn .6s ease-out both, menuPulse 1.9s ease-in-out .6s infinite; }
+
+  /* ---- Pulsatsiya sozlamasi: rasm yuqoriroqda, pulsatsiya to'liqroq ---- */
+  .splash-artwork-wrap{
+    transform:translateY(-28px);
+  }
+  @keyframes splashArtworkPulse{
+    0%, 100%{
+      transform:scale(1);
+      box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 40px rgba(0,0,0,0.55), 0 0 60px 12px rgba(217,60,52,0.35);
+    }
+    50%{
+      transform:scale(1.09);
+      box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 18px 48px rgba(0,0,0,0.6), 0 0 120px 30px rgba(217,60,52,0.7);
+    }
+  }
 </style>
 <style id="install-bar-style">
   .install-bar{
