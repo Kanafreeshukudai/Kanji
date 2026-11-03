@@ -14311,40 +14311,6 @@
     quizBarPct = targetPct;
   }
 
-  // ---------- CHALG'ITUVCHI VARIANTLAR (eng qiyin tartibda) ----------
-  // Tartib: 0) shu kanji guruhining (group) boshqa so'z birikmalari;
-  // 1) boshqa guruhdagi, savol kanjisi belgisini o'z ichiga olgan birikmalar (ko'proq mosi birinchi);
-  // 2) shu kundagi boshqa so'zlar; 3) qolgan hamma so'zlar.
-  // Joriy quiz to'plamidagilar (quizPool) har bir daraja ichida afzal ko'riladi.
-  function kanjiChars(s){ return (s || '').match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []; }
-  function pickDistractors(word, field, count){
-    const want = count || 3;
-    const seenTexts = new Set([word[field]]);
-    const out = [];
-    const mine = new Set(kanjiChars(word.kanji));
-    const poolSet = new Set(quizPool.length >= 4 ? quizPool : []);
-    const cands = WORDS.filter(w => w.id !== word.id).map(w => {
-      const shared = kanjiChars(w.kanji).filter(c => mine.has(c)).length;
-      const sameGroup = !!(w.group && word.group && w.group === word.group);
-      const tier = sameGroup ? 0 : (shared > 0 ? 1 : (w.day === word.day ? 2 : 3));
-      return { id: w.id, tier, shared, inPool: poolSet.has(w.id) ? 1 : 0, r: Math.random() };
-    });
-    cands.sort((a, b) => (a.tier - b.tier) || (b.inPool - a.inPool) || (b.shared - a.shared) || (a.r - b.r));
-    for(const c of cands){
-      if(out.length === want) break;
-      const text = byId[c.id][field];
-      if(!text || seenTexts.has(text)) continue;
-      seenTexts.add(text);
-      out.push(c.id);
-    }
-    // matnlar yetarli bo'lmasa, takrorlanishga ruxsat beramiz (eski xulq)
-    for(const c of cands){
-      if(out.length === want) break;
-      if(!out.includes(c.id)) out.push(c.id);
-    }
-    return out;
-  }
-
   function renderQuizQuestion(){
     if(timedRevealTimeout){ clearTimeout(timedRevealTimeout); timedRevealTimeout = null; }
     if(timedUrgentTimeout){ clearTimeout(timedUrgentTimeout); timedUrgentTimeout = null; }
@@ -14373,7 +14339,24 @@
     // agar noyob variant yetarlicha topilmasa (juda kam noyob tarjima bo'lsa), qolganini
     // to'ldirish uchun takrorlanishlarga ham ruxsat beramiz.
     const optField = quizType === 'romaji' ? 'romaji' : 'uz';
-    const distractors = pickDistractors(word, optField, 3);
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word[optField]]);
+    let distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id][optField];
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
     const options = shuffle([word.id, ...distractors]);
 
     const modeLabel = quizType === 'romaji' ? "Kanjining romajisini toping" : "Kanjining ma'nosini toping";
@@ -14402,7 +14385,24 @@
   // Savol — kanji. 1-bosqich: to'g'ri romaji topiladi. To'g'ri bo'lsa, ball hali berilmaydi,
   // 2-bosqichda tarjima so'raladi. Romajida xato bo'lsa — darhol keyingi savolga o'tiladi.
   function buildRomTrOptions(word, field){
-    const distractors = pickDistractors(word, field, 3);
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word[field]]);
+    const distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id][field];
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
     return shuffle([word.id, ...distractors]);
   }
   function renderRomTrQuizQuestion(){
@@ -14479,7 +14479,24 @@
   function renderListenQuizQuestion(){
     const wrap = document.getElementById('quizWrap');
     const word = byId[quizItems[quizIdx]];
-    const distractors = pickDistractors(word, 'kanji', 3);
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word.kanji]);
+    let distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id].kanji;
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
     const options = shuffle([word.id, ...distractors]);
     wrap.innerHTML = `
       <div class="quiz-progress">
@@ -14542,7 +14559,24 @@
     const optsEl = wrap.querySelector('.quiz-options');
     if(!optsEl) return;
     // 3 ta chalg'ituvchi tarjima (matni takrorlanmasin)
-    const distractors = pickDistractors(word, 'uz', 3);
+    const pool = quizPool.length >= 4 ? quizPool : WORDS.map(w=>w.id);
+    const shuffledPool = shuffle(pool.filter(id=>id!==word.id));
+    const usedTexts = new Set([word.uz]);
+    let distractors = [];
+    for(const id of shuffledPool){
+      if(distractors.length===3) break;
+      const text = byId[id].uz;
+      if(usedTexts.has(text)) continue;
+      usedTexts.add(text);
+      distractors.push(id);
+    }
+    if(distractors.length<3){
+      for(const id of shuffledPool){
+        if(distractors.length===3) break;
+        if(distractors.includes(id)) continue;
+        distractors.push(id);
+      }
+    }
     const options2 = shuffle([word.id, ...distractors]);
     const label = wrap.querySelector('.quiz-mode-label');
     const steps = document.getElementById('listenSteps');
@@ -17207,11 +17241,7 @@
     function getGuessOptions(uid, card){
       const cached = guessOptCache.get(uid);
       if(cached && cached.wordId === card.wordId) return cached;
-      const cw = byId[card.wordId];
       const pick = (field, correct) => {
-        if(cw){
-          return pickDistractors(cw, field, 9).map(id => byId[id][field]).filter(Boolean);
-        }
         const seen = new Set([guessNorm(correct)]);
         const out = [];
         for(const w of shuffleArr(WORDS.slice())){
@@ -19979,7 +20009,18 @@
           if (!snap.exists() || !snap.data().firstSeen) payload.firstSeen = serverTimestamp();
         } catch (e) { /* o'qib bo'lmasa, keyingi kirishda qayta urinadi */ presenceFirstSeenChecked.delete(user.uid); }
       }
-      await setDoc(ref, payload, { merge: true });
+      try {
+        await setDoc(ref, payload, { merge: true });
+      } catch (e) {
+        // Xavfsizlik qoidalari "sessions" maydonini rad etsa, eski tuzilishda qayta yozamiz
+        console.warn("Presence (sessions) rad etildi, eski formatda qayta urinilmoqda:", e.message);
+        const legacy = {
+          uid: payload.uid, nick: payload.nick, email: payload.email,
+          photoURL: payload.photoURL, lastSeen: payload.lastSeen, online: online
+        };
+        if (payload.firstSeen) legacy.firstSeen = payload.firstSeen;
+        await setDoc(ref, legacy, { merge: true });
+      }
     } catch (e) {
       console.error("Presence yozishda xatolik:", e.message);
     }
