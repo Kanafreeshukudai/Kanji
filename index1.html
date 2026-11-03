@@ -2114,6 +2114,30 @@
     transition:background-color .2s ease,border-color .2s ease,color .2s ease,opacity .2s ease,transform .2s ease,box-shadow .2s ease,filter .2s ease;
   }
   .all-day-select-btn:active{transform:scale(0.94);}
+  /* 82-kun ostidagi "Hammasini belgilash" — barcha kunlarni birdan belgilaydi / olib tashlaydi */
+  .all-select-everything-btn{
+    display:block;
+    width:100%;
+    margin:12px 0 4px;
+    padding:7px 14px;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.01em;
+    line-height:1.2;
+    color:var(--ink-soft);
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--glass-border-soft);
+    border-radius:999px;
+    cursor:pointer;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,transform .2s ease;
+  }
+  .all-select-everything-btn:active{transform:scale(0.97);}
+  .all-select-everything-btn.all-selected{
+    color:var(--accent-soft);
+    border-color:rgba(217,105,79,0.4);
+    background:rgba(217,105,79,0.14);
+  }
   .all-day-select-btn.all-selected{
     color:var(--accent-soft);
     border-color:rgba(217,105,79,0.4);
@@ -12801,9 +12825,20 @@
               </div>
             </div>
           </div>`;
-      }).join('');
+      }).join('') + `
+        <button class="all-select-everything-btn" id="btnAllSelectEverything" type="button">Hammasini belgilash</button>`;
       // bitta umumiy listener (event delegation) — har bir tugma uchun alohida emas, tezroq va tejamli
       allList.addEventListener('click', (e)=>{
+        const everythingBtn = e.target.closest('.all-select-everything-btn');
+        if(everythingBtn){
+          // barcha kunlardagi barcha kanjilarni belgilash / qayta bosilganda hammasini o'chirish
+          const everyAlreadySelected = ALL_KANJI.length > 0 && ALL_KANJI.every(w=>selectedKanji.has(w.id));
+          if(everyAlreadySelected) selectedKanji.clear();
+          else ALL_KANJI.forEach(w=>selectedKanji.add(w.id));
+          playSelectDayTing(!everyAlreadySelected);
+          refreshAllSelectionUI();
+          return;
+        }
         const dayBtn = e.target.closest('.all-day-select-btn');
         if(dayBtn){
           const d = Number(dayBtn.getAttribute('data-day'));
@@ -12854,6 +12889,12 @@
       btn.classList.toggle('all-selected', allSelected);
       btn.textContent = allSelected ? "Olib tashlash" : "Hammasini tanlash";
     });
+    const everyBtn = document.getElementById('btnAllSelectEverything');
+    if(everyBtn){
+      const everySelected = ALL_KANJI.length > 0 && ALL_KANJI.every(w=>selectedKanji.has(w.id));
+      everyBtn.classList.toggle('all-selected', everySelected);
+      everyBtn.textContent = everySelected ? "Belgilashni olib tashlash" : "Hammasini belgilash";
+    }
     updateAllQuizButtons();
   }
 
@@ -20165,16 +20206,15 @@
     // "So'nggi faollik: 3 kun oldin" bo'lib ko'rinadi (online nuqta/hisob/saralashda ham
     // shu 3 kun oldin kirganlar qatorida turadi). Owner o'zi va
     // boshqalarning holatini odatdagidek ko'radi.
-    const viewerIsOwnerList = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL.toLowerCase();
-    if (!viewerIsOwnerList) {
-      items.forEach((it) => {
-        if (it.email && it.email.trim().toLowerCase() === OWNER_EMAIL.toLowerCase()) {
-          it.online = false;
-          // Doim "3 kun oldin": soxta lastSeen har safar hozirgi vaqtdan 3 kun (+1s) orqada
-          it.lastSeen = { toMillis: () => Date.now() - (3 * 86400000 + 1000) };
-        }
-      });
-    }
+    // Owner qatori hamma uchun, owner o'zi kirganda ham, doim "3 kun oldin" holatida turadi;
+    // qolgan foydalanuvchilarning haqiqiy online holati owner'ga ko'rinaveradi.
+    items.forEach((it) => {
+      if (it.email && it.email.trim().toLowerCase() === OWNER_EMAIL.toLowerCase()) {
+        it.online = false;
+        // Doim "3 kun oldin": soxta lastSeen har safar hozirgi vaqtdan 3 kun (+1s) orqada
+        it.lastSeen = { toMillis: () => Date.now() - (3 * 86400000 + 1000) };
+      }
+    });
     // Saralash: avval hozir online bo'lganlar, undan keyin oxirgi marta
     // kirganlar (lastSeen) bo'yicha — eng yangisi tepada, eng eskisi pastda.
     // Online guruh ichida lastSeen har heartbeat'da o'zgargani uchun ro'yxat
