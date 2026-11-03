@@ -9084,7 +9084,7 @@
 </style>
 <style id="account-menu-order">
   /* Akkaunt menyusi tartibi: 1 ism/akkaunt, 2 fon chiziqlari, 3 fon zarralari, 4 yengil rejim,
-     5 yuqori kontrast, 6 ovoz, 7 qaydlar, 8 xatolik/shikoyat, 9 ilovani ulashish, 10 chiqish */
+     5 yuqori kontrast, 6 ovoz, 7 qaydlar, 8 xatolik/shikoyat, 9 romaji ko'rsatish, 10 ilovani ulashish, 11 chiqish */
   .auth-dropdown{ display:flex; flex-direction:column; }
   #user-name{ order:1; --i:0; }
   #bgFxToggleBtn{ order:2; --i:1; }
@@ -9096,8 +9096,9 @@
   #soundToggleBtn{ order:8; --i:7; }
   #notes-btn{ order:9; --i:8; }
   #bugReportBtn{ order:10; --i:9; }
-  #shareAppBtn{ order:11; --i:10; }
-  #logout-btn{ order:12; --i:11; }
+  #romajiToggleBtn{ order:11; --i:10; }
+  #shareAppBtn{ order:12; --i:11; }
+  #logout-btn{ order:13; --i:12; }
   /* Barcha on/off tugmalar bir ustunda: nomi chapda, kaliti hamma uchun o'ngda bir chiziqda */
   .auth-dropdown .auth-bgfx-btn{ justify-content:space-between; }
 </style>
@@ -13163,7 +13164,7 @@
     const spk = card.querySelector('.speak-jp-btn');
     if(spk){
       ['pointerdown','touchstart','mousedown'].forEach(ev=>spk.addEventListener(ev, e=>e.stopPropagation()));
-      spk.addEventListener('click', e=>{ e.stopPropagation(); speakJP(romajiToKana(word.romaji), spk); });
+      spk.addEventListener('click', e=>{ e.stopPropagation(); speakJP(romajiToKana(word.romaji), spk, true); });
     }
     updateHintCounts();
   }
@@ -13472,11 +13473,12 @@
     return out;
   }
 
-  function speakJP(text, btn){
+  function speakJP(text, btn, userTriggered){
     if(!text || !('speechSynthesis' in window)) return;
-    // butun saytdagi "Ovoz" tugmasi o'chiq bo'lsa, o'qimaymiz
+    // "Ovoz" o'chiq bo'lsa ham karnay tugmasi bosilganda (userTriggered) talaffuz ishlayveradi;
+    // faqat o'zi avtomatik o'qiladigan holatlar (savol ochilganda) o'chiq ovozga bo'ysunadi.
     const soundOff = document.getElementById('soundToggleBtn')?.getAttribute('aria-checked') === 'false';
-    if(soundOff) return;
+    if(soundOff && !userTriggered) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
@@ -14506,7 +14508,7 @@
     animateQuizBar(document.getElementById('quizBarFill'));
     const playBtn = document.getElementById('listenPlay');
     const kana = kanaForWord(word);
-    playBtn.addEventListener('click', ()=>speakJP(kana, playBtn));
+    playBtn.addEventListener('click', ()=>speakJP(kana, playBtn, true));
     const listenCard = wrap.querySelector('.quiz-card-listen');
     const pressOn = ()=>listenCard.classList.add('is-pressed');
     const pressOff = ()=>listenCard.classList.remove('is-pressed');
