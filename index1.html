@@ -12821,7 +12821,10 @@
         const heading = e.target.closest('.all-day-heading');
         if(heading){
           const group = heading.closest('.all-day-group');
-          if(group) group.classList.toggle('collapsed');
+          if(group){
+            group.classList.toggle('collapsed');
+            playWhooshSound(!group.classList.contains('collapsed'));
+          }
           return;
         }
         const btn = e.target.closest('.all-kanji-item');
@@ -15016,6 +15019,60 @@
   function playSelectKanjiTing(on){
     if(on) playSelectTingTone(783.99, 0.60, 0.05);    // G5
     else   playSelectTingTone(587.33, 0.45, 0.04);    // D5
+  }
+  // Kun bo'limi ochilganda/yopilganda — kartochkalar chiqishi va qaytishiga mos tovush:
+  // kartochkalar stolga birin-ketin yumshoq "tak-tak-tak" bilan tushadi (ochilganda, ohang
+  // yuqoriga ko'tarilib) va yig'ilib qaytadi (yopilganda, ohang pastga tushib).
+  // Har bir "tak" — qisqa mato-qog'oz zarbasi + past, yumshoq "tuk" (yog'och/kartoy ohangi).
+  function playCardTap(t, pitch, vol){
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    // 1) yumshoq zarba — juda qisqa filtrlangan shovqin
+    const len = Math.floor(ctx.sampleRate * 0.03);
+    const nb = ctx.createBuffer(1, len, ctx.sampleRate);
+    const nd = nb.getChannelData(0);
+    for(let i=0;i<len;i++) nd[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2);
+    const ns = ctx.createBufferSource(); ns.buffer = nb;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass';
+    bp.frequency.value = pitch * 6; bp.Q.value = 0.8;
+    const ng = ctx.createGain(); ng.gain.value = vol * 0.9;
+    ns.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
+    ns.start(t); ns.stop(t + 0.04);
+    // 2) "tuk" — tez pasayuvchi sinus (kartochka stolga tegishi)
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(pitch * 1.5, t);
+    o.frequency.exponentialRampToValueAtTime(pitch, t + 0.05);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + 0.13);
+  }
+  function playWhooshSound(opening){
+    // Kun bo'limi ochilganda/yopilganda — juda yumshoq, qisqa, mayin "dum" (yumshoq pufakcha kabi).
+    // Faqat sof sinus, tiniq garmonikasiz, past o'tkazuvchi filtr bilan yumshatilgan,
+    // sekin-asta kirib tez so'nadi — quloqqa/boshga o'tkir urilmaydi.
+    try{
+      const ctx = getAudioCtx();
+      if(!ctx) return;
+      const t = ctx.currentTime;
+      const dur = 0.16;
+      const f = opening ? 330 : 262;                 // E4 / C4 — past va iliq
+      const f0 = opening ? f * 0.92 : f * 1.06;      // ochilganda biroz ko'tarilib, yopilganda biroz tushib
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f0, t);
+      o.frequency.exponentialRampToValueAtTime(f, t + 0.06);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = 0.5;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(opening ? 0.030 : 0.022, t + 0.018);   // yumshoq kirish
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);                 // tez va silliq so'nish
+      o.connect(lp); lp.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t + dur + 0.03);
+    }catch(e){}
   }
   function playFlipSound(){
     try{
@@ -20104,17 +20161,17 @@
     });
     items.length = 0;
     uniqueMap.forEach((it) => items.push(it));
-    // OWNER YASHIRIN REJIM: owner ro'yxatda turadi, lekin uning online/offline holati
-    // owner'dan boshqa hech kimga ko'rinmaydi (nuqta, "Online" matni, "so'nggi faollik",
-    // online hisobi va saralashdagi o'rni ham oshkor qilmaydi). Owner o'zi va
+    // OWNER YASHIRIN REJIM: owner ro'yxatda turadi, lekin boshqalarga u har doim
+    // "So'nggi faollik: 3 kun oldin" bo'lib ko'rinadi (online nuqta/hisob/saralashda ham
+    // shu 3 kun oldin kirganlar qatorida turadi). Owner o'zi va
     // boshqalarning holatini odatdagidek ko'radi.
     const viewerIsOwnerList = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL.toLowerCase();
     if (!viewerIsOwnerList) {
       items.forEach((it) => {
         if (it.email && it.email.trim().toLowerCase() === OWNER_EMAIL.toLowerCase()) {
           it.online = false;
-          it.lastSeen = null;
-          it.statusHidden = true;
+          // Doim "3 kun oldin": soxta lastSeen har safar hozirgi vaqtdan 3 kun (+1s) orqada
+          it.lastSeen = { toMillis: () => Date.now() - (3 * 86400000 + 1000) };
         }
       });
     }
