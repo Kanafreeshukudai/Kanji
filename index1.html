@@ -20104,6 +20104,20 @@
     });
     items.length = 0;
     uniqueMap.forEach((it) => items.push(it));
+    // OWNER YASHIRIN REJIM: owner ro'yxatda turadi, lekin uning online/offline holati
+    // owner'dan boshqa hech kimga ko'rinmaydi (nuqta, "Online" matni, "so'nggi faollik",
+    // online hisobi va saralashdagi o'rni ham oshkor qilmaydi). Owner o'zi va
+    // boshqalarning holatini odatdagidek ko'radi.
+    const viewerIsOwnerList = !!auth.currentUser && String(auth.currentUser.email || "").toLowerCase() === OWNER_EMAIL.toLowerCase();
+    if (!viewerIsOwnerList) {
+      items.forEach((it) => {
+        if (it.email && it.email.trim().toLowerCase() === OWNER_EMAIL.toLowerCase()) {
+          it.online = false;
+          it.lastSeen = null;
+          it.statusHidden = true;
+        }
+      });
+    }
     // Saralash: avval hozir online bo'lganlar, undan keyin oxirgi marta
     // kirganlar (lastSeen) bo'yicha — eng yangisi tepada, eng eskisi pastda.
     // Online guruh ichida lastSeen har heartbeat'da o'zgargani uchun ro'yxat
@@ -20153,9 +20167,11 @@
       } else {
         avatar.textContent = item.nick.trim().charAt(0).toUpperCase();
       }
-      const dot = document.createElement("span");
-      dot.className = "presence-dot" + (item.online ? " online" : "");
-      avatar.appendChild(dot);
+      if (!item.statusHidden) {
+        const dot = document.createElement("span");
+        dot.className = "presence-dot" + (item.online ? " online" : "");
+        avatar.appendChild(dot);
+      }
 
       const info = document.createElement("div");
       info.className = "presence-info";
@@ -20168,7 +20184,7 @@
         ? "Online"
         : "So'nggi faollik: " + presenceFormatLastSeen(item.lastSeen);
       info.appendChild(nameEl);
-      info.appendChild(statusEl);
+      if (!item.statusHidden) info.appendChild(statusEl);
 
       row.appendChild(avatar);
       row.appendChild(info);
