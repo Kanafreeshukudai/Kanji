@@ -428,7 +428,7 @@
     display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
     line-height:1.15; text-align:left;
   }
-  .splash-music-title{font-size:13px; font-weight:800; letter-spacing:0.04em; color:var(--ink);}
+  .splash-music-title{font-size:13px; font-weight:800; letter-spacing:0.04em; color:var(--ink); white-space:nowrap;}
   .splash-music-state{font-size:10.5px; font-weight:500; color:var(--ink-soft); letter-spacing:0.02em;}
   .splash-music-state::before{content:"Ijroda";}
   .splash-music-eq{
@@ -1454,17 +1454,17 @@
     <div class="splash-artwork-wrap">
       <div class="splash-artwork-waves" id="splashArtworkWaves" aria-hidden="true"></div>
       <div class="splash-artwork" id="splashArtwork">
-        <img src="splash-art.jpg" alt="" draggable="false">
+        <img src="splash-art.jpg?v=2" alt="" draggable="false">
       </div>
     </div>
-    <audio id="splashPhonkAudio" src="song.m4a" preload="auto" loop playsinline></audio>
+    <audio id="splashPhonkAudio" src="song.m4a?v=2" preload="auto" loop playsinline></audio>
     <div class="splash-music-wrap" id="splashMusicWrap">
       <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
         <span class="splash-music-disc">
           <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
           <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
         </span>
-        <span class="splash-music-label"><span class="splash-music-title">Mustang (Spirit)</span><span class="splash-music-state"></span></span>
+        <span class="splash-music-label"><span class="splash-music-title">Stay with me - Miki Matsubara</span><span class="splash-music-state"></span></span>
         <span class="splash-music-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
       </button>
     </div>
