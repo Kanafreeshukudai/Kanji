@@ -19972,6 +19972,20 @@
     return doc(db, "presence", uid);
   }
 
+  // Har bir brauzer tab/qurilma uchun alohida sessiya ID (sessionStorage — tab bo'yicha)
+  const PRESENCE_SESSION_ID = (() => {
+    try {
+      let id = sessionStorage.getItem("kanji-presence-sid");
+      if (!id) {
+        id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        sessionStorage.setItem("kanji-presence-sid", id);
+      }
+      return id;
+    } catch (e) {
+      return Math.random().toString(36).slice(2);
+    }
+  })();
+
   const presenceFirstSeenChecked = new Set();
   async function presenceBeat(user, online) {
     try {
@@ -19981,8 +19995,11 @@
         nick: (user.displayName || user.email || "Foydalanuvchi").toString().slice(0, 60),
         email: (user.email || "").toString().slice(0, 120),
         photoURL: user.photoURL || "",
-        online: online,
-        lastSeen: serverTimestamp()
+        lastSeen: serverTimestamp(),
+        // Har bir qurilma/tab o'z yozuviga ega; bir-biriga aralashmaydi
+        sessions: {
+          [PRESENCE_SESSION_ID]: { online: online, lastSeen: serverTimestamp() }
+        }
       };
       // Birinchi tashrif vaqti: faqat bir marta yoziladi (mavjud bo'lsa o'zgartirilmaydi)
       if (!presenceFirstSeenChecked.has(user.uid)) {
@@ -20035,8 +20052,19 @@
   }
 
   function presenceIsFresh(lastSeen) {
-    if (!lastSeen || typeof lastSeen.toMillis !== "function") return true; // hali yozilmoqda (pending)
+    if (!lastSeen || typeof lastSeen.toMillis !== "function") return false; // yozuv yo'q yoki hali yetib bormagan
     return (Date.now() - lastSeen.toMillis()) < PRESENCE_STALE_MS;
+  }
+
+  // Akkaunt online bo'lishi uchun kamida bitta sessiya online VA yangi bo'lishi kerak
+  function presenceIsOnline(data) {
+    const sessions = (data.sessions && typeof data.sessions === "object")
+      ? Object.values(data.sessions) : [];
+    if (!sessions.length) {
+      // Eski (sessiyasiz) hujjatlar uchun zaxira mantiq
+      return data.online !== false && presenceIsFresh(data.lastSeen);
+    }
+    return sessions.some((s) => s && s.online !== false && presenceIsFresh(s.lastSeen));
   }
 
   // Firestore Timestamp'ni "5 daqiqa oldin" kabi o'qilishi oson matnga aylantiradi.
@@ -20184,7 +20212,6 @@
 
     const items = presenceLastDocs.map((d) => {
       const data = d.data();
-      const fresh = presenceIsFresh(data.lastSeen);
       return {
         uid: data.uid || d.id,
         nick: data.nick || "Foydalanuvchi",
@@ -20192,7 +20219,7 @@
         photoURL: data.photoURL || "",
         lastSeen: data.lastSeen || null,
         firstSeen: data.firstSeen || null,
-        online: data.online !== false && fresh
+        online: presenceIsOnline(data)
       };
     });
     // DUBLIKATLARNI BIRLASHTIRISH: bir xil email bilan bir nechta hujjat bo'lsa
