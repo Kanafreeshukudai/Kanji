@@ -1,30 +1,198 @@
-0|To you, yes my love, to you
-4.2|Yes, my love to you
-12.5|Watashi wa watashi, anata wa anata to
-34.5|Yume itte ta
-44.5|Sonna ki mo suru wa
-53.5|Mure no jaketto ni mioboe ga aru
-62.5|Kouhi no shimi aikawarazu na nome
-73.5|Shou windo ni futari utsureba
-80.5|Stay with me, mayonaka no doa wo tataki
-85.8|Kaeranai de to naita
-92.8|Ano kisetsu ga ima me no mae
-100.5|Stay with me, kuchiguse wo iinagara
-106.0|Futari no toki wo daite
-119.5|Mada wasuresu daiji ni shite ita
-129.5|Koi to ai to wa chigau mono da yo to
-139.5|Yume iwareta sonna ki mo suru wa
-148.5|Nidome no fuyu ga kite hanarete itta
-155.5|Anata no kokoro furi kaereba itsumo
-161.8|Soko ni anata wo kanjite ita no
-168.5|Stay with me, mayonaka no doa wo tataki
-173.8|Kokoro ni ana ga aita
-180.5|Ano kisetsu ga ima me no mae
-188.5|Stay with me, samishisa magirawashite
-193.8|Oitare koudou no hari
-212.5|Onaji merodi ikuri kaeshite ita
-220.5|Stay with me, mayonaka no doa wo tataki
-225.8|Kaeranai de to naita
-232.8|Ano kisetsu ga ima me no mae
-241.5|Stay with me, kuchiguse wo iinagara
-246.0|Futari no toki wo daite
+0|To
+0.5|you...
+3.2|Yes,
+3.6|my
+3.9|love
+4.3|to
+4.6|you
+8.5|
+12.5|Watashi
+12.9|wa
+13.2|watashi,
+13.8|anata
+14.3|wa
+14.6|anata
+15.0|to
+30.5|
+34.5|Yume
+35.1|itte
+35.5|ta
+41.0|
+44.5|Sonna
+45.0|ki
+45.3|mo
+45.6|suru
+46.0|wa
+50.0|
+53.5|Mure
+53.9|no
+54.2|jaketto
+54.7|ni
+55.1|mioboe
+55.6|ga
+55.9|aru
+60.0|
+62.5|Kouhi
+63.0|no
+63.3|shimi
+63.9|aikawarazu
+64.6|na
+64.9|nome
+70.0|
+73.5|Shou
+74.0|windo
+74.5|ni
+74.8|futari
+75.3|utsureba
+78.5|
+80.5|Stay
+80.9|with
+81.2|me,
+81.6|mayonaka
+82.2|no
+82.5|doa
+82.8|wo
+83.1|tataki
+85.8|Kaeranai
+86.4|de
+86.7|to
+87.0|naita
+90.5|
+92.8|Ano
+93.2|kisetsu
+93.7|ga
+94.0|ima
+94.3|me
+94.6|no
+94.9|mae
+98.0|
+100.5|Stay
+100.9|with
+101.2|me,
+101.6|kuchiguse
+102.3|wo
+102.6|iinagara
+106.0|Futari
+106.5|no
+106.8|toki
+107.2|wo
+107.5|daite
+112.0|
+119.5|Mada
+120.0|wasuresu
+120.6|daiji
+121.0|ni
+121.3|shite
+121.7|ita
+127.0|
+129.5|Koi
+129.9|to
+130.2|ai
+130.5|to
+130.8|wa
+131.2|chigau
+131.6|mono
+132.0|da
+132.2|yo
+132.5|to
+137.0|
+139.5|Yume
+140.0|iwareta
+140.6|sonna
+141.0|ki
+141.3|mo
+141.6|suru
+142.0|wa
+146.0|
+148.5|Nidome
+149.1|no
+149.4|fuyu
+149.8|ga
+150.1|kite
+150.6|hanarete
+151.2|itta
+153.0|
+155.5|Anata
+156.0|no
+156.3|kokoro
+156.9|furi
+157.3|kaereba
+157.8|itsumo
+161.8|Soko
+162.2|ni
+162.5|anata
+162.9|wo
+163.2|kanjite
+163.7|ita
+164.0|no
+165.0|
+168.5|Stay
+168.9|with
+169.2|me,
+169.6|mayonaka
+170.2|no
+170.5|doa
+170.8|wo
+171.1|tataki
+173.8|Kokoro
+174.4|ni
+174.7|ana
+175.1|ga
+175.4|aita
+177.0|
+180.5|Ano
+180.9|kisetsu
+181.4|ga
+181.7|ima
+182.0|me
+182.3|no
+182.6|mae
+186.0|
+188.5|Stay
+188.9|with
+189.2|me,
+189.6|samishisa
+190.3|magirawashite
+193.8|Oitare
+194.4|koudou
+194.9|no
+195.2|hari
+200.0|
+212.5|Onaji
+213.0|merodi
+213.6|ikuri
+214.0|kaeshite
+214.5|ita
+217.0|
+220.5|Stay
+220.9|with
+221.2|me,
+221.6|mayonaka
+222.2|no
+222.5|doa
+222.8|wo
+223.1|tataki
+225.8|Kaeranai
+226.4|de
+226.7|to
+227.0|naita
+230.0|
+232.8|Ano
+233.2|kisetsu
+233.7|ga
+234.0|ima
+234.3|me
+234.6|no
+234.9|mae
+238.0|
+241.5|Stay
+241.9|with
+242.2|me,
+242.6|kuchiguse
+243.3|wo
+243.6|iinagara
+246.0|Futari
+246.5|no
+246.8|toki
+247.2|wo
+247.5|daite
