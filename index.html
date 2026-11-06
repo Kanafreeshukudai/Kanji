@@ -1462,6 +1462,33 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=5">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=5">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=5">
+<style id="lyric-sub-style">
+  /* Subtitr qatlami: rasm pastida, musiqa tugmasi ustida */
+  .splash-lyric{
+    position:relative; z-index:1;
+    width:min(86vw,360px); min-height:58px;
+    margin:14px auto 6px; padding:0 8px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    color:var(--ink, #f5f1ea);
+    font-size:17px; font-weight:700; line-height:1.35; letter-spacing:.01em;
+    text-shadow:0 2px 14px rgba(0,0,0,.55);
+    pointer-events:none; user-select:none;
+  }
+  .splash-lyric-text{ display:block; will-change:transform,opacity,filter; }
+  .splash-lyric-text.lyric-in{ animation:lyricIn .45s cubic-bezier(.2,.7,.2,1) both; }
+  .splash-lyric-text.lyric-out{ animation:lyricOut .22s ease-in both; }
+  @keyframes lyricIn{
+    0%{ opacity:0; transform:translateY(12px) scale(.98); filter:blur(7px); }
+    100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+  }
+  @keyframes lyricOut{
+    0%{ opacity:1; transform:translateY(0); filter:blur(0); }
+    100%{ opacity:0; transform:translateY(-8px); filter:blur(5px); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .splash-lyric-text.lyric-in,.splash-lyric-text.lyric-out{ animation:none; }
+  }
+</style>
 </head>
 <body>
   <canvas class="splash-line-canvas" id="splashLineCanvas" aria-hidden="true"></canvas>
@@ -1472,6 +1499,7 @@
         <img src="splash-art.jpg?v=2" alt="" draggable="false">
       </div>
     </div>
+    <div class="splash-lyric" id="splashLyric" aria-live="polite"><span class="splash-lyric-text" id="splashLyricText"></span></div>
     <audio id="splashPhonkAudio" src="song.m4a?v=2" preload="auto" loop playsinline></audio>
     <div class="splash-music-wrap" id="splashMusicWrap">
       <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
@@ -2512,6 +2540,93 @@
   }
   ['play','playing','loadeddata','pause','emptied'].forEach(function(ev){ a.addEventListener(ev, quiet); });
   quiet();
+})();
+</script>
+<script id="lyric-sub-script">
+/* ============================================================
+   QO'SHIQ SUBTITRLARI
+   Har bir qator: { t: boshlanish_soniyada, text: "matn" }
+   t qiymatlari audio ijro vaqtiga mos bo'lishi kerak.
+   Matnni quyidagi massivga o'zingiz kiriting. Massiv tartibda,
+   t qiymatlari o'sib borishi kerak.
+   Masalan:  { t: 12.5, text: "birinchi qator" },
+   ============================================================ */
+var LYRIC_LINES = [
+  // { t: 0.0, text: "" },
+];
+
+(function () {
+  var audio = document.getElementById('splashPhonkAudio');
+  var textEl = document.getElementById('splashLyricText');
+  if (!audio || !textEl) return;
+
+  var current = -2;      // hozirgi qator indeksi (-1 = hali boshlanmagan)
+  var swapTimer = null;
+  var raf = null;
+
+  function indexAt(t) {
+    var idx = -1;
+    for (var i = 0; i < LYRIC_LINES.length; i++) {
+      if (t >= LYRIC_LINES[i].t) idx = i; else break;
+    }
+    return idx;
+  }
+
+  function show(idx) {
+    var text = idx >= 0 ? LYRIC_LINES[idx].text : '';
+    clearTimeout(swapTimer);
+    textEl.classList.remove('lyric-in');
+    textEl.classList.add('lyric-out');
+    swapTimer = setTimeout(function () {
+      textEl.textContent = text;
+      textEl.classList.remove('lyric-out');
+      void textEl.offsetWidth; // animatsiyani qayta boshlash
+      textEl.classList.add('lyric-in');
+    }, 220);
+  }
+
+  function tick() {
+    var idx = indexAt(audio.currentTime);
+    if (idx !== current) { current = idx; show(idx); }
+    if (!audio.paused && !audio.ended) raf = requestAnimationFrame(tick);
+    else raf = null;
+  }
+
+  function start() { if (!raf) raf = requestAnimationFrame(tick); }
+  function stop() { if (raf) cancelAnimationFrame(raf); raf = null; tick(); }
+
+  audio.addEventListener('play', start);
+  audio.addEventListener('playing', start);
+  audio.addEventListener('pause', stop);   // pauzada subtitr shu qatorda qoladi
+  audio.addEventListener('ended', stop);
+  audio.addEventListener('seeked', function () { tick(); });
+  // lyrics.txt ni o'qish: har bir qator "sekund|matn" ko'rinishida
+  function parseLyrics(raw) {
+    var out = [];
+    raw.split(/\r?\n/).forEach(function (line) {
+      line = line.trim();
+      if (!line || line.charAt(0) === '#') return;
+      var bar = line.indexOf('|');
+      if (bar < 0) return;
+      var t = parseFloat(line.slice(0, bar).replace(',', '.'));
+      var text = line.slice(bar + 1).trim();
+      if (!isNaN(t) && text) out.push({ t: t, text: text });
+    });
+    out.sort(function (a, b) { return a.t - b.t; });
+    return out;
+  }
+
+  fetch('lyrics.txt?v=1', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error('lyrics.txt topilmadi'); return r.text(); })
+    .then(function (raw) {
+      LYRIC_LINES = parseLyrics(raw);
+      current = -2;
+      tick();
+      if (!audio.paused) start();
+    })
+    .catch(function () { /* lyrics.txt yo'q bo'lsa, subtitr shunchaki chiqmaydi */ });
+
+  if (!audio.paused) start();
 })();
 </script>
 </body>
