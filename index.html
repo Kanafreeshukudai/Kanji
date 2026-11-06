@@ -1472,21 +1472,28 @@
     color:var(--ink, #f5f1ea);
     font-size:17px; font-weight:700; line-height:1.35; letter-spacing:.01em;
     text-shadow:0 2px 14px rgba(0,0,0,.55);
+    perspective:700px;
     pointer-events:none; user-select:none;
   }
-  .splash-lyric-text{ display:block; will-change:transform,opacity,filter; }
+  .splash-lyric-text{ display:block; transform:scale(1.12); will-change:transform,opacity,filter; }
   .splash-lyric-text.lyric-in{ animation:lyricIn .45s cubic-bezier(.2,.7,.2,1) both; }
   .splash-lyric-text.lyric-out{ animation:lyricOut .22s ease-in both; }
   @keyframes lyricIn{
-    0%{ opacity:0; transform:translateY(12px) scale(.98); filter:blur(7px); }
-    100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+    0%{ opacity:0; transform:translate3d(0,12px,-80px) scale(.82); filter:blur(7px); }
+    100%{ opacity:1; transform:translate3d(0,0,0) scale(1.12); filter:blur(0); }
   }
   @keyframes lyricOut{
     0%{ opacity:1; transform:translateY(0); filter:blur(0); }
     100%{ opacity:0; transform:translateY(-8px); filter:blur(5px); }
   }
+  /* Pauzada: qator sekin nafas oladigandek kattalashib-kichrayadi */
+  @keyframes lyricBreath{
+    0%,100%{ transform:scale(1.10); opacity:.9; }
+    50%{ transform:scale(1.17); opacity:1; }
+  }
+  .splash-lyric-text.lyric-breath{ animation:lyricBreath 3.6s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce){
-    .splash-lyric-text.lyric-in,.splash-lyric-text.lyric-out{ animation:none; }
+    .splash-lyric-text.lyric-in,.splash-lyric-text.lyric-out,.splash-lyric-text.lyric-breath{ animation:none; }
   }
 </style>
 </head>
@@ -2562,6 +2569,7 @@ var LYRIC_LINES = [
 
   var current = -2;      // hozirgi qator indeksi (-1 = hali boshlanmagan)
   var swapTimer = null;
+  var breathTimer = null;
   var raf = null;
 
   function indexAt(t) {
@@ -2572,9 +2580,18 @@ var LYRIC_LINES = [
     return idx;
   }
 
+  function scheduleBreath() {
+    clearTimeout(breathTimer);
+    breathTimer = setTimeout(function () {
+      if (audio.paused) textEl.classList.add('lyric-breath');
+    }, 480);
+  }
+
   function show(idx) {
     var text = idx >= 0 ? LYRIC_LINES[idx].text : '';
     clearTimeout(swapTimer);
+    clearTimeout(breathTimer);
+    textEl.classList.remove('lyric-breath');
     textEl.classList.remove('lyric-in');
     textEl.classList.add('lyric-out');
     swapTimer = setTimeout(function () {
@@ -2582,6 +2599,7 @@ var LYRIC_LINES = [
       textEl.classList.remove('lyric-out');
       void textEl.offsetWidth; // animatsiyani qayta boshlash
       textEl.classList.add('lyric-in');
+      scheduleBreath();
     }, 220);
   }
 
@@ -2592,8 +2610,17 @@ var LYRIC_LINES = [
     else raf = null;
   }
 
-  function start() { if (!raf) raf = requestAnimationFrame(tick); }
-  function stop() { if (raf) cancelAnimationFrame(raf); raf = null; tick(); }
+  function start() {
+    clearTimeout(breathTimer);
+    textEl.classList.remove('lyric-breath');
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    tick();
+    scheduleBreath();
+  }
 
   audio.addEventListener('play', start);
   audio.addEventListener('playing', start);
