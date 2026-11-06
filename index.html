@@ -2662,7 +2662,8 @@ var LYRIC_LINES = [
       if (bar < 0) return;
       var t = parseFloat(line.slice(0, bar).replace(',', '.'));
       var text = line.slice(bar + 1).trim();
-      if (!isNaN(t) && text) out.push({ t: t, text: text });
+      // Matnsiz qator (sekund|) ham qabul qilinadi: shu vaqtda subtitr tozalanadi
+      if (!isNaN(t)) out.push({ t: t, text: text });
     });
     out.sort(function (a, b) { return a.t - b.t; });
     return out;
