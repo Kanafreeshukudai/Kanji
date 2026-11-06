@@ -1475,12 +1475,13 @@
     perspective:700px;
     pointer-events:none; user-select:none;
   }
-  .splash-lyric-text{ display:block; transform:scale(1.12); will-change:transform,opacity,filter; }
-  .splash-lyric-text.lyric-in{ animation:lyricIn .45s cubic-bezier(.2,.7,.2,1) both; }
+  .splash-lyric-text{ display:block; transform:scale(1.12); transform-origin:50% 60%; will-change:transform,opacity,filter; }
+  .splash-lyric-text.lyric-in{ animation:lyricIn 1.1s cubic-bezier(.16,1,.3,1) both; }
   .splash-lyric-text.lyric-out{ animation:lyricOut .22s ease-in both; }
   @keyframes lyricIn{
-    0%{ opacity:0; transform:translate3d(0,12px,-80px) scale(.82); filter:blur(7px); }
-    100%{ opacity:1; transform:translate3d(0,0,0) scale(1.12); filter:blur(0); }
+    0%{ opacity:0; transform:translate3d(0,8px,-260px) scale(.68); filter:blur(12px) drop-shadow(0 0 0 rgba(201,166,107,0)); }
+    55%{ opacity:.85; filter:blur(2px) drop-shadow(0 0 16px rgba(201,166,107,.45)); }
+    100%{ opacity:1; transform:translate3d(0,0,0) scale(1.12); filter:blur(0) drop-shadow(0 0 12px rgba(201,166,107,.3)); }
   }
   @keyframes lyricOut{
     0%{ opacity:1; transform:translateY(0); filter:blur(0); }
