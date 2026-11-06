@@ -1,82 +1,56 @@
 0|To you, yes my love
-4.5|to you, yes my love
-8.5|to you, to you
-12.5|Watashi wa watashi, anata
-15.0|wa anata to
-30.5|
-34.5|Yume itte ta, sonna
-41.0|
-44.5|ki mo suru wa
-50.0|
-53.5|Mure no jaketto ni
-56.0|mioboe ga aru
-60.0|
-62.5|Kouhi no shimi aikawarazu
-65.0|na nome
-70.0|
-73.5|Shou windo ni futari
-76.0|utsureba
-78.5|
-80.5|Stay with me, mayonaka
-83.0|no doa wo tataki
-85.8|
-86.5|Kaeranai de to naita
-90.5|
-92.8|Ano kisetsu ga ima
-95.0|me no mae
-98.0|
-100.5|Stay with me, kuchiguse
-103.0|wo iinagara
-106.0|
-106.8|Futari no toki wo
-108.5|daite
-112.0|
-119.5|Mada wasuresu daiji ni
-122.0|shite ita
-127.0|
-129.5|Koi to ai to wa
-132.0|chigau mono da yo to
-137.0|
-139.5|Yume iwareta sonna ki
-142.0|mo suru wa
-146.0|
-148.5|Nidome no fuyu ga kite
-151.0|hanarete itta
-153.0|
-155.5|Anata no kokoro furi
-158.0|kaereba itsumo
-161.8|
-162.5|Soko ni anata wo
-164.0|kanjite ita no
-165.0|
-168.5|Stay with me, mayonaka
-171.0|no doa wo tataki
-173.8|
-174.5|Kokoro ni ana ga
-176.0|aita
-177.0|
-180.5|Ano kisetsu ga ima
-183.0|me no mae
-186.0|
-188.5|Stay with me, samishisa
-191.0|magirawashite
-193.8|
-194.5|Oitare koudou no
-196.0|hari
-200.0|
-212.5|Onaji merodi ikuri
-215.0|kaeshite ita
-217.0|
-220.5|Stay with me, mayonaka
-223.0|no doa wo tataki
-225.8|
-226.5|Kaeranai de to naita
-230.0|
-232.8|Ano kisetsu ga ima
-235.0|me no mae
-238.0|
-241.5|Stay with me, kuchiguse
-244.0|wo iinagara
-246.0|
-246.8|Futari no toki wo
-248.5|daite
+3.2|to you, yes my love
+7.0|to you... you...
+11.5|
+23.0|わたしわわたし、あなたわあなたと
+31.0|
+33.0|ゆめいってた、そんなきもするわ
+41.5|
+43.0|むれのジャケットにみおぼえがある
+52.0|
+56.5|コーヒーのしみあいかわらずなnome
+62.0|
+65.0|ショウウィンドウにふたりうつれば
+71.5|
+73.5|Stay with me, まよなかのどあをたたき
+80.5|かえないでとないた
+84.5|
+86.0|あのきせつがいまめのまえ
+91.5|
+93.5|Stay with me, くちぐせをいいながら
+100.5|
+102.5|ふたりのときをだいて
+109.5|
+116.5|まだわすれずだいじにしていた
+124.0|
+125.5|Koi to ai to wa chigau mono da yo to
+133.5|
+135.0|ゆめいわれたそんなきもするわ
+143.0|
+145.0|にどめのふゆがきてはなれていった
+152.0|
+153.5|あなたのこころふりかえればいつも
+160.0|
+161.0|そこにあなたを感じていたの
+165.5|
+167.0|Stay with me, まよなかのどあをたたき
+173.5|
+175.0|こころにあながあいた
+179.5|
+181.0|あのきせつがいまめのまえ
+186.5|
+188.0|Stay with me, さみしさぎらわして
+193.5|
+195.0|おいたれこうどうのはり
+207.0|
+210.0|おなじメロディくりかえしていた
+216.5|
+218.0|Stay with me, まよなかのどあをたたき
+224.5|
+225.0|かえないでとないた
+229.0|
+230.5|あのきせつがいまめのまえ
+236.5|
+238.0|Stay with me, くちぐせをいいながら
+244.0|
+245.5|ふたりのときをだいて
