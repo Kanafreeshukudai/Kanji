@@ -1520,7 +1520,7 @@
     .splash-lyric-text.lyric-in,.splash-lyric-text.lyric-out,.splash-lyric-text.lyric-breath{ animation:none; }
   }
   /* Subtitr bo'sh qator bo'lganda (matn yo'q) qo'shiq ritmiga mos yumshoq to'lqin.
-     Amplitudani BeatSync bas energiyasidan olingan --wave-drive boshqaradi. */
+     Uch qatlam: --wd-a (bas), --wd-b (o'rta), --wd-c (yuqori) BeatSync dan boshqariladi. */
   .lyric-wave{
     position:absolute; left:0; right:0; top:50%;
     height:48px; margin-top:-24px;
@@ -1535,23 +1535,35 @@
   /* Kirish (matn bo'sh bo'lganda) — sekinroq, yumshoq fade-in.
      Transition shu holat qoidasidan olinadi, shuning uchun vaqtlar alohida. */
   .splash-lyric.lyric-wave-on .lyric-wave{ opacity:1; transition-duration:.9s; }
-  .lyric-wave svg{
-    display:block; width:100%; height:100%; overflow:hidden;
-    /* jimlik: deyarli tekis (0.06); eng kuchli zarb: to'liq tebranish (~1.16) */
-    transform:scaleY(calc(0.06 + var(--wave-drive, 0.1) * 1.1));
-    transform-origin:50% 50%;
-    transition:transform .09s linear;
-  }
+  .lyric-wave svg{ display:block; width:100%; height:100%; overflow:hidden; }
   .lyric-wave path{
     fill:none; stroke-linecap:round; stroke-linejoin:round;
     vector-effect:non-scaling-stroke;
   }
-  /* Asosiy chiziq: oltin -> qizil -> yashil gradient (SVG gradient, filtr yo'q — yengil) */
-  .lyric-wave-a path{ stroke:url(#lyricWaveGrad); stroke-width:2.2; opacity:.95; }
-  .lyric-wave-a{ animation:lyricWaveFlowA 3.2s linear infinite; }
-  @keyframes lyricWaveFlowA{ from{ transform:translateX(0); } to{ transform:translateX(-120px); } }
+  /* Har qatlamning ichki .wave-scale elementi o'z ovoz manbaiga bog'liq masshtabda tebranadi.
+     Jimlikda (0 ga yaqin) deyarli tekis; kuchli ohangda to'liq tebranadi. */
+  .wave-scale{
+    transform-box:view-box; transform-origin:180px 24px;
+    transition:transform .09s linear;
+  }
+  /* 1-qatlam (A): BAS — kuchli, sekin, asosiy to'lqin (gradient) */
+  .wave-a .wave-scale{ transform:scaleY(calc(0.06 + var(--wd-a, 0.15) * 1.1)); }
+  /* 2-qatlam (B): O'RTA diapazon — vokal/melodiya, o'rtacha tebranish */
+  .wave-b .wave-scale{ transform:scaleY(calc(0.05 + var(--wd-b, 0.12) * 0.8)); }
+  /* 3-qatlam (C): YUQORI diapazon — tez, yengil "titroq" (hi-hat, yorqin tovushlar) */
+  .wave-c .wave-scale{ transform:scaleY(calc(0.05 + var(--wd-c, 0.1) * 0.6)); }
+  /* Har qatlam o'z tezligida chapga siljiydi (davr = siljish, uzluksiz aylanadi) */
+  .wave-a{ animation:waveFlowA 3.2s linear infinite; }
+  .wave-b{ animation:waveFlowB 4.8s linear infinite; }
+  .wave-c{ animation:waveFlowC 2.1s linear infinite; }
+  @keyframes waveFlowA{ from{ transform:translateX(0); } to{ transform:translateX(-120px); } }
+  @keyframes waveFlowB{ from{ transform:translateX(0); } to{ transform:translateX(-160px); } }
+  @keyframes waveFlowC{ from{ transform:translateX(0); } to{ transform:translateX(-70px); } }
+  .wave-a path{ stroke:url(#lyricWaveGrad); stroke-width:2.2; opacity:.95; }
+  .wave-b path{ stroke:#C9A66B; stroke-width:1.6; opacity:.6; }
+  .wave-c path{ stroke:#93b17f; stroke-width:1.2; opacity:.55; }
   @media (prefers-reduced-motion: reduce){
-    .lyric-wave-a{ animation:none; }
+    .wave-a,.wave-b,.wave-c{ animation:none; }
   }
 </style>
 </head>
@@ -1896,14 +1908,19 @@
     const waves = document.getElementById('splashArtworkWaves');
     const lyricWave = document.querySelector('.lyric-wave');
     const lyricBox = document.getElementById('splashLyric');
-    function setWaveDrive(v){
+    function setWaveDrive(a, b, c){
       // Faqat ko'rinayotgan to'lqinni yangilaymiz (hujjat bo'ylab stil qayta hisoblanmaydi)
       if(lyricWave && lyricBox && lyricBox.classList.contains('lyric-wave-on')){
-        lyricWave.style.setProperty('--wave-drive', v);
+        lyricWave.style.setProperty('--wd-a', a.toFixed(3));
+        lyricWave.style.setProperty('--wd-b', b.toFixed(3));
+        lyricWave.style.setProperty('--wd-c', c.toFixed(3));
       }
     }
     function clearWaveDrive(){
-      if(lyricWave) lyricWave.style.removeProperty('--wave-drive');
+      if(!lyricWave) return;
+      lyricWave.style.removeProperty('--wd-a');
+      lyricWave.style.removeProperty('--wd-b');
+      lyricWave.style.removeProperty('--wd-c');
     }
     const AudioCtor = window.AudioContext || window.webkitAudioContext;
     if(!audio || !artwork || !AudioCtor) return { start(){}, stop(){} };
@@ -1920,6 +1937,8 @@
     let avg = 0;            // bas energiyasining qisqa o'rtachasi (~0.5s)
     let peak = 0.02;        // bas energiyasining sekin so'nuvchi cho'qqisi (normallashtirish uchun)
     let prevE = 0, lastBeat = 0, silentFrames = 0, fallback = false;
+    let anMid = null, anHi = null, midBuf = null, hiBuf = null;   // o'rta va yuqori diapazon tahlili
+    let midPeak = 0.02, hiPeak = 0.02, midLvl = 0, hiLvl = 0;
 
     const MIN_BEAT_INTERVAL_MS = 230; // ketma-ket zarblar orasidagi eng kichik oraliq
     const PUNCH_DECAY = 0.88;         // 60fps dagi har kadr uchun so'nish (kadr tezligiga qarab moslanadi)
@@ -1958,6 +1977,18 @@
         sink.connect(ctx.destination);
         useFloat = typeof analyser.getFloatTimeDomainData === 'function';
         timeData = useFloat ? new Float32Array(analyser.fftSize) : new Uint8Array(analyser.fftSize);
+        // Qo'shimcha yo'llar: o'rta diapazon (melodiya/vokal) va yuqori diapazon (titroq).
+        // Xato bo'lsa ham asosiy (bas) tahlil ishlashda davom etadi.
+        try{
+          const midF = ctx.createBiquadFilter(); midF.type = 'bandpass'; midF.frequency.value = 900; midF.Q.value = 0.9;
+          const hiF = ctx.createBiquadFilter(); hiF.type = 'highpass'; hiF.frequency.value = 3500; hiF.Q.value = 0.7;
+          anMid = ctx.createAnalyser(); anMid.fftSize = 1024; anMid.smoothingTimeConstant = 0;
+          anHi = ctx.createAnalyser(); anHi.fftSize = 1024; anHi.smoothingTimeConstant = 0;
+          source.connect(midF); midF.connect(anMid); anMid.connect(sink);
+          source.connect(hiF); hiF.connect(anHi); anHi.connect(sink);
+          midBuf = useFloat ? new Float32Array(1024) : new Uint8Array(1024);
+          hiBuf = useFloat ? new Float32Array(1024) : new Uint8Array(1024);
+        }catch(e){ anMid = null; anHi = null; }
         ready = true;
         return true;
       }catch(e){
@@ -1977,6 +2008,20 @@
       } else {
         analyser.getByteTimeDomainData(timeData);
         for(let i = 0; i < n; i++){ const v = (timeData[i] - 128) / 128; sum += v * v; }
+      }
+      return Math.sqrt(sum / n);
+    }
+
+    // Berilgan analizatordan diapazon RMS amplitudasi
+    function bandRms(an, buf){
+      if(!an || !buf) return 0;
+      let sum = 0; const n = buf.length;
+      if(useFloat){
+        an.getFloatTimeDomainData(buf);
+        for(let i = 0; i < n; i++){ const v = buf[i]; sum += v * v; }
+      } else {
+        an.getByteTimeDomainData(buf);
+        for(let i = 0; i < n; i++){ const v = (buf[i] - 128) / 128; sum += v * v; }
       }
       return Math.sqrt(sum / n);
     }
@@ -2029,7 +2074,7 @@
       if(fallback) return;
 
       // Jimlik: to'lqin to'liq tekislanadi (keyingi kadrlar ham shu holatda davom etadi)
-      if(e < SILENT_LIMIT){ punch = 0; level = 0; setWaveDrive(0); }
+      if(e < SILENT_LIMIT){ punch = 0; level = 0; midLvl = 0; hiLvl = 0; setWaveDrive(0, 0, 0); }
 
       // Moslashuvchan o'lchamlar: cho'qqi sekin so'nadi, o'rtacha tez yangilanadi
       peak = Math.max(0.01, e, peak * Math.pow(0.997, dt));
@@ -2054,7 +2099,15 @@
       const drive = Math.min(1, Math.max(punch, level * 0.9));
       artwork.style.transform = 'scale(' + (1 + drive * MAX_SCALE_DELTA).toFixed(4) + ')';
       artwork.style.setProperty('--beat', drive.toFixed(3)); // nur (glow) ham ritmga mos
-      setWaveDrive(drive.toFixed(3)); // subtitr to'lqini ham ritmga mos
+      // O'rta va yuqori diapazon: o'z cho'qqisiga nisbatan normallashtiriladi
+      const eMid = bandRms(anMid, midBuf), eHi = bandRms(anHi, hiBuf);
+      midPeak = Math.max(0.01, eMid, midPeak * Math.pow(0.997, dt));
+      hiPeak  = Math.max(0.01, eHi,  hiPeak  * Math.pow(0.997, dt));
+      const tMid = Math.pow(Math.min(1, eMid / midPeak), 0.7);
+      const tHi  = Math.pow(Math.min(1, eHi / hiPeak), 0.7);
+      midLvl += (tMid - midLvl) * (1 - Math.pow(tMid > midLvl ? 0.45 : 0.8, dt));
+      hiLvl  += (tHi - hiLvl)   * (1 - Math.pow(tHi > hiLvl ? 0.5 : 0.6, dt));
+      setWaveDrive(drive, midLvl, hiLvl); // 3 qatlam: bas, o'rta, yuqori
     }
 
     // Brauzer/iOS audio kontekstni to'xtatib qo'ygan bo'lsa — teginishda qayta yoqamiz
@@ -2064,6 +2117,7 @@
 
     function resetState(){
       punch = 0; level = 0; avg = 0; peak = 0.02; prevE = 0;
+      midPeak = 0.02; hiPeak = 0.02; midLvl = 0; hiLvl = 0;
       lastBeat = 0; silentFrames = 0; fallback = false; lastT = 0;
     }
 
@@ -2734,21 +2788,27 @@ var LYRIC_LINES = [
     });
     defs.appendChild(lg);
     svg.appendChild(defs);
+    // A: bas (katta amplituda, uzun davr) · B: o'rta (o'rtacha) · C: yuqori (kichik, qisqa davr)
     var layers = [
-      { cls: 'lyric-wave-a', amp: 9, period: 120, phase: 0 },
+      { cls: 'wave-a', amp: 9, period: 120, phase: 0 },
+      { cls: 'wave-b', amp: 7, period: 160, phase: 40 },
+      { cls: 'wave-c', amp: 4, period: 70,  phase: 15 }
     ];
     layers.forEach(function (L) {
       var d = '';
-      for (var x = -150; x <= 510; x += 4) {
+      // Siljish (maks 160px) uchun yetarli diapazon
+      for (var x = -170; x <= 530; x += 4) {
         var y = 24 + L.amp * Math.sin(((x + L.phase) / L.period) * 2 * Math.PI);
-        d += (x === -150 ? 'M' : 'L') + x + ' ' + y.toFixed(2) + ' ';
+        d += (x === -170 ? 'M' : 'L') + x + ' ' + y.toFixed(2) + ' ';
       }
-      var g = document.createElementNS(NS, 'g');
+      var g = document.createElementNS(NS, 'g');   // siljish (CSS animation)
       g.setAttribute('class', L.cls);
-      var dl = d.trim();
+      var sc = document.createElementNS(NS, 'g');  // tebranish masshtabi (BeatSync)
+      sc.setAttribute('class', 'wave-scale');
       var p = document.createElementNS(NS, 'path');
-      p.setAttribute('d', dl);
-      g.appendChild(p);
+      p.setAttribute('d', d.trim());
+      sc.appendChild(p);
+      g.appendChild(sc);
       svg.appendChild(g);
     });
   }
