@@ -1548,16 +1548,10 @@
   }
   /* Asosiy chiziq: oltin -> qizil -> yashil gradient (SVG gradient, filtr yo'q — yengil) */
   .lyric-wave-a path{ stroke:url(#lyricWaveGrad); stroke-width:2.2; opacity:.95; }
-  /* Pastki yumshoq soya: chiziq ostida xira to'ldirilgan qatlam */
-  .lyric-wave path.lyric-wave-fill{ fill:url(#lyricWaveGrad); stroke:none; opacity:.12; }
-  /* Ikkinchi, sekinroq va xiraroq qatlam: chuqurlik hissi */
-  .lyric-wave-b path{ stroke:var(--moss-soft, #93b17f); stroke-width:1.4; opacity:.4; }
   .lyric-wave-a{ animation:lyricWaveFlowA 3.2s linear infinite; }
-  .lyric-wave-b{ animation:lyricWaveFlowB 4s linear infinite; }
   @keyframes lyricWaveFlowA{ from{ transform:translateX(0); } to{ transform:translateX(-120px); } }
-  @keyframes lyricWaveFlowB{ from{ transform:translateX(0); } to{ transform:translateX(-150px); } }
   @media (prefers-reduced-motion: reduce){
-    .lyric-wave-a,.lyric-wave-b{ animation:none; }
+    .lyric-wave-a{ animation:none; }
   }
 </style>
 </head>
@@ -2742,7 +2736,6 @@ var LYRIC_LINES = [
     svg.appendChild(defs);
     var layers = [
       { cls: 'lyric-wave-a', amp: 9, period: 120, phase: 0 },
-      { cls: 'lyric-wave-b', amp: 6, period: 150, phase: 40 }
     ];
     layers.forEach(function (L) {
       var d = '';
@@ -2753,12 +2746,6 @@ var LYRIC_LINES = [
       var g = document.createElementNS(NS, 'g');
       g.setAttribute('class', L.cls);
       var dl = d.trim();
-      if (L.cls === 'lyric-wave-a') {
-        var area = document.createElementNS(NS, 'path');
-        area.setAttribute('class', 'lyric-wave-fill');
-        area.setAttribute('d', dl + ' L510 48 L-150 48 Z');
-        g.appendChild(area);
-      }
       var p = document.createElementNS(NS, 'path');
       p.setAttribute('d', dl);
       g.appendChild(p);
