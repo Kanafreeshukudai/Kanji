@@ -1537,9 +1537,10 @@
   .splash-lyric.lyric-wave-on .lyric-wave{ opacity:1; transition-duration:.9s; }
   .lyric-wave svg{
     display:block; width:100%; height:100%; overflow:hidden;
-    transform:scaleY(calc(0.3 + var(--wave-drive, 0.35) * 0.9));
+    /* jimlik: deyarli tekis (0.06); eng kuchli zarb: to'liq tebranish (~1.16) */
+    transform:scaleY(calc(0.06 + var(--wave-drive, 0.1) * 1.1));
     transform-origin:50% 50%;
-    transition:transform .12s linear;
+    transition:transform .09s linear;
   }
   .lyric-wave path{
     fill:none; stroke-linecap:round; stroke-linejoin:round;
@@ -2033,6 +2034,9 @@
       }
       if(fallback) return;
 
+      // Jimlik: to'lqin to'liq tekislanadi (keyingi kadrlar ham shu holatda davom etadi)
+      if(e < SILENT_LIMIT){ punch = 0; level = 0; setWaveDrive(0); }
+
       // Moslashuvchan o'lchamlar: cho'qqi sekin so'nadi, o'rtacha tez yangilanadi
       peak = Math.max(0.01, e, peak * Math.pow(0.997, dt));
       avg += (e - avg) * (1 - Math.pow(0.97, dt));
@@ -2047,11 +2051,13 @@
       punch *= Math.pow(PUNCH_DECAY, dt);
 
       // Zarb aniqlanmay qolsa ham rasm bas balandligiga qarab silliq harakatlanadi
+      // Musiqa ohangi (bas) balandligi: sezgirroq egri (kichik ohanglar ham seziladi)
       const n = Math.min(1, e / peak);
-      const target = n * n;
-      level += (target - level) * (1 - Math.pow(target > level ? 0.5 : 0.85, dt));
+      const target = Math.pow(n, 0.7);
+      level += (target - level) * (1 - Math.pow(target > level ? 0.45 : 0.8, dt));
 
-      const drive = Math.max(punch, level * 0.5);
+      // Zarb (punch) va ohang balandligi birgalikda — ikkalasi ham to'lqinni tebratadi
+      const drive = Math.min(1, Math.max(punch, level * 0.9));
       artwork.style.transform = 'scale(' + (1 + drive * MAX_SCALE_DELTA).toFixed(4) + ')';
       artwork.style.setProperty('--beat', drive.toFixed(3)); // nur (glow) ham ritmga mos
       setWaveDrive(drive.toFixed(3)); // subtitr to'lqini ham ritmga mos
