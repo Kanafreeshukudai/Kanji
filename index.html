@@ -1529,8 +1529,9 @@
     transition:opacity .5s ease;
     pointer-events:none; overflow:hidden;
     /* Chetlar gradient bilan so'nadi: to'lqin tekis kesilmaydi */
-    -webkit-mask-image:linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
-            mask-image:linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    /* Kuchli so'nish: har tomonda ~40% zona, chetlar deyarli shaffof, markaz to'liq ko'rinadi */
+    -webkit-mask-image:linear-gradient(to right, transparent 0%, rgba(0,0,0,.25) 12%, #000 40%, #000 60%, rgba(0,0,0,.25) 88%, transparent 100%);
+            mask-image:linear-gradient(to right, transparent 0%, rgba(0,0,0,.25) 12%, #000 40%, #000 60%, rgba(0,0,0,.25) 88%, transparent 100%);
   }
   /* Kirish (matn bo'sh bo'lganda) — sekinroq, yumshoq fade-in.
      Transition shu holat qoidasidan olinadi, shuning uchun vaqtlar alohida. */
@@ -1555,7 +1556,8 @@
   .wave-b{ animation:waveFlowB 4.8s linear infinite; }
   @keyframes waveFlowA{ from{ transform:translateX(0); } to{ transform:translateX(-120px); } }
   @keyframes waveFlowB{ from{ transform:translateX(0); } to{ transform:translateX(-160px); } }
-  .wave-a path{ stroke:url(#lyricWaveGrad); stroke-width:2.2; opacity:.95; }
+  /* A qatlam maska ichida (oq chiziq) — ko'rinadigan rang harakatlanuvchi gradientdan keladi */
+  .wave-a path{ stroke:#fff; stroke-width:2.2; }
   .wave-b path{ stroke:#C9A66B; stroke-width:1.6; opacity:.6; }
   @media (prefers-reduced-motion: reduce){
     .wave-a,.wave-b{ animation:none; }
@@ -1932,6 +1934,8 @@
     let prevE = 0, lastBeat = 0, silentFrames = 0, fallback = false;
     let anMid = null, midBuf = null;   // o'rta diapazon tahlili
     let midPeak = 0.02, midLvl = 0;
+    const gradEl = document.getElementById('lyricWaveGrad');
+    let gradPhase = 0;   // rang oqimi holati (bas kuchiga qarab tezlashadi)
 
     const MIN_BEAT_INTERVAL_MS = 230; // ketma-ket zarblar orasidagi eng kichik oraliq
     const PUNCH_DECAY = 0.88;         // 60fps dagi har kadr uchun so'nish (kadr tezligiga qarab moslanadi)
@@ -2093,6 +2097,13 @@
       const tMid = Math.pow(Math.min(1, eMid / midPeak), 0.7);
       midLvl += (tMid - midLvl) * (1 - Math.pow(tMid > midLvl ? 0.45 : 0.8, dt));
       setWaveDrive(drive, midLvl); // 2 qatlam: bas, o'rta
+
+      // G'oya 2: rang gradienti bas kuchiga qarab oqadi (jim — sekin, zarbda — tezroq)
+      if(gradEl && lyricBox && lyricBox.classList.contains('lyric-wave-on')){
+        gradPhase = (gradPhase + dt * (0.6 + drive * 2.4)) % 300;
+        gradEl.setAttribute('x1', gradPhase.toFixed(1));
+        gradEl.setAttribute('x2', (gradPhase + 300).toFixed(1));
+      }
     }
 
     // Brauzer/iOS audio kontekstni to'xtatib qo'ygan bo'lsa — teginishda qayta yoqamiz
@@ -2761,26 +2772,47 @@ var LYRIC_LINES = [
     if (!svg) return;
     var NS = 'http://www.w3.org/2000/svg';
     var defs = document.createElementNS(NS, 'defs');
+
+    // Rang gradienti: tekis (fixed) koordinatada, takrorlanuvchi — BeatSync uni siljitadi
     var lg = document.createElementNS(NS, 'linearGradient');
     lg.setAttribute('id', 'lyricWaveGrad');
+    lg.setAttribute('gradientUnits', 'userSpaceOnUse');
+    lg.setAttribute('spreadMethod', 'repeat');
     lg.setAttribute('x1', '0'); lg.setAttribute('y1', '0');
-    lg.setAttribute('x2', '1'); lg.setAttribute('y2', '0');
-    [['0%', '#C9A66B'], ['50%', '#D9694F'], ['100%', '#93b17f']].forEach(function (st) {
+    lg.setAttribute('x2', '300'); lg.setAttribute('y2', '0');
+    [['0%', '#C9A66B'], ['33%', '#D9694F'], ['66%', '#93b17f'], ['100%', '#C9A66B']].forEach(function (st) {
       var stop = document.createElementNS(NS, 'stop');
       stop.setAttribute('offset', st[0]);
       stop.setAttribute('stop-color', st[1]);
       lg.appendChild(stop);
     });
     defs.appendChild(lg);
+
+    // A qatlam uchun maska: harakatlanuvchi to'lqin shakli (oq = ko'rinadi)
+    var mask = document.createElementNS(NS, 'mask');
+    mask.setAttribute('id', 'lyricWaveMask');
+    mask.setAttribute('maskUnits', 'userSpaceOnUse');
+    mask.setAttribute('x', '-200'); mask.setAttribute('y', '-60');
+    mask.setAttribute('width', '800'); mask.setAttribute('height', '160');
+    defs.appendChild(mask);
     svg.appendChild(defs);
-    // A: bas (katta amplituda, uzun davr) · B: o'rta diapazon (o'rtacha)
+
+    // A: bas — katta amplituda, uzun davr (maska ichida)
+    // B: o'rta diapazon — o'rtacha amplituda (oddiy chiziq)
     var layers = [
-      { cls: 'wave-a', amp: 9, period: 120, phase: 0 },
-      { cls: 'wave-b', amp: 7, period: 160, phase: 40 }
+      { cls: 'wave-a', amp: 9, period: 120, phase: 0,  inMask: true },
+      { cls: 'wave-b', amp: 7, period: 160, phase: 40, inMask: false }
     ];
+    var rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('x', '-200'); rect.setAttribute('y', '-60');
+    rect.setAttribute('width', '800'); rect.setAttribute('height', '160');
+    rect.setAttribute('fill', 'url(#lyricWaveGrad)');
+    rect.setAttribute('mask', 'url(#lyricWaveMask)');
+    rect.setAttribute('opacity', '.95');
+    svg.appendChild(rect);
+
     layers.forEach(function (L) {
       var d = '';
-      // Siljish (maks 160px) uchun yetarli diapazon
       for (var x = -170; x <= 530; x += 4) {
         var y = 24 + L.amp * Math.sin(((x + L.phase) / L.period) * 2 * Math.PI);
         d += (x === -170 ? 'M' : 'L') + x + ' ' + y.toFixed(2) + ' ';
@@ -2793,7 +2825,8 @@ var LYRIC_LINES = [
       p.setAttribute('d', d.trim());
       sc.appendChild(p);
       g.appendChild(sc);
-      svg.appendChild(g);
+      if (L.inMask) mask.appendChild(g);
+      else svg.appendChild(g);
     });
   }
   buildWave();
