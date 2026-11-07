@@ -2734,7 +2734,13 @@ var LYRIC_LINES = [
       syncWave();
       // 「はな」 bor qator: sakura bir marta, keyingi zarbga mos holda otiladi
       var hanaCount = text ? text.split('はな').length - 1 : 0;
-      if (hanaCount > 0 && window.sakuraOnBeat) window.sakuraOnBeat(hanaCount);
+      if (hanaCount > 0 && window.sakuraOnBeat) {
+        // Qator qancha vaqt turishini hisoblab, otilishlarni shu oraliqqa teng taqsimlaymiz
+        var nextT = (idx + 1 < LYRIC_LINES.length) ? LYRIC_LINES[idx + 1].t : null;
+        var spanMs = nextT !== null ? (nextT - audio.currentTime) * 1000 : 1600;
+        if (!(spanMs >= 600 && spanMs <= 4000)) spanMs = 1600;
+        window.sakuraOnBeat(hanaCount, spanMs);
+      }
       textEl.classList.remove('lyric-out');
       void textEl.offsetWidth; // animatsiyani qayta boshlash
       textEl.classList.add('lyric-in');
@@ -2921,28 +2927,33 @@ var LYRIC_LINES = [
 
   // 「はな」 qatori uchun: keyingi zarbda (beatpulse) bir marta otiladi.
   // Zarb kelmasa ham 900ms dan keyin baribir otiladi.
-  // Bitta qatorda bir necha 「はな」 bo'lsa, har biri uchun alohida otilish navbatda turadi.
-  var pending = 0;      // kutilayotgan otilishlar soni
-  var fallbackT = null;
-  function scheduleFallback(delay) {
-    clearTimeout(fallbackT);
-    fallbackT = setTimeout(function () {
-      if (pending > 0) {
-        pending--;
-        burst();
-        if (pending > 0) scheduleFallback(600);
-      }
-    }, delay);
+  // Bitta qatorda bir necha 「はな」 bo'lsa, har biri uchun alohida otilish.
+  // Otilishlar qator davomiyligi bo'ylab teng taqsimlanadi (navbat — deadline'lar ro'yxati).
+  // Zarb (beatpulse) kelsa, navbatdagi otilish o'sha zarbga "ko'chiriladi".
+  var queue = [];       // har bir otilish uchun mo'ljallangan vaqt (ms)
+  var qTimer = null;
+  function tickQueue() {
+    qTimer = null;
+    if (!queue.length) return;
+    if (audio.paused) { qTimer = setTimeout(tickQueue, 200); return; }
+    if (queue[0] <= Date.now()) {
+      queue.shift();
+      burst();
+    }
+    if (queue.length) qTimer = setTimeout(tickQueue, 60);
   }
-  window.sakuraOnBeat = function (count) {
-    pending += count;
-    scheduleFallback(900);
+  window.sakuraOnBeat = function (count, spanMs) {
+    var now = Date.now();
+    var span = (spanMs && spanMs > 0) ? spanMs : 1600;
+    for (var i = 0; i < count; i++) {
+      queue.push(now + span * (i + 1) / (count + 1));
+    }
+    if (!qTimer) qTimer = setTimeout(tickQueue, 60);
   };
   window.addEventListener('beatpulse', function () {
-    if (pending > 0 && !audio.paused) {
-      pending--;
+    if (queue.length && !audio.paused && queue[0] <= Date.now() + 250) {
+      queue.shift();
       burst();
-      if (pending > 0) scheduleFallback(900); else clearTimeout(fallbackT);
     }
   });
 
