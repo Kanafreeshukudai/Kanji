@@ -13141,7 +13141,7 @@
         const isLeft = dir < 0;
         b.className = 'side-push-arrow ' + (isLeft ? 'left' : 'right');
         const title = isLeft ? 'Bilganlarimga surish' : 'Navbatda saqlash';
-        b.title = title;
+        // title (hover tooltip) olib tashlandi — faqat aria-label qoladi
         b.setAttribute('aria-label', title);
         b.innerHTML = isLeft
           ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14.5 6.5 8.5 12 14.5 17.5"/></svg>'
