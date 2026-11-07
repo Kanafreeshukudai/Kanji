@@ -2076,6 +2076,7 @@
       prevE = e;
       if(rising && e > avg * BEAT_RATIO && e > ENERGY_FLOOR && e > peak * 0.35 && (now - lastBeat) > MIN_BEAT_INTERVAL_MS){
         lastBeat = now;
+        window.dispatchEvent(new Event('beatpulse')); // sakura zarbga mos otilishi uchun
         punch = Math.min(1, 0.55 + 0.45 * (e / peak)); // kuchli zarb — kuchliroq "ezilish"
         spawnWave(punch);                              // shu zarbda qizil to'lqin ham tarqaladi
       }
@@ -2731,6 +2732,9 @@ var LYRIC_LINES = [
     swapTimer = setTimeout(function () {
       textEl.textContent = text;
       syncWave();
+      // 「はな」 bor qator: sakura bir marta, keyingi zarbga mos holda otiladi
+      var hanaCount = text ? text.split('はな').length - 1 : 0;
+      if (hanaCount > 0 && window.sakuraOnBeat) window.sakuraOnBeat(hanaCount);
       textEl.classList.remove('lyric-out');
       void textEl.offsetWidth; // animatsiyani qayta boshlash
       textEl.classList.add('lyric-in');
@@ -2913,7 +2917,34 @@ var LYRIC_LINES = [
     host.appendChild(makePetal(dist));
   }
 
-  function burst() { for (var i = 0; i < 16; i++) spawn(120); }
+  function burst() { for (var i = 0; i < 22; i++) spawn(120); }
+
+  // 「はな」 qatori uchun: keyingi zarbda (beatpulse) bir marta otiladi.
+  // Zarb kelmasa ham 900ms dan keyin baribir otiladi.
+  // Bitta qatorda bir necha 「はな」 bo'lsa, har biri uchun alohida otilish navbatda turadi.
+  var pending = 0;      // kutilayotgan otilishlar soni
+  var fallbackT = null;
+  function scheduleFallback(delay) {
+    clearTimeout(fallbackT);
+    fallbackT = setTimeout(function () {
+      if (pending > 0) {
+        pending--;
+        burst();
+        if (pending > 0) scheduleFallback(600);
+      }
+    }, delay);
+  }
+  window.sakuraOnBeat = function (count) {
+    pending += count;
+    scheduleFallback(900);
+  };
+  window.addEventListener('beatpulse', function () {
+    if (pending > 0 && !audio.paused) {
+      pending--;
+      burst();
+      if (pending > 0) scheduleFallback(900); else clearTimeout(fallbackT);
+    }
+  });
 
   function startSpawning() {
     clearInterval(timer);
