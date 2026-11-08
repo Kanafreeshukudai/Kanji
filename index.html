@@ -2930,32 +2930,25 @@ var LYRIC_LINES = [
   // Bitta qatorda bir necha 「はな」 bo'lsa, har biri uchun alohida otilish.
   // Otilishlar qator davomiyligi bo'ylab teng taqsimlanadi (navbat — deadline'lar ro'yxati).
   // Zarb (beatpulse) kelsa, navbatdagi otilish o'sha zarbga "ko'chiriladi".
-  var queue = [];       // har bir otilish uchun mo'ljallangan vaqt (ms)
-  var qTimer = null;
-  function tickQueue() {
-    qTimer = null;
-    if (!queue.length) return;
-    if (audio.paused) { qTimer = setTimeout(tickQueue, 200); return; }
-    if (queue[0] <= Date.now()) {
-      queue.shift();
-      burst();
-    }
-    if (queue.length) qTimer = setTimeout(tickQueue, 60);
+  // Har bir 「はな」 uchun alohida, o'z vaqtidagi otilish (timer).
+  // Qator davomiyligi bo'ylab teng taqsimlanadi. Har yangi qatorda oldingi
+  // rejalashtirilgan otilishlar bekor qilinadi, zarbga bog'liq emas.
+  var pendingTimers = [];
+  function clearPending() {
+    for (var i = 0; i < pendingTimers.length; i++) clearTimeout(pendingTimers[i]);
+    pendingTimers = [];
   }
   window.sakuraOnBeat = function (count, spanMs) {
-    var now = Date.now();
+    clearPending();
     var span = (spanMs && spanMs > 0) ? spanMs : 1600;
     for (var i = 0; i < count; i++) {
-      queue.push(now + span * (i + 1) / (count + 1));
+      (function (delay) {
+        pendingTimers.push(setTimeout(function () {
+          if (!audio.paused) burst();
+        }, delay));
+      })(span * (i + 1) / (count + 1));
     }
-    if (!qTimer) qTimer = setTimeout(tickQueue, 60);
   };
-  window.addEventListener('beatpulse', function () {
-    if (queue.length && !audio.paused && queue[0] <= Date.now() + 250) {
-      queue.shift();
-      burst();
-    }
-  });
 
   function startSpawning() {
     clearInterval(timer);
@@ -2974,6 +2967,7 @@ var LYRIC_LINES = [
   function onStop() {
     playing = false;
     stopSpawning();
+    clearPending();
   }
 
   audio.addEventListener('playing', onStart);
