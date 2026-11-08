@@ -2930,24 +2930,28 @@ var LYRIC_LINES = [
   // Bitta qatorda bir necha 「はな」 bo'lsa, har biri uchun alohida otilish.
   // Otilishlar qator davomiyligi bo'ylab teng taqsimlanadi (navbat — deadline'lar ro'yxati).
   // Zarb (beatpulse) kelsa, navbatdagi otilish o'sha zarbga "ko'chiriladi".
-  // Har bir 「はな」 uchun alohida, o'z vaqtidagi otilish (timer).
-  // Qator davomiyligi bo'ylab teng taqsimlanadi. Har yangi qatorda oldingi
-  // rejalashtirilgan otilishlar bekor qilinadi, zarbga bog'liq emas.
-  var pendingTimers = [];
-  function clearPending() {
-    for (var i = 0; i < pendingTimers.length; i++) clearTimeout(pendingTimers[i]);
-    pendingTimers = [];
+  // Har bir 「はな」 uchun alohida otilish. Vaqt musiqa (audio.currentTime) bo'yicha
+  // hisoblanadi, setTimeout emas: shunda tab orqada bo'lsa ham yoki kechikish bo'lsa ham
+  // otilishlar bir vaqtga yig'ilmaydi. Har tekshiruvda faqat bitta gul otiladi.
+  var pendingAt = [];      // otilish vaqtlari (audio soniyasida)
+  var pollTimer = null;
+  function poll() {
+    if (!pendingAt.length || audio.paused) return;
+    var now = audio.currentTime;
+    if (pendingAt[0] <= now) {
+      var t = pendingAt.shift();
+      // juda kechikkan otilish (masalan, tab yashirin bo'lgan) tashlab yuboriladi
+      if (now - t < 0.3) burst();
+    }
   }
   window.sakuraOnBeat = function (count, spanMs) {
-    clearPending();
-    var span = (spanMs && spanMs > 0) ? spanMs : 1600;
+    var span = (spanMs && spanMs > 0) ? spanMs / 1000 : 1.6;
+    var start = audio.currentTime;
+    pendingAt = [];
     for (var i = 0; i < count; i++) {
-      (function (delay) {
-        pendingTimers.push(setTimeout(function () {
-          if (!audio.paused) burst();
-        }, delay));
-      })(span * (i + 1) / (count + 1));
+      pendingAt.push(start + span * (i + 1) / (count + 1));
     }
+    if (!pollTimer) pollTimer = setInterval(poll, 40);
   };
 
   function startSpawning() {
@@ -2967,7 +2971,7 @@ var LYRIC_LINES = [
   function onStop() {
     playing = false;
     stopSpawning();
-    clearPending();
+    pendingAt = [];
   }
 
   audio.addEventListener('playing', onStart);
