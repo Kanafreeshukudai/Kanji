@@ -2088,7 +2088,7 @@
   .all-kanji-collapse{
     display:grid;
     grid-template-rows:1fr;
-    transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1), opacity .28s ease;
+    transition:grid-template-rows .42s cubic-bezier(.22,.8,.24,1), opacity .3s ease;
     opacity:1;
   }
   .all-kanji-collapse > .all-kanji-grid{
@@ -2098,6 +2098,54 @@
   .all-day-group.collapsed .all-kanji-collapse{
     grid-template-rows:0fr;
     opacity:0;
+  }
+  /* ---------- KUN OCHILGANDA KANJI KARTOCHKALARI: bosqichma-bosqich paydo bo'lish ----------
+     Har bir kartochka o'z tartib raqami (--i) bo'yicha ozgina kechikib, pastdan yumshoq
+     ko'tarilib va sekin kattalashib chiqadi — to'lqin kabi. Faqat transform va opacity
+     ishlatiladi (GPU'da silliq, yengil rejimda ham og'ir emas). backwards: animatsiya
+     tugagach tugmaning :active va .selected holatlari buzilmaydi. */
+  @keyframes akiRise{
+    from{ opacity:0; transform:translateY(14px) scale(0.9); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  .all-day-group:not(.collapsed) .all-kanji-item{
+    animation:akiRise .42s cubic-bezier(.2,.8,.2,1) backwards;
+    /* ko'p kanjili kunlarda oxirgilar kutib qolmasin: kechikish 12-kartochkada to'xtaydi */
+    animation-delay:calc(min(var(--i, 0), 12) * 22ms);
+  }
+  /* animatsiya o'chirilgan rejimlarda (kam harakat / "no-anim") kartochkalar darhol ko'rinadi */
+  html.no-anim .all-day-group .all-kanji-item{ animation:none !important; }
+  @media (prefers-reduced-motion: reduce){
+    .all-day-group .all-kanji-item{ animation:none !important; }
+  }
+
+  /* Kartochkalar to'rida yuqoriga ko'tarilish uchun joy: grid overflow:hidden bo'lgani uchun
+     ichki padding qo'shilib, manfiy margin bilan tashqi tartib o'zgarmaydi. Yig'ilganda padding 0 bo'ladi. */
+  .all-kanji-collapse > .all-kanji-grid{
+    padding:8px 0;
+    margin:-8px 0;
+    transition:padding .42s cubic-bezier(.22,.8,.24,1), margin .42s cubic-bezier(.22,.8,.24,1);
+  }
+  .all-day-group.collapsed .all-kanji-collapse > .all-kanji-grid{
+    padding-top:0; padding-bottom:0; margin-top:0; margin-bottom:0;
+  }
+  /* sichqoncha (hover) ta'siri: kursor kelganda kartochka yuqoriga ko'tariladi, ketganda yumshoq qaytadi.
+     Faqat sichqoncha kabi aniq ko'rsatkichli qurilmalarda ishlaydi — sensorli ekranda "yopishib" qolmaydi. */
+  @media (hover:hover) and (pointer:fine){
+    .all-day-group:not(.collapsed) .all-kanji-item{
+      transition:transform .28s cubic-bezier(.22,.8,.24,1), border-color .2s ease, background-color .2s ease;
+    }
+    .all-day-group:not(.collapsed) .all-kanji-item:hover{
+      transform:translateY(-5px);
+      border-color:rgba(255,255,255,0.32);
+      background-color:rgba(255,255,255,0.09);
+    }
+    .all-day-group:not(.collapsed) .all-kanji-item.selected:hover{
+      border-color:var(--accent);
+    }
+    .all-day-group:not(.collapsed) .all-kanji-item:hover:active{
+      transform:translateY(-2px) scale(0.95);
+    }
   }
   .all-day-select-btn{
     flex-shrink:0;
@@ -2489,6 +2537,12 @@
     /* Bilganlarim/Hammasi qatori bilan bir xil eni va bir xil ustunda,
        aynan shu tugmalar tagida turadi */
     display:flex;
+    /* Sahifa pastga aylantirilganda tugma yuqorida (ekran tepasida) qotib turadi;
+       tepaga qaytilganda yana o'z joyiga qaytadi. Sticky aylantirish holatiga qarab
+       o'zi boshqariladi — hech qanday JS kerak emas. */
+    position:sticky;
+    top:calc(env(safe-area-inset-top, 0px) + 10px);
+    z-index:30;
     margin:10px auto 0;
     max-width:480px;
     width:calc(100% - 40px);
@@ -12831,8 +12885,8 @@
             </div>
             <div class="all-kanji-collapse">
               <div class="all-kanji-grid">
-                ${items.map(w=>`
-                  <button class="all-kanji-item" data-id="${w.id}" type="button">
+                ${items.map((w,idx)=>`
+                  <button class="all-kanji-item" style="--i:${idx}" data-id="${w.id}" type="button">
                     <span class="aki-kanji">${w.kanji}</span>
                     <span class="aki-romaji">${w.romaji}</span>
                   </button>`).join('')}
