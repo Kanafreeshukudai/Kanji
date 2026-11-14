@@ -9740,6 +9740,31 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=5">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=5">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=5">
+<style id="lang-css">
+  /* ---------- TILLAR (til tanlash: O'zbekcha / Русский) ---------- */
+  .auth-dropdown .auth-lang{
+    display:flex; flex-direction:column; gap:8px;
+    padding:10px 12px; border-radius:14px;
+    background:var(--glass-bg); border:1px solid var(--glass-border-soft);
+  }
+  .auth-dropdown .auth-lang-title{
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; color:var(--ink); font-weight:500;
+  }
+  .auth-dropdown .auth-lang-title svg{ width:16px; height:16px; flex:none; color:var(--ink); }
+  .auth-dropdown .auth-lang-opts{ display:flex; gap:6px; }
+  .auth-dropdown .auth-lang-opt{
+    flex:1; padding:7px 8px; border-radius:10px;
+    border:1px solid var(--glass-border-soft); background:transparent;
+    color:var(--ink-soft); font:inherit; font-size:13px; cursor:pointer;
+    transition:background .2s, color .2s, border-color .2s;
+  }
+  .auth-dropdown .auth-lang-opt[aria-pressed="true"]{
+    background:var(--glass-bg-strong); color:var(--ink); border-color:var(--glass-border);
+  }
+  .auth-dropdown .auth-lang-opt:active{ transform:scale(0.96); }
+  #soundToggleBtn{ margin-bottom:0; }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
@@ -9892,6 +9917,17 @@
         <span>Ovoz</span>
         <i class="bgfx-switch" aria-hidden="true"></i>
       </button>
+      <!-- Tillar: O'zbekcha / Русский (tanlov qurilmada eslab qolinadi) -->
+      <div class="auth-lang" id="langGroup" role="group" aria-label="Tillar">
+        <div class="auth-lang-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"></path></svg>
+          <span>Tillar</span>
+        </div>
+        <div class="auth-lang-opts">
+          <button type="button" id="langUzBtn" class="auth-lang-opt" data-lang="uz" aria-pressed="true">O'zbekcha</button>
+          <button type="button" id="langRuBtn" class="auth-lang-opt" data-lang="ru" aria-pressed="false">Русский</button>
+        </div>
+      </div>
       <!-- Ilovani do'stlarga ulashish: telefonda ulashish oynasi, aks holda havola nusxalanadi -->
       <button id="shareAppBtn" class="auth-notes-btn menu-row-btn" type="button" aria-label="Ilovani ulashish">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg>
@@ -21521,6 +21557,123 @@ window.addEventListener('message', function(e){
   }
   ['play','playing','loadeddata','pause','emptied'].forEach(function(ev){ a.addEventListener(ev, quiet); });
   quiet();
+})();
+</script>
+<script id="lang-i18n-js">
+(function(){
+  var DICT = {"AI yordamchi": "ИИ-помощник", "Romaji ko'rsatish": "Показать ромадзи", "Kana ko'rsatish": "Показать кану", "Qaydlar": "Заметки", "Xatolik / shikoyat": "Ошибка / жалоба", "Fon chiziqlari": "Линии фона", "Fon zarralari": "Частицы фона", "Fon naqshi": "Узор фона", "Yengil rejim": "Облегчённый режим", "Yuqori kontrast": "Высокая контрастность", "Animatsiyalar": "Анимации", "Ovoz": "Звук", "Ilovani ulashish": "Поделиться приложением", "Chiqish": "Выход", "Tillar": "Языки", "Profil": "Профиль", "Akkaunt ma'lumotlari": "Данные аккаунта", "Romaji yoki kana ko'rsatish": "Показать ромадзи или кану", "Xatolik yoki shikoyat yuborish": "Отправить ошибку или жалобу", "Shikoyat va takliflar": "Жалобы и предложения", "Yaponcha o'qish": "Прочитать по-японски", "Animatsiyalarni": "Анимации", "Bilganlarimga surish": "Переместить в знакомые", "Navbatda saqlash": "Сохранить в очереди", "Kanjining boshqa o'qilishlari": "Другие чтения канджи", "BILAMAN ✓": "ЗНАЮ ✓", "NAVBATDA ↺": "В ОЧЕРЕДИ ↺", "So'z birikmalari": "Словосочетания", "Kanji Flashcard": "Kanji Flashcard", "Bilganlarim": "Знакомые", "Hammasi": "Все", "Ortga": "Назад", "Oldingi kunlar": "Предыдущие дни", "Navbatga": "В очередь", "Hali bo'sh": "Пока пусто", "Kartochkalarni chapga surganingizda, bilgan so'zlaringiz shu yerda to'planadi.": "Когда вы смахнёте карточку влево, знакомые слова будут собираться здесь.", "Tarjima test": "Тест перевода", "Romaji va tarjima test": "Тест ромадзи и перевода", "Eshitish test": "Тест на слух", "Vaqt sinovi": "Испытание на время", "Tozalash": "Очистить", "Flashcardga aylantirish": "Превратить во флешкарточки", "Aralashtirish": "Перемешать", "Quiz yoki flashcard uchun kanji tanlang": "Выберите канджи для теста или флешкарточек", "Hammasini belgilash": "Выбрать все", "Hammasini tanlash": "Выбрать все", "Xatolarni takrorlash": "Повторить ошибки", "Yuklanmoqda…": "Загрузка…", "Tayyor ✓": "Готово ✓", "🐞 Xatolik, shikoyat yoki taklif bormi?": "🐞 Есть ошибка, жалоба или предложение?", "Ilovada kamchilik yoki xatolik uchrasa, iltimos, uning": "Если в приложении найдёте недочёт или ошибку, пожалуйста, сделайте", "skrinshotini": "скриншот", "olib Telegram orqali yuboring. Shikoyat va takliflaringizni ham shu yerga yozing — tez orada ko'rib chiqamiz.": "и отправьте через Telegram. Жалобы и предложения тоже пишите сюда — скоро рассмотрим.", "Telegramda yozish": "Написать в Telegram", "Nickname'ni tahrirlash": "Изменить никнейм", "Bu ism chatda boshqalarga shu nom bilan ko'rinadi.": "Это имя в чате будет видно другим под таким именем.", "⚠️ Iltimos, nickname o'rniga o'z ismingizni yozing — chatda hamma bir-birini tanishi uchun.": "⚠️ Пожалуйста, вместо никнейма напишите своё имя — чтобы в чате все могли узнавать друг друга.", "Saqlash": "Сохранить", "Yaratish": "Создать", "Kirish": "Войти", "Nickname": "Никнейм", "Ismingizni yozing": "Введите имя", "Shrift o'lchami": "Размер шрифта", "Asl holiga qaytarish": "Сбросить", "Yopish": "Закрыть", "Bekor qilish": "Отмена", "Yoqish": "Включить", "Akkauntingizga saqlanadi": "Сохраняется в вашем аккаунте", "Yangi": "Новое", "Xona yaratish": "Создать комнату", "Do'stlaringiz bilan kanji kartochkalarni so'roq o'yini tarzida almashing — kartochka yuborasiz, ular javobini qaytaradi.": "Обменивайтесь карточками канджи с друзьями в формате викторины: вы отправляете карточку, они присылают ответ.", "Ishtirokchilar soni": "Число участников", "Xona turi": "Тип комнаты", "Ochiq": "Открытая", "Yopiq": "Закрытая", "Rejim": "Режим", "Ketma-ket": "По очереди", "Hammaga": "Всем", "Xonaga kirish": "Войти в комнату", "Ochiq xonalardan birini tanlang yoki do'stingiz bergan kodni kiriting.": "Выберите одну из открытых комнат или введите код, который дал друг.", "Ochiq xonalar": "Открытые комнаты", "Kod bilan": "По коду", "Xonalar qidirilmoqda...": "Поиск комнат...", "Kutilmoqda...": "Ожидание...", "Xonaga kirish kodi": "Код входа в комнату", "Nusxalash": "Копировать", "Bu kodni do'stlaringizga yuboring — ular shu kod bilan xonaga kira oladi.": "Отправьте этот код друзьям — они смогут войти в комнату с его помощью.", "Boshqa ishtirokchilarni kuting...": "Ждём других участников...", "Boshlash": "Начать", "Tayyorman": "Я готов", "Xona boshlandi": "Комната началась", "Musobaqani tugatish": "Завершить соревнование", "Tugatish": "Завершить", "Flashcard tanlash": "Выбор флешкарточек", "Kartochkalar almashish tez orada shu yerda ishga tushadi — hozircha shu joyda birga kutamiz.": "Обмен карточками скоро заработает здесь — а пока ждём вместе.", "Musobaqa yakunlandi!": "Соревнование завершено!", "Davom etish": "Продолжить", "Foydalanuvchilar": "Пользователи", "Foydalanuvchilar yuklanmoqda…": "Загрузка пользователей…", "Hozircha hech kim yo'q": "Пока никого нет", "Chiqishni tasdiqlaysizmi?": "Подтвердить выход?", "Akkauntingizdan chiqasiz. Qayta kirish uchun Google hisobingizni yana tanlashingiz kerak bo'ladi.": "Вы выйдете из аккаунта. Для повторного входа нужно будет снова выбрать аккаунт Google.", "Fon chiziqlarini yoqasizmi?": "Включить линии фона?", "Bu effekt kompyuter va telefonni sezilarli darajada sekinlashtirishi hamda batareyani tez sarflashi mumkin. Qurilmangiz sekin ishlasa, uni istalgan vaqt o'chirib qo'yishingiz mumkin.": "Этот эффект может заметно замедлить компьютер и телефон и быстро расходовать батарею. Если устройство работает медленно, эффект можно отключить в любой момент.", "Chat": "Чат", "Mehmon sifatida": "Как гость", "Qoidalar": "Правила", "Admin": "Админ", "Salom! Kanji 漢字 — かんじ": "Привет! Канджи 漢字 — かんじ", "Yangi xabar": "Новое сообщение", "📜 Chat qoidalari": "📜 Правила чата", "Chatda hamma uchun qulay va hurmatli muhit saqlanadi. Iltimos, yozishdan oldin quyidagi qoidalar bilan tanishib chiqing.": "В чате поддерживается удобная и уважительная атмосфера для всех. Пожалуйста, перед написанием сообщений ознакомьтесь с правилами ниже.", "Hurmat bilan yozing.": "Пишите уважительно.", "Haqorat, so'kinish va boshqalarni kamsitish (millati, tili, jinsi, dini, yoshi yoki jismoniy holati uchun) qat'iyan taqiqlanadi.": "Оскорбления, ругательства и унижение других (по национальности, языку, полу, религии, возрасту или физическому состоянию) строго запрещены.", "Spam va reklama yo'q.": "Никакого спама и рекламы.", "Bir xil xabarni takrorlash, reklama va begona havolalar yuborish taqiqlanadi.": "Запрещено повторять одно и то же сообщение, рекламировать и отправлять посторонние ссылки.", "Tahdid va shaxsiy ma'lumot yo'q.": "Никаких угроз и личных данных.", "Boshqalarni tahdid qilish hamda telefon raqami, manzil yoki parol kabi shaxsiy ma'lumotlarni oshkor qilish man etiladi.": "Запрещено угрожать другим, а также раскрывать личные данные — номер телефона, адрес или пароль.", "Mavzuga rioya qiling.": "Придерживайтесь темы.", "Kanji o'rganish va foydali suhbatga e'tibor bering. Ataylab chalg'itish va yolg'on ma'lumot tarqatish mumkin emas.": "Сосредоточьтесь на изучении канджи и полезном общении. Намеренно отвлекать и распространять ложную информацию нельзя.", "Qoidani buzgan xabarlar": "Сообщения, нарушающие правила", "o'chirilishi mumkin.": "могут быть удалены.", "Takroriy buzilishlar.": "Повторные нарушения.", "Qoidalar qayta-qayta buzilsa, bu ilovadan foydalanishning cheklanishigacha olib kelishi mumkin.": "Если правила нарушаются снова и снова, это может привести к ограничению использования приложения.", "⚠️ Ogohlantirish:": "⚠️ Предупреждение:", "Qoidalar buzilsa, administrator qaroriga ko'ra foydalanuvchiga": "При нарушении правил, по решению администратора, пользователю может быть выдан", "vaqtincha mute": "временный мут", "(yozish cheklovi) yoki": "(ограничение на написание) или", "chatdan doimiy ban": "постоянный бан в чате", "beriladi. Ban berilgan foydalanuvchi chatga xabar yoza olmaydi.": "Пользователь с баном не сможет писать в чат.", "Tushunarli": "Понятно", "🛡 Chat boshqaruvi": "🛡 Управление чатом", "🚫 Bloklanganlar": "🚫 Заблокированные", "👥 Adminlar": "👥 Админы", "Adminlar ro'yxati": "Список админов", "Yangi admin qo'shish": "Добавить админа", "Yangi xabar yozing": "Напишите сообщение", "Xabar yozing...": "Напишите сообщение...", "Kanji, romaji yoki tarjima...": "Канджи, ромадзи или перевод...", "Masalan: A1B2C3": "Например: A1B2C3", "Shu yerga qaydlaringizni yozing...": "Пишите свои заметки здесь...", "Ism yoki email qismini yozing": "Введите имя или часть email", "Yangi xabar yozish": "Написать сообщение", "Shaxsiy AI suhbat": "Личный диалог с ИИ", "AI Yordamchi": "ИИ-помощник", "AI yordamchiga xabar yozing...": "Напишите сообщение ИИ-помощнику...", "Kanji 漢字 — o'qilishi: かんじ": "Канджи 漢字 — чтение: かんじ", "Salom! Men AI yordamchiman 👋 Menga kanji, so'zlar va grammatika haqida yapon tiliga oid har qanday savol berishing mumkin.": "Привет! Я ИИ-помощник 👋 Можете задать любой вопрос по японскому языку: о канджи, словах и грамматике.", "Sayt sekin ishlayapti": "Сайт работает медленно", "Bu qurilmada sayt og'irlik qilyapti. Yengil rejimga o'tsangiz:": "На этом устройстве сайт тормозит. Если переключитесь на облегчённый режим:", "shisha (blur) effektlar o'chadi": "эффекты размытия (blur) отключатся", "ortiqcha animatsiyalar kamayadi": "лишних анимаций станет меньше", "sayt yumshoq va tez ishlaydi": "сайт будет работать плавнее и быстрее", "Kartochkalar, ranglar va barcha funksiyalar saqlanadi. Istalgan vaqt akkaunt menyusidan qaytarishingiz mumkin.": "Карточки, цвета и все функции сохранятся. Вернуть обычный режим можно в любой момент в меню аккаунта.", "Ha, yengil rejim": "Да, облегчённый режим", "Yo'q, shunday qolsin": "Нет, оставить так"};
+  var PATTERNS = [[/^Online: (\d+)$/,"Онлайн: \\1"],[/^Yuklanmoqda… (\d+)%$/,"Загрузка… \\1%"]];
+  var KEY = 'kanji-lang';
+  var lang = 'uz';
+  try{ lang = localStorage.getItem(KEY) === 'ru' ? 'ru' : 'uz'; }catch(e){}
+  var ATTRS = ['aria-label','title','placeholder','alt'];
+  var SKIP = 'script,style,noscript,.translation';   /* kanji ortidagi o'zbekcha tarjima o'zgarmaydi */
+  var textOrig = new WeakMap(), textWritten = new WeakMap();
+  var attrRec = new WeakMap();
+
+  function tr(s){
+    var k = s.trim();
+    if(!k) return null;
+    if(Object.prototype.hasOwnProperty.call(DICT, k)){
+      return s.replace(k, function(){ return DICT[k]; });
+    }
+    for(var i = 0; i < PATTERNS.length; i++){
+      var m = k.match(PATTERNS[i][0]);
+      if(m){ return s.replace(k, k.replace(PATTERNS[i][0], PATTERNS[i][1])); }
+    }
+    return null;
+  }
+  function skipped(node){
+    var p = node.parentNode;
+    while(p && p.nodeType === 1){
+      if(p.matches && p.matches(SKIP)) return true;
+      p = p.parentNode;
+    }
+    return false;
+  }
+  function applyText(node){
+    if(node.nodeType !== 3 || skipped(node)) return;
+    var cur = node.nodeValue;
+    if(textWritten.get(node) !== cur){ textOrig.set(node, cur); }   /* ilova matnni o'zgartirdi */
+    var orig = textOrig.get(node);
+    var out = (lang === 'ru') ? (tr(orig) || orig) : orig;
+    if(out !== cur) node.nodeValue = out;
+    textWritten.set(node, out);
+  }
+  function applyAttr(el, a){
+    var cur = el.getAttribute(a);
+    if(cur === null) return;
+    var rec = attrRec.get(el);
+    if(!rec){ rec = {}; attrRec.set(el, rec); }
+    if(rec[a] === undefined || rec[a + '#w'] !== cur){ rec[a] = cur; }
+    var out = (lang === 'ru') ? (tr(rec[a]) || rec[a]) : rec[a];
+    if(out !== cur) el.setAttribute(a, out);
+    rec[a + '#w'] = out;
+  }
+  function walk(root){
+    if(!root) return;
+    if(root.nodeType === 3){ applyText(root); return; }
+    if(root.nodeType !== 1) return;
+    ATTRS.forEach(function(a){ if(root.hasAttribute(a)) applyAttr(root, a); });
+    var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    var n;
+    while((n = tw.nextNode())){
+      if(n.nodeType === 3) applyText(n);
+      else ATTRS.forEach(function(a){ if(n.hasAttribute(a)) applyAttr(n, a); });
+    }
+  }
+  function paintButtons(){
+    var uz = document.getElementById('langUzBtn'), ru = document.getElementById('langRuBtn');
+    if(uz) uz.setAttribute('aria-pressed', lang === 'uz' ? 'true' : 'false');
+    if(ru) ru.setAttribute('aria-pressed', lang === 'ru' ? 'true' : 'false');
+  }
+  function setLang(l){
+    lang = (l === 'ru') ? 'ru' : 'uz';
+    try{ localStorage.setItem(KEY, lang); }catch(e){}
+    document.documentElement.lang = lang;
+    paintButtons();
+    walk(document.body);
+  }
+  window.setAppLang = setLang;
+  window.getAppLang = function(){ return lang; };
+
+  document.documentElement.lang = lang;
+  var uzB = document.getElementById('langUzBtn'), ruB = document.getElementById('langRuBtn');
+  if(uzB) uzB.addEventListener('click', function(){ setLang('uz'); });
+  if(ruB) ruB.addEventListener('click', function(){ setLang('ru'); });
+  paintButtons();
+
+  var pending = [], scheduled = false;
+  function flush(){
+    scheduled = false;
+    var list = pending; pending = [];
+    list.forEach(function(item){
+      if(item.kind === 'node') walk(item.node);
+      else if(item.kind === 'attr') applyAttr(item.node, item.attr);
+    });
+  }
+  function queue(item){
+    pending.push(item);
+    if(!scheduled){ scheduled = true; (window.requestAnimationFrame || setTimeout)(flush); }
+  }
+  var mo = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      if(m.type === 'childList'){
+        m.addedNodes.forEach(function(n){ queue({kind:'node', node:n}); });
+      } else if(m.type === 'characterData'){
+        queue({kind:'node', node:m.target});
+      } else if(m.type === 'attributes'){
+        queue({kind:'attr', node:m.target, attr:m.attributeName});
+      }
+    });
+  });
+  function start(){
+    walk(document.body);
+    mo.observe(document.body, {childList:true, subtree:true, characterData:true,
+      attributes:true, attributeFilter:ATTRS});
+  }
+  if(document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  window.addEventListener('load', function(){ walk(document.body); });
 })();
 </script>
 </body>
