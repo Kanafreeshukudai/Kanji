@@ -12651,6 +12651,10 @@
   let flipped = false;
   let currentTab = "learn";
   let selectedKanji = new Set();
+  // Surib yuborilgan kartochkalar tarixi (ortga qaytarish uchun): {id, dir, day, addedKnown}
+  // dir: -1 = chapga (Bilganlarim), +1 = o'ngga (Navbatga)
+  const undoStack = [];
+  const UNDO_MAX = 100;
 
   function hanko(id){
     return byId[id] ? byId[id].group : "";
@@ -13882,6 +13886,8 @@
     const wasCustom = currentDay === CUSTOM_DAY_ID;
     const id = queues[currentDay].shift();
     const wasAlreadyKnown = known.indexOf(id) !== -1; // maxsus kartochka orqali ikki marta qo'shilib ketmasin
+    undoStack.push({id, dir:-1, day:currentDay, addedKnown:!wasAlreadyKnown});
+    if(undoStack.length > UNDO_MAX) undoStack.shift();
     if(!wasAlreadyKnown) known.push(id);
     if(wasCustom && !wasAlreadyKnown){
       customKnownSet.add(id); // Maxsus Flashcarddan bilinganlar alohida guruhlanadi
@@ -13934,10 +13940,140 @@
   function markLater(ghost){
     const id = queues[currentDay].shift();
     queues[currentDay].push(id);
+    undoStack.push({id, dir:1, day:currentDay, addedKnown:false});
+    if(undoStack.length > UNDO_MAX) undoStack.shift();
     saveState();
     renderStage(true, ghost);
     updateCounts();
   }
+
+  // ---------- ORTGA QAYTARISH: surib yuborilgan kartochkani qaytarib olish ----------
+  // dir = -1: kartochka chapga ("Bilganlarim") ketgan edi → u chapdan qaytib keladi
+  // dir = +1: kartochka o'ngga ("Navbatga") ketgan edi → u o'ngdan qaytib keladi
+  function undoSwipe(dir){
+    if(currentTab !== 'learn') return false;
+    const u = undoStack[undoStack.length - 1];
+    if(!u || u.dir !== dir) return false;
+    if(u.day !== currentDay){ undoStack.length = 0; return false; } // boshqa kunga o'tilgan — tarix eskirgan
+    const q = queues[u.day];
+    if(!q) { undoStack.pop(); return false; }
+    if(u.dir < 0){
+      const ki = known.indexOf(u.id);
+      if(ki === -1){ undoStack.pop(); return false; }   // allaqachon Bilganlarimdan olib tashlangan
+      if(u.addedKnown){ known.splice(ki, 1); customKnownSet.delete(u.id); }
+      const qi = q.indexOf(u.id);
+      if(qi !== -1) q.splice(qi, 1);
+      q.unshift(u.id);
+    } else {
+      const qi = q.lastIndexOf(u.id);                   // o'ngga surilganda navbat oxiriga ketgan edi
+      if(qi === -1){ undoStack.pop(); return false; }
+      q.splice(qi, 1);
+      q.unshift(u.id);
+    }
+    undoStack.pop();
+    // Maxsus Flashcard tabi hammasi tugagach yo'qolib ketgan bo'lsa — qaytaramiz
+    if(u.day === CUSTOM_DAY_ID && !customDeckExists){
+      customDeckExists = true; customFadingOut = false; renderTabs();
+    }
+    saveState();
+    renderStage(false);
+    updateCounts();
+    // Qaytayotgan kartochka o'zi ketgan tomondan uchib kiradi
+    const c = document.getElementById('activeCard');
+    if(c){
+      c.style.willChange = 'transform, opacity';
+      c.style.transition = 'none';
+      c.style.opacity = '0';
+      c.style.transform = `translateX(${dir*460}px) translateY(-14px) rotate(${dir*20}deg) scale(.93)`;
+      void c.offsetWidth;
+      c.style.transition = 'transform .6s cubic-bezier(.22,1,.36,1), opacity .35s ease';
+      c.style.transform = '';
+      c.style.opacity = '';
+      setTimeout(()=>{ if(c.isConnected){ c.style.transition = ''; c.style.willChange = ''; } }, 680);
+    }
+    try{ DotsFX.drift(0); }catch(_){}
+    return true;
+  }
+
+  // Sahifaning istalgan bo'sh joyida (kartochka va tugmalardan tashqarida) surish:
+  //  • kartochka chapga ketgan bo'lsa — CHAPDAN → O'NGGA suriladi
+  //  • kartochka o'ngga ketgan bo'lsa — O'NGDAN → CHAPGA suriladi
+  (function initUndoSwipe(){
+    const TH = 56;                 // qaytarish uchun minimal gorizontal masofa (px)
+    let st = null, lastTouchAt = 0;
+    const clearGlow = ()=>{ edgeGlowLeft.style.opacity = 0; edgeGlowRight.style.opacity = 0; };
+
+    function begin(p, e){
+      st = null;
+      if(currentTab !== 'learn' || !undoStack.length || customFadingOut) return;
+      const t = e.target;
+      if(!t || !t.closest) return;
+      // kartochka, tugmalar va boshqa interaktiv elementlar ustida emas — faqat bo'sh joyda
+      if(t.closest('.card, button, a, input, textarea, select, label, .side-push-arrow, .swipe-hints')) return;
+      // ochiq oyna (modal/overlay, fixed panel) ustida yoki gorizontal aylantiriladigan blok ichida emas
+      for(let n = t; n && n.nodeType === 1 && n !== document.documentElement; n = n.parentElement){
+        if(n.getAttribute('aria-modal') === 'true' || n.getAttribute('role') === 'dialog') return;
+        const cs = getComputedStyle(n);
+        if(cs.position === 'fixed') return;
+        if((cs.overflowX === 'auto' || cs.overflowX === 'scroll') && n.scrollWidth > n.clientWidth + 1) return;
+      }
+      // Sahifaning ISTALGAN bo'sh joyidan boshlash mumkin: yo'nalish oxirgi surilgan kartochkaga qarab belgilanadi
+      const u = undoStack[undoStack.length - 1];
+      const now = performance.now();
+      st = {x:p.clientX, y:p.clientY, dx:0, dir:u.dir, horiz:false, lastX:p.clientX, lastT:now, vx:0};
+    }
+    function move(p, e){
+      if(!st) return;
+      const dx = p.clientX - st.x, dy = p.clientY - st.y;
+      const need = -st.dir;        // chapga ketgan (-1) → o'ngga (+1) surish kerak, va aksincha
+      if(!st.horiz){
+        const adx = Math.abs(dx), ady = Math.abs(dy);
+        if(adx < 12 && ady < 12) return;
+        if(adx > ady * 1.3 && Math.sign(dx) === need){ st.horiz = true; }
+        else { st = null; clearGlow(); return; }   // vertikal yoki teskari yo'nalish — e'tiborsiz
+      }
+      const now = performance.now();
+      st.vx = (p.clientX - st.lastX) / Math.max(1, now - st.lastT);
+      st.lastX = p.clientX; st.lastT = now; st.dx = dx;
+      const prog = Math.max(0, Math.min(1, dx * need / TH));
+      const on = st.dir < 0 ? edgeGlowLeft : edgeGlowRight;
+      const off = st.dir < 0 ? edgeGlowRight : edgeGlowLeft;
+      on.style.opacity = String(prog * 0.9);
+      off.style.opacity = 0;
+      if(e.cancelable) e.preventDefault();
+    }
+    function end(){
+      if(!st) return;
+      const s = st; st = null;
+      clearGlow();
+      if(!s.horiz) return;
+      const need = -s.dir;
+      const passed = s.dx * need >= TH || (s.dx * need >= 28 && s.vx * need > 0.5);
+      if(passed) undoSwipe(s.dir);
+    }
+
+    document.addEventListener('touchstart', e=>{
+      lastTouchAt = Date.now();
+      if(e.touches.length !== 1){ st = null; clearGlow(); return; }
+      begin(e.touches[0], e);
+    }, {passive:true});
+    document.addEventListener('touchmove', e=>{
+      if(!st) return;
+      if(e.touches.length !== 1){ st = null; clearGlow(); return; }
+      move(e.touches[0], e);
+    }, {passive:false});
+    document.addEventListener('touchend', end, {passive:true});
+    document.addEventListener('touchcancel', ()=>{ st = null; clearGlow(); }, {passive:true});
+    // sichqoncha (desktop)
+    document.addEventListener('mousedown', e=>{
+      if(e.button !== 0 || Date.now() - lastTouchAt < 700) return;
+      begin(e, e);
+      if(st) e.preventDefault();   // surish paytida matn belgilanib qolmasin
+    });
+    document.addEventListener('mousemove', e=>{ if(st) move(e, e); });
+    document.addEventListener('mouseup', end);
+    window.addEventListener('blur', ()=>{ st = null; clearGlow(); });
+  })();
 
   // ---------- KNOWN VIEW (faqat umumiy statistika) ----------
   function renderKnown(){
