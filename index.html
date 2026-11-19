@@ -1576,8 +1576,8 @@
     </div>
     <div class="splash-lyric" id="splashLyric" aria-live="polite"><span class="splash-lyric-text" id="splashLyricText"></span><div class="lyric-wave" aria-hidden="true"><svg id="lyricWaveSvg" viewBox="0 0 360 48" preserveAspectRatio="xMidYMid meet"></svg></div></div>
     <audio id="splashPhonkAudio" src="song.m4a?v=2" preload="auto" loop playsinline></audio>
-    <div class="splash-music-wrap" id="splashMusicWrap">
-      <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="true" aria-label="Qo'shiqni pauza qilish">
+    <div class="splash-music-wrap paused" id="splashMusicWrap">
+      <button class="splash-music-toggle" id="splashMusicToggle" type="button" aria-pressed="false" aria-label="Qo'shiqni davom ettirish">
         <span class="splash-music-disc">
           <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg>
           <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.87 1.28 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7l-10.6-6.8C8.87 3.92 8 4.4 8 5.2z"></path></svg>
@@ -2140,9 +2140,8 @@
   })();
 
   // ---------- SPLASH PHONK MUSIQA ----------
-  // Sahifa ochilishi bilan (avtoplay siyosati ruxsat bersa) qisqa phonk
-  // klipni pastdan yuqoriga sekin ovoz bilan chalamiz; brauzer avtomatik
-  // ijroni bloklasa, birinchi teginish/bosishda o'zi ishga tushadi.
+  // Sahifa pauzada ochiladi — musiqa avtomatik boshlanmaydi. Foydalanuvchi
+  // Play (davom ettirish) tugmasini bosganda klip sekin ovoz bilan chalinadi.
   // "Boshlash" bosilganda musiqa asta pasayib to'xtaydi.
   const PhonkFX = window.PhonkFX = (function(){
     const audio = document.getElementById('splashPhonkAudio');
@@ -2213,12 +2212,8 @@
       }
     }
 
-    // Sahifa yuklanganda darrov urinib ko'ramiz
-    tryStart();
-    // Bloklangan bo'lsa — birinchi teginish/bosish/tugma zarbida ishga tushamiz
-    ['pointerdown', 'keydown', 'touchstart'].forEach(evt=>{
-      document.addEventListener(evt, tryStart, {once:true, passive:true});
-    });
+    // Musiqa avtomatik BOSHLANMAYDI: sahifa pauzada ochiladi va faqat foydalanuvchi
+    // Play (davom ettirish) tugmasini bosganda chalinadi. (Teginish/bosish ham ishga tushirmaydi.)
 
     // Play/Pause (davom ettirish) tugmasi — qo'shiqni haqiqatan pauza/davom qiladi
     toggle.addEventListener('click', ()=>{

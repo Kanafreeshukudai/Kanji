@@ -14193,7 +14193,14 @@
     all: document.getElementById('view-all'),
     quiz: document.getElementById('view-quiz'),
   };
+  // "Hammasi" bo'limidagi scroll joyi: boshqa bo'limga (kartochka, quiz, Bilganlarim) o'tib,
+  // qaytganda sahifa aynan shu qatordan davom etadi (tepadan boshlanmaydi)
+  let allScrollY = 0;
   function showTab(tab, animateCard){
+    const prevTab = currentTab;
+    if(prevTab === 'all' && tab !== 'all'){
+      allScrollY = window.scrollY || window.pageYOffset || 0;
+    }
     currentTab = tab;
     Object.keys(views).forEach(k=>{
       const el = views[k];
@@ -14226,6 +14233,18 @@
     if(tab==='learn') renderStage(!!animateCard);
     if(tab==='known') renderKnown();
     if(tab==='all') renderAll();
+    if(tab==='all' && prevTab !== 'all' && allScrollY > 0){
+      const restoreY = allScrollY;
+      const jump = ()=>{
+        const de = document.documentElement;
+        const prev = de.style.scrollBehavior;
+        de.style.scrollBehavior = 'auto';   // silliq (smooth) emas — darhol o'sha joyga
+        window.scrollTo(0, restoreY);
+        de.style.scrollBehavior = prev;
+      };
+      jump();                                  // bo'lim ko'ringan zahoti
+      requestAnimationFrame(()=>{ jump(); requestAnimationFrame(jump); });  // joylashuv tugagach qayta tekshiruv
+    }
     if(window.__iosRepaint){ setTimeout(window.__iosRepaint, 60); setTimeout(window.__iosRepaint, 400); }
   }
 
