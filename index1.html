@@ -9808,7 +9808,8 @@
   @keyframes ctPanelIn{ from{ opacity:0; translate:0 22px; } to{ opacity:1; translate:0 0; } }
   @keyframes ctPanelOut{ from{ opacity:1; translate:0 0; } to{ opacity:0; translate:0 22px; } }
 
-  .ct-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .ct-head{ position:relative; display:flex; align-items:center; justify-content:center; gap:10px; min-height:30px; }
+  .ct-head .ct-x{ position:absolute; right:0; top:50%; translate:0 -50%; }
   .ct-steps{ display:flex; align-items:center; gap:8px; }
   .ct-step{
     display:inline-flex; align-items:center; gap:6px;
@@ -9825,6 +9826,11 @@
   .ct-step.active b{ background:var(--moss); border-color:var(--moss); color:#0B0D10; }
   .ct-step.done{ color:var(--moss-soft); }
   .ct-step.done b{ border-color:var(--moss-soft); }
+  /* Javob natijasi: to'g'ri — yashil, xato — qizil */
+  .ct-step.ok{ color:var(--moss-soft); }
+  .ct-step.ok b{ background:var(--moss); border-color:var(--moss); color:#0B0D10; }
+  .ct-step.bad{ color:var(--accent-soft); }
+  .ct-step.bad b{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .ct-line{ width:22px; height:2px; border-radius:2px; background:var(--glass-border-soft); }
   .ct-x{
     width:30px; height:30px; border-radius:50%;
@@ -13596,6 +13602,7 @@
     const body = panel.querySelector('.ct-body');
     const s1 = panel.querySelector('[data-s="1"]'), s2 = panel.querySelector('[data-s="2"]');
     let score = 0, locked = false, closed = false;
+    let romajiOk = false, uzOk = false;   // qaysi bosqich to'g'ri topilgani
     const alive = ()=> !closed && panel.isConnected && card.classList.contains('testing');
 
     function close(){
@@ -13622,8 +13629,10 @@
       const buttons = Array.from(body.querySelectorAll('.ct-opt'));
       const ok = w.id === word.id;
       buttons.forEach(b=>b.classList.add('ct-lock'));
+      (n === 1 ? s1 : s2).classList.add(ok ? 'ok' : 'bad');
       if(ok){
         score++;
+        if(n === 1) romajiOk = true; else uzOk = true;
         btn.classList.add('correct');
         try{ playCorrectSound(); }catch(_){}
         try{ playJoyBurst(btn); }catch(_){}
@@ -13648,7 +13657,7 @@
       label.textContent = n === 1 ? 'Kanjining romajisini toping' : 'Kanjining tarjimasini toping';
       label.style.display = '';
       if(n === 2){ s1.classList.remove('active'); s1.classList.add('done'); s2.classList.add('active'); }
-      else { s1.classList.add('active'); s1.classList.remove('done'); s2.classList.remove('active', 'done'); }
+      else { s1.classList.add('active'); s1.classList.remove('done', 'ok', 'bad'); s2.classList.remove('active', 'done', 'ok', 'bad'); }
       body.classList.remove('ct-in'); void body.offsetWidth;
       body.innerHTML = '<div class="ct-opts">' + opts.map(w=>
         '<button type="button" class="ct-opt' + (n === 1 ? ' ct-opt-romaji' : '') + '" data-id="' + w.id + '"></button>').join('') + '</div>';
@@ -13664,7 +13673,10 @@
       s1.classList.remove('active'); s1.classList.add('done');
       s2.classList.remove('active'); s2.classList.add('done');
       label.style.display = 'none';
-      const msg = score === 2 ? "Barakalla! Ikkalasi ham to'g'ri" : score === 1 ? "Yaxshi, yana bir bor urinib ko'ring" : "Bu safar bo'lmadi — yana urinib ko'ring";
+      const msg = score === 2 ? "Barakalla! Ikkalasi ham to'g'ri"
+        : romajiOk ? "Romaji topdingiz, tarjima xato"
+        : uzOk ? "Tarjima topdingiz, romaji xato"
+        : "Bu safar bo'lmadi — yana urinib ko'ring";
       body.classList.remove('ct-in'); void body.offsetWidth;
       body.innerHTML =
         '<div class="ct-result s' + score + '">' +
@@ -13674,7 +13686,7 @@
         '</div>';
       body.querySelector('.ct-msg').textContent = msg;
       body.classList.add('ct-in');
-      body.querySelector('.ct-again').addEventListener('click', ()=>{ score = 0; step(1); });
+      body.querySelector('.ct-again').addEventListener('click', ()=>{ score = 0; romajiOk = false; uzOk = false; step(1); });
       body.querySelector('.ct-done').addEventListener('click', close);
     }
 
