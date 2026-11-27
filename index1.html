@@ -9765,6 +9765,270 @@
   .auth-dropdown .auth-lang-opt:active{ transform:scale(0.96); }
   #soundToggleBtn{ margin-bottom:0; }
 </style>
+<style id="card-test-patch">
+  /* ---------- "TEST QILISH" TUGMASI (kartochka old tomonining pastida) ---------- */
+  .face.front > .card-test-btn{
+    position:absolute; left:0; right:0; bottom:22px; margin:0 auto; width:max-content;
+    z-index:3;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:7px 20px;
+    border-radius:999px;
+    border:1px solid rgba(147,177,127,.55);
+    background:linear-gradient(135deg,#06140d 0%,#0f3322 55%,#1b5a3b 100%);
+    color:#dff5df;
+    font-family:'Zen Maru Gothic',sans-serif; font-size:13px; font-weight:500; letter-spacing:.05em;
+    cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(124,154,107,.55), inset 0 1px 0 rgba(255,255,255,.14);
+    transition:opacity .25s ease, filter .15s ease, scale .15s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+    .face.front > .card-test-btn:hover{ filter:brightness(1.18); }
+  .face.front > .card-test-btn:active{ scale:.96; }
+  .card.testing .card-test-btn{ opacity:0; pointer-events:none; }
+
+  /* ---------- Test paytida kartochka: biroz kichrayib tepaga suriladi ---------- */
+  .card.testing{
+    translate:0 -20%;
+    scale:.58;
+    pointer-events:none;
+    cursor:default;
+  }
+  .stage.stage-testing .side-push-arrow{ pointer-events:none; opacity:.25; }
+
+  /* ---------- Pastdagi test paneli ---------- */
+  .card-test-panel{
+    position:absolute; left:0; right:0; bottom:0; margin:0 auto;
+    width:min(92vw,400px);
+    display:flex; flex-direction:column; gap:8px;
+    z-index:4;
+    animation:ctPanelIn .55s .12s cubic-bezier(.22,1,.36,1) backwards;
+    touch-action:manipulation;
+  }
+  .card-test-panel.ct-out{ animation:ctPanelOut .4s ease forwards; pointer-events:none; }
+  @keyframes ctPanelIn{ from{ opacity:0; translate:0 22px; } to{ opacity:1; translate:0 0; } }
+  @keyframes ctPanelOut{ from{ opacity:1; translate:0 0; } to{ opacity:0; translate:0 22px; } }
+
+  .ct-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .ct-steps{ display:flex; align-items:center; gap:8px; }
+  .ct-step{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Zen Maru Gothic',sans-serif; font-size:12px; font-weight:700; color:var(--ink-faint);
+    transition:color .25s ease;
+  }
+  .ct-step b{
+    width:19px; height:19px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; border:1.5px solid var(--glass-border-soft); color:inherit;
+    transition:background-color .25s ease, border-color .25s ease, color .25s ease;
+  }
+  .ct-step.active{ color:var(--ink); }
+  .ct-step.active b{ background:var(--moss); border-color:var(--moss); color:#0B0D10; }
+  .ct-step.done{ color:var(--moss-soft); }
+  .ct-step.done b{ border-color:var(--moss-soft); }
+  .ct-line{ width:22px; height:2px; border-radius:2px; background:var(--glass-border-soft); }
+  .ct-x{
+    width:30px; height:30px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(11,13,16,.72); color:var(--ink-soft);
+    border:1.5px solid var(--glass-border-soft); cursor:pointer; padding:0;
+  }
+  .ct-x:active{ scale:.92; }
+  .ct-label{
+    text-align:center; font-family:'Zen Maru Gothic',sans-serif;
+    font-size:13px; font-weight:700; color:var(--ink-soft); letter-spacing:.02em;
+  }
+  .ct-body{ min-height:104px; }
+  .ct-body.ct-in{ animation:ctBodyIn .4s cubic-bezier(.22,1,.36,1); }
+  @keyframes ctBodyIn{ from{ opacity:0; translate:0 10px; } to{ opacity:1; translate:0 0; } }
+
+  .ct-opts{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .ct-opt{
+    position:relative;
+    min-width:0; min-height:48px;
+    display:flex; align-items:center; justify-content:center;
+    padding:10px 8px;
+    overflow-wrap:anywhere; word-break:break-word; line-height:1.25; text-align:center;
+    background:rgba(11,13,16,.80);
+    border:2px solid var(--glass-border-soft);
+    border-radius:12px;
+    color:var(--ink);
+    font-family:'Zen Maru Gothic',sans-serif; font-size:14px; font-weight:600;
+    cursor:pointer;
+    transition:background-color .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease, scale .15s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .ct-opt-romaji{ font-size:15px; letter-spacing:.03em; }
+  .ct-opt:active{ scale:.97; }
+  .ct-opt.correct{ background:var(--moss); border-color:var(--moss); color:#0B0D10; }
+  .ct-opt.wrong{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .ct-opt.ct-lock{ pointer-events:none; }
+  .ct-opt.ct-lock:not(.correct):not(.wrong){ opacity:.5; }
+  .ct-opt.joy-pop{ animation:joyPop .62s cubic-bezier(.2,1.3,.4,1); }
+  .ct-opt.ct-shake{ animation:wrongShake .6s cubic-bezier(.36,.07,.19,.97); }
+
+  /* ---------- Natija ---------- */
+  .ct-result{ display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:4px; }
+  .ct-score{
+    font-family:'Shippori Mincho',serif; font-size:40px; font-weight:800; line-height:1;
+    color:var(--moss-soft);
+  }
+  .ct-score span{ font-size:20px; color:var(--ink-soft); margin-left:2px; }
+  .ct-result.s1 .ct-score{ color:var(--gold); }
+  .ct-result.s0 .ct-score{ color:var(--accent-soft); }
+  .ct-msg{ font-family:'Zen Maru Gothic',sans-serif; font-size:13px; font-weight:700; color:var(--ink-soft); text-align:center; }
+  .ct-actions{ display:flex; gap:10px; margin-top:4px; }
+  .ct-actions button{
+    min-width:104px; padding:10px 20px; border-radius:999px; cursor:pointer;
+    font-family:'Zen Maru Gothic',sans-serif; font-size:14px; font-weight:800; letter-spacing:.04em;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .ct-actions button:active{ scale:.96; }
+  .ct-again{ background:rgba(11,13,16,.80); color:var(--ink); border:1.5px solid var(--glass-border-soft); }
+  .ct-done{
+    color:#dff5df; border:1px solid rgba(147,177,127,.55);
+    background:linear-gradient(135deg,#06140d 0%,#0f3322 55%,#1b5a3b 100%);
+  }
+
+  /* ---------- VARIANTLAR CHIQISHI: ketma-ket, yumshoq "pop" bilan ----------
+     Har bir variant o'z navbatida (--i) sakrab, aylanib va xiralikdan chiqib keladi.
+     To'g'ri/noto'g'ri holatdagi tugmalar (joy-pop, ct-shake, correct, wrong) o'z
+     animatsiyasini buzmaydi. */
+  .ct-body.ct-in .ct-opt:not(.joy-pop):not(.ct-shake):not(.correct):not(.wrong){
+    animation:ctOptIn .6s cubic-bezier(.2,1.28,.36,1) backwards;
+    animation-delay:calc(var(--i, 0) * 75ms + 90ms);
+  }
+  @keyframes ctOptIn{
+    0%  { opacity:0; transform:translateY(16px) scale(.8) rotate(-4deg); filter:blur(5px); }
+    55% { opacity:1; filter:blur(0); }
+    80% { transform:translateY(-3px) scale(1.03) rotate(.6deg); }
+    100%{ opacity:1; transform:none; filter:none; }
+  }
+  /* Yengil/perf qurilmalarda filter (blur) o'rniga faqat transform+opacity */
+  html.lite .ct-body.ct-in .ct-opt:not(.joy-pop):not(.ct-shake):not(.correct):not(.wrong),
+  html.perf .ct-body.ct-in .ct-opt:not(.joy-pop):not(.ct-shake):not(.correct):not(.wrong){
+    animation-name:ctOptInLite;
+  }
+  @keyframes ctOptInLite{
+    from{ opacity:0; transform:translateY(12px) scale(.9); }
+    to{ opacity:1; transform:none; }
+  }
+
+  /* ---------- 2/2 natija: ball va izoh yumshoq fade bilan chiqadi ---------- */
+  .ct-result.s2 .ct-score{ animation:ctFadeIn .8s ease .45s both; }
+  .ct-result.s2 .ct-msg{ animation:ctFadeIn .8s ease .7s both; }
+  @keyframes ctFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .card-test-panel, .ct-body.ct-in{ animation:none !important; }
+    .ct-body.ct-in .ct-opt{ animation:none !important; }
+    .ct-result.s2 .ct-score, .ct-result.s2 .ct-msg{ animation:none !important; }
+  }
+  html.no-anim .ct-body.ct-in .ct-opt{ animation:none !important; }
+</style>
+<style id="card-deal-patch">
+  /* ---------- KARTOCHKA YIG'ILISHI (Hammasi → flashcard / aralashtirish) ---------- */
+  .deal-fx{ position:absolute; inset:0; pointer-events:none; z-index:6; }
+  .deal-ghost{
+    position:absolute; left:50%; top:50%;
+    width:var(--card-w); height:var(--card-h);
+    margin-left:calc(var(--card-w) / -2); margin-top:calc(var(--card-h) / -2);
+    border-radius:22px;
+    background:
+      radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,.07), transparent 62%),
+      linear-gradient(160deg, #0a0a0a, #000);
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 22px 40px -18px rgba(0,0,0,.85);
+    opacity:0;
+    animation:dealGhost 1.5s cubic-bezier(.2,.9,.22,1) var(--d, 0ms) both;
+  }
+  .deal-ghost::after{
+    content:""; position:absolute; inset:10px; border-radius:15px;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  @keyframes dealGhost{
+    0%  { opacity:0; translate:var(--fx) var(--fy); rotate:var(--fr); scale:.6; }
+    25% { opacity:.9; }
+    100%{ opacity:0; translate:0 0; rotate:0deg; scale:.9; }
+  }
+
+  .card.card-deal{
+    animation:dealReveal 1.5s cubic-bezier(.22,.61,.36,1) .5s both;
+  }
+  @keyframes dealReveal{
+    0%  { opacity:0; transform:translateY(36px) scale(.965) rotateX(14deg); }
+    60% { opacity:1; }
+    100%{ opacity:1; transform:translateY(0) scale(1) rotateX(0deg); }
+  }
+
+  .deal-sheen{
+    position:absolute; left:50%; top:50%;
+    width:var(--card-w); height:var(--card-h);
+    margin-left:calc(var(--card-w) / -2); margin-top:calc(var(--card-h) / -2);
+    border-radius:22px; overflow:hidden; opacity:0;
+    background:linear-gradient(110deg, transparent 32%, rgba(190,214,170,.5) 50%, transparent 68%);
+    background-size:260% 100%; background-repeat:no-repeat;
+    mix-blend-mode:screen;
+    animation:dealSheen 1.7s ease-in-out 1.35s both;
+  }
+  @keyframes dealSheen{
+    0%  { opacity:0; background-position:130% 0; }
+    20% { opacity:1; }
+    100%{ opacity:0; background-position:-30% 0; }
+  }
+
+  .deal-ring{
+    position:absolute; left:50%; top:50%;
+    width:var(--card-w); height:var(--card-h);
+    margin-left:calc(var(--card-w) / -2); margin-top:calc(var(--card-h) / -2);
+    border-radius:22px;
+    border:1.5px solid rgba(147,177,127,.9);
+    box-shadow:0 0 34px 4px rgba(124,154,107,.45), inset 0 0 20px rgba(124,154,107,.2);
+    opacity:0;
+    animation:dealRing 2s cubic-bezier(.16,.7,.3,1) .85s both;
+  }
+  @keyframes dealRing{
+    0%  { opacity:0; scale:.92; }
+    30% { opacity:1; }
+    100%{ opacity:0; scale:1.28; }
+  }
+
+  /* Chetki nur: kartochka markazga joylashgach, chap-tepa va o'ng-past burchaklardan
+     ikki tomonga yoyiladi — burchaklardagi yumaloq qismlar bo'ylab ham o'tadi —
+     va qarama-qarshi burchaklarda uchrashib so'nadi. (SVG yo'li bo'ylab) */
+  .deal-edge{
+    position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    overflow:visible; pointer-events:none;
+    filter:drop-shadow(0 0 5px rgba(147,177,127,.8));
+  }
+  .deal-edge path{
+    fill:none; stroke:rgba(214,234,200,.98); stroke-width:2.2; stroke-linecap:butt;
+    opacity:0;
+  }
+  /* Har bir burchak ikki tomonga yoyiladi: TL → o'ngga (yuqori chiziq) va pastga (chap chiziq),
+     BR → chapga (pastki chiziq) va yuqoriga (o'ng chiziq). Har bir nur yoyilib boradi va
+     so'nadi. Yo'nalishlar yumaloq burchaklar bo'ylab o'tadi. */
+  .deal-edge path{
+    stroke-dasharray:0 100;
+    stroke-dashoffset:var(--s, 0);
+    animation:dealEdgeG 2.1s cubic-bezier(.3,.55,.45,1) 1.9s both;
+  }
+  @keyframes dealEdgeG{
+    0%  { stroke-dasharray:0 100;                 stroke-dashoffset:var(--s);   opacity:0; }
+    8%  { opacity:1; }
+    100%{ stroke-dasharray:var(--len) 100;        stroke-dashoffset:var(--end); opacity:0; }
+  }
+
+  /* Yengil va perf rejimda og'ir qatlamlar o'chadi, asosiy harakat qoladi */
+  html.lite .deal-sheen, html.perf .deal-sheen,
+  html.lite .deal-ring, html.perf .deal-ring{ display:none; }
+  html.lite .deal-ghost, html.perf .deal-ghost{ box-shadow:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .deal-fx{ display:none; }
+    .card.card-deal{ animation:none !important; }
+  }
+</style>
 </head>
 <script>
   // ---------- LITE MODE AUTO-DETECT ----------
@@ -13064,7 +13328,7 @@
     saveState();
     renderTabs();
     showTab('learn');
-    playCardCreationAnimation();
+    playCardCreationAnimation(shuffled);
   }
 
   btnAllToFlashcard.addEventListener('click', ()=>{
@@ -13205,6 +13469,7 @@
       <div class="card-inner">
         <div class="face front">
           <div class="kanji-display">${word.kanji}</div>
+          <button type="button" class="card-test-btn">Test qilish</button>
         </div>
         <div class="face back">
           <div class="face-back-scroll">
@@ -13267,6 +13532,7 @@
     stage.appendChild(card);
     fitCardToContent(card);
     attachCardEvents(card);
+    setupCardTest(card, word);
     // (romaji/kana tugmasi: kartochka aylanib ketmasligi uchun hodisani to'xtatamiz — hodisa delegatsiyasida)
     // yapon o'qilishini o'qish tugmasi (kartochka aylantirish/surish bilan adashmasligi uchun hodisani to'xtatamiz)
     const spk = card.querySelector('.speak-jp-btn');
@@ -13275,6 +13541,144 @@
       spk.addEventListener('click', e=>{ e.stopPropagation(); speakJP(romajiToKana(word.romaji), spk, true); });
     }
     updateHintCounts();
+  }
+
+  // ---------- KARTOCHKA USTIDAGI MINI-TEST ("Test qilish" tugmasi) ----------
+  // Tugma bosilganda markazdagi kartochka biroz kichrayib tepaga suriladi, pastda
+  // 4 variant chiqadi: 1) romaji, 2) tarjima. Oxirida natija ko'rsatiladi.
+  function cardTestText(w, field){
+    if(field === 'romaji') return w.romaji;
+    const ru = window.getAppLang && getAppLang() === 'ru' && window.RU_MEANING && RU_MEANING[w.uz];
+    return ru || w.uz;
+  }
+  function cardTestOptions(word, field){
+    const used = new Set([cardTestText(word, field)]);
+    const out = [];
+    const take = (list)=>{
+      for(const w of shuffleArray(list.slice())){
+        if(out.length === 3) return;
+        const t = cardTestText(w, field);
+        if(used.has(t)) continue;
+        used.add(t); out.push(w);
+      }
+    };
+    take(WORDS.filter(w=>w.day === word.day && w.id !== word.id));   // avval shu kunning so'zlari
+    if(out.length < 3) take(WORDS.filter(w=>w.id !== word.id));       // yetmasa — hammasidan
+    return shuffleArray([word, ...out]);
+  }
+  function setupCardTest(card, word){
+    const btn = card.querySelector('.card-test-btn');
+    if(!btn) return;
+    // Tugma kartochkani aylantirmasin / surmasin
+    ['pointerdown','mousedown','mouseup','touchend','click'].forEach(ev=>btn.addEventListener(ev, e=>e.stopPropagation()));
+    btn.addEventListener('touchstart', e=>e.stopPropagation(), {passive:true});
+    btn.addEventListener('click', e=>{ e.preventDefault(); openCardTest(card, word); });
+  }
+  function openCardTest(card, word){
+    if(card.classList.contains('testing') || card.classList.contains('flipped') || card.classList.contains('flipping')) return;
+    const EASE = '.6s cubic-bezier(.22,1,.36,1)';
+    card.classList.remove('card-enter');
+    card.style.transition = 'translate ' + EASE + ', scale ' + EASE;
+    card.classList.add('testing');
+    stage.classList.add('stage-testing');
+
+    const panel = document.createElement('div');
+    panel.className = 'card-test-panel';
+    panel.innerHTML =
+      '<div class="ct-head">' +
+        '<div class="ct-steps"><span class="ct-step active" data-s="1"><b>1</b>Romaji</span><span class="ct-line"></span><span class="ct-step" data-s="2"><b>2</b>Tarjima</span></div>' +
+        '<button type="button" class="ct-x" aria-label="Yopish"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
+      '</div>' +
+      '<div class="ct-label"></div>' +
+      '<div class="ct-body"></div>';
+    stage.appendChild(panel);
+    const label = panel.querySelector('.ct-label');
+    const body = panel.querySelector('.ct-body');
+    const s1 = panel.querySelector('[data-s="1"]'), s2 = panel.querySelector('[data-s="2"]');
+    let score = 0, locked = false, closed = false;
+    const alive = ()=> !closed && panel.isConnected && card.classList.contains('testing');
+
+    function close(){
+      if(closed) return; closed = true;
+      document.removeEventListener('keydown', onKey, true);
+      card.style.transition = 'translate ' + EASE + ', scale ' + EASE;
+      card.classList.remove('testing');
+      stage.classList.remove('stage-testing');
+      panel.classList.add('ct-out');
+      setTimeout(()=>{ panel.remove(); card.style.transition = ''; }, 620);
+    }
+    function onKey(e){
+      if(!panel.isConnected){ document.removeEventListener('keydown', onKey, true); return; }
+      if(e.key === 'Escape'){ e.stopPropagation(); close(); }
+    }
+    document.addEventListener('keydown', onKey, true);
+    panel.addEventListener('pointerdown', e=>e.stopPropagation());
+    panel.addEventListener('touchstart', e=>e.stopPropagation(), {passive:true});
+    panel.querySelector('.ct-x').addEventListener('click', close);
+
+    function pick(btn, w, n, all){
+      if(locked || !alive()) return;
+      locked = true;
+      const buttons = Array.from(body.querySelectorAll('.ct-opt'));
+      const ok = w.id === word.id;
+      buttons.forEach(b=>b.classList.add('ct-lock'));
+      if(ok){
+        score++;
+        btn.classList.add('correct');
+        try{ playCorrectSound(); }catch(_){}
+        try{ playJoyBurst(btn); }catch(_){}
+        try{ vibrateCorrect(); }catch(_){}
+      } else {
+        btn.classList.add('wrong', 'ct-shake');
+        const right = buttons.find(b=>b.getAttribute('data-id') === word.id);
+        if(right) setTimeout(()=>right.classList.add('correct'), 260);   // to'g'ri javob keyin ko'rsatiladi
+        try{ playWrongSound(); }catch(_){}
+        try{ vibrateWrong(); }catch(_){}
+      }
+      setTimeout(()=>{
+        if(!alive()) return;
+        if(n === 1) step(2); else finish();
+      }, ok ? 650 : 1150);
+    }
+
+    function step(n){
+      locked = false;
+      const field = n === 1 ? 'romaji' : 'uz';
+      const opts = cardTestOptions(word, field);
+      label.textContent = n === 1 ? 'Kanjining romajisini toping' : 'Kanjining tarjimasini toping';
+      label.style.display = '';
+      if(n === 2){ s1.classList.remove('active'); s1.classList.add('done'); s2.classList.add('active'); }
+      else { s1.classList.add('active'); s1.classList.remove('done'); s2.classList.remove('active', 'done'); }
+      body.classList.remove('ct-in'); void body.offsetWidth;
+      body.innerHTML = '<div class="ct-opts">' + opts.map(w=>
+        '<button type="button" class="ct-opt' + (n === 1 ? ' ct-opt-romaji' : '') + '" data-id="' + w.id + '"></button>').join('') + '</div>';
+      body.querySelectorAll('.ct-opt').forEach((b, i)=>{
+        b.style.setProperty('--i', i);                         // ketma-ket chiqish tartibi
+        b.textContent = cardTestText(opts[i], field);          // matn xavfsiz (textContent) qo'yiladi
+        b.addEventListener('click', ()=>pick(b, opts[i], n, opts));
+      });
+      body.classList.add('ct-in');
+    }
+
+    function finish(){
+      s1.classList.remove('active'); s1.classList.add('done');
+      s2.classList.remove('active'); s2.classList.add('done');
+      label.style.display = 'none';
+      const msg = score === 2 ? "Barakalla! Ikkalasi ham to'g'ri" : score === 1 ? "Yaxshi, yana bir bor urinib ko'ring" : "Bu safar bo'lmadi — yana urinib ko'ring";
+      body.classList.remove('ct-in'); void body.offsetWidth;
+      body.innerHTML =
+        '<div class="ct-result s' + score + '">' +
+          '<div class="ct-score">' + score + '<span>/2</span></div>' +
+          '<div class="ct-msg"></div>' +
+          '<div class="ct-actions"><button type="button" class="ct-again">Qayta</button><button type="button" class="ct-done">Tayyor</button></div>' +
+        '</div>';
+      body.querySelector('.ct-msg').textContent = msg;
+      body.classList.add('ct-in');
+      body.querySelector('.ct-again').addEventListener('click', ()=>{ score = 0; step(1); });
+      body.querySelector('.ct-done').addEventListener('click', close);
+    }
+
+    step(1);
   }
 
   function updateCounts(){
@@ -13438,7 +13842,8 @@
     // "vviz" (whoosh) ovozi olib tashlandi — endi faqat kartochka joyiga
     // tushgandagi "buff" tovushi eshitiladi, aylanish vaqti bilan bir xil
     // vaqtlash saqlab qolindi.
-    creationThud(ctx, t0 + 1.10);      // buff — joyiga tushganda
+    // "dupp" tovushi olib tashlandi — faqat vizual animatsiya qoladi
+    void t0;
   }
 
   // kartochka joyiga tushgach, mozayik nuqtalar markazdan suv tomchisidek tarqaladi
@@ -13491,22 +13896,84 @@
     void st.offsetWidth;
     st.classList.add('arrows-in');
   }
-  function playCardCreationAnimation(){
+  // ---------- KARTOCHKA YIG'ILISHI (yangi): orqa tomonlar chetdan yig'iladi, so'ng oltin ochilish ----------
+  function spawnDealFx(card, shuffled){
+    const fx = document.createElement('div');
+    fx.className = 'deal-fx';
+    stage.appendChild(fx);
+    // Orqa tomon kartochkalar: oddiy tarqatish (3 ta) yoki aralashtirish (5 ta, ikki tomondan)
+    // Kartochkalar faqat ikki yon tomondan (chap va o'ng) keladi
+    const deck = shuffled
+      ? [[-300,-30,-22,0],[296,-20,20,90],[-250,40,-10,180],[260,30,12,260],[-180,-10,-6,130],[190,-40,8,320]]
+      : [[-230,20,-14,0],[240,14,12,80],[-210,-10,-8,150],[225,-18,10,220]];
+    deck.forEach(([fx_,fy_,fr_,d])=>{
+      const g = document.createElement('div');
+      g.className = 'deal-ghost';
+      g.style.setProperty('--fx', fx_ + 'px');
+      g.style.setProperty('--fy', fy_ + 'px');
+      g.style.setProperty('--fr', fr_ + 'deg');
+      g.style.setProperty('--d', d + 'ms');
+      fx.appendChild(g);
+    });
+    const ring = document.createElement('div');
+    ring.className = 'deal-ring';
+    fx.appendChild(ring);
+    const sheen = document.createElement('div');
+    sheen.className = 'deal-sheen';
+    fx.appendChild(sheen);
+    // Chetki nur: kartochka konturi bo'ylab (yumaloq burchaklar bilan) ikki yo'nalishda yoyiladi
+    {
+      const W = card.offsetWidth || 360, H = card.offsetHeight || 460;
+      const rr = 21, x0 = 1, y0 = 1, w = W - 2, h = H - 2;     // 1px ichkarida, radius 22 dan 1 kam
+      const T = w - 2*rr, R = h - 2*rr, arc = Math.PI * rr / 2;
+      const P = 2*T + 2*R + 4*arc;
+      const quarter = arc / 2;
+      const k = rr * (1 - Math.SQRT1_2);
+      const sx = x0 + k, sy = y0 + k;                           // TL burchak o'rtasi (boshlanish nuqtasi)
+      const d = [
+        `M ${sx} ${sy}`,
+        `A ${rr} ${rr} 0 0 1 ${x0 + rr} ${y0}`,
+        `H ${x0 + w - rr}`,
+        `A ${rr} ${rr} 0 0 1 ${x0 + w} ${y0 + rr}`,
+        `V ${y0 + h - rr}`,
+        `A ${rr} ${rr} 0 0 1 ${x0 + w - rr} ${y0 + h}`,
+        `H ${x0 + rr}`,
+        `A ${rr} ${rr} 0 0 1 ${x0} ${y0 + h - rr}`,
+        `V ${y0 + rr}`,
+        `A ${rr} ${rr} 0 0 1 ${sx} ${sy} Z`
+      ].join(' ');
+      const mTR = (100 * (quarter + T + arc/2) / P);            // yuqori-o'ng burchak o'rtasi (foiz)
+      const mBL = (100 * (quarter + 2*T + R + 2.5*arc) / P);    // pastki-chap burchak o'rtasi (foiz)
+      const f = (n)=> n.toFixed(3);
+      const paths = [
+        `--s:0;--end:0;--len:${f(mTR)}`,                                   // TL → o'ngga (yuqori chiziq)
+        `--s:-100;--end:${f(-mBL)};--len:${f(100 - mBL)}`,                 // TL → pastga (chap chiziq)
+        `--s:-50;--end:${f(-mTR)};--len:${f(50 - mTR)}`,                   // BR → yuqoriga (o'ng chiziq)
+        `--s:-50;--end:-50;--len:${f(mBL - 50)}`                           // BR → chapga (pastki chiziq)
+      ].map(st => `<path pathLength="100" d="${d}" style="${st}"/>`).join('');
+      fx.insertAdjacentHTML('beforeend',
+        `<svg class="deal-edge" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${paths}</svg>`);
+    }
+    setTimeout(()=>{ fx.remove(); }, 4600);
+  }
+
+  function playCardCreationAnimation(shuffled){
     const card = document.getElementById('activeCard');
     if(!card) return;
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(reduceMotion) return; // kamaytirilgan animatsiya afzal ko'rilsa, kartochka oddiy ko'rinishda qoladi
 
     card.style.pointerEvents = 'none';
-    card.classList.add('card-forming');
+    card.classList.add('card-deal');
     hideSideArrows();
+    spawnDealFx(card, !!shuffled);
     setTimeout(()=>{   // zaxira: animatsiya o'chiq bo'lsa kartochka qotib qolmasin
-      if(card.classList.contains('card-forming')){
-        card.classList.remove('card-forming');
+      if(card.classList.contains('card-deal')){
+        card.classList.remove('card-deal');
         card.style.pointerEvents = '';
         revealSideArrows();
       }
-    }, 1500);
+    }, 4200);
 
     try{
       const ctx = getCreationAudioCtx();
@@ -13515,12 +13982,11 @@
 
     card.addEventListener('animationend', function onEnd(){
       card.removeEventListener('animationend', onEnd);
-      runWaterRipple(card);
       setTimeout(()=>{
-        card.classList.remove('card-forming');
+        card.classList.remove('card-deal');
         card.style.pointerEvents = '';
         revealSideArrows();
-      }, 180);
+      }, 120);
     }, {once:true});
   }
 
